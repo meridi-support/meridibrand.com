@@ -1,8 +1,4 @@
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/meridi-support/meridi-square/main/MeridiLogo.jpg" alt="Meridi Brand" width="300">
-</p>
-
 <h1 align="center">🐾 Meridi Brand</h1>
 <h3 align="center">Indie Tools for People Tired of Subscriptions.</h3>
 <p align="center"><em>No Ads. No Subscriptions. Just Tools.</em></p>
