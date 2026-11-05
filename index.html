@@ -4,227 +4,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meridi Brand — Tools Built for Everyone</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<title>Meridi Brand — Tools for Everyone</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #faf9f6;
-  color: #2c2c2c;
-  line-height: 1.6;
-}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#f5f5f0; color:#2c2c2c; }
 
-/* Header Banner */
-.header-banner {
-  width: 100%;
-  max-height: 400px;
-  overflow: hidden;
-  position: relative;
-}
-.header-banner img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
+  /* Header */
+  .header { width:100%; }
+  .header img { width:100%; display:block; }
 
-/* Navigation */
-.nav-bar {
-  background: #2c2c2c;
-  padding: 12px 0;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.nav-bar a {
-  color: #e0e0e0;
-  text-decoration: none;
-  margin: 0 18px;
-  font-size: 14px;
-  letter-spacing: 1px;
-  transition: color 0.3s;
-}
-.nav-bar a:hover { color: #ffffff; }
+  /* Welcome */
+  .welcome { text-align:center; padding:40px 20px 20px; }
+  .welcome h1 { font-size:2em; color:#2c2c2c; margin-bottom:8px; }
+  .welcome p { font-size:1.1em; color:#666; max-width:600px; margin:0 auto; }
 
-/* Main Content */
-.main-content {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
+  /* Products */
+  .products { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:30px 20px; max-width:1000px; margin:0 auto; }
+  .product-card {
+    background:#fff; border-radius:12px; padding:24px; width:280px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;
+    transition:transform 0.2s;
+  }
+  .product-card:hover { transform:translateY(-4px); box-shadow:0 4px 16px rgba(0,0,0,0.12); }
+  .product-icon { font-size:2.5em; margin-bottom:12px; }
+  .product-card h3 { margin:8px 0; color:#2c2c2c; }
+  .product-card p { font-size:0.9em; color:#666; margin-bottom:16px; line-height:1.5; }
+  .product-link {
+    display:inline-block; padding:8px 20px; border-radius:20px;
+    background:#2c2c2c; color:#fff; text-decoration:none; font-size:0.85em;
+    transition:background 0.2s; margin:4px;
+  }
+  .product-link:hover { background:#555; }
 
-/* Welcome Section */
-.welcome {
-  text-align: center;
-  margin-bottom: 50px;
-}
-.welcome h1 {
-  font-size: 28px;
-  color: #2c2c2c;
-  margin-bottom: 10px;
-  font-weight: 300;
-  letter-spacing: 2px;
-}
-.welcome p {
-  font-size: 16px;
-  color: #666;
-  max-width: 600px;
-  margin: 0 auto;
-}
+  /* Badges */
+  .badge {
+    display:inline-block; padding:3px 10px; border-radius:10px;
+    font-size:0.75em; font-weight:bold; margin-bottom:8px;
+  }
+  .badge-free { background:#e8f5e9; color:#2e7d32; }
+  .badge-paid { background:#fff3e0; color:#e65100; }
 
-/* Product Cards */
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 50px;
-}
-.product-card {
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
-  border-radius: 12px;
-  padding: 30px;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-.product-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-.product-card h3 {
-  font-size: 20px;
-  color: #2c2c2c;
-  margin-bottom: 8px;
-}
-.product-card p {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 16px;
-  min-height: 40px;
-}
-.product-card .badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-}
-.badge-free { background: #e8f5e9; color: #2e7d32; }
-.badge-paid { background: #fff3e0; color: #e65100; }
-.badge-soon { background: #f3e5f5; color: #7b1fa2; }
-.product-link {
-  display: inline-block;
-  padding: 8px 24px;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
-  color: #2c2c2c;
-  text-decoration: none;
-  font-size: 13px;
-  transition: background 0.3s, color 0.3s;
-}
-.product-link:hover {
-  background: #2c2c2c;
-  color: #ffffff;
-}
+  /* Philosophy */
+  .philosophy {
+    text-align:center; padding:40px 20px; max-width:600px; margin:0 auto;
+  }
+  .philosophy blockquote {
+    font-style:italic; font-size:1.1em; color:#555;
+    border-left:3px solid #ccc; padding-left:16px; margin:20px auto;
+    max-width:500px; text-align:left;
+  }
 
-/* Philosophy Section */
-.philosophy {
-  text-align: center;
-  padding: 40px 20px;
-  margin-bottom: 40px;
-  border-top: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-}
-.philosophy h2 {
-  font-size: 20px;
-  font-weight: 300;
-  color: #2c2c2c;
-  margin-bottom: 20px;
-  letter-spacing: 2px;
-}
-.philosophy-items {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-.philosophy-item {
-  font-size: 14px;
-  color: #666;
-}
-.philosophy-item span {
-  display: block;
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  padding: 30px 20px;
-  color: #999;
-  font-size: 12px;
-}
-.footer a {
-  color: #999;
-  text-decoration: none;
-  margin: 0 8px;
-}
-.footer a:hover { color: #2c2c2c; }
-.footer .since {
-  margin-top: 8px;
-  font-style: italic;
-}
+  /* Footer */
+  .footer {
+    text-align:center; padding:30px 20px; background:#2c2c2c; color:#999;
+    font-size:0.85em; margin-top:40px;
+  }
+  .footer a { color:#ccc; text-decoration:none; }
+  .footer a:hover { color:#fff; }
+  .footer-links { margin-bottom:12px; }
+  .footer-links a { margin:0 8px; }
 </style>
 </head>
 <body>
 
-<!-- Header Banner -->
-<div class="header-banner">
-  <img src="MeridiBrandHeader.jpg" alt="Welcome to Meridi Brand">
-</div>
+  <!-- Header Banner -->
+  <div class="header">
+    <img src="MeridiBrandHeader.jpg" alt="Welcome to Meridi Brand">
+  </div>
 
-<!-- Navigation -->
-<nav class="nav-bar">
-  <a href="#products">TOOLS</a>
-  <a href="#philosophy">PHILOSOPHY</a>
-  <a href="https://github.com/meridi-support" target="_blank">GITHUB</a>
-  <a href="https://buymeacoffee.com/meridius" target="_blank">SUPPORT</a>
-</nav>
-
-<!-- Main Content -->
-<div class="main-content">
-
-  <!-- Welcome -->
+  <!-- Welcome Section -->
   <div class="welcome">
-    <h1>MERIDI BRAND</h1>
-    <p>Small tools, built with care. No ads, no subscriptions — just tools that work for everyone.</p>
+    <h1>Welcome to Meridi Brand</h1>
+    <p>Simple tools, built with care. No ads, no subscriptions — just tools that work.</p>
   </div>
 
   <!-- Products -->
-  <div class="products" id="products">
+  <div class="products">
 
     <div class="product-card">
       <div class="product-icon">📅</div>
-      <span class="badge badge-free">FREE</span>
+      <span class="badge badge-free">Free</span>
       <h3>MeridiMeet</h3>
-      <p>Cross-timezone scheduling made simple. Plan meetings, raids, and events across the globe.</p>
+      <p>Cross-timezone scheduling made simple. Plan raids, meetings, and events across the globe.</p>
       <a href="/meet/" class="product-link">Open MeridiMeet</a>
     </div>
 
     <div class="product-card">
       <div class="product-icon">📖</div>
-      <span class="badge badge-free">FREE</span>
+      <span class="badge badge-free">Free</span>
       <h3>MeridiLingo</h3>
-      <p>450 real-world English expressions with quiz mode. Learn English the way it's actually spoken.</p>
+      <p>450 real English expressions with quiz mode. Learn the way English is actually spoken.</p>
       <a href="/lingo/" class="product-link">Open MeridiLingo</a>
     </div>
 
@@ -233,69 +102,32 @@ body {
       <span class="badge badge-paid">&#165;1,000 / $8</span>
       <h3>MeridiSync</h3>
       <p>A resident text snippet expander for Windows. Multi-step wizards, dynamic prompts, no YAML.</p>
-      <a href="https://meridistore.booth.pm/items/8814601" class="product-link" target="_blank">🇯🇵　BOOTH</a>&nbsp;
-  <a href="https://meridius4.gumroad.com/l/meridisync"
-     class="product-link" target="_blank">🌐 Gumroad</a>
-    </div>
-
-    <div class="product-card">
-      <div class="product-icon">🎮</div>
-      <span class="badge badge-soon">COMING SOON</span>
-      <h3>MeridiPlay</h3>
-      <p>Fun decision-making tools — coin toss, roulette, team shuffle, bingo, and more.</p>
-      <span class="product-link" style="opacity:0.5;cursor:default;">Stay Tuned</span>
-    </div>
-
-    <div class="product-card">
-      <div class="product-icon">🗺️</div>
-      <span class="badge badge-soon">2027</span>
-      <h3>Meridi Atlas</h3>
-      <p>Interactive web-based GIS tool for accessibility mapping and spatial analysis.</p>
-      <span class="product-link" style="opacity:0.5;cursor:default;">Coming 2027</span>
+      <a href="https://meridistore.booth.pm/items/8814601" class="product-link" target="_blank">🇯🇵 BOOTH</a>
+      <a href="https://meridius4.gumroad.com/l/meridisync" class="product-link" target="_blank">🌐 Gumroad</a>
     </div>
 
   </div>
 
   <!-- Philosophy -->
-  <div class="philosophy" id="philosophy">
-    <h2>OUR PHILOSOPHY</h2>
-    <div class="philosophy-items">
-      <div class="philosophy-item">
-        <span>🚫</span>
-        No Ads
-      </div>
-      <div class="philosophy-item">
-        <span>🔓</span>
-        No Subscriptions
-      </div>
-      <div class="philosophy-item">
-        <span>🌍</span>
-        For Everyone
-      </div>
-      <div class="philosophy-item">
-        <span>🐾</span>
-        Built with Cats
-      </div>
+  <div class="philosophy">
+    <blockquote>"Every tool is a vessel. What you fill it with is up to you."</blockquote>
+    <p style="margin-top:16px; color:#999; font-size:0.9em;">No Ads. No Subscriptions. Just Tools. 🐾</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-links">
+      <a href="https://github.com/meridi-support" target="_blank">🐱 GitHub</a>
+      <a href="https://buymeacoffee.com/meridius" target="_blank">☕ Buy the cats a treat</a>
+      <a href="mailto:meridisupport@gmail.com">📧 Contact</a>
     </div>
+    <p>Meridi Brand &copy; 2026 — Since November 1st, 2026</p>
+    <p style="margin-top:4px; font-size:0.8em; color:#666;">🐟 Keep swimming.</p>
   </div>
 
-</div>
-
-<!-- Footer -->
-<div class="footer">
-  <a href="https://github.com/meridi-support" target="_blank">🐱 GitHub</a>
-  <a href="https://meridistore.booth.pm" target="_blank">🛒 BOOTH</a>
-  <a href="https://meridius4.gumroad.com" target="_blank">🛒 Gumroad</a>
-  <a href="https://buymeacoffee.com/meridius" target="_blank">☕ Buy Me a Coffee</a>
-  <div class="since">
-    Meridi Brand &copy; 2026 — Since November 1st, 2026<br>
-    No Ads. No Subscriptions. Just Tools. 🐾
-  </div>
-</div>
-
-<!-- GoatCounter -->
-<script data-goatcounter="https://meridibrand.goatcounter.com/count"
-  async src="//gc.zgo.at/count.js"></script>
+  <!-- GoatCounter -->
+  <script data-goatcounter="https://meridibrand.goatcounter.com/count"
+    async src="//gc.zgo.at/count.js"></script>
 
 </body>
 </html>
