@@ -19,7 +19,7 @@
   .welcome p { font-size:1.1em; color:#666; max-width:600px; margin:0 auto; }
 
   /* Products */
-  .products { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:30px 20px; max-width:1000px; margin:0 auto; }
+  .products { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:30px 20px; max-width:1200px; margin:0 auto; }
   .product-card {
     background:#fff; border-radius:12px; padding:24px; width:280px;
     box-shadow:0 2px 8px rgba(0,0,0,0.08); text-align:center;
@@ -32,7 +32,7 @@
   .product-link {
     display:inline-block; padding:8px 20px; border-radius:20px;
     background:#2c2c2c; color:#fff; text-decoration:none; font-size:0.85em;
-    transition:background 0.2s; margin:4px;
+    transition:background 0.2s; margin:4px; min-width:120px; text-align:center;
   }
   .product-link:hover { background:#555; }
 
@@ -43,6 +43,7 @@
   }
   .badge-free { background:#e8f5e9; color:#2e7d32; }
   .badge-paid { background:#fff3e0; color:#e65100; }
+  .badge-coming { background:#e3f2fd; color:#1565c0; }
 
   /* Philosophy */
   .philosophy {
@@ -81,6 +82,7 @@
   <!-- Products -->
   <div class="products">
 
+    <!-- MeridiMeet -->
     <div class="product-card">
       <div class="product-icon">📅</div>
       <span class="badge badge-free">Free</span>
@@ -89,6 +91,7 @@
       <a href="/meet/" class="product-link">Open MeridiMeet</a>
     </div>
 
+    <!-- MeridiLingo -->
     <div class="product-card">
       <div class="product-icon">📖</div>
       <span class="badge badge-free">Free</span>
@@ -97,13 +100,30 @@
       <a href="/lingo/" class="product-link">Open MeridiLingo</a>
     </div>
 
+    <!-- MeridiSync -->
     <div class="product-card">
       <div class="product-icon">💻</div>
       <span class="badge badge-paid">&#165;1,000 / $8</span>
       <h3>MeridiSync</h3>
       <p>A resident text snippet expander for Windows. Multi-step wizards, dynamic prompts, no YAML.</p>
-      <a href="https://meridistore.booth.pm/items/8814601" class="product-link" target="_blank" style="min-width:120px; text-align:center;">🇯🇵 BOOTH</a>
-      <a href="https://meridius4.gumroad.com/l/meridisync" class="product-link" target="_blank" style="min-width:120px; text-align:center;">🌐 Gumroad</a>
+      <a href="https://meridistore.booth.pm/items/8814601" class="product-link" target="_blank">🇯🇵 BOOTH</a>
+      <a href="https://meridius4.gumroad.com/l/meridisync" class="product-link" target="_blank">🌐 Gumroad</a>
+    </div>
+
+    <!-- MeridiPlay -->
+    <div class="product-card">
+      <div class="product-icon">🎮</div>
+      <span class="badge badge-coming">Coming Soon</span>
+      <h3>MeridiPlay</h3>
+      <p>A collection of fun mini-games — coin toss, roulette, team shuffle, tournament brackets, and more.</p>
+    </div>
+
+    <!-- MeridiAtlas -->
+    <div class="product-card">
+      <div class="product-icon">🗺️</div>
+      <span class="badge badge-coming">2027</span>
+      <h3>MeridiAtlas</h3>
+      <p>A GIS-powered map tool for delivery zones, accessibility, and area management.</p>
     </div>
 
   </div>
@@ -122,7 +142,7 @@
       <a href="mailto:meridisupport@gmail.com">📧 Contact</a>
     </div>
     <p>Meridi Brand &copy; 2026 — Since November 1st, 2026</p>
-    <p style="margin-top:4px; font-size:0.8em; color:#666;">🐟 Keep swimming.</p>
+    <p style="margin-top:4px; font-size:0.8em; color:#666;">🐟 Keep Swimming.</p>
   </div>
 
   <!-- GoatCounter -->
