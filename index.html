@@ -4,744 +4,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meridi Brand — Tools Built for Everyone</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<title>Meridi Brand — Simple Tools for a Connected World</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #faf9f6;
-  color: #2c2c2c;
-  line-height: 1.6;
-}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',sans-serif;background:#fff;color:#333;}
+  .banner{width:100%;display:block;}
+  .banner img{width:100%;display:block;}
 
-/* Header Banner */
-.header-banner {
-  width: 100%;
-  max-height: 400px;
-  overflow: hidden;
-  position: relative;
-}
-.header-banner img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
+  /* World Clock */
+  .clock-bar{display:flex;align-items:center;justify-content:center;gap:18px;padding:14px 10px;background:#1a1a2e;flex-wrap:wrap;}
+  .clock-item{text-align:center;min-width:100px;}
+  .clock-city{font-size:11px;color:#aaa;margin-bottom:2px;letter-spacing:1px;text-transform:uppercase;}
+  .flip-clock{display:flex;gap:2px;justify-content:center;align-items:center;}
+  .flip-unit{background:#2a2a3e;color:#e0e0e0;font-family:'Courier New',monospace;font-size:20px;font-weight:bold;padding:4px 6px;border-radius:4px;min-width:28px;text-align:center;position:relative;overflow:hidden;}
+  .flip-unit.colon{background:transparent;color:#555;min-width:8px;padding:0;font-size:18px;}
+  .clock-settings-btn{background:none;border:1px solid #555;color:#aaa;font-size:18px;cursor:pointer;padding:6px 10px;border-radius:6px;transition:all 0.3s;}
+  .clock-settings-btn:hover{border-color:#39ff14;color:#39ff14;}
 
-/* World Clock Section */
-.world-clock-section {
-  background: #2c2c2c;
-  padding: 16px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  flex-wrap: wrap;
-}
-.clock-city {
-  text-align: center;
-  min-width: 120px;
-}
-.clock-city-name {
-  color: #aaa;
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.flip-clock {
-  display: flex;
-  justify-content: center;
-  gap: 3px;
-  align-items: center;
-}
-.flip-unit {
-  position: relative;
-  width: 28px;
-  height: 38px;
-  perspective: 200px;
-}
-.flip-card {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.flip-card .top,
-.flip-card .bottom {
-  position: absolute;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.flip-card .top {
-  top: 0;
-  background: #3a3a3a;
-  border-bottom: 1px solid #222;
-  border-radius: 4px 4px 0 0;
-}
-.flip-card .bottom {
-  bottom: 0;
-  background: #333;
-  border-radius: 0 0 4px 4px;
-}
-.flip-card .top span,
-.flip-card .bottom span {
-  font-family: 'Courier New', monospace;
-  font-size: 22px;
-  font-weight: bold;
-  color: #f0f0f0;
-  line-height: 38px;
-}
-.flip-card .top span {
-  transform: translateY(25%);
-}
-.flip-card .bottom span {
-  transform: translateY(-25%);
-}
-.flip-separator {
-  color: #888;
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 38px;
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  0%,100% { opacity:1; }
-  50% { opacity:0.3; }
-}
-.flip-animate {
-  animation: flipDown 0.4s ease-in-out;
-}
-@keyframes flipDown {
-  0% { transform: rotateX(0deg); }
-  50% { transform: rotateX(-90deg); }
-  100% { transform: rotateX(0deg); }
-}
+  /* Settings Panel */
+  .settings-panel{display:none;background:#1a1a2e;border-top:1px solid #333;padding:16px 20px;color:#ccc;font-size:13px;}
+  .settings-panel.open{display:block;}
+  .settings-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+  .settings-row label{min-width:80px;color:#aaa;}
+  .settings-row select{background:#2a2a3e;color:#e0e0e0;border:1px solid #555;padding:4px 8px;border-radius:4px;font-size:13px;}
+  .settings-row button{background:#39ff14;color:#000;border:none;padding:5px 14px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:12px;}
+  .settings-row button:hover{background:#32d912;}
+  .settings-row button.close-btn{background:#555;color:#fff;}
 
-/* Settings Button */
-.clock-settings-btn {
-  background: none;
-  border: 1px solid #555;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #aaa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  margin-left: 8px;
-}
-.clock-settings-btn:hover {
-  background: #444;
-  border-color: #888;
-  color: #fff;
-}
+  /* Navigation */
+  .nav{display:flex;justify-content:center;gap:24px;padding:16px;background:#f8f8f8;border-bottom:1px solid #eee;}
+  .nav a{text-decoration:none;color:#555;font-size:14px;font-weight:500;transition:color 0.3s;}
+  .nav a:hover{color:#000;}
 
-/* Settings Panel */
-.settings-panel {
-  display: none;
-  background: #333;
-  padding: 15px 20px;
-  text-align: center;
-  border-bottom: 1px solid #444;
-}
-.settings-panel.active { display: block; }
-.settings-panel h3 {
-  font-size: 13px;
-  color: #aaa;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-}
-.settings-row {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.settings-row label {
-  font-size: 12px;
-  color: #888;
-}
-.settings-row select {
-  padding: 4px 8px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  font-size: 12px;
-  background: #2c2c2c;
-  color: #e0e0e0;
-}
-.style-btn {
-  padding: 5px 12px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  background: #2c2c2c;
-  color: #aaa;
-  cursor: pointer;
-  font-size: 11px;
-  transition: all 0.3s;
-}
-.style-btn.active {
-  background: #555;
-  color: #fff;
-  border-color: #888;
-}
-.style-btn:hover { background: #444; color: #ddd; }
+  /* Products */
+  .section-title{text-align:center;font-size:22px;margin:30px 0 10px;font-weight:600;}
+  .section-sub{text-align:center;color:#777;font-size:14px;margin-bottom:24px;}
+  .products{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;padding:0 20px 30px;}
+  .product-card{background:#fafafa;border:1px solid #eee;border-radius:12px;padding:24px;width:260px;text-align:center;transition:transform 0.2s,box-shadow 0.2s;}
+  .product-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+  .product-icon{font-size:36px;margin-bottom:10px;}
+  .product-card h3{font-size:16px;margin-bottom:6px;}
+  .product-card p{font-size:13px;color:#666;margin-bottom:14px;line-height:1.5;}
+  .product-link{display:inline-block;margin:4px;padding:8px 16px;background:#000;color:#fff;text-decoration:none;border-radius:6px;font-size:12px;transition:background 0.3s;}
+  .product-link:hover{background:#333;}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-bottom:10px;}
+  .badge-free{background:#e8f5e9;color:#2e7d32;}
+  .badge-paid{background:#fff3e0;color:#e65100;}
+  .badge-soon{background:#e3f2fd;color:#1565c0;}
 
-/* Navigation */
-.nav-bar {
-  background: #2c2c2c;
-  padding: 12px 0;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-top: 1px solid #444;
-}
-.nav-bar a {
-  color: #e0e0e0;
-  text-decoration: none;
-  margin: 0 18px;
-  font-size: 14px;
-  letter-spacing: 1px;
-  transition: color 0.3s;
-}
-.nav-bar a:hover { color: #ffffff; }
+  /* Philosophy */
+  .philosophy{max-width:640px;margin:30px auto;padding:0 20px;text-align:center;}
+  .philosophy blockquote{font-style:italic;color:#555;font-size:15px;line-height:1.7;border-left:3px solid #ddd;padding-left:16px;text-align:left;}
 
-/* Main Content */
-.main-content {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-/* Welcome Section */
-.welcome {
-  text-align: center;
-  margin-bottom: 50px;
-}
-.welcome h1 {
-  font-size: 28px;
-  color: #2c2c2c;
-  margin-bottom: 10px;
-  font-weight: 300;
-  letter-spacing: 2px;
-}
-.welcome p {
-  font-size: 16px;
-  color: #666;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* Product Cards */
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 50px;
-}
-.product-card {
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
-  border-radius: 12px;
-  padding: 30px;
-  text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-.product-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-.product-card h3 {
-  font-size: 20px;
-  color: #2c2c2c;
-  margin-bottom: 8px;
-}
-.product-card p {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 16px;
-  min-height: 40px;
-}
-.product-card .badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-}
-.badge-free { background: #e8f5e9; color: #2e7d32; }
-.badge-paid { background: #fff3e0; color: #e65100; }
-.badge-soon { background: #f3e5f5; color: #7b1fa2; }
-.product-link {
-  display: inline-block;
-  padding: 8px 24px;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
-  color: #2c2c2c;
-  text-decoration: none;
-  font-size: 13px;
-  transition: background 0.3s, color 0.3s;
-  min-width: 120px;
-}
-.product-link:hover {
-  background: #2c2c2c;
-  color: #ffffff;
-}
-
-/* Philosophy Section */
-.philosophy {
-  text-align: center;
-  padding: 40px 20px;
-  margin-bottom: 40px;
-  border-top: 1px solid #e8e8e8;
-  border-bottom: 1px solid #e8e8e8;
-}
-.philosophy h2 {
-  font-size: 20px;
-  font-weight: 300;
-  color: #2c2c2c;
-  margin-bottom: 20px;
-  letter-spacing: 2px;
-}
-.philosophy-items {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-.philosophy-item {
-  font-size: 14px;
-  color: #666;
-}
-.philosophy-item span {
-  display: block;
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  padding: 30px 20px;
-  color: #999;
-  font-size: 12px;
-}
-.footer a {
-  color: #999;
-  text-decoration: none;
-  margin: 0 8px;
-}
-.footer a:hover { color: #2c2c2c; }
-.footer .since {
-  margin-top: 8px;
-  font-style: italic;
-}
+  /* Footer */
+  .footer{text-align:center;padding:20px;font-size:12px;color:#999;border-top:1px solid #eee;margin-top:30px;}
+  .footer a{color:#777;text-decoration:none;margin:0 6px;}
+  .footer a:hover{color:#000;}
 </style>
 </head>
 <body>
 
-<!-- Header Banner -->
-<div class="header-banner">
-  <img src="MeridiBrandHeader.jpg" alt="Welcome to Meridi Brand">
-</div>
-
-<!-- World Clock -->
-<div class="world-clock-section" id="worldclock">
-  <div class="clock-city" id="city-0">
-    <div class="clock-city-name">Tokyo</div>
-    <div class="flip-clock" data-tz="Asia/Tokyo"></div>
-  </div>
-  <div class="clock-city" id="city-1">
-    <div class="clock-city-name">New York</div>
-    <div class="flip-clock" data-tz="America/New_York"></div>
-  </div>
-  <div class="clock-city" id="city-2">
-    <div class="clock-city-name">London</div>
-    <div class="flip-clock" data-tz="Europe/London"></div>
-  </div>
-  <div class="clock-city" id="city-3">
-    <div class="clock-city-name">Dubai</div>
-    <div class="flip-clock" data-tz="Asia/Dubai"></div>
-  </div>
-  <div class="clock-city" id="city-4">
-    <div class="clock-city-name">Sydney</div>
-    <div class="flip-clock" data-tz="Australia/Sydney"></div>
-  </div>
-  <button class="clock-settings-btn" onclick="toggleSettings()" title="Clock Settings">&#9881;</button>
-</div>
-
-<!-- Settings Panel -->
-<div class="settings-panel" id="settingsPanel">
-  <h3>&#9881; CLOCK SETTINGS</h3>
-  <div class="settings-row">
-    <label>Style:</label>
-    <button class="style-btn active" id="styleFlip" onclick="setStyle('flip')">Flip</button>
-    <button class="style-btn" id="styleDigital" onclick="setStyle('digital')">Digital</button>
-    <button class="style-btn" id="styleAnalog" onclick="setStyle('analog')">Analog</button>
-  </div>
-  <div class="settings-row">
-    <label>Format:</label>
-    <button class="style-btn active" id="fmt12" onclick="setFormat('12h')">12h</button>
-    <button class="style-btn" id="fmt24" onclick="setFormat('24h')">24h</button>
-  </div>
-  <div class="settings-row">
-    <label>Replace:</label>
-    <select id="replaceSlot">
-      <option value="0">Slot 1 (Tokyo)</option>
-      <option value="1">Slot 2 (New York)</option>
-      <option value="2">Slot 3 (London)</option>
-      <option value="3">Slot 4 (Dubai)</option>
-      <option value="4">Slot 5 (Sydney)</option>
-    </select>
-    <select id="newCity">
-      <option value="Asia/Tokyo">Tokyo</option>
-      <option value="America/New_York">New York</option>
-      <option value="America/Los_Angeles">Los Angeles</option>
-      <option value="America/Chicago">Chicago</option>
-      <option value="America/Denver">Denver</option>
-      <option value="America/Sao_Paulo">Sao Paulo</option>
-      <option value="Europe/London">London</option>
-      <option value="Europe/Paris">Paris</option>
-      <option value="Europe/Berlin">Berlin</option>
-      <option value="Europe/Moscow">Moscow</option>
-      <option value="Africa/Cairo">Cairo</option>
-      <option value="Asia/Dubai">Dubai</option>
-      <option value="Asia/Kolkata">Mumbai</option>
-      <option value="Asia/Bangkok">Bangkok</option>
-      <option value="Asia/Singapore">Singapore</option>
-      <option value="Asia/Hong_Kong">Hong Kong</option>
-      <option value="Asia/Shanghai">Shanghai</option>
-      <option value="Asia/Seoul">Seoul</option>
-      <option value="Australia/Sydney">Sydney</option>
-      <option value="Pacific/Auckland">Auckland</option>
-    </select>
-    <button class="style-btn" onclick="replaceCity()">Apply</button>
-  </div>
-</div>
-
-<!-- Navigation -->
-<nav class="nav-bar">
-  <a href="#products">TOOLS</a>
-  <a href="#philosophy">PHILOSOPHY</a>
-  <a href="https://github.com/meridi-support" target="_blank">GITHUB</a>
-  <a href="https://buymeacoffee.com/meridius" target="_blank">SUPPORT</a>
-</nav>
-
-<!-- Main Content -->
-<div class="main-content">
-
-  <!-- Welcome -->
-  <div class="welcome">
-    <h1>MERIDI BRAND</h1>
-    <p>Small tools, built with care. No ads, no subscriptions — just tools that work for everyone.</p>
+  <div class="banner">
+    <img src="MeridiBrandHeader.jpg" alt="Meridi Brand">
   </div>
 
-  <!-- Products -->
-  <div class="products" id="products">
+  <!-- World Clock Bar -->
+  <div class="clock-bar" id="clockBar"></div>
 
-    <div class="product-card">
-      <div class="product-icon">📅</div>
-      <span class="badge badge-free">FREE</span>
-      <h3>MeridiMeet</h3>
-      <p>Cross-timezone scheduling made simple. Plan meetings, raids, and events across the globe.</p>
-      <a href="/meet/" class="product-link">Open MeridiMeet</a>
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-row">
+      <label>Format:</label>
+      <select id="formatSelect">
+        <option value="24">24-hour</option>
+        <option value="12">12-hour</option>
+      </select>
     </div>
-
-    <div class="product-card">
-      <div class="product-icon">📖</div>
-      <span class="badge badge-free">FREE</span>
-      <h3>MeridiLingo</h3>
-      <p>560+ real-world English expressions with quiz mode. Learn English the way it's actually spoken.</p>
-      <a href="/lingo/" class="product-link">Open MeridiLingo</a>
+    <div class="settings-row">
+      <label>Replace:</label>
+      <select id="slotSelect"></select>
+      <span>→</span>
+      <select id="citySelect"></select>
+      <button onclick="applyCity()">Apply</button>
     </div>
-
-    <div class="product-card">
-      <div class="product-icon">💻</div>
-      <span class="badge badge-paid">&#165;1,000 / $8</span>
-      <h3>MeridiSync</h3>
-      <p>A resident text snippet expander for Windows. Multi-step wizards, dynamic prompts, no YAML.</p>
-      <a href="https://meridistore.booth.pm/items/8814601" class="product-link" target="_blank">🇯🇵 BOOTH</a>&nbsp;
-      <a href="https://meridius4.gumroad.com/l/meridisync" class="product-link" target="_blank">🌐 Gumroad</a>
+    <div class="settings-row">
+      <button class="close-btn" onclick="toggleSettings()">Close</button>
     </div>
-
-    <div class="product-card">
-      <div class="product-icon">🎮</div>
-      <span class="badge badge-soon">COMING SOON</span>
-      <h3>MeridiPlay</h3>
-      <p>Fun decision-making tools — coin toss, roulette, team shuffle, bingo, and more.</p>
-      <span class="product-link" style="opacity:0.5;cursor:default;">Stay Tuned</span>
-    </div>
-
-    <div class="product-card">
-      <div class="product-icon">🗺️</div>
-      <span class="badge badge-soon">2027</span>
-      <h3>Meridi Atlas</h3>
-      <p>Interactive web-based GIS tool for accessibility mapping and spatial analysis.</p>
-      <span class="product-link" style="opacity:0.5;cursor:default;">Coming 2027</span>
-    </div>
-
   </div>
 
-  <!-- Philosophy -->
-  <div class="philosophy" id="philosophy">
-    <h2>OUR PHILOSOPHY</h2>
-    <div class="philosophy-items">
-      <div class="philosophy-item">
-        <span>🚫</span>
-        No Ads
+  <div class="nav">
+    <a href="#products">🛠️ Products</a>
+    <a href="https://github.com/meridi-support" target="_blank">🐱 GitHub</a>
+    <a href="#philosophy">💡 Philosophy</a>
+    <a href="mailto:meridisupport@gmail.com">✉️ Contact</a>
+  </div>
+
+  <div id="products">
+    <div class="section-title">Our Tools</div>
+    <div class="section-sub">Simple tools for a connected world 🐾</div>
+    <div class="products">
+
+      <div class="product-card">
+        <div class="product-icon">📖</div>
+        <span class="badge badge-free">Free</span>
+        <h3>MeridiLingo</h3>
+        <p>An English expression learning tool with 450+ expressions across 24 categories. Quiz mode, shuffle, and offline support.</p>
+        <a href="/lingo/" class="product-link">🌐 Try Online</a>
+        <a href="https://meridistore.booth.pm/items/8992102" class="product-link" target="_blank">🇯🇵 BOOTH</a>
+        <a href="https://meridius4.gumroad.com/l/meridilingo" class="product-link" target="_blank">🌐 Gumroad</a>
       </div>
-      <div class="philosophy-item">
-        <span>🔓</span>
-        No Subscriptions
+
+      <div class="product-card">
+        <div class="product-icon">📅</div>
+        <span class="badge badge-free">Free</span>
+        <h3>MeridiMeet</h3>
+        <p>A cross-timezone scheduling tool. No ads, no sign-up. Just pick your times and share the link.</p>
+        <a href="/meet/" class="product-link">🌐 Try Online</a>
+        <a href="https://meridistore.booth.pm/items/8814602" class="product-link" target="_blank">🇯🇵 BOOTH</a>
+        <a href="https://meridius4.gumroad.com/l/meridimeet" class="product-link" target="_blank">🌐 Gumroad</a>
       </div>
-      <div class="philosophy-item">
-        <span>🌍</span>
-        For Everyone
+
+      <div class="product-card">
+        <div class="product-icon">💻</div>
+        <span class="badge badge-paid">&#165;1,000 / $8</span>
+        <h3>MeridiSync</h3>
+        <p>A resident text snippet expander for Windows. Multi-step wizards, dynamic prompts, no YAML.</p>
+        <a href="https://meridistore.booth.pm/items/8814580" class="product-link" target="_blank">🇯🇵 BOOTH</a>
+        <a href="https://meridius4.gumroad.com/l/meridisync" class="product-link" target="_blank">🌐 Gumroad</a>
       </div>
-      <div class="philosophy-item">
-        <span>🐾</span>
-        Built with Cats
+
+      <div class="product-card">
+        <div class="product-icon">🎮</div>
+        <span class="badge badge-soon">Coming Soon</span>
+        <h3>MeridiPlay</h3>
+        <p>Fun mini-games and tools — roulette, coin toss, team shuffle, bingo, and more. Play fair, play fun.</p>
       </div>
+
+      <div class="product-card">
+        <div class="product-icon">🗺️</div>
+        <span class="badge badge-soon">2027</span>
+        <h3>MeridiAtlas</h3>
+        <p>A lightweight GIS visualization tool for logistics and urban planning. Polygons, postal codes, and more.</p>
+      </div>
+
     </div>
   </div>
 
-</div>
-
-<!-- Footer -->
-<div class="footer">
-  <a href="https://github.com/meridi-support" target="_blank">🐱 GitHub</a>
-  <a href="https://meridistore.booth.pm" target="_blank">🛒 BOOTH</a>
-  <a href="https://meridius4.gumroad.com" target="_blank">🛒 Gumroad</a>
-  <a href="https://buymeacoffee.com/meridius" target="_blank">☕ Buy Me a Coffee</a>
-  <a href="mailto:meridisupport@gmail.com">✉️ Contact</a>
-  <div class="since">
-    Meridi Brand &copy; 2026 — Since November 1st, 2026<br>
-    No Ads. No Subscriptions. Just Tools. 🐾
+  <div id="philosophy" class="philosophy">
+    <div class="section-title">Our Philosophy</div>
+    <blockquote>
+      "Every tool is a vessel. What you fill it with is up to you."<br><br>
+      We build small, honest tools — no ads, no tracking, no bloat. Just things that help you get stuff done. 🐾
+    </blockquote>
   </div>
-</div>
 
-<!-- World Clock Script -->
+  <div class="footer">
+    <p>Meridi Brand &copy; 2026 — Since November 1st, 2026</p>
+    <p>
+      <a href="https://github.com/meridi-support" target="_blank">🐱 GitHub</a>
+      <a href="https://buymeacoffee.com/meridius" target="_blank">☕ Buy Me a Coffee</a>
+      <a href="mailto:meridisupport@gmail.com">✉️ Contact</a>
+    </p>
+    <p style="margin-top:6px;">🐟 Keep swimming.</p>
+  </div>
+
 <script>
-(function(){
-  var cityData=[
-    {name:'Tokyo',tz:'Asia/Tokyo'},
-    {name:'New York',tz:'America/New_York'},
-    {name:'London',tz:'Europe/London'},
-    {name:'Dubai',tz:'Asia/Dubai'},
-    {name:'Sydney',tz:'Australia/Sydney'}
-  ];
-  var clockStyle='flip';
-  var clockFormat='12h';
-  var prevValues={};
+var ALL_CITIES=[
+  {name:'Tokyo',tz:'Asia/Tokyo'},
+  {name:'Seoul',tz:'Asia/Seoul'},
+  {name:'Shanghai',tz:'Asia/Shanghai'},
+  {name:'Hong Kong',tz:'Asia/Hong_Kong'},
+  {name:'Taipei',tz:'Asia/Taipei'},
+  {name:'Singapore',tz:'Asia/Singapore'},
+  {name:'Manila',tz:'Asia/Manila'},
+  {name:'Bangkok',tz:'Asia/Bangkok'},
+  {name:'Jakarta',tz:'Asia/Jakarta'},
+  {name:'Mumbai',tz:'Asia/Kolkata'},
+  {name:'Karachi',tz:'Asia/Karachi'},
+  {name:'Dubai',tz:'Asia/Dubai'},
+  {name:'Riyadh',tz:'Asia/Riyadh'},
+  {name:'Tehran',tz:'Asia/Tehran'},
+  {name:'Istanbul',tz:'Europe/Istanbul'},
+  {name:'Moscow',tz:'Europe/Moscow'},
+  {name:'Athens',tz:'Europe/Athens'},
+  {name:'Helsinki',tz:'Europe/Helsinki'},
+  {name:'Cairo',tz:'Africa/Cairo'},
+  {name:'Johannesburg',tz:'Africa/Johannesburg'},
+  {name:'Nairobi',tz:'Africa/Nairobi'},
+  {name:'Lagos',tz:'Africa/Lagos'},
+  {name:'Algiers',tz:'Africa/Algiers'},
+  {name:'Berlin',tz:'Europe/Berlin'},
+  {name:'Paris',tz:'Europe/Paris'},
+  {name:'Rome',tz:'Europe/Rome'},
+  {name:'Madrid',tz:'Europe/Madrid'},
+  {name:'Amsterdam',tz:'Europe/Amsterdam'},
+  {name:'Warsaw',tz:'Europe/Warsaw'},
+  {name:'London',tz:'Europe/London'},
+  {name:'Lisbon',tz:'Europe/Lisbon'},
+  {name:'Reykjavik',tz:'Atlantic/Reykjavik'},
+  {name:'Sao Paulo',tz:'America/Sao_Paulo'},
+  {name:'Buenos Aires',tz:'America/Argentina/Buenos_Aires'},
+  {name:'Rio de Janeiro',tz:'America/Sao_Paulo'},
+  {name:'Santiago',tz:'America/Santiago'},
+  {name:'Lima',tz:'America/Lima'},
+  {name:'Bogota',tz:'America/Bogota'},
+  {name:'New York',tz:'America/New_York'},
+  {name:'Toronto',tz:'America/Toronto'},
+  {name:'Chicago',tz:'America/Chicago'},
+  {name:'Mexico City',tz:'America/Mexico_City'},
+  {name:'Denver',tz:'America/Denver'},
+  {name:'Los Angeles',tz:'America/Los_Angeles'},
+  {name:'Vancouver',tz:'America/Vancouver'},
+  {name:'Anchorage',tz:'America/Anchorage'},
+  {name:'Honolulu',tz:'Pacific/Honolulu'},
+  {name:'Sydney',tz:'Australia/Sydney'},
+  {name:'Melbourne',tz:'Australia/Melbourne'},
+  {name:'Auckland',tz:'Pacific/Auckland'}
+];
 
-  // Load saved settings
-  try{
-    var saved=localStorage.getItem('meridiClockCities');
-    if(saved) cityData=JSON.parse(saved);
-    var savedStyle=localStorage.getItem('meridiClockStyle');
-    if(savedStyle) clockStyle=savedStyle;
-    var savedFormat=localStorage.getItem('meridiClockFormat');
-    if(savedFormat) clockFormat=savedFormat;
-  }catch(e){}
+var displaySlots=[
+  {name:'Tokyo',tz:'Asia/Tokyo'},
+  {name:'New York',tz:'America/New_York'},
+  {name:'London',tz:'Europe/London'},
+  {name:'Dubai',tz:'Asia/Dubai'},
+  {name:'Sydney',tz:'Australia/Sydney'}
+];
 
-  // Apply saved style/format buttons
-  if(clockStyle!=='flip'){
-    document.getElementById('styleFlip').classList.remove('active');
-    document.getElementById('style'+clockStyle.charAt(0).toUpperCase()+clockStyle.slice(1)).classList.add('active');
+var use12=false;
+
+function getTimeStr(tz){
+  var now=new Date();
+  var opts={timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:use12};
+  return now.toLocaleTimeString('en-US',opts);
+}
+
+function buildClocks(){
+  var bar=document.getElementById('clockBar');
+  bar.innerHTML='';
+  for(var i=0;i<displaySlots.length;i++){
+    var c=displaySlots[i];
+    var div=document.createElement('div');
+    div.className='clock-item';
+    div.innerHTML='<div class="clock-city">'+c.name+'</div><div class="flip-clock" id="clock-'+i+'"></div>';
+    bar.appendChild(div);
   }
-  if(clockFormat==='24h'){
-    document.getElementById('fmt12').classList.remove('active');
-    document.getElementById('fmt24').classList.add('active');
-  }
+  var btn=document.createElement('button');
+  btn.className='clock-settings-btn';
+  btn.innerHTML='&#9881;';
+  btn.onclick=toggleSettings;
+  bar.appendChild(btn);
+  buildSlotSelect();
+  buildCitySelect();
+}
 
-  window.toggleSettings=function(){
-    document.getElementById('settingsPanel').classList.toggle('active');
-  };
-
-  window.setStyle=function(s){
-    clockStyle=s;
-    var btns=document.querySelectorAll('#settingsPanel .settings-row:first-child .style-btn');
-    // target style row
-    document.getElementById('styleFlip').classList.remove('active');
-    document.getElementById('styleDigital').classList.remove('active');
-    document.getElementById('styleAnalog').classList.remove('active');
-    document.getElementById('style'+s.charAt(0).toUpperCase()+s.slice(1)).classList.add('active');
-    prevValues={};
-    try{localStorage.setItem('meridiClockStyle',s);}catch(e){}
-  };
-
-  window.setFormat=function(f){
-    clockFormat=f;
-    document.getElementById('fmt12').classList.remove('active');
-    document.getElementById('fmt24').classList.remove('active');
-    if(f==='12h') document.getElementById('fmt12').classList.add('active');
-    else document.getElementById('fmt24').classList.add('active');
-    prevValues={};
-    try{localStorage.setItem('meridiClockFormat',f);}catch(e){}
-  };
-
-  window.replaceCity=function(){
-    var slot=parseInt(document.getElementById('replaceSlot').value);
-    var sel=document.getElementById('newCity');
-    var tz=sel.value;
-    var name=sel.options[sel.selectedIndex].text;
-    cityData[slot]={name:name,tz:tz};
-
-    // Update HTML
-    var cityEl=document.getElementById('city-'+slot);
-    cityEl.querySelector('.clock-city-name').textContent=name;
-    cityEl.querySelector('.flip-clock').setAttribute('data-tz',tz);
-
-    // Update slot label
-    var slotSel=document.getElementById('replaceSlot');
-    slotSel.options[slot].text='Slot '+(slot+1)+' ('+name+')';
-
-    prevValues={};
-    try{localStorage.setItem('meridiClockCities',JSON.stringify(cityData));}catch(e){}
-  };
-
-  // Apply saved city names
-  for(var c=0;c<cityData.length;c++){
-    var cityEl=document.getElementById('city-'+c);
-    if(cityEl){
-      cityEl.querySelector('.clock-city-name').textContent=cityData[c].name;
-      cityEl.querySelector('.flip-clock').setAttribute('data-tz',cityData[c].tz);
+function updateClocks(){
+  for(var i=0;i<displaySlots.length;i++){
+    var el=document.getElementById('clock-'+i);
+    if(!el)continue;
+    var t=getTimeStr(displaySlots[i].tz);
+    var parts=t.replace(/\s/g,'').split('');
+    var html='';
+    for(var j=0;j<parts.length;j++){
+      if(parts[j]===':'){
+        html+='<span class="flip-unit colon">:</span>';
+      } else {
+        html+='<span class="flip-unit">'+parts[j]+'</span>';
+      }
     }
-    var slotSel=document.getElementById('replaceSlot');
-    if(slotSel && slotSel.options[c]) slotSel.options[c].text='Slot '+(c+1)+' ('+cityData[c].name+')';
+    el.innerHTML=html;
   }
+}
 
-  var clocks=document.querySelectorAll('.flip-clock');
+function toggleSettings(){
+  var p=document.getElementById('settingsPanel');
+  p.classList.toggle('open');
+}
 
-  function initFlipUnits(){
-    clocks.forEach(function(clock){
-      var html='';
-      for(var i=0;i<2;i++){
-        html+='<div class="flip-unit" data-pos="h'+i+'">'
-          +'<div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div>'
-          +'</div>';
-      }
-      html+='<span class="flip-separator">:</span>';
-      for(var i=0;i<2;i++){
-        html+='<div class="flip-unit" data-pos="m'+i+'">'
-          +'<div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div>'
-          +'</div>';
-      }
-      html+='<span class="flip-separator">:</span>';
-      for(var i=0;i<2;i++){
-        html+='<div class="flip-unit" data-pos="s'+i+'">'
-          +'<div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div>'
-          +'</div>';
-      }
-      clock.innerHTML=html;
-    });
+function buildSlotSelect(){
+  var sel=document.getElementById('slotSelect');
+  sel.innerHTML='';
+  for(var i=0;i<displaySlots.length;i++){
+    var o=document.createElement('option');
+    o.value=i;
+    o.textContent='Slot '+(i+1)+': '+displaySlots[i].name;
+    sel.appendChild(o);
   }
+}
 
-  initFlipUnits();
-
-  function updateClocks(){
-    clocks=document.querySelectorAll('.flip-clock');
-    clocks.forEach(function(clock,idx){
-      var tz=clock.getAttribute('data-tz');
-      var now=new Date();
-
-      if(clockStyle==='flip'){
-        // Ensure flip units exist
-        if(!clock.querySelector('.flip-unit')){
-          var html='';
-          for(var i=0;i<2;i++){
-            html+='<div class="flip-unit" data-pos="h'+i+'"><div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div></div>';
-          }
-          html+='<span class="flip-separator">:</span>';
-          for(var i=0;i<2;i++){
-            html+='<div class="flip-unit" data-pos="m'+i+'"><div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div></div>';
-          }
-          html+='<span class="flip-separator">:</span>';
-          for(var i=0;i<2;i++){
-            html+='<div class="flip-unit" data-pos="s'+i+'"><div class="flip-card"><div class="top"><span>0</span></div><div class="bottom"><span>0</span></div></div></div>';
-          }
-          clock.innerHTML=html;
-        }
-
-        var str=now.toLocaleTimeString('en-US',{timeZone:tz,hour12:clockFormat==='12h',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        var timePart=str.replace(/\s?(AM|PM)/i,'');
-        var parts=timePart.split(':');
-        var h=parts[0]||'00';
-        var m=parts[1]||'00';
-        var s=parts[2]||'00';
-        if(h.length<2) h='0'+h;
-        var timeStr=h+m+s;
-
-        var units=clock.querySelectorAll('.flip-unit');
-        var digits=[h.charAt(0),h.charAt(1),m.charAt(0),m.charAt(1),s.charAt(0),s.charAt(1)];
-        var prev=prevValues[idx]||'';
-        var prevDigits=prev?[prev.charAt(0),prev.charAt(1),prev.charAt(2),prev.charAt(3),prev.charAt(4),prev.charAt(5)]:['','','','','',''];
-
-        for(var i=0;i<6;i++){
-          if(units[i]){
-            var topSpan=units[i].querySelector('.top span');
-            var bottomSpan=units[i].querySelector('.bottom span');
-            if(digits[i]!==prevDigits[i]){
-              units[i].querySelector('.flip-card').classList.remove('flip-animate');
-              void units[i].querySelector('.flip-card').offsetWidth;
-              units[i].querySelector('.flip-card').classList.add('flip-animate');
-            }
-            topSpan.textContent=digits[i];
-            bottomSpan.textContent=digits[i];
-          }
-        }
-        prevValues[idx]=timeStr;
-
-      } else if(clockStyle==='digital'){
-        var str=now.toLocaleTimeString('en-US',{timeZone:tz,hour12:clockFormat==='12h',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        clock.innerHTML='<span style="font-family:Courier New,monospace;font-size:22px;color:#f0f0f0;letter-spacing:2px;">'+str+'</span>';
-
-      } else if(clockStyle==='analog'){
-        var localStr=now.toLocaleString('en-US',{timeZone:tz});
-        var localDate=new Date(localStr);
-        var hr=localDate.getHours()%12;
-        var mn=localDate.getMinutes();
-        var sc=localDate.getSeconds();
-        var hDeg=hr*30+mn*0.5;
-        var mDeg=mn*6;
-        var sDeg=sc*6;
-        clock.innerHTML='<svg width="55" height="55" viewBox="0 0 100 100">'
-          +'<circle cx="50" cy="50" r="48" fill="#3a3a3a" stroke="#555" stroke-width="2"/>'
-          +'<line x1="50" y1="50" x2="50" y2="28" stroke="#f0f0f0" stroke-width="3" stroke-linecap="round" transform="rotate('+hDeg+',50,50)"/>'
-          +'<line x1="50" y1="50" x2="50" y2="18" stroke="#ccc" stroke-width="2" stroke-linecap="round" transform="rotate('+mDeg+',50,50)"/>'
-          +'<line x1="50" y1="50" x2="50" y2="15" stroke="#39ff14" stroke-width="1" stroke-linecap="round" transform="rotate('+sDeg+',50,50)"/>'
-          +'<circle cx="50" cy="50" r="3" fill="#f0f0f0"/>'
-          +'</svg>';
-      }
-    });
+function buildCitySelect(){
+  var sel=document.getElementById('citySelect');
+  sel.innerHTML='';
+  for(var i=0;i<ALL_CITIES.length;i++){
+    var o=document.createElement('option');
+    o.value=i;
+    o.textContent=ALL_CITIES[i].name;
+    sel.appendChild(o);
   }
+}
 
+function applyCity(){
+  var slotIdx=parseInt(document.getElementById('slotSelect').value);
+  var cityIdx=parseInt(document.getElementById('citySelect').value);
+  displaySlots[slotIdx]={name:ALL_CITIES[cityIdx].name,tz:ALL_CITIES[cityIdx].tz};
+  buildClocks();
   updateClocks();
-  setInterval(updateClocks,500);
-})();
+  try{localStorage.setItem('meridiClocks',JSON.stringify(displaySlots));}catch(e){}
+}
+
+document.getElementById('formatSelect').addEventListener('change',function(){
+  use12=this.value==='12';
+  updateClocks();
+  try{localStorage.setItem('meridiFormat',this.value);}catch(e){}
+});
+
+// Load saved settings
+try{
+  var saved=localStorage.getItem('meridiClocks');
+  if(saved){displaySlots=JSON.parse(saved);}
+  var fmt=localStorage.getItem('meridiFormat');
+  if(fmt==='12'){use12=true;document.getElementById('formatSelect').value='12';}
+}catch(e){}
+
+buildClocks();
+updateClocks();
+setInterval(updateClocks,1000);
 </script>
 
-<!-- GoatCounter -->
-<script data-goatcounter="https://meridibrand.goatcounter.com/count"
-  async src="//gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
 </body>
 </html>
