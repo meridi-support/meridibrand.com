@@ -465,6 +465,7 @@ body {
       <option value="Europe/Warsaw">Warsaw</option>
     </select>
     <button class="style-btn" onclick="replaceCity()">Apply</button>
+    <button class="style-btn" onclick="resetClocks()">Reset Default</button>
   </div>
 </div>
 
@@ -629,22 +630,24 @@ body {
     try{localStorage.setItem('meridiClockFormat',f);}catch(e){}
   };
 
-  window.replaceCity=function(){
-    var slot=parseInt(document.getElementById('replaceSlot').value);
-    var sel=document.getElementById('newCity');
-    var tz=sel.value;
-    var name=sel.options[sel.selectedIndex].text;
-    cityData[slot]={name:name,tz:tz};
-
-    // Update HTML
-    var cityEl=document.getElementById('city-'+slot);
-    cityEl.querySelector('.clock-city-name').textContent=name;
-    cityEl.querySelector('.flip-clock').setAttribute('data-tz',tz);
-
-    // Update slot label
-    var slotSel=document.getElementById('replaceSlot');
-    slotSel.options[slot].text='Slot '+(slot+1)+' ('+name+')';
-
+  window.resetClocks=function(){
+    var defaults=[
+      {name:'Tokyo',tz:'Asia/Tokyo'},
+      {name:'New York',tz:'America/New_York'},
+      {name:'London',tz:'Europe/London'},
+      {name:'Dubai',tz:'Asia/Dubai'},
+      {name:'Sydney',tz:'Australia/Sydney'}
+    ];
+    for(var i=0;i<defaults.length;i++){
+      cityData[i]=defaults[i];
+      var cityEl=document.getElementById('city-'+i);
+      if(cityEl){
+        cityEl.querySelector('.clock-city-name').textContent=defaults[i].name;
+        cityEl.querySelector('.flip-clock').setAttribute('data-tz',defaults[i].tz);
+      }
+      var slotSel=document.getElementById('replaceSlot');
+      if(slotSel&&slotSel.options[i]) slotSel.options[i].text='Slot '+(i+1)+' ('+defaults[i].name+')';
+    }
     prevValues={};
     try{localStorage.setItem('meridiClockCities',JSON.stringify(cityData));}catch(e){}
   };
