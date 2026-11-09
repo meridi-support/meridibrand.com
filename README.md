@@ -23,7 +23,7 @@ Every tool is a vessel. What you fill it with is up to you.
 
 | Tool | Description | Price | Live Demo |
 |------|-------------|-------|-----------|
-| 🐾🪄 **MeridiLingo** | 450 expressions — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
+| 🐾🪄 **MeridiLingo** | 560 expressions — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 💻 **MeridiSync** | High-speed snippet manager for Windows | $8 / ¥1,000 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
 | 🎮 **MeridiPlay** | Fun & Games Collection | Coming Soon | — |
