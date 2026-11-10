@@ -25,11 +25,11 @@ Every tool is a vessel. What you fill it with is up to you.
 |------|-------------|-------|-----------|
 | 🐾🪄 **MeridiLingo** | 560 expressions — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
-| 💻 **MeridiSync** | High-speed snippet manager for Windows | $8 / ¥1,000 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
+| 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| 💻 **MeridiSync** | High-speed snippet manager for Windows | \$8 / ¥1,000 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
 | 🎮 **MeridiPlay** | Fun & Games Collection | Coming Soon | — |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
-| 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
 
 ---
 
