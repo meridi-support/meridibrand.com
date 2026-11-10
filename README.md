@@ -29,6 +29,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | 🎮 **MeridiPlay** | Fun & Games Collection | Coming Soon | — |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
+| 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
 
 ---
 
