@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — 丁半 Cho-Han v5</title>
+<style>
+:root{--g:#39ff14;--cho:#ff4a6a;--han:#4a9aff;--gold:#e8c26a;--wood:#2a170b;--E:cubic-bezier(.22,1,.36,1);
+  --mincho:'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif JP','MS PMincho',serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;color:#eadfca;font-family:var(--mincho);overflow-x:hidden;
+  background:#0a0604}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(ellipse at 18% 8%,#ffb35a22,transparent 28%),
+   radial-gradient(ellipse at 82% 8%,#ffb35a22,transparent 28%),
+   linear-gradient(#1a0f08 0%,#120a05 38%,#0b0704 100%)}
+body::after{content:'';position:fixed;left:0;right:0;bottom:0;height:44vh;z-index:0;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(90deg,#2f2a14 0 2px,#25210f 2px 5px),linear-gradient(#0000,#000a);
+  -webkit-mask-image:linear-gradient(transparent,#000 40%);mask-image:linear-gradient(transparent,#000 40%)}
+
+header{position:relative;z-index:5;display:flex;align-items:center;gap:7px;padding:12px 20px;border-bottom:1px solid #39ff1422;flex-wrap:wrap;background:#0008}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:12px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+.brand span{font-size:14px;letter-spacing:6px;color:#e8d7b5}
+.tg{background:#000a;color:#d9cfb6;border:1px solid #39ff1440;border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--g);color:var(--g)}
+.tg.on{background:#39ff141c;border-color:var(--g);color:var(--g);box-shadow:0 0 8px #39ff1440}
+
+.wrap{position:relative;z-index:2;max-width:1040px;margin:0 auto;padding:10px 16px 30px}
+/* ===== SCENE ===== */
+.scene{position:relative;height:500px;perspective:1050px;perspective-origin:50% 18%;overflow:hidden;border-radius:16px;
+  background:radial-gradient(ellipse at 50% 40%,#3a2412 0%,#1c0f07 55%,#0b0603 100%);box-shadow:inset 0 0 80px #000c}
+.lamp{position:absolute;top:-30px;width:260px;height:260px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#ffbf6a30,#ffbf6a0a 45%,transparent 70%);animation:breathe 6s ease-in-out infinite}
+.lamp.l{left:6%}.lamp.r{right:6%;animation-delay:-3s}
+@keyframes breathe{0%,100%{opacity:.85}50%{opacity:1}}
+.chochin{position:absolute;top:14px;width:46px;height:64px;border-radius:45%;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 40% 40%,#ffe2a8,#e7892f 60%,#a8441a);box-shadow:0 0 30px #ff9a3c66;
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#5a1a0a;font-weight:700}
+.chochin::before,.chochin::after{content:'';position:absolute;left:12px;right:12px;height:6px;background:#1a0c05;border-radius:2px}
+.chochin::before{top:-4px}.chochin::after{bottom:-4px}
+.chochin.l{left:9%}.chochin.r{right:9%}
+.cam{position:absolute;inset:0;transform-style:preserve-3d}
+.world{position:absolute;left:50%;top:0;width:0;height:0;transform-style:preserve-3d;transform:translateY(330px) rotateX(46deg)}
+.tatami{position:absolute;left:-560px;top:-420px;width:1120px;height:840px;
+  background:repeating-linear-gradient(0deg,#5a5428 0 2px,#4a4520 2px 5px);
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 35%,transparent 70%);mask-image:radial-gradient(ellipse at center,#000 35%,transparent 70%);opacity:.55}
+.mat{position:absolute;left:-360px;top:-200px;width:720px;height:400px;border-radius:10px;
+  background:radial-gradient(ellipse at 50% 45%,#f4efe3 0%,#e6dfcf 60%,#cfc6b2 100%);
+  box-shadow:0 0 0 6px #6b1d16,0 0 0 9px #2a0d08,0 30px 60px #000c}
+.mat::before{content:'';position:absolute;inset:14px;border:1px solid #6b1d1633;border-radius:6px}
+.mat .mk{position:absolute;top:50%;font-weight:700;font-size:92px;color:#6b1d160e;transform:translateY(-50%)}
+.mat .mk.c{left:60px}.mat .mk.h{right:60px}
+.shd{position:absolute;border-radius:50%;background:radial-gradient(ellipse,#000a 0%,#0005 45%,transparent 70%);will-change:transform,opacity}
+.dsh{left:-34px;top:-34px;width:68px;height:68px}
+.csh{left:-96px;top:-60px;width:192px;height:120px}
+.d3{position:absolute;left:-23px;top:-23px;width:46px;height:46px;transform-style:preserve-3d;will-change:transform}
+.fc{position:absolute;inset:0;border-radius:7px;background:radial-gradient(circle at 35% 30%,#fffdf7,#efe9dc 70%,#d9d0bd);
+  box-shadow:inset 0 0 0 1px #0000001a,inset 0 0 6px #00000022;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:6px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fc{box-shadow:inset 0 0 0 1px #00000022,inset 2px 2px 3px #ffffffcc,inset -4px -4px 8px #00000038}
+.lit{position:absolute;inset:0;border-radius:7px;pointer-events:none;background:#000;opacity:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cr{position:absolute;inset:1px;background:#d9cfb9;backface-visibility:visible}
+.fc i{display:block;width:9px;height:9px;margin:auto;border-radius:50%;background:radial-gradient(circle at 40% 35%,#3a3a3a,#000);box-shadow:inset 0 1px 1px #000}
+.fc i.o{visibility:hidden}
+.fc.f1 i.p{width:17px;height:17px;background:radial-gradient(circle at 40% 35%,#ff5a4a,#a50d0d)}
+.f1{transform:translateZ(23px)}.f6{transform:rotateY(180deg) translateZ(23px)}
+.f2{transform:rotateY(90deg) translateZ(23px)}.f5{transform:rotateY(-90deg) translateZ(23px)}
+.f3{transform:rotateX(90deg) translateZ(23px)}.f4{transform:rotateX(-90deg) translateZ(23px)}
+.cup{position:absolute;left:-80px;top:-170px;width:160px;height:170px;transform-origin:50% 100%;will-change:transform;filter:drop-shadow(0 6px 10px #000a)}
+.cup svg{width:100%;height:100%;display:block;overflow:visible}
+.cup .mouth{transition:opacity .2s}
+
+.hud{position:absolute;left:0;right:0;top:20px;text-align:center;pointer-events:none;z-index:3}
+.res{font-size:58px;font-weight:700;letter-spacing:10px;opacity:0;transform:translateY(12px) scale(.96);transition:opacity .6s,transform .9s var(--E)}
+.res.show{opacity:1;transform:none}
+.res.C{color:var(--cho);text-shadow:0 0 30px #ff4a6a77,0 3px 0 #000}
+.res.Hn{color:var(--han);text-shadow:0 0 30px #4a9aff77,0 3px 0 #000}
+.res.Z{color:var(--gold);text-shadow:0 0 34px #e8c26aaa,0 3px 0 #000}
+.resSub{font:15px 'Courier New',monospace;letter-spacing:4px;margin-top:8px;opacity:0;transition:opacity .6s .2s;color:#e8dcc0}
+.resSub.show{opacity:1}
+.call{position:absolute;left:50%;bottom:18px;transform:translate(-50%,8px);z-index:4;background:#0b0604ee;border:1px solid #e8c26a66;color:#f3e6c8;
+  border-radius:24px;padding:9px 26px;font-size:18px;letter-spacing:5px;opacity:0;transition:opacity .45s,transform .6s var(--E);white-space:nowrap;pointer-events:none}
+.call.show{opacity:1;transform:translate(-50%,0)}
+
+/* ===== PANEL ===== */
+.panel{display:grid;grid-template-columns:1fr 330px 1fr;gap:14px;margin-top:14px;align-items:stretch}
+@media(max-width:860px){.panel{grid-template-columns:1fr 1fr}.mid{grid-column:1/-1;order:-1}}
+.zone{position:relative;border:2px solid #ffffff1a;border-radius:14px;padding:12px 14px;min-height:178px;cursor:pointer;transition:all .45s var(--E);background:#0007;display:flex;flex-direction:column;align-items:center}
+.zone .k{font-size:64px;font-weight:700;line-height:1;transition:text-shadow .4s}
+.zone .e{font:11px 'Courier New',monospace;letter-spacing:3px;opacity:.65;margin-top:4px}
+.zone .amt{font:bold 18px 'Courier New',monospace;margin-top:8px;color:#fff;min-height:22px}
+.zone .tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px;min-height:26px}
+.zone .tot{font:11px 'Courier New',monospace;opacity:.6;margin-top:auto;padding-top:6px}
+#zC .k{color:var(--cho)}#zH .k{color:var(--han)}
+#zC.sel{border-color:var(--cho);box-shadow:0 0 24px #ff4a6a44,inset 0 0 30px #ff4a6a18}
+#zH.sel{border-color:var(--han);box-shadow:0 0 24px #4a9aff44,inset 0 0 30px #4a9aff18}
+#zC.sel .k{text-shadow:0 0 22px #ff4a6aaa}#zH.sel .k{text-shadow:0 0 22px #4a9affaa}
+.zone.win{animation:zwin 1.6s var(--E)}
+@keyframes zwin{0%{transform:scale(1)}20%{transform:scale(1.04)}100%{transform:scale(1)}}
+.zone.off{opacity:.5;cursor:default}
+.tag{font-size:12px;padding:3px 8px;border-radius:4px;background:linear-gradient(#e9d2a0,#bf9a5a);color:#2a170b;font-weight:700;box-shadow:0 2px 4px #0008;animation:tagIn .45s var(--E)}
+.tag.me{background:linear-gradient(#b8ffb0,#39c42a);color:#062a02}
+.tag.house{background:linear-gradient(#ddd,#999)}
+@keyframes tagIn{from{opacity:0;transform:translateY(-14px) scale(.8)}to{opacity:1;transform:none}}
+.mid{display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;border:1px solid #39ff1422;border-radius:14px;padding:12px;background:#0007}
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.btn{border:1px solid #e8c26a88;background:linear-gradient(#3a2412,#1c0f07);color:#f3e6c8;border-radius:24px;padding:11px 22px;font:16px var(--mincho);letter-spacing:4px;cursor:pointer;transition:all .35s var(--E)}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 18px #000a,0 0 14px #e8c26a44}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.main{font-size:20px;padding:13px 34px;border-color:var(--g);color:#fff;box-shadow:0 0 14px #39ff1433}
+.btn.sm{font-size:13px;padding:8px 14px;letter-spacing:2px}
+.btn.hide{display:none}
+.rack{display:flex;gap:7px;align-items:center}
+.koma{width:46px;height:62px;border-radius:5px;background:linear-gradient(90deg,#c9a463,#f1dcaa 45%,#b58f50);border:1px solid #6b4a1e;color:#3a1d08;
+  font-weight:700;font-size:12px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;letter-spacing:1px;cursor:pointer;box-shadow:0 3px 8px #000a;transition:transform .25s var(--E),opacity .3s;user-select:none}
+.koma::before{content:'';position:absolute}
+.koma:hover{transform:translateY(-4px)}
+.koma.off{opacity:.25;pointer-events:none}
+.koma[data-v="5000"]{background:linear-gradient(90deg,#6b1d16,#b23a2a 45%,#5a140f);color:#ffe9c2;border-color:#2a0806}
+.bank{font:bold 22px 'Courier New',monospace;color:var(--gold);text-shadow:0 0 10px #e8c26a44}
+.bank small{display:block;font:10px 'Courier New',monospace;letter-spacing:3px;color:#ffffff77;text-align:center}
+.msg{font-size:13px;letter-spacing:2px;color:#d8ccb0;min-height:20px;text-align:center}
+.npcs{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.npc{display:flex;align-items:center;gap:8px;border:1px solid #ffffff18;border-radius:20px;padding:5px 12px 5px 5px;background:#0006;font-size:13px}
+.npc .mon{width:28px;height:28px;border-radius:50%;border:1.5px solid #e8c26a99;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);background:#1c0f07}
+.npc b{font:bold 12px 'Courier New',monospace;color:var(--gold)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.seq{display:flex;gap:4px;flex-wrap:wrap}
+.seq i{font-style:normal;width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.seq i.C{background:#ff4a6a26;color:var(--cho);border:1px solid #ff4a6a55}
+.seq i.H{background:#4a9aff26;color:var(--han);border:1px solid #4a9aff55}
+.seq i.Z{box-shadow:0 0 8px #e8c26a88}
+.seq i.new{animation:tagIn .5s var(--E)}
+.quick{font:12px 'Courier New',monospace;color:#cfc4a8;text-align:right}
+.hint{text-align:center;font:11px 'Courier New',monospace;opacity:.5;margin-top:12px;letter-spacing:1px}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;z-index:40;background:#000c;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal.show{opacity:1;pointer-events:auto}
+.mbox{width:min(680px,94vw);max-height:90vh;overflow:auto;background:linear-gradient(#170d06,#0b0603);border:1px solid #e8c26a66;border-radius:14px;padding:22px 24px;box-shadow:0 0 40px #000;transform:translateY(12px);transition:transform .6s var(--E)}
+.modal.show .mbox{transform:none}
+.mbox h2{font-size:20px;letter-spacing:8px;color:var(--gold);text-align:center;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid #e8c26a33;border-radius:10px;padding:9px 6px;text-align:center}
+.kpi b{display:block;font:bold 20px 'Courier New',monospace;color:#fff}
+.kpi span{font-size:11px;letter-spacing:1px;opacity:.65}
+.sub2{font-size:13px;letter-spacing:4px;color:var(--gold);margin:18px 0 6px}
+#histo,#bankG{width:100%;display:block}
+#histo text,#bankG text{fill:#ffffff88;font:10px 'Courier New',monospace}
+#bankG .ln{fill:none;stroke:var(--g);stroke-width:1.8;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.zoros{display:flex;gap:8px;justify-content:center}
+.zoros span{border:1px solid #e8c26a33;border-radius:8px;padding:6px 10px;font-size:12px;text-align:center;opacity:.4}
+.zoros span.got{opacity:1;border-color:var(--gold);color:var(--gold)}
+.zoros span b{display:block;font:bold 15px 'Courier New',monospace}
+.achs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ach{font-size:12px;border:1px solid #ffffff18;border-radius:8px;padding:6px 9px;opacity:.35;filter:grayscale(1)}
+.ach.got{opacity:1;filter:none;border-color:#e8c26a88}
+.note{font-size:11px;opacity:.6;line-height:1.7;margin-top:6px}
+.mrow{display:flex;justify-content:space-between;margin-top:18px}
+.toasts{position:fixed;right:16px;top:64px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#0b0604ee;border:1px solid var(--gold);border-radius:12px;padding:9px 14px;font-size:13px;letter-spacing:1px;box-shadow:0 0 16px #e8c26a33;animation:tin .6s var(--E) both;max-width:320px}
+.toast.out{animation:tout .5s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateX(30px)}}
+#fxc{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span>丁 半 · v5</span></div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tVoice"></button>
+  <button class="tg" id="tMode"></button>
+  <button class="tg" id="tTera"></button>
+  <button class="tg" id="tSpeed">⏩ x1</button>
+  <button class="tg" id="tStats">📊</button>
+</header>
+
+<div class="wrap">
+  <div class="scene" id="scene">
+    <div class="lamp l"></div><div class="lamp r"></div>
+    <div class="chochin l">丁</div><div class="chochin r">半</div>
+    <div class="cam" id="cam"><div class="world" id="world">
+      <div class="tatami"></div>
+      <div class="mat"><span class="mk c">丁</span><span class="mk h">半</span></div>
+      <div class="shd csh" id="csh"></div>
+      <div class="shd dsh" id="ds0"></div><div class="shd dsh" id="ds1"></div>
+      <div class="d3" id="d0"></div><div class="d3" id="d1"></div>
+      <div class="cup" id="cup">
+        <svg viewBox="0 0 160 170" aria-hidden="true">
+          <defs>
+            <linearGradient id="rat" x1="0" x2="1"><stop offset="0" stop-color="#3a1f0c"/><stop offset=".35" stop-color="#8a5a2a"/><stop offset=".55" stop-color="#a87238"/><stop offset="1" stop-color="#3a1f0c"/></linearGradient>
+            <linearGradient id="lac" x1="0" x2="1"><stop offset="0" stop-color="#1a0605"/><stop offset=".5" stop-color="#6b1d16"/><stop offset="1" stop-color="#1a0605"/></linearGradient>
+            <clipPath id="cupClip"><path d="M8 168 L22 42 Q30 6 80 4 Q130 6 138 42 L152 168 Z"/></clipPath>
+          </defs>
+          <path d="M8 168 L22 42 Q30 6 80 4 Q130 6 138 42 L152 168 Z" fill="url(#rat)"/>
+          <g clip-path="url(#cupClip)" fill="none" stroke="#2a1405" stroke-opacity=".55">
+            <path d="M0 30 Q80 40 160 30" stroke-width="1.2"/><path d="M0 52 Q80 62 160 52"/><path d="M0 74 Q80 84 160 74"/><path d="M0 96 Q80 106 160 96"/><path d="M0 118 Q80 128 160 118"/><path d="M0 140 Q80 150 160 140"/>
+            <g stroke-opacity=".3"><path d="M40 0 L30 170"/><path d="M60 0 L56 170"/><path d="M80 0 L80 170"/><path d="M100 0 L104 170"/><path d="M120 0 L130 170"/></g>
+          </g>
+          <path d="M30 40 Q36 14 70 10" stroke="#f2c98a" stroke-opacity=".35" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M10 150 L150 150 L152 168 L8 168 Z" fill="url(#lac)"/>
+          <path d="M10 150 L150 150" stroke="#e8c26a" stroke-opacity=".6"/>
+          <ellipse class="mouth" id="mouth" cx="80" cy="168" rx="72" ry="11" fill="#0a0503" stroke="#6b1d16" stroke-width="2" opacity="0"/>
+        </svg>
+      </div>
+    </div></div>
+    <div class="hud"><div class="res" id="res"></div><div class="resSub" id="resSub"></div></div>
+    <div class="call" id="call"></div>
+  </div>
+
+  <div class="panel">
+    <div class="zone" id="zC" data-s="C"><div class="k">丁</div><div class="e" id="eC"></div><div class="amt" id="aC"></div><div class="tags" id="tagC"></div><div class="tot" id="totC"></div></div>
+    <div class="mid">
+      <div class="btns">
+        <button class="btn main" id="bMain"></button>
+        <button class="btn sm" id="bKen"></button>
+        <button class="btn sm" id="bClear"></button>
+        <button class="btn sm hide" id="bReset"></button>
+      </div>
+      <div class="rack" id="rack">
+        <div class="koma" data-v="100">百</div><div class="koma" data-v="500">五百</div>
+        <div class="koma" data-v="1000">千</div><div class="koma" data-v="5000">五千</div>
+        <div class="bank"><small id="bankL"></small><span id="bank">10,000</span></div>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+    <div class="zone" id="zH" data-s="H"><div class="k">半</div><div class="e" id="eH"></div><div class="amt" id="aH"></div><div class="tags" id="tagH"></div><div class="tot" id="totH"></div></div>
+  </div>
+  <div class="npcs" id="npcs"></div>
+  <div class="foot"><div class="seq" id="seq"></div><div class="quick" id="quick"></div></div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox">
+  <h2 id="mT"></h2>
+  <div class="kpis" id="kpis"></div>
+  <div class="sub2" id="sHisto"></div>
+  <svg id="histo" viewBox="0 0 600 190"></svg>
+  <div class="note" id="nHisto"></div>
+  <div class="sub2" id="sZoro"></div>
+  <div class="zoros" id="zoros"></div>
+  <div class="sub2" id="sBank"></div>
+  <svg id="bankG" viewBox="0 0 600 160"></svg>
+  <div class="sub2" id="sAch"></div>
+  <div class="achs" id="achs"></div>
+  <div class="mrow"><button class="tg" id="mReset"></button><button class="tg on" id="mClose">OK</button></div>
+</div></div>
+<div class="toasts" id="toasts"></div>
+<canvas id="fxc"></canvas>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const H = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const ri = n => Math.floor(rnd() * n);
+const pick = a => a[ri(a.length)];
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const fmt = n => Math.round(n).toLocaleString();
+
+/* ================= SAVE ================= */
+const LS = 'meridiplay_chohan_v5', START = 10000, NPC_START = 30000;
+const fresh = () => ({ seq: [], sum: Array(13).fill(0), zoro: Array(7).fill(0), cho: 0, han: 0, run: { f: null, n: 0 }, best: { f: null, n: 0 },
+  bets: 0, wins: 0, loss: 0, winRun: 0, bestRun: 0, bank: START, peak: START, bankHist: [START], npc: [NPC_START, NPC_START, NPC_START], ach: {} });
+let D = Object.assign({ lang: 'ja', sound: true, voice: false, mode: 'bet', tera: true, speed: 1 }, fresh());
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+const SP = () => D.speed;
+
+/* ================= DICE NAMES ================= */
+const PAIR = { '1-2':['ピンニ','Pin-ni'], '1-3':['ピンサン','Pin-san'], '1-4':['ヨイチ','Yoichi'], '1-5':['グイチ','Gu-ichi'], '1-6':['ピンロク','Pin-roku'],
+  '2-3':['ニサン','Ni-san'], '2-4':['シニ','Shi-ni'], '2-5':['グニ','Gu-ni'], '2-6':['ニロク','Ni-roku'], '3-4':['シソウ','Shisō'], '3-5':['グサン','Gu-san'],
+  '3-6':['サブロク','Saburoku'], '4-5':['グシ','Gu-shi'], '4-6':['シロク','Shi-roku'], '5-6':['ゴロク','Go-roku'] };
+const ZORO = [null, ['ピンゾロ','Pinzoro'], ['ニゾロ','Nizoro'], ['サンゾロ','Sanzoro'], ['シゾロ','Shizoro'], ['グゾロ','Guzoro'], ['ロクゾロ','Rokuzoro']];
+function rollName(a, b){
+  const J = D.lang === 'ja' ? 0 : 1, even = (a + b) % 2 === 0;
+  const nm = a === b ? ZORO[a][J] : PAIR[Math.min(a, b) + '-' + Math.max(a, b)][J];
+  return J === 0 ? `${nm}の${even ? '丁' : '半'}` : `${nm} no ${even ? 'Chō' : 'Han'}`;
+}
+
+/* ================= I18N ================= */
+const UI = {
+  ja: {
+    roll:'振る', shobu:'勝負', ken:'見（ケン）', clear:'駒を戻す', reset:'駒を借りる', bankL:'手 駒',
+    eC:'偶数 · EVEN', eH:'奇数 · ODD', voice:v=>'🗣 声 '+(v?'ON':'OFF'), mode:m=>m==='bet'?'🎴 賭場':'🎲 振るだけ', tera:t=>'寺銭 '+(t?'5%':'なし'),
+    msgIdle:'「振る」で壺が入ります（Space）', msgBet:'丁か半か選び、駒札を張ってください', msgQuick:'Space で振ります',
+    needSide:'先に丁か半を選んでください', noMoney:'手駒が足りません', broke:'手駒が尽きました。「駒を借りる」で 10,000 から再開',
+    hint:'Space＝振る／勝負 ・ C＝丁 ・ H＝半 ・ 1〜4＝駒札 ・ K＝見 ・ X＝戻す ・ S＝記録',
+    quick:(n,c,h)=>`${n} 回 ｜ 丁 ${c}% ｜ 半 ${h}%`, tot:n=>`合計 ${fmt(n)}`,
+    calls:{ in:['入ります','壺、入ります'], bet:['さぁ、張った張った！','どちらさんも、張った張った！'], choNai:['丁方ないか！ 丁方ないか！'], hanNai:['半方ないか！ 半方ないか！'],
+      fill:n=>`${n}、受けます`, house:'胴元が受けます', soroi:['丁半、駒揃いました'], shobu:['勝負！'], ken:['見でございますね'],
+      zoro:['ゾロ目でございます！'], ikasama:['……お客さん、今日はやけにツイてますねぇ'] },
+    house:'胴元', npc:['熊五郎','八五郎','ご隠居'], mon:['熊','八','隠'],
+    win:n=>`勝ち ＋${fmt(n)}`, lose:n=>`負け −${fmt(n)}`, kenR:'見',
+    mT:'丁 半 帳', k:['振った回数','丁','半','ゾロ目','勝負','勝ち','最長連勝','最高手駒'],
+    sHisto:'出目の合計（実際 ▮ と 理論値 ─）', nHisto:'2 個のサイコロの合計は 7 が最も出やすく（6/36）、2 と 12 は出にくい（1/36）。それでも丁と半はちょうど五分五分です。',
+    sZoro:'ゾロ目', sBank:'手駒の推移', sAch:'実績', mReset:'⟲ 帳面を清める', confirm:'記録と手駒をすべてリセットしますか？',
+    achGot:'実績解除：', ach:{ first:'🎴 初勝負', win5:'🔥 五連勝', pin:'🔴 ピンゾロ', roku:'⚅ ロクゾロ', allzoro:'🎲 ゾロ目六種制覇', big:'💴 五千の大勝負',
+      rich:'💰 手駒五万', r100:'💯 百回振った', broke:'🍂 一文無し', sakura:'🌸 桜吹雪', ikasama:'🤫 イカサマ' },
+    sakura:'「この桜吹雪、見忘れたとは言わせねぇぜ！」', ikasama:'……次の一振り、何かが起こるかもしれません'
+  },
+  en: {
+    roll:'ROLL', shobu:'SHŌBU!', ken:'Watch', clear:'Take back', reset:'Borrow tiles', bankL:'YOUR TILES',
+    eC:'CHŌ · EVEN', eH:'HAN · ODD', voice:v=>'🗣 Voice '+(v?'ON':'OFF'), mode:m=>m==='bet'?'🎴 Gambling hall':'🎲 Roll only', tera:t=>'House cut '+(t?'5%':'off'),
+    msgIdle:'Press ROLL — the dealer puts the dice in (Space)', msgBet:'Pick Chō or Han, then place your tiles', msgQuick:'Press Space to roll',
+    needSide:'Pick Chō (even) or Han (odd) first', noMoney:'Not enough tiles', broke:'Out of tiles. Press "Borrow tiles" to restart at 10,000',
+    hint:'Space = Roll / Shōbu · C = Chō · H = Han · 1-4 = tiles · K = watch · X = take back · S = records',
+    quick:(n,c,h)=>`${n} rolls | Chō ${c}% | Han ${h}%`, tot:n=>`Total ${fmt(n)}`,
+    calls:{ in:['Dice going in!','Into the cup!'], bet:['Place your bets!','Chō or Han — place your bets!'], choNai:['Need more on Chō!'], hanNai:['Need more on Han!'],
+      fill:n=>`${n} takes it`, house:'The house takes it', soroi:['Bets are matched!'], shobu:['Shōbu!'], ken:['Just watching, then.'],
+      zoro:['Doubles!'], ikasama:['…You sure are lucky today, friend.'] },
+    house:'House', npc:['Kumagorō','Hachigorō','Goinkyo'], mon:['熊','八','隠'],
+    win:n=>`Win +${fmt(n)}`, lose:n=>`Lose −${fmt(n)}`, kenR:'Watched',
+    mT:'CHŌ-HAN RECORDS', k:['Rolls','Chō','Han','Doubles','Bets','Wins','Best streak','Peak tiles'],
+    sHisto:'Sum of the dice (actual ▮ vs theory ─)', nHisto:'With two dice, 7 is the most common sum (6/36) and 2 or 12 the rarest (1/36). Yet Chō and Han are exactly 50/50.',
+    sZoro:'Doubles', sBank:'Tiles over time', sAch:'Achievements', mReset:'⟲ Reset records', confirm:'Reset all records and tiles?',
+    achGot:'Achievement: ', ach:{ first:'🎴 First bet', win5:'🔥 5 wins in a row', pin:'🔴 Pinzoro', roku:'⚅ Rokuzoro', allzoro:'🎲 All six doubles', big:'💴 5,000-tile bet',
+      rich:'💰 50,000 tiles', r100:'💯 100 rolls', broke:'🍂 Broke', sakura:'🌸 Cherry blossoms', ikasama:'🤫 Loaded dice' },
+    sakura:'"Have you forgotten these cherry blossoms?"', ikasama:'…Something may happen on the next roll.'
+  }
+};
+const T = (k, ...a) => { const v = UI[D.lang][k]; return typeof v === 'function' ? v(...a) : v; };
+const C = k => UI[D.lang].calls[k];
+
+/* ================= SOUND & VOICE ================= */
+let AC = null, master = null;
+function ac(){
+  if (!AC){
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    master = AC.createGain(); master.gain.value = .9; master.connect(AC.destination);
+    const conv = AC.createConvolver(), len = AC.sampleRate * 1.8, ir = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++){ const ch = ir.getChannelData(c); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.4); }
+    conv.buffer = ir; const wet = AC.createGain(); wet.gain.value = .25; master.connect(conv); conv.connect(wet); wet.connect(AC.destination);
+  }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(f, t, d, v, type = 'sine', f2){
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05);
+}
+function noise(t, d, v, type, f, q = 1){
+  const len = Math.max(1, Math.floor(AC.sampleRate * d)), b = AC.createBuffer(1, len, AC.sampleRate), ch = b.getChannelData(0);
+  for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+  const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = b; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = v;
+  s.connect(fl); fl.connect(g); g.connect(master); s.start(t);
+}
+const YO = [293.66, 329.63, 392, 440, 493.88, 587.33, 659.25, 783.99];
+function sfx(k){
+  if (!D.sound) return;
+  try {
+    const t = ac().currentTime;
+    if (k === 'clack'){ noise(t, .03, .4, 'bandpass', 2200 + rnd() * 900, 5); tone(700 + rnd() * 300, t, .07, .03, 'triangle'); }
+    else if (k === 'drop'){ for (let i = 0; i < 4; i++){ noise(t + i * .06 + rnd() * .03, .03, .3 - i * .05, 'bandpass', 1500 + rnd() * 800, 4); tone(500 + rnd() * 200, t + i * .06, .08, .02, 'triangle'); } }
+    else if (k === 'thud'){ tone(110, t, .5, .5, 'sine', 42); noise(t, .12, .5, 'lowpass', 380); noise(t + .01, .05, .2, 'bandpass', 1200, 3); }
+    else if (k === 'rattle'){ noise(t, .025, .12, 'bandpass', 1100 + rnd() * 500, 3); }
+    else if (k === 'swish'){ noise(t, .45, .1, 'lowpass', 900); }
+    else if (k === 'lift'){ noise(t, .3, .07, 'bandpass', 1600, 1.2); }
+    else if (k === 'koma'){ noise(t, .025, .35, 'bandpass', 1700, 6); tone(1250, t, .06, .025, 'triangle'); }
+    else if (k === 'win') [3, 4, 5, 7].forEach((n, i) => tone(YO[n], t + i * .1, .9, .045, 'triangle'));
+    else if (k === 'lose'){ tone(YO[2], t, .5, .035); tone(YO[0], t + .18, .7, .035); }
+    else if (k === 'taiko'){ tone(95, t, .9, .55, 'sine', 45); noise(t, .1, .3, 'lowpass', 280); tone(95, t + .32, .7, .35, 'sine', 45); }
+    else if (k === 'zoro'){ sfx('taiko'); [0, 2, 3, 5, 7].forEach((n, i) => tone(YO[n], t + .5 + i * .09, 1.2, .04, 'triangle')); }
+    else if (k === 'call') tone(YO[3], t, .12, .01);
+  } catch(e){}
+}
+function speak(txt){
+  if (!D.voice || !window.speechSynthesis) return;
+  try { const u = new SpeechSynthesisUtterance(txt); u.lang = D.lang === 'ja' ? 'ja-JP' : 'en-US'; u.rate = D.lang === 'ja' ? .95 : 1; u.pitch = .7; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){}
+}
+let callT = null;
+function say(txt){
+  if (Array.isArray(txt)) txt = pick(txt);
+  const el = $('call'); el.textContent = D.lang === 'ja' ? '「' + txt + '」' : '"' + txt + '"';
+  el.classList.add('show'); clearTimeout(callT); callT = setTimeout(() => el.classList.remove('show'), 2600 / SP());
+  speak(txt);
+}
+
+/* ================= TWEEN ================= */
+const easeIO = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIn = k => k * k * k;
+const lerp = (a, b, k) => a + (b - a) * k;
+const wait = ms => new Promise(r => setTimeout(r, ms / SP()));
+function tween(ms, fn, ease = easeIO){
+  return new Promise(res => {
+    const dur = ms / SP(), t0 = performance.now();
+    const f = now => { const k = Math.min(1, (now - t0) / dur); fn(ease(k), k); if (k < 1) requestAnimationFrame(f); else res(); };
+    requestAnimationFrame(f);
+  });
+}
+
+/* ================= BUILD DICE ================= */
+const LAY = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const ORI_IN = { 1: 'translateZ(21.5px)', 6: 'rotateY(180deg) translateZ(21.5px)', 2: 'rotateY(90deg) translateZ(21.5px)', 5: 'rotateY(-90deg) translateZ(21.5px)', 3: 'rotateX(90deg) translateZ(21.5px)', 4: 'rotateX(-90deg) translateZ(21.5px)' };
+const ORI = { 1: '', 6: 'rotateY(180deg)', 2: 'rotateY(-90deg)', 5: 'rotateY(90deg)', 3: 'rotateX(-90deg)', 4: 'rotateX(90deg)' };
+function buildDie(el){
+  for (let v = 1; v <= 6; v++){
+    const cr = H('div', 'cr'); cr.style.transform = ORI_IN[v]; el.append(cr);
+    const f = H('div', 'fc f' + v);
+    for (let c = 0; c < 9; c++) f.append(H('i', LAY[v].includes(c) ? 'p' : 'o'));
+    f.append(H('div', 'lit'));
+    el.append(f);
+  }
+}
+const dice = [0, 1].map(i => { const el = $('d' + i); buildDie(el); return { el, sh: $('ds' + i), x: i ? 34 : -34, y: 0, z: 0, yaw: (i ? 1 : -1) * (24 + ri(12)), v: i + 1, rx: 0, ry: 0, op: 1 }; });
+const cup = { el: $('cup'), sh: $('csh'), x: 300, y: -120, z: 0, r: 0, tilt: 0 };
+function render(){
+  dice.forEach(d => {
+    d.el.style.transform = `translate3d(${d.x.toFixed(1)}px,${d.y.toFixed(1)}px,${(d.z + 23).toFixed(1)}px) rotateZ(${d.yaw.toFixed(1)}deg) rotateX(${d.rx.toFixed(1)}deg) rotateY(${d.ry.toFixed(1)}deg) ${ORI[d.v]}`;
+    d.el.style.visibility = d.op > .5 ? 'visible' : 'hidden';
+    if (d.lastV !== d.v){ d.lastV = d.v;
+      const opp = { 1: 6, 6: 1, 2: 5, 5: 2, 3: 4, 4: 3 };
+      d.el.querySelectorAll('.fc').forEach(f => { const n = +f.className.match(/f(\d)/)[1]; f.querySelector('.lit').style.opacity = n === d.v ? 0 : n === opp[d.v] ? .6 : .34; });
+    }
+    const s = 1 / (1 + d.z / 160);
+    d.sh.style.transform = `translate3d(${d.x.toFixed(1)}px,${d.y.toFixed(1)}px,1px) scale(${s.toFixed(3)})`;
+    d.sh.style.opacity = (d.op * .9 * s).toFixed(3);
+  });
+  cup.el.style.transform = `translate3d(${cup.x.toFixed(1)}px,${cup.y.toFixed(1)}px,${cup.z.toFixed(1)}px) rotateX(-46deg) rotateX(${cup.tilt.toFixed(1)}deg) translateY(-85px) rotateZ(${cup.r.toFixed(1)}deg) translateY(85px)`;
+  $('mouth').style.opacity = Math.abs(cup.r) > 90 ? 1 : 0;
+  const s = 1 / (1 + cup.z / 220);
+  cup.sh.style.transform = `translate3d(${cup.x.toFixed(1)}px,${(cup.y - 18).toFixed(1)}px,1px) scale(${s.toFixed(3)})`;
+  cup.sh.style.opacity = (.85 * s).toFixed(3);
+}
+function loop(){ render(); requestAnimationFrame(loop); }
+
+/* ================= GAME STATE ================= */
+let phase = 'idle', vals = [1, 2], bet = { side: null, amt: 0 }, forced = null, wagers = [];
+const zoneEl = s => s === 'C' ? $('zC') : $('zH');
+
+async function ritual(){
+  hideRes();
+  vals = forced ? forced.slice() : [ri(6) + 1, ri(6) + 1];
+  const wasForced = !!forced; forced = null;
+  say(C('in'));
+  // 壺を宙へ（口を上に）＆ サイコロを客に見せる
+  const c0 = { ...cup }, d0 = dice.map(d => ({ ...d }));
+  sfx('swish');
+  await tween(950, k => {
+    cup.x = lerp(c0.x, 0, k); cup.y = lerp(c0.y, 40, k); cup.z = lerp(c0.z, 150, k) + Math.sin(k * Math.PI) * 40; cup.r = lerp(c0.r, 180, k);
+    dice.forEach((d, i) => { d.x = lerp(d0[i].x, i ? -150 : -230, k); d.y = lerp(d0[i].y, -30, k); d.z = lerp(d0[i].z, 130, k); d.rx = lerp(0, 360, k); d.ry = lerp(0, 180, k); d.op = 1; });
+  });
+  dice.forEach((d, i) => { d.v = i ? 4 : 3; d.rx = 0; d.ry = 0; });
+  await wait(450);
+  // サイコロを壺へ
+  for (let i = 0; i < 2; i++){
+    const d = dice[i], sx = d.x, sy = d.y, sz = d.z;
+    tween(620, k => { d.x = lerp(sx, 0, k); d.y = lerp(sy, -60, k); d.z = lerp(sz, 280, k) + Math.sin(k * Math.PI) * 90; d.rx = 540 * k; d.ry = 360 * k; d.op = k > .85 ? 1 - (k - .85) / .15 : 1; }, easeIO)
+      .then(() => { d.op = 0; sfx('drop'); });
+    await wait(180);
+  }
+  await wait(560);
+  // 伏せる
+  const c1 = { ...cup };
+  await tween(620, k => { cup.r = lerp(c1.r, 0, k); cup.z = lerp(c1.z, 0, easeIn(k)) + Math.sin(k * Math.PI) * 50; cup.y = lerp(c1.y, 28, k); }, k => k);
+  sfx('thud'); $('scene').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'translateY(-1px)' }, { transform: 'none' }], { duration: 260 / SP() });
+  // 中で転がす（盆の上を滑らせる）
+  sfx('swish');
+  const rat = setInterval(() => sfx('rattle'), 90 / SP());
+  await tween(1150, k => { cup.x = Math.sin(k * Math.PI * 4) * 34 * (1 - k); cup.y = 28 + Math.sin(k * Math.PI * 3) * 8 * (1 - k); });
+  clearInterval(rat); cup.x = 0; cup.y = 28;
+  // 伏せた下にサイコロを配置（見えない）
+  const yawA = (rnd() < .5 ? -1 : 1) * (18 + ri(22)), yawB = (rnd() < .5 ? -1 : 1) * (18 + ri(22));
+  Object.assign(dice[0], { x: -30 + rnd() * 10, y: -14 + rnd() * 12, z: 0, yaw: yawA, v: vals[0], rx: 0, ry: 0, op: 0 });
+  Object.assign(dice[1], { x: 28 + rnd() * 10, y: -10 + rnd() * 12, z: 0, yaw: yawB, v: vals[1], rx: 0, ry: 0, op: 0 });
+  return wasForced;
+}
+async function reveal(){
+  sfx('lift');
+  const c0 = { ...cup };
+  dice.forEach(d => d.op = 1);
+  await tween(700, k => { cup.z = lerp(c0.z, 230, k); cup.tilt = lerp(0, 18, k); }, easeOut);
+  await wait(250);
+  const c1 = { ...cup };
+  tween(800, k => { cup.x = lerp(c1.x, 300, k); cup.y = lerp(c1.y, -120, k); cup.z = lerp(c1.z, 0, k) + Math.sin(k * Math.PI) * 30; cup.tilt = lerp(c1.tilt, 0, k); });
+  const [a, b] = vals, sum = a + b, even = sum % 2 === 0, zoro = a === b;
+  const res = $('res');
+  res.className = 'res ' + (zoro ? 'Z' : even ? 'C' : 'Hn');
+  res.textContent = rollName(a, b);
+  requestAnimationFrame(() => res.classList.add('show'));
+  $('resSub').textContent = `${a} + ${b} = ${sum} · ${even ? (D.lang === 'ja' ? '丁（偶数）' : 'EVEN') : (D.lang === 'ja' ? '半（奇数）' : 'ODD')}`;
+  requestAnimationFrame(() => $('resSub').classList.add('show'));
+  speak(rollName(a, b));
+  if (zoro){ sfx('zoro'); if (a === 1) unlock('pin'); if (a === 6) unlock('roku'); }
+  record(a, b);
+  return { even, zoro };
+}
+function hideRes(){ $('res').classList.remove('show'); $('resSub').classList.remove('show'); }
+function record(a, b){
+  const f = (a + b) % 2 === 0 ? 'C' : 'H';
+  D.seq.push([a, b]); if (D.seq.length > 600) D.seq.shift();
+  D.sum[a + b]++; if (a === b) D.zoro[a]++;
+  if (f === 'C') D.cho++; else D.han++;
+  if (D.run.f === f) D.run.n++; else D.run = { f, n: 1 };
+  if (D.run.n > D.best.n) D.best = { ...D.run };
+  if (D.zoro.slice(1).every(n => n > 0)) unlock('allzoro');
+  if (D.cho + D.han >= 100) unlock('r100');
+  save(); updFoot(true);
+}
+
+/* ---------- flows ---------- */
+async function mainAction(){
+  if (phase === 'idle'){
+    if (D.mode === 'bet' && D.bank < 100){ msg(T('broke')); return; }
+    phase = 'ritual'; ui();
+    clearTags(); bet = { side: null, amt: 0 }; updZones();
+    const f = await ritual();
+    if (D.mode === 'quick'){
+      await wait(500); say(C('shobu')); await wait(500);
+      await reveal(); if (f) ikasamaLine();
+      phase = 'idle'; ui(); return;
+    }
+    phase = 'bet'; say(C('bet')); ui();
+    return;
+  }
+  if (phase === 'bet') return shobu(bet.amt <= 0);
+}
+async function shobu(isKen){
+  if (phase !== 'bet') return;
+  try { await shobuInner(isKen); }
+  catch(err){ console.error(err); dice.forEach(d => d.op = 1); cup.x = 300; cup.y = -120; cup.z = 0; cup.tilt = 0; cup.r = 0; phase = 'idle'; ui(); }
+}
+async function shobuInner(isKen){
+  if (!isKen && bet.amt <= 0) isKen = true;
+  if (isKen){ clearBet(); say(C('ken')); }
+  phase = 'match'; ui();
+  wagers = [];
+  if (!isKen){ wagers.push({ who: 'me', side: bet.side, amt: bet.amt }); D.bets++; unlock('first'); if (bet.amt >= 5000) unlock('big'); }
+  // 客が張る
+  const NB = [100, 200, 300, 500, 1000, 2000];
+  for (let i = 0; i < 3; i++){
+    if (D.npc[i] < 100) D.npc[i] = NPC_START;
+    const amt = Math.min(D.npc[i], pick(NB)), side = rnd() < .5 ? 'C' : 'H';
+    D.npc[i] -= amt; wagers.push({ who: i, side, amt });
+    addTag(side, T('mon')[i] + ' ' + fmt(amt), ''); sfx('koma'); updNpcs();
+    await wait(420);
+  }
+  // 丁半を揃える
+  const tot = s => wagers.filter(w => w.side === s).reduce((a, w) => a + w.amt, 0);
+  let tc = tot('C'), th = tot('H');
+  if (tc !== th){
+    const short = tc < th ? 'C' : 'H', diff = Math.abs(tc - th);
+    say(short === 'C' ? C('choNai') : C('hanNai')); await wait(1200);
+    const cand = [0, 1, 2].filter(i => D.npc[i] >= diff);
+    if (cand.length && rnd() < .8){
+      const i = pick(cand); D.npc[i] -= diff; wagers.push({ who: i, side: short, amt: diff });
+      addTag(short, T('mon')[i] + ' ' + fmt(diff), ''); say(C('fill')(T('npc')[i]));
+    } else { wagers.push({ who: 'house', side: short, amt: diff }); addTag(short, T('house') + ' ' + fmt(diff), 'house'); say(C('house')); }
+    sfx('koma'); updNpcs(); await wait(1100);
+  }
+  updTotals();
+  say(C('soroi')); await wait(1100);
+  say(C('shobu')); sfx('taiko'); await wait(700);
+  const { even } = await reveal();
+  const W = even ? 'C' : 'H';
+  await wait(500);
+  zoneEl(W).classList.remove('win'); void zoneEl(W).offsetWidth; zoneEl(W).classList.add('win');
+  let net = null;
+  wagers.forEach(w => {
+    if (w.who === 'house') return;
+    const won = w.side === W, gain = won ? Math.floor(w.amt * (D.tera ? .95 : 1)) : 0, back = won ? w.amt + gain : 0;
+    if (w.who === 'me'){ D.bank += back; net = won ? gain : -w.amt; }
+    else D.npc[w.who] += back;
+  });
+  if (net !== null){
+    if (net > 0){ D.wins++; D.winRun++; D.bestRun = Math.max(D.bestRun, D.winRun); if (D.winRun >= 5) unlock('win5'); sfx('win'); }
+    else { D.loss++; D.winRun = 0; sfx('lose'); }
+    $('resSub').textContent += '  ·  ' + (net > 0 ? T('win', net) : T('lose', -net));
+    D.peak = Math.max(D.peak, D.bank); if (D.bank >= 50000) unlock('rich');
+    D.bankHist.push(D.bank); if (D.bankHist.length > 400) D.bankHist.shift();
+    if (D.bank < 100) unlock('broke');
+  }
+  if (forcedPending){ forcedPending = false; ikasamaLine(); }
+  bet = { side: null, amt: 0 };
+  save(); updBank(); updNpcs();
+  await wait(1600);
+  phase = 'idle'; ui();
+}
+let forcedPending = false;
+function ikasamaLine(){ setTimeout(() => say(C('ikasama')), 900 / SP()); unlock('ikasama'); }
+
+/* ---------- betting ---------- */
+function selectSide(s){
+  if (phase !== 'bet') return;
+  bet.side = s; updZones(); sfx('call');
+}
+function addKoma(v, src){
+  if (phase !== 'bet') return;
+  if (!bet.side){ msg(T('needSide')); return; }
+  if (D.bank < v){ msg(T('noMoney')); return; }
+  D.bank -= v; bet.amt += v; sfx('koma');
+  if (src){ const z = zoneEl(bet.side).getBoundingClientRect(), r = src.getBoundingClientRect(), g = src.cloneNode(true);
+    g.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;z-index:30;pointer-events:none;margin:0`;
+    document.body.append(g);
+    g.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${(z.left + z.width / 2 - r.left - 23) * .5}px,${(z.top - r.top) * .5 - 50}px) rotate(-10deg)`, opacity: 1 }, { transform: `translate(${z.left + z.width / 2 - r.left - 23}px,${z.top + 90 - r.top}px) scale(.5)`, opacity: 0 }],
+      { duration: 520 / SP(), easing: 'cubic-bezier(.3,.7,.3,1)' }).finished.then(() => g.remove());
+  }
+  updBank(); updZones(); msg('');
+}
+function clearBet(){ if (phase !== 'bet' || !bet.amt) return; D.bank += bet.amt; bet.amt = 0; updBank(); updZones(); }
+
+/* ================= UI ================= */
+const msg = t => $('msg').textContent = t;
+let shown = D.bank, bAnim = null;
+function updBank(){
+  const from = shown, to = D.bank, t0 = performance.now();
+  cancelAnimationFrame(bAnim);
+  const st = now => { const k = Math.min(1, (now - t0) / 600); shown = from + (to - from) * easeOut(k); $('bank').textContent = fmt(shown); if (k < 1) bAnim = requestAnimationFrame(st); };
+  bAnim = requestAnimationFrame(st);
+  document.querySelectorAll('.koma').forEach(k => k.classList.toggle('off', phase !== 'bet' || +k.dataset.v > D.bank));
+  $('bReset').classList.toggle('hide', !(D.mode === 'bet' && D.bank < 100 && phase === 'idle'));
+}
+function updZones(){
+  ['C', 'H'].forEach(s => {
+    const z = zoneEl(s), mine = bet.side === s;
+    z.classList.toggle('sel', mine && (phase === 'bet' || phase === 'match'));
+    z.classList.toggle('off', D.mode !== 'bet');
+    $('a' + s).textContent = mine && bet.amt ? fmt(bet.amt) : '';
+  });
+}
+function addTag(s, txt, cls){ $('tag' + s).append(H('span', 'tag ' + cls, txt)); }
+function clearTags(){ $('tagC').replaceChildren(); $('tagH').replaceChildren(); $('totC').textContent = ''; $('totH').textContent = ''; }
+function updTotals(){
+  ['C', 'H'].forEach(s => $('tot' + s).textContent = T('tot', wagers.filter(w => w.side === s).reduce((a, w) => a + w.amt, 0)));
+}
+function updNpcs(){
+  const box = $('npcs'); box.replaceChildren();
+  if (D.mode !== 'bet') return;
+  T('npc').forEach((n, i) => { const c = H('div', 'npc'); c.append(H('span', 'mon', T('mon')[i]), H('span', '', n), H('b', '', fmt(D.npc[i]))); box.append(c); });
+}
+function updFoot(fresh){
+  const n = D.cho + D.han, cp = n ? Math.round(D.cho / n * 100) : 0;
+  $('quick').textContent = T('quick', n, cp, n ? 100 - cp : 0);
+  const s = $('seq'); s.replaceChildren();
+  D.seq.slice(-24).forEach(([a, b], i, arr) => { const f = (a + b) % 2 === 0 ? 'C' : 'H'; const e = H('i', f + (a === b ? ' Z' : '') + (fresh && i === arr.length - 1 ? ' new' : ''), f === 'C' ? '丁' : '半'); e.title = `${a}-${b}`; s.append(e); });
+}
+function ui(){
+  const b = $('bMain');
+  b.textContent = phase === 'bet' ? T('shobu') : T('roll');
+  b.disabled = !(phase === 'idle' || phase === 'bet');
+  $('bKen').classList.toggle('hide', !(phase === 'bet'));
+  $('bClear').classList.toggle('hide', !(phase === 'bet'));
+  if (phase === 'idle') msg(D.mode === 'bet' ? (D.bank < 100 ? T('broke') : T('msgIdle')) : T('msgQuick'));
+  else if (phase === 'bet') msg(T('msgBet'));
+  else msg('');
+  $('rack').style.display = D.mode === 'bet' ? '' : 'none';
+  updBank(); updZones();
+}
+function apply(){
+  document.documentElement.lang = D.lang;
+  $('tLang').textContent = D.lang === 'ja' ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇'; $('tSound').classList.toggle('on', D.sound);
+  $('tVoice').textContent = T('voice', D.voice); $('tVoice').classList.toggle('on', D.voice);
+  $('tMode').textContent = T('mode', D.mode); $('tMode').classList.toggle('on', D.mode === 'bet');
+  $('tTera').textContent = T('tera', D.tera); $('tTera').classList.toggle('on', D.tera); $('tTera').style.display = D.mode === 'bet' ? '' : 'none';
+  $('tSpeed').textContent = '⏩ x' + D.speed;
+  $('bKen').textContent = T('ken'); $('bClear').textContent = T('clear'); $('bReset').textContent = T('reset');
+  $('bankL').textContent = T('bankL'); $('eC').textContent = T('eC'); $('eH').textContent = T('eH');
+  $('hint').textContent = T('hint');
+  updNpcs(); updFoot(false); ui(); save();
+}
+
+/* ================= ACH / TOAST / FX ================= */
+function toast(m){ const t = H('div', 'toast', m); $('toasts').append(t); setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 550); }, 3400); }
+function unlock(k){ if (D.ach[k]) return; D.ach[k] = Date.now(); save(); toast(T('achGot') + T('ach')[k]); }
+const fxc = $('fxc'), fx = fxc.getContext('2d');
+let petals = [], fxOn = false;
+function sakura(){
+  fxc.width = innerWidth; fxc.height = innerHeight;
+  for (let i = 0; i < 220; i++) petals.push({ x: rnd() * innerWidth, y: -20 - rnd() * innerHeight, vx: 1 + rnd() * 2.2, vy: 1.2 + rnd() * 2, r: 5 + rnd() * 5, a: rnd() * 6, va: (rnd() - .5) * .08, ph: rnd() * 6, c: pick(['#ffd6e4', '#ffc1d6', '#ffe6ee', '#f7b3c9']) });
+  if (fxOn) return; fxOn = true;
+  const step = () => {
+    fx.clearRect(0, 0, fxc.width, fxc.height);
+    petals = petals.filter(p => p.y < fxc.height + 30);
+    petals.forEach(p => {
+      p.ph += .03; p.x += p.vx + Math.sin(p.ph) * .8; p.y += p.vy; p.a += p.va;
+      fx.save(); fx.translate(p.x, p.y); fx.rotate(p.a); fx.scale(Math.cos(p.ph * 1.3), 1); fx.fillStyle = p.c; fx.globalAlpha = .85;
+      fx.beginPath(); fx.moveTo(0, p.r); fx.quadraticCurveTo(-p.r * 1.1, 0, -p.r * .35, -p.r); fx.lineTo(0, -p.r * .7); fx.lineTo(p.r * .35, -p.r); fx.quadraticCurveTo(p.r * 1.1, 0, 0, p.r); fx.fill(); fx.restore();
+    });
+    if (petals.length) requestAnimationFrame(step); else { fxOn = false; fx.clearRect(0, 0, fxc.width, fxc.height); }
+  };
+  requestAnimationFrame(step);
+}
+
+/* ================= STATS ================= */
+function svgE(t, a, x){ const e = document.createElementNS('http://www.w3.org/2000/svg', t); for (const k in a) e.setAttribute(k, a[k]); if (x != null) e.textContent = x; return e; }
+function openStats(){
+  const n = D.cho + D.han, J = D.lang === 'ja';
+  $('mT').textContent = T('mT');
+  const k = T('k'), zt = D.zoro.reduce((a, b) => a + b, 0);
+  $('kpis').innerHTML = [[k[0], n], [k[1], n ? `${D.cho}<small style="font-size:11px"> ${(D.cho / n * 100).toFixed(1)}%</small>` : 0], [k[2], n ? `${D.han}<small style="font-size:11px"> ${(D.han / n * 100).toFixed(1)}%</small>` : 0], [k[3], zt],
+    [k[4], D.bets], [k[5], D.bets ? `${D.wins}<small style="font-size:11px"> ${(D.wins / D.bets * 100).toFixed(0)}%</small>` : 0], [k[6], D.bestRun], [k[7], fmt(D.peak)]]
+    .map(([a, b]) => `<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
+  $('sHisto').textContent = T('sHisto'); $('nHisto').textContent = T('nHisto');
+  const hs = $('histo'); hs.replaceChildren();
+  const L = 30, R = 590, B = 166, Tp = 10, bw = (R - L) / 11, mx = Math.max(6 / 36, ...D.sum.slice(2).map(v => n ? v / n : 0)) * 1.1;
+  const Y = p => B - (B - Tp) * p / mx;
+  let pts = [];
+  for (let s = 2; s <= 12; s++){
+    const x = L + (s - 2) * bw, p = n ? D.sum[s] / n : 0, th = (6 - Math.abs(s - 7)) / 36;
+    const r = svgE('rect', { x: x + 6, y: B, width: bw - 12, height: 0, rx: 3, fill: s % 2 ? '#4a9aff' : '#ff4a6a', opacity: .8 });
+    r.animate([{ y: B, height: 0 }, { y: Y(p), height: B - Y(p) }], { duration: 1100, delay: (s - 2) * 50, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' });
+    r.setAttribute('y', Y(p)); r.setAttribute('height', B - Y(p));
+    hs.append(r, svgE('text', { x: x + bw / 2, y: B + 16, 'text-anchor': 'middle' }, s));
+    pts.push(`${x + bw / 2},${Y(th)}`);
+  }
+  hs.append(svgE('polyline', { points: pts.join(' '), fill: 'none', stroke: '#e8c26a', 'stroke-width': 2, 'stroke-dasharray': '5 4' }));
+  $('sZoro').textContent = T('sZoro');
+  $('zoros').innerHTML = [1, 2, 3, 4, 5, 6].map(v => `<span class="${D.zoro[v] ? 'got' : ''}"><b>${D.zoro[v]}</b>${ZORO[v][J ? 0 : 1]}</span>`).join('');
+  $('sBank').textContent = T('sBank');
+  const bg = $('bankG'); bg.replaceChildren();
+  const h = D.bankHist;
+  if (h.length > 1){
+    const mn = Math.min(...h, 0), mxx = Math.max(...h, START) * 1.05, X = i => 40 + 550 * i / (h.length - 1), YY = v => 146 - 136 * (v - mn) / (mxx - mn || 1);
+    [mn, (mn + mxx) / 2, mxx].forEach(v => { bg.append(svgE('line', { x1: 40, x2: 590, y1: YY(v), y2: YY(v), stroke: '#ffffff14' })); bg.append(svgE('text', { x: 36, y: YY(v) + 3, 'text-anchor': 'end' }, fmt(v))); });
+    bg.append(svgE('line', { x1: 40, x2: 590, y1: YY(START), y2: YY(START), stroke: '#e8c26a66', 'stroke-dasharray': '4 4' }));
+    bg.append(svgE('polyline', { points: h.map((v, i) => X(i).toFixed(1) + ',' + YY(v).toFixed(1)).join(' '), class: 'ln', pathLength: 1 }));
+  } else bg.append(svgE('text', { x: 300, y: 80, 'text-anchor': 'middle' }, '—'));
+  $('sAch').textContent = T('sAch');
+  const a = $('achs'); a.replaceChildren();
+  Object.entries(T('ach')).forEach(([key, name]) => a.append(H('div', 'ach' + (D.ach[key] ? ' got' : ''), D.ach[key] || !['sakura', 'ikasama'].includes(key) ? name : '❔ ???')));
+  $('mReset').textContent = T('mReset');
+  $('modal').classList.add('show');
+}
+
+/* ================= EVENTS ================= */
+$('bMain').onclick = () => { try { ac(); } catch(e){} mainAction(); };
+$('bKen').onclick = () => shobu(true);
+$('bClear').onclick = clearBet;
+$('bReset').onclick = () => { D.bank = START; D.bankHist.push(START); save(); ui(); };
+$('zC').onclick = () => selectSide('C'); $('zH').onclick = () => selectSide('H');
+document.querySelectorAll('.koma').forEach(k => k.onclick = () => addKoma(+k.dataset.v, k));
+$('tLang').onclick = () => { D.lang = D.lang === 'ja' ? 'en' : 'ja'; apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; apply(); if (D.sound) sfx('koma'); };
+$('tVoice').onclick = () => { D.voice = !D.voice; apply(); if (D.voice) speak(D.lang === 'ja' ? 'よろしゅうございます' : 'Very well'); };
+$('tMode').onclick = () => { if (phase !== 'idle') return; D.mode = D.mode === 'bet' ? 'quick' : 'bet'; clearTags(); apply(); };
+$('tTera').onclick = () => { if (phase !== 'idle') return; D.tera = !D.tera; apply(); };
+$('tSpeed').onclick = () => { D.speed = D.speed === 1 ? 1.6 : D.speed === 1.6 ? 2.5 : 1; apply(); };
+$('tStats').onclick = openStats;
+$('mClose').onclick = () => $('modal').classList.remove('show');
+$('modal').onclick = e => { if (e.target.id === 'modal') $('modal').classList.remove('show'); };
+$('mReset').onclick = () => { if (phase !== 'idle' || !confirm(T('confirm'))) return; Object.assign(D, fresh()); save(); apply(); openStats(); };
+const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+let buf = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ($('modal').classList.contains('show')){ if (k === 'escape') $('modal').classList.remove('show'); return; }
+  if (e.repeat) return;
+  buf.push(k); if (buf.length > 12) buf.shift();
+  const word = buf.filter(x => x.length === 1).join('');
+  if (buf.slice(-10).join() === KONAMI.join()){ buf = []; sakura(); unlock('sakura'); toast(T('sakura')); sfx('taiko'); return; }
+  if (word.endsWith('pinzoro')){ buf = []; forced = [1, 1]; forcedPending = D.mode === 'bet'; toast(T('ikasama')); return; }
+  if (k === ' ' || k === 'enter'){ e.preventDefault(); try { ac(); } catch(err){} mainAction(); }
+  else if (k === 'c') selectSide('C'); else if (k === 'h') selectSide('H');
+  else if ('1234'.includes(k) && k.length === 1){ const v = [100, 500, 1000, 5000][+k - 1]; addKoma(v, document.querySelector(`.koma[data-v="${v}"]`)); }
+  else if (k === 'k') shobu(true); else if (k === 'x') clearBet(); else if (k === 's') openStats();
+});
+
+/* ================= INIT ================= */
+if (D.seq.length){ const [a, b] = D.seq[D.seq.length - 1]; dice[0].v = a; dice[1].v = b; }
+apply(); requestAnimationFrame(loop);
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

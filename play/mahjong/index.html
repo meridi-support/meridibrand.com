@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — 麻雀牌占い Mahjong Oracle</title>
+<style>
+:root{--g:#39ff14;--gold:#e8c26a;--E:cubic-bezier(.22,1,.36,1);
+  --mincho:'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif JP','MS PMincho',serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:#07090c;color:#e9e2cf;font-family:var(--mincho);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 20%,#1b2a22 0%,#0a0f0c 55%,#040605 100%)}
+header{position:relative;z-index:5;display:flex;align-items:center;gap:7px;padding:12px 20px;border-bottom:1px solid #39ff1422;flex-wrap:wrap;background:#0007}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:12px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+.brand span{font-size:14px;letter-spacing:6px}
+.tg{background:#000a;color:#d6e6d0;border:1px solid #39ff1440;border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--g);color:var(--g)}
+.tg.on{background:#39ff141c;border-color:var(--g);color:var(--g);box-shadow:0 0 8px #39ff1440}
+.wrap{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:14px 16px 30px}
+
+/* mat */
+.mat{position:relative;height:330px;border-radius:18px;border:12px solid #2a1a0e;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 45%,#1f7a48 0%,#155c35 55%,#0c3a21 100%);box-shadow:0 0 50px #000c,inset 0 0 50px #0008}
+.mat::before{content:'';position:absolute;inset:0;opacity:.25;background:repeating-linear-gradient(45deg,#ffffff06 0 2px,transparent 2px 5px)}
+.mlabel{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:8px;color:#ffffff33;white-space:nowrap}
+.tile{position:absolute;width:52px;height:70px;border-radius:7px;will-change:transform;user-select:none}
+.tile .f,.tile .b{position:absolute;inset:0;border-radius:7px}
+.tile .f{background:linear-gradient(160deg,#fffdf4,#efe8d4);box-shadow:inset 0 0 0 1px #00000018,inset 2px 2px 2px #fff,0 5px 0 #d9cfb4,0 6px 0 #1f8a48,0 9px 0 #166b37,0 12px 10px #0009}
+.tile .b{background:linear-gradient(160deg,#2fae63,#1a7a42);box-shadow:inset 0 0 0 1px #0003,inset 2px 2px 3px #ffffff44,0 5px 0 #146a35,0 6px 0 #e9e1c8,0 9px 0 #cfc5a8,0 12px 10px #0009;display:none}
+.tile.down .f{display:none}.tile.down .b{display:block}
+.tile .f svg{width:100%;height:100%;display:block}
+body.gold .tile .b{background:linear-gradient(160deg,#ffe08a,#c08a1c);box-shadow:inset 0 0 0 1px #0003,inset 2px 2px 3px #fff8,0 5px 0 #9a6d10,0 6px 0 #e9e1c8,0 9px 0 #cfc5a8,0 12px 10px #0009}
+.tile.pick{cursor:pointer;transition:transform .35s var(--E)}
+.tile.pick:hover,.tile.pick.cur{transform:translateY(-12px)!important}
+.tile.cur .b{outline:2px solid #fff8;outline-offset:3px}
+.tile.big{width:86px;height:116px;border-radius:10px}
+.tile.big .f,.tile.big .b{border-radius:10px}
+
+/* spread */
+.spread{display:flex;justify-content:center;gap:22px;margin-top:22px;flex-wrap:wrap}
+.pos{width:300px;min-height:330px;border:1px solid #39ff1422;border-radius:14px;background:#050a07cc;padding:14px;display:flex;flex-direction:column;align-items:center;transition:border-color .6s,box-shadow .6s}
+.pos.filled{border-color:#e8c26a55;box-shadow:0 0 22px #e8c26a18}
+.pos h4{font-size:13px;letter-spacing:6px;color:var(--gold);margin-bottom:12px}
+.slot{position:relative;width:86px;height:128px;border:1px dashed #ffffff22;border-radius:10px}
+.slot .tile{position:absolute;left:0;top:0}
+.pn{margin-top:14px;font-size:20px;letter-spacing:4px;font-weight:700;opacity:0;transition:opacity .8s}
+.pk{font:11px 'Courier New',monospace;letter-spacing:2px;color:#9fcf9f;margin-top:4px;opacity:0;transition:opacity .8s .1s}
+.pm{font-size:14px;line-height:1.9;margin-top:10px;text-align:center;opacity:0;transform:translateY(6px);transition:opacity .9s .25s,transform 1s .25s var(--E)}
+.pos.filled .pn,.pos.filled .pk,.pos.filled .pm{opacity:1;transform:none}
+.reading{max-width:920px;margin:20px auto 0;border:1px solid #e8c26a44;border-radius:14px;padding:18px 22px;background:#0b0905cc;opacity:0;transform:translateY(10px);transition:opacity 1s,transform 1.1s var(--E)}
+.reading.show{opacity:1;transform:none}
+.reading h3{font-size:16px;letter-spacing:8px;color:var(--gold);text-align:center;margin-bottom:10px}
+.yaku{text-align:center;font-size:24px;letter-spacing:6px;font-weight:700;color:#ffe08a;text-shadow:0 0 20px #e8c26a88;margin-bottom:8px;min-height:0}
+.reading p{font-size:15px;line-height:2;letter-spacing:1px}
+.lucky{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:12px;font-size:14px}
+.lucky em{font-style:normal;color:var(--gold);margin-right:6px}
+
+.ctrl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.btn{border:1px solid var(--gold);background:linear-gradient(#1c2a20,#0b120d);color:#f3ecd8;border-radius:24px;padding:11px 26px;font:16px var(--mincho);letter-spacing:4px;cursor:pointer;transition:all .35s var(--E)}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 18px #000a,0 0 14px #e8c26a44}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.main{border-color:var(--g);font-size:18px;padding:12px 36px;box-shadow:0 0 14px #39ff1433}
+.msg{text-align:center;font-size:14px;letter-spacing:3px;margin-top:12px;min-height:22px;color:#dfe9d6}
+.qin{display:block;margin:12px auto 0;width:min(420px,90%);background:#000a;border:1px solid #e8c26a44;color:#f3ecd8;border-radius:22px;padding:9px 18px;font:14px var(--mincho);text-align:center;letter-spacing:2px;outline:none}
+.qin:focus{border-color:var(--gold)}
+.hint{text-align:center;font:11px 'Courier New',monospace;opacity:.5;margin-top:14px;letter-spacing:1px}
+
+/* book */
+.modal{position:fixed;inset:0;z-index:40;background:#000c;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal.show{opacity:1;pointer-events:auto}
+.mbox{width:min(820px,95vw);max-height:90vh;overflow:auto;background:linear-gradient(#0f1712,#070b08);border:1px solid #e8c26a66;border-radius:14px;padding:22px 24px;transform:translateY(12px);transition:transform .6s var(--E)}
+.modal.show .mbox{transform:none}
+.mbox h2{font-size:19px;letter-spacing:8px;color:var(--gold);text-align:center}
+.prog{text-align:center;font-size:12px;letter-spacing:3px;margin:8px 0 14px;opacity:.75}
+.book{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+@media(max-width:640px){.book{grid-template-columns:repeat(6,1fr)}}
+.bk{position:relative;aspect-ratio:52/70;border-radius:6px;cursor:pointer}
+.bk svg{width:100%;height:100%;display:block;border-radius:6px;background:linear-gradient(160deg,#fffdf4,#efe8d4);box-shadow:0 3px 0 #1f8a48}
+.bk.lock svg{filter:grayscale(1) brightness(.25)}
+.bk i{position:absolute;right:2px;bottom:2px;font:bold 9px 'Courier New',monospace;font-style:normal;color:#0a5a2a}
+.bdet{margin-top:14px;min-height:60px;font-size:14px;line-height:1.9;text-align:center}
+.hist{display:flex;flex-direction:column;gap:6px;margin-top:14px;font-size:13px}
+.hist div{border-bottom:1px solid #ffffff12;padding:4px 0}
+.hist em{font-style:normal;opacity:.5;margin-right:8px;font-family:'Courier New',monospace;font-size:11px}
+.mrow{display:flex;justify-content:space-between;margin-top:18px}
+.gbox{width:min(760px,95vw)}
+.gtabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0 16px}
+.gpage{animation:gIn .5s var(--E);font-size:14.5px;line-height:2;letter-spacing:.5px}
+@keyframes gIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.gpage h4{font-size:15px;letter-spacing:4px;color:var(--gold);margin:14px 0 6px}
+.gpage ol,.gpage ul{padding-left:1.4em}
+.gpage b{color:#ffe08a}
+.gpage .note{font-size:12px;opacity:.65;margin-top:10px;line-height:1.8}
+.gtbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.gtbl th,.gtbl td{border-bottom:1px solid #ffffff14;padding:6px 6px;text-align:left;vertical-align:middle}
+.gtbl th{color:var(--gold);font-weight:normal;font-size:12px;letter-spacing:2px}
+.gtiles{display:flex;gap:3px}
+.gtiles span{display:block;width:26px;height:35px;border-radius:4px;background:linear-gradient(160deg,#fffdf4,#efe8d4);box-shadow:0 2px 0 #1f8a48}
+.gtiles svg{width:100%;height:100%;display:block}
+.gno{display:block;text-align:center;font-size:12px;opacity:.7;margin-top:14px;cursor:pointer}
+.toasts{position:fixed;right:16px;top:64px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#0b0905ee;border:1px solid var(--gold);border-radius:12px;padding:9px 14px;font-size:13px;letter-spacing:1px;animation:tin .6s var(--E) both;max-width:320px}
+.toast.out{animation:tout .5s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateX(30px)}}
+#fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span id="bT">麻雀牌占い</span></div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tMode"></button>
+  <button class="tg" id="tBook"></button>
+  <button class="tg" id="tGuide"></button>
+</header>
+
+<div class="wrap">
+  <div class="mat" id="mat"><div class="mlabel">MERIDIPLAY · 麻 雀 牌 占 い</div></div>
+  <input class="qin" id="qin" maxlength="40" autocomplete="off">
+  <div class="ctrl"><button class="btn main" id="bMain"></button><button class="btn" id="bAuto"></button></div>
+  <div class="msg" id="msg"></div>
+  <div class="spread" id="spread"></div>
+  <div class="reading" id="reading"><h3 id="rT"></h3><div class="yaku" id="yaku"></div><p id="rP"></p><div class="lucky" id="lucky"></div></div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox">
+  <h2 id="mT"></h2><div class="prog" id="mP"></div>
+  <div class="book" id="book"></div>
+  <div class="bdet" id="bdet"></div>
+  <div class="hist" id="hist"></div>
+  <div class="mrow"><button class="tg" id="mReset"></button><button class="tg on" id="mClose">OK</button></div>
+</div></div>
+<div class="modal" id="guide"><div class="mbox gbox">
+  <h2 id="gT"></h2>
+  <div class="gtabs" id="gTabs"></div>
+  <div id="gBody"></div>
+  <label class="gno"><input type="checkbox" id="gNo"> <span id="gNoL"></span></label>
+  <div class="mrow"><button class="tg" id="gPrev">‹</button><button class="tg on" id="gClose"></button><button class="tg" id="gNext">›</button></div>
+</div></div>
+<div class="toasts" id="toasts"></div>
+<canvas id="fx"></canvas>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const H = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const ri = n => Math.floor(rnd() * n);
+const pick = a => a[ri(a.length)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const EASE = 'cubic-bezier(.22,1,.36,1)';
+
+/* ================= TILES ================= */
+// id: m1-9 萬子 / p1-9 筒子 / s1-9 索子 / z1-7 東南西北白發中
+const TILES = [];
+['m', 'p', 's'].forEach(s => { for (let n = 1; n <= 9; n++) TILES.push({ id: s + n, s, n }); });
+for (let n = 1; n <= 7; n++) TILES.push({ id: 'z' + n, s: 'z', n });
+const KAN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+const ZJ = ['', '東', '南', '西', '北', '白', '發', '中'];
+const ZE = ['', 'East', 'South', 'West', 'North', 'White', 'Green', 'Red'];
+const SUITJ = { m: '萬子', p: '筒子', s: '索子' }, SUITE = { m: 'Characters', p: 'Circles', s: 'Bamboo' };
+function tName(t, lang){
+  if (t.s === 'z') return lang === 'ja' ? ZJ[t.n] : ZE[t.n] + (t.n <= 4 ? ' Wind' : ' Dragon');
+  return lang === 'ja' ? KAN[t.n] + (t.s === 'm' ? '萬' : t.s === 'p' ? '筒' : '索') : `${t.n} of ${SUITE[t.s]}`;
+}
+
+/* ---------- face SVG ---------- */
+const PIPS = {
+  1: [[30, 40]], 2: [[30, 21], [30, 59]], 3: [[16, 17], [30, 40], [44, 63]], 4: [[18, 22], [42, 22], [18, 58], [42, 58]],
+  5: [[18, 20], [42, 20], [30, 40], [18, 60], [42, 60]], 6: [[19, 17], [41, 17], [19, 40], [41, 40], [19, 63], [41, 63]],
+  7: [[14, 13], [30, 21], [46, 29], [19, 47], [41, 47], [19, 66], [41, 66]], 8: [[19, 12], [41, 12], [19, 30], [41, 30], [19, 50], [41, 50], [19, 68], [41, 68]],
+  9: [[15, 16], [30, 16], [45, 16], [15, 40], [30, 40], [45, 40], [15, 64], [30, 64], [45, 64]]
+};
+function face(t){
+  let b = '';
+  if (t.s === 'm'){
+    b = `<text x="30" y="34" font-size="27" text-anchor="middle" font-weight="700" fill="#1b2350" font-family="serif">${KAN[t.n]}</text>
+         <text x="30" y="70" font-size="29" text-anchor="middle" font-weight="700" fill="#b3121e" font-family="serif">萬</text>`;
+  } else if (t.s === 'p'){
+    const r = t.n === 1 ? 19 : t.n <= 4 ? 10 : t.n <= 6 ? 8.5 : 7.4;
+    PIPS[t.n].forEach(([x, y], i) => {
+      const c = t.n === 1 ? '#b3121e' : (t.n === 5 && i === 2) || (t.n === 7 && i < 3) || (t.n === 9 && i % 3 === 1) ? '#b3121e' : i % 2 ? '#1f7a3a' : '#1b3a8a';
+      b += `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${c}" stroke-width="${r * .28}"/><circle cx="${x}" cy="${y}" r="${r * .42}" fill="${c}"/>`;
+      if (t.n === 1) b += `<circle cx="30" cy="40" r="11" fill="none" stroke="#1b3a8a" stroke-width="2.4"/>`;
+    });
+  } else if (t.s === 's'){
+    if (t.n === 1){
+      b = `<g transform="translate(30,42)"><ellipse cx="0" cy="6" rx="12" ry="15" fill="#1f7a3a"/><circle cx="0" cy="-14" r="7" fill="#b3121e"/><path d="M0 -14 L10 -18 L2 -10Z" fill="#e2a31c"/>
+        <path d="M-10 18 Q-18 30 -6 28 M10 18 Q18 30 6 28" stroke="#1b3a8a" stroke-width="3" fill="none"/><circle cx="-2" cy="-15" r="1.6" fill="#fff"/></g>`;
+    } else {
+      PIPS[t.n].forEach(([x, y], i) => {
+        const c = (t.n === 5 && i === 2) || (t.n === 7 && i === 0) || (t.n === 9 && i % 3 === 1) ? '#b3121e' : '#1f7a3a';
+        const h = t.n <= 4 ? 30 : t.n <= 6 ? 20 : 16;
+        b += `<rect x="${x - 3.6}" y="${y - h / 2}" width="7.2" height="${h}" rx="3.4" fill="${c}"/><rect x="${x - 4.4}" y="${y - 1}" width="8.8" height="2.2" rx="1" fill="#fff9"/>`;
+      });
+    }
+  } else {
+    const c = t.n === 7 ? '#b3121e' : t.n === 6 ? '#1f7a3a' : '#1a1a1a';
+    if (t.n === 5) b = `<rect x="13" y="16" width="34" height="48" rx="3" fill="none" stroke="#1b3a8a" stroke-width="3"/><rect x="18" y="21" width="24" height="38" rx="2" fill="none" stroke="#1b3a8a" stroke-width="1.2"/>`;
+    else b = `<text x="30" y="56" font-size="40" text-anchor="middle" font-weight="700" fill="${c}" font-family="serif">${ZJ[t.n]}</text>`;
+  }
+  return `<svg viewBox="0 0 60 80">${b}</svg>`;
+}
+function tileEl(t, down = true){
+  const el = H('div', 'tile' + (down ? ' down' : ''));
+  const f = H('div', 'f'); f.innerHTML = face(t); el.append(f, H('div', 'b'));
+  el._t = t; return el;
+}
+
+/* ================= MEANINGS（MeridiPlay オリジナル解釈） ================= */
+const KEY = { 1:['始まり','Beginning'], 2:['縁','Connection'], 3:['芽吹き','Growth'], 4:['土台','Foundation'], 5:['転機','Turning point'], 6:['調和','Harmony'], 7:['内省','Reflection'], 8:['広がり','Expansion'], 9:['成就','Fulfillment'] };
+const THEME = { m:['財と仕事','wealth & work'], p:['心と人の縁','heart & relationships'], s:['成長と健やかさ','growth & wellbeing'], z:['天の巡り','the turning of heaven'] };
+const MJ = {
+  m:['新しい仕事の芽が出ます。小さく始めることが、大きな実りへの近道です。','頼れる協力者が現れます。一人で抱えず、声をかけてみて。','努力が形になり始めます。手を止めず、少しずつ積み上げて。',
+     '地道な準備が報われる時。足元を固めるほど、先が開けます。','流れが変わる兆し。新しいやり方を一つ取り入れると吉。','収支の釣り合いが取れる時。無理のない計画が福を呼びます。',
+     '立ち止まって見直す時期。焦りは禁物、数字を丁寧に確かめて。','評価や収入が広がる兆し。人に分けるほど巡りが良くなります。','長く続けてきたことが実を結びます。胸を張って受け取りましょう。'],
+  p:['新しい出会いの予感。最初の挨拶を、いつもより丁寧に。','大切な人との縁が深まります。感謝を言葉にすると吉。','心に小さな喜びが芽生えます。好きなことに少し時間を。',
+     '信頼の土台が育つ時。約束を一つずつ守ることが鍵です。','気持ちに変化が訪れます。素直な心で受け止めて。','人の輪がよく和みます。聞き役に回ると、福が集まります。',
+     '心を休める時。一人の静かな時間が、次の力になります。','縁が縁を呼びます。誘いには気軽に応じてみて。','想いが通じ合います。積み重ねた優しさが、ここで報われます。'],
+  s:['新しい習慣を始めるのに良い時。今日の一歩を大切に。','支え合うことで伸びていきます。仲間と歩調を合わせて。','すくすくと伸びる時期。学んだことをすぐ試してみて。',
+     '体と暮らしを整える時。眠りと食事を見直すと吉。','伸び方が変わる節目。竹の節のように、ここで強くなります。','心身の調子が整います。無理をせず、今のリズムを守って。',
+     '休むことも成長のうち。少し立ち止まって、根を張りましょう。','力が外へ広がります。挑戦の範囲を一歩だけ広げて。','長く育ててきたものが実ります。自分をしっかり労って。']
+};
+const ZM = [null,
+  ['東は日の昇る方角。物事の始まりに追い風が吹きます。','Rising sun: a tailwind for new beginnings.'],
+  ['南は陽の極み。明るさと勢いが、周りを惹きつけます。','Full sun: your brightness draws people in.'],
+  ['西は実りと休息の方角。一区切りつけて、成果を味わって。','Harvest and rest: pause and enjoy your results.'],
+  ['北は静けさと蓄えの方角。今は力を内に溜める時です。','Stillness and storage: gather strength within.'],
+  ['白は清らかな余白。何も描かれていないのは、何でも描けるということ。','A blank tile: nothing drawn means anything can be.'],
+  ['發は発展の兆し。思い切った一手が、大きな広がりを生みます。','Prosperity: one bold move brings great expansion.'],
+  ['中は的の真ん中。迷いが晴れ、狙いがまっすぐ定まります。','Bullseye: doubts clear and your aim becomes true.']];
+function meaning(t, lang){
+  if (t.s === 'z') return ZM[t.n][lang === 'ja' ? 0 : 1];
+  if (lang === 'ja') return MJ[t.s][t.n - 1];
+  return `${KEY[t.n][1]} in ${THEME[t.s][1]}. ` + ({ 1:'Start small; it leads somewhere big.', 2:'Reach out — someone will help.', 3:'Keep going; it is taking shape.', 4:'Steady preparation pays off.', 5:'Try one new approach.', 6:'Balance brings good fortune.', 7:'Slow down and review with care.', 8:'Share, and it comes back wider.', 9:'Long effort bears fruit. Accept it proudly.' })[t.n];
+}
+function keyword(t, lang){ if (t.s === 'z') return lang === 'ja' ? '天の巡り' : 'Heaven'; return (lang === 'ja' ? KEY[t.n][0] : KEY[t.n][1]) + ' · ' + (lang === 'ja' ? THEME[t.s][0] : THEME[t.s][1]); }
+
+/* ================= SAVE ================= */
+const LS = 'meridiplay_mjoracle_v1';
+let D = { lang: 'ja', sound: true, mode: 3, got: {}, hist: [], draws: 0, ach: {} };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+
+/* ================= I18N ================= */
+const UI = {
+  ja: { title:'麻雀牌占い', mode:m=>m === 3 ? '🀄 三枚引き' : '🀅 今日の一牌', book:'📖 牌譜帳', cut:'牌を切る', pickBtn:'おまかせで引く',
+    q:'占いたいこと（任意）', idle:'「牌を切る」で、牌を混ぜます（Space）', washing:'ジャラ… ジャラ…', choose:n=>`心が惹かれる牌を ${n} 枚選んでください（← → ・ Enter）`,
+    pos3:['過去','現在','未来'], pos1:['今日の一牌'], rT:'読み解き', again:'もう一度',
+    hint:'Space＝切る／おまかせ ・ ← → で選択・Enter で決定 ・ M＝引き方 ・ B＝牌譜帳 ・ 迷ったら直感で',
+    sum:{ m:'今は「財と仕事」の流れが強く出ています。手を動かした分だけ、確かな手応えが返ってくるでしょう。', p:'今は「心と人の縁」が鍵です。身近な人との関わりの中に、答えが隠れています。',
+      s:'今は「成長と健やかさ」の時。焦らず、自分のペースで伸びていくことが一番の近道です。', z:'天の巡りが強く働いています。自分の力だけでなく、時の流れに身を任せることも大切に。',
+      mix:'三つの流れがほどよく混ざっています。どれか一つに偏らず、全体の釣り合いを大切にすると吉。' },
+    flow:(a,b)=>`過去の「${a}」が、未来の「${b}」へとつながっていきます。`, q2:q=>`問い：「${q}」`,
+    yk:{ pung:['刻子','同じ牌が三つ。強い意志が、一つの道をまっすぐ貫きます。'], chow:['順子','連なる三枚。物事が順を追って、滞りなく進んでいきます。'], pair:['対子','対になる牌。良き相棒との巡り合わせがあります。'],
+      dragon:['大三元','白・發・中がそろいました。滅多に出ない大吉の兆しです。'], wind:['風牌三枚','風が三方から吹き込みます。変化を味方につける時です。'], honor:['字牌三枚','天の巡りがそろいました。大きな流れの中にいます。'] },
+    lucky:'吉兆', dir:'吉方', col:'吉色', num:'吉数', dirs:['東','南','西','北'], cols:['翠','朱','藍','金','白','若草'],
+    mT:'牌 譜 帳', mP:(a,b,c)=>`${a} / ${b} 種 ・ 占った回数 ${c}`, reset:'帳面を清める', confirm:'記録をすべて消しますか？', got:'初めて出会った牌：',
+    achGot:'実績：', gold:'✨ 牌の背が黄金になりました', kokushi:'🀄 国士無双……の気配がします' },
+  en: { title:'Mahjong Oracle', mode:m=>m === 3 ? '🀄 Three tiles' : '🀅 Tile of the day', book:'📖 Tile book', cut:'Shuffle the tiles', pickBtn:'Pick for me',
+    q:'What would you like to ask? (optional)', idle:'Press "Shuffle the tiles" to wash the tiles (Space)', washing:'clack… clack…', choose:n=>`Choose ${n} tile${n > 1 ? 's' : ''} that call to you (← → · Enter)`,
+    pos3:['Past','Present','Future'], pos1:['Tile of the day'], rT:'Reading', again:'Again',
+    hint:'Space = shuffle / pick for me · ← → to choose, Enter to take · M = spread · B = book · trust your intuition',
+    sum:{ m:'Wealth and work flow strongly now. Effort you put in will come back to you.', p:'Heart and relationships are the key. The answer lies with people close to you.',
+      s:'This is a time of growth. Move at your own pace — it is the shortest path.', z:'Heaven is turning strongly. Let the flow of time carry you, too.',
+      mix:'The three currents are well mixed. Keep everything in balance.' },
+    flow:(a,b)=>`Your past "${a}" leads toward a future of "${b}".`, q2:q=>`Question: "${q}"`,
+    yk:{ pung:['Pung','Three of a kind: a strong will cuts one straight path.'], chow:['Chow','A run of three: things move forward in good order.'], pair:['Pair','A matching pair: a good partner crosses your path.'],
+      dragon:['Big Three Dragons','White, Green and Red together — a rare sign of great fortune.'], wind:['Three Winds','Winds blow from three sides. Make change your ally.'], honor:['Three Honors','Heaven aligns. You are inside a great current.'] },
+    lucky:'Omens', dir:'Direction', col:'Color', num:'Number', dirs:['East','South','West','North'], cols:['Jade','Vermilion','Indigo','Gold','White','Spring green'],
+    mT:'TILE BOOK', mP:(a,b,c)=>`${a} / ${b} tiles · ${c} readings`, reset:'Reset the book', confirm:'Erase all records?', got:'New tile met: ',
+    achGot:'Achievement: ', gold:'✨ The tile backs turned golden', kokushi:'🀄 You sense… Thirteen Orphans' }
+};
+const T = (k, ...a) => { const v = UI[D.lang][k]; return typeof v === 'function' ? v(...a) : v; };
+
+/* ================= SOUND ================= */
+let AC = null, master = null;
+function ac(){
+  if (!AC){
+    AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .9; master.connect(AC.destination);
+    const cv = AC.createConvolver(), len = AC.sampleRate * 1.3, ir = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++){ const ch = ir.getChannelData(c); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    cv.buffer = ir; const w = AC.createGain(); w.gain.value = .18; master.connect(cv); cv.connect(w); w.connect(AC.destination);
+  }
+  if (AC.state === 'suspended') AC.resume(); return AC;
+}
+function tone(f, t, d, v, type = 'sine'){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .003); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05); }
+function noise(t, d, v, f, q = 5){ const len = Math.max(1, Math.floor(AC.sampleRate * d)), b = AC.createBuffer(1, len, AC.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2); const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = b; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = v; s.connect(fl); fl.connect(g); g.connect(master); s.start(t); }
+function sfx(k){
+  if (!D.sound || !AC) return;
+  try { const t = AC.currentTime;
+    if (k === 'clack'){ noise(t, .022, .3, 2600 + Math.random() * 1400); tone(1500 + Math.random() * 700, t, .05, .015, 'triangle'); }
+    else if (k === 'wash'){ for (let i = 0; i < 26; i++){ const tt = t + i * .055 + Math.random() * .04; noise(tt, .02, .12 + Math.random() * .12, 2000 + Math.random() * 2200); } }
+    else if (k === 'flip'){ noise(t, .03, .45, 1900, 6); tone(900, t, .09, .03, 'triangle'); }
+    else if (k === 'chime') [587.33, 783.99, 987.77].forEach((f, i) => tone(f, t + i * .14, 1.6, .03));
+    else if (k === 'yaku') [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => tone(f, t + i * .1, 1.4, .035, 'triangle'));
+  } catch(e){}
+}
+
+/* ================= FLOW ================= */
+const mat = $('mat');
+let phase = 'idle', wall = [], picks = [], cursor = 0, lastReading = null;
+function matSize(){ const r = mat.getBoundingClientRect(); return { w: r.width - 24, h: r.height - 24 }; }
+function deck136(){ const d = []; TILES.forEach(t => { for (let k = 0; k < 4; k++) d.push(t); }); for (let i = d.length - 1; i > 0; i--){ const j = ri(i + 1); [d[i], d[j]] = [d[j], d[i]]; } return d; }
+function place(el, x, y, r){ el._x = x; el._y = y; el._r = r; el.style.transform = `translate(${x}px,${y}px) rotate(${r}deg)`; }
+
+async function cut(){
+  if (phase !== 'idle' && phase !== 'done') return;
+  try { ac(); } catch(e){}
+  phase = 'wash'; ui();
+  picks = []; resetSpread(); $('reading').classList.remove('show');
+  mat.querySelectorAll('.tile').forEach(t => t.remove());
+  const { w, h } = matSize(), N = 22, deck = deck136().slice(0, N);
+  wall = deck.map(t => { const el = tileEl(t); place(el, w / 2 - 26 + (rnd() - .5) * 60, h / 2 - 35 + (rnd() - .5) * 40, ri(360)); mat.append(el); return el; });
+  $('msg').textContent = T('washing');
+  // 洗牌：両手でかき混ぜるように数回散らす
+  for (let k = 0; k < 4; k++){
+    sfx('wash');
+    await Promise.all(wall.map(el => {
+      const cx = w / 2, cy = h / 2, a = rnd() * Math.PI * 2, rr = 60 + rnd() * Math.min(w * .42, 240);
+      const x = cx + Math.cos(a) * rr * (w > 600 ? 1.5 : 1) - 26, y = cy + Math.sin(a) * rr * .45 - 35, r = el._r + (rnd() - .5) * 200;
+      const from = el.style.transform; place(el, Math.max(0, Math.min(w - 52, x)), Math.max(0, Math.min(h - 80, y)), r);
+      return el.animate([{ transform: from }, { transform: el.style.transform }], { duration: 620 + rnd() * 200, easing: 'cubic-bezier(.45,.05,.3,1)' }).finished;
+    }));
+  }
+  // 一列に並べる（壁）
+  const gap = Math.min(58, (w - 20) / N * 1.0), x0 = (w - gap * (N - 1) - 52) / 2, y0 = h / 2 - 40;
+  sfx('wash');
+  await Promise.all(wall.map((el, i) => {
+    const from = el.style.transform; place(el, x0 + i * gap, y0 + Math.sin(i / (N - 1) * Math.PI) * -10, 0);
+    return el.animate([{ transform: from }, { transform: el.style.transform }], { duration: 700, delay: i * 25, easing: EASE, fill: 'backwards' }).finished;
+  }));
+  wall.forEach((el, i) => { el.classList.add('pick'); el.onclick = () => choose(i); el.onmouseenter = () => setCursor(i); });
+  phase = 'choose'; cursor = Math.floor(N / 2); setCursor(cursor); ui();
+}
+function setCursor(i){
+  if (phase !== 'choose') return;
+  const av = wall.map((el, k) => el.isConnected && !el._taken ? k : -1).filter(k => k >= 0); if (!av.length) return;
+  if (!av.includes(i)) i = av.reduce((b, k) => Math.abs(k - i) < Math.abs(b - i) ? k : b, av[0]);
+  cursor = i; wall.forEach((el, k) => el.classList.toggle('cur', k === i));
+}
+function moveCursor(d){
+  const av = wall.map((el, k) => !el._taken ? k : -1).filter(k => k >= 0); if (!av.length) return;
+  let idx = av.indexOf(cursor); idx = (idx + d + av.length) % av.length; setCursor(av[idx]);
+}
+async function choose(i){
+  if (phase !== 'choose' || wall[i]._taken) return;
+  const el = wall[i]; el._taken = true; el.classList.remove('pick', 'cur'); el.onclick = null;
+  const k = picks.length; picks.push(el._t);
+  const slot = $('slot' + k), a = el.getBoundingClientRect();
+  sfx('clack');
+  const big = tileEl(el._t, true); big.classList.add('big'); slot.append(big);
+  const b = big.getBoundingClientRect();
+  el.style.visibility = 'hidden';
+  if (picks.length >= D.mode){ phase = 'reveal'; ui(); } else { moveCursor(1); }
+  await big.animate([{ transform: `translate(${a.left - b.left}px,${a.top - b.top}px) scale(${a.width / b.width})` }, { transform: 'none' }], { duration: 650, easing: EASE }).finished;
+  if (picks.length >= D.mode && k === D.mode - 1) await revealAll();
+}
+async function auto(){
+  if (phase === 'idle' || phase === 'done'){ await cut(); }
+  if (phase !== 'choose') return;
+  while (phase === 'choose' && picks.length < D.mode){
+    const av = wall.map((el, k) => !el._taken ? k : -1).filter(k => k >= 0);
+    setCursor(pick(av)); await sleep(380); await choose(cursor); await sleep(250);
+  }
+}
+async function revealAll(){
+  await sleep(400);
+  for (let k = 0; k < picks.length; k++){
+    const slot = $('slot' + k), el = slot.querySelector('.tile');
+    await el.animate([{ transform: 'none' }, { transform: 'scaleY(.04) translateY(40px)' }], { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished;
+    el.classList.remove('down');
+    sfx('flip');
+    await el.animate([{ transform: 'scaleY(.04) translateY(40px)' }, { transform: 'scaleY(1.06)' }, { transform: 'none' }], { duration: 420, easing: EASE, fill: 'forwards' }).finished;
+    fillPos(k, picks[k]);
+    if (!D.got[picks[k].id]){ D.got[picks[k].id] = 1; toast(T('got') + tName(picks[k], D.lang)); } else D.got[picks[k].id]++;
+    await sleep(650);
+  }
+  reading();
+  phase = 'done'; ui();
+}
+
+/* ================= SPREAD / READING ================= */
+function resetSpread(){
+  const box = $('spread'); box.replaceChildren();
+  const names = D.mode === 3 ? T('pos3') : T('pos1');
+  names.forEach((nm, k) => {
+    const p = H('div', 'pos'); p.id = 'pos' + k;
+    p.append(H('h4', '', nm)); const s = H('div', 'slot'); s.id = 'slot' + k; p.append(s);
+    p.append(H('div', 'pn'), H('div', 'pk'), H('div', 'pm')); box.append(p);
+  });
+}
+function fillPos(k, t){
+  const p = $('pos' + k); p.classList.add('filled');
+  p.querySelector('.pn').textContent = tName(t, D.lang);
+  p.querySelector('.pk').textContent = keyword(t, D.lang);
+  p.querySelector('.pm').textContent = meaning(t, D.lang);
+}
+function yaku(ts){
+  if (ts.length < 3) return null;
+  const ids = ts.map(t => t.id);
+  if (['z5', 'z6', 'z7'].every(i => ids.includes(i))) return 'dragon';
+  if (ids[0] === ids[1] && ids[1] === ids[2]) return 'pung';
+  if (ts.every(t => t.s === 'z' && t.n <= 4) && new Set(ids).size === 3) return 'wind';
+  if (ts.every(t => t.s === 'z')) return 'honor';
+  if (ts.every(t => t.s === ts[0].s && t.s !== 'z')){ const n = ts.map(t => t.n).sort((a, b) => a - b); if (n[1] === n[0] + 1 && n[2] === n[1] + 1) return 'chow'; }
+  if (new Set(ids).size < 3) return 'pair';
+  return null;
+}
+function reading(){
+  const ts = picks, J = D.lang === 'ja';
+  const cnt = { m: 0, p: 0, s: 0, z: 0 }; ts.forEach(t => cnt[t.s]++);
+  let dom = Object.keys(cnt).find(k => cnt[k] >= 2) || (ts.length === 1 ? ts[0].s : 'mix');
+  let text = '';
+  const q = $('qin').value.trim(); if (q) text += T('q2', q) + '<br>';
+  text += T('sum')[dom];
+  if (ts.length === 3) text += ' ' + T('flow', keyword(ts[0], D.lang).split(' · ')[0], keyword(ts[2], D.lang).split(' · ')[0]);
+  const y = yaku(ts);
+  $('yaku').textContent = y ? '🀄 ' + T('yk')[y][0] : '';
+  if (y){ text += '<br><b>' + T('yk')[y][1] + '</b>'; sfx('yaku'); sparkle(y === 'dragon' ? 160 : 70); D.ach[y] = 1; }
+  else sfx('chime');
+  $('rP').innerHTML = text; $('rT').textContent = T('rT');
+  const L = T('dirs'), C = T('cols'), sumN = ts.reduce((a, t) => a + t.n, 0);
+  $('lucky').innerHTML = `<span><em>${T('lucky')}</em></span><span><em>${T('dir')}</em>${L[sumN % 4]}</span><span><em>${T('col')}</em>${C[(sumN + ts.length) % C.length]}</span><span><em>${T('num')}</em>${sumN % 9 + 1}</span>`;
+  $('reading').classList.add('show');
+  D.draws++; D.hist.unshift({ d: new Date().toISOString().slice(0, 16).replace('T', ' '), ids: ts.map(t => t.id), q, y }); if (D.hist.length > 30) D.hist.length = 30;
+  save();
+  setTimeout(() => $('reading').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300);
+}
+
+/* ================= FX ================= */
+const fxc = $('fx'), fx = fxc.getContext('2d'); let parts = [], fxOn = false;
+function sparkle(n){
+  fxc.width = innerWidth; fxc.height = innerHeight;
+  for (let i = 0; i < n; i++) parts.push({ x: rnd() * innerWidth, y: innerHeight + 10, vy: -(1.2 + rnd() * 2.4), vx: (rnd() - .5) * .6, r: 1 + rnd() * 2.4, life: 1, d: .003 + rnd() * .004 });
+  if (fxOn) return; fxOn = true;
+  const st = () => { fx.clearRect(0, 0, fxc.width, fxc.height); parts = parts.filter(p => p.life > 0);
+    fx.globalCompositeOperation = 'lighter';
+    parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= p.d; fx.globalAlpha = Math.max(0, p.life); fx.fillStyle = '#ffd98a'; fx.beginPath(); fx.arc(p.x, p.y, p.r, 0, 7); fx.fill(); });
+    fx.globalCompositeOperation = 'source-over'; fx.globalAlpha = 1;
+    if (parts.length) requestAnimationFrame(st); else { fxOn = false; fx.clearRect(0, 0, fxc.width, fxc.height); } };
+  requestAnimationFrame(st);
+}
+function toast(m){ const t = H('div', 'toast', m); $('toasts').append(t); setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 550); }, 3200); }
+
+/* ================= BOOK ================= */
+function openBook(){
+  const n = Object.keys(D.got).length;
+  $('mT').textContent = T('mT'); $('mP').textContent = T('mP', n, TILES.length, D.draws);
+  const b = $('book'); b.replaceChildren(); $('bdet').textContent = '';
+  TILES.forEach(t => {
+    const c = H('div', 'bk' + (D.got[t.id] ? '' : ' lock')); c.innerHTML = face(t) + (D.got[t.id] ? `<i>×${D.got[t.id]}</i>` : '');
+    c.onclick = () => { $('bdet').innerHTML = D.got[t.id] ? `<b>${tName(t, D.lang)}</b>（${keyword(t, D.lang)}）<br>${meaning(t, D.lang)}` : '？'; };
+    b.append(c);
+  });
+  const h = $('hist'); h.replaceChildren();
+  D.hist.forEach(x => { const d = H('div'); d.innerHTML = `<em>${x.d}</em>${x.ids.map(id => tName(TILES.find(t => t.id === id), D.lang)).join(' ・ ')}${x.y ? ' 🀄 ' + T('yk')[x.y][0] : ''}${x.q ? ' — ' + x.q.replace(/[<>&]/g, '') : ''}`; h.append(d); });
+  $('mReset').textContent = T('reset');
+  $('modal').classList.add('show');
+}
+
+/* ================= GUIDE ================= */
+const mini = ids => `<span class="gtiles">${ids.map(id => `<span>${face(TILES.find(t => t.id === id))}</span>`).join('')}</span>`;
+const GUIDE = {
+  ja: { title:'📜 麻雀牌占いの手引き', btn:'📜 遊び方', close:'はじめる', no:'次回から自動で表示しない',
+    tabs:['麻雀牌占いとは','占い方','牌の意味','役（特別な組み合わせ）','操作'],
+    pages:[
+`<h4>🀄 麻雀牌占いとは</h4>
+麻雀牌を伏せて混ぜ、直感で選んだ牌から今の自分へのメッセージを読み解く占いです。雰囲気はタロット占いに近く、<b>1 枚ずつに意味</b>があり、<b>並んだ位置</b>（過去・現在・未来）で読み方が変わります。
+<h4>麻雀を知らなくても大丈夫</h4>
+麻雀のルールは一切不要です。牌の絵柄を覚える必要もなく、引いた牌の名前と意味はすべて画面に表示されます。
+<div class="note">※ 麻雀牌を使った占いは中国などに伝わる習わしとされていますが、決まった作法はありません。この占いの牌の意味は MeridiPlay オリジナルの解釈です。娯楽としてお楽しみください。</div>`,
+`<h4>🙏 占い方</h4>
+<ol>
+<li><b>問いを思い浮かべる</b>：占いたいことを入力欄に書きます（空欄でも OK）。</li>
+<li><b>牌を切る</b>：雀卓の上で牌がジャラジャラと混ざり（洗牌）、一列に並びます。</li>
+<li><b>牌を選ぶ</b>：心が惹かれる牌を選びます。理屈ではなく直感で。迷ったら「おまかせで引く」。</li>
+<li><b>読み解く</b>：牌が 1 枚ずつ表になり、意味と全体のメッセージが現れます。</li>
+</ol>
+<h4>2 つの引き方</h4>
+<ul>
+<li><b>🀄 三枚引き</b>：左から「過去・現在・未来」。流れを知りたいときに。</li>
+<li><b>🀅 今日の一牌</b>：1 枚だけ。朝の運試しや、ひとことの助言がほしいときに。</li>
+</ul>
+<div class="note">吉兆（吉方・吉色・吉数）は、引いた牌の数字から導いています。</div>`,
+`<h4>🀇 牌の種類 ＝ テーマ</h4>
+<table class="gtbl">
+<tr><th>種類</th><th>見た目</th><th>テーマ</th></tr>
+<tr><td>萬子（マンズ）</td><td>${mini(['m1','m5','m9'])}</td><td>財と仕事</td></tr>
+<tr><td>筒子（ピンズ）</td><td>${mini(['p1','p5','p9'])}</td><td>心と人の縁</td></tr>
+<tr><td>索子（ソーズ）</td><td>${mini(['s1','s5','s9'])}</td><td>成長と健やかさ</td></tr>
+<tr><td>字牌（ジハイ）</td><td>${mini(['z1','z5','z6','z7'])}</td><td>天の巡り（特別な意味）</td></tr>
+</table>
+<h4>数字 ＝ キーワード</h4>
+<table class="gtbl">
+<tr><td>1 始まり</td><td>2 縁</td><td>3 芽吹き</td></tr>
+<tr><td>4 土台</td><td>5 転機</td><td>6 調和</td></tr>
+<tr><td>7 内省</td><td>8 広がり</td><td>9 成就</td></tr>
+</table>
+<div class="note">例：「三索」＝ 成長と健やかさ × 芽吹き → 学んだことをすぐ試すと伸びる時。</div>
+<h4>字牌</h4>
+<table class="gtbl">
+<tr><td>${mini(['z1'])}</td><td>東：始まりに追い風</td><td>${mini(['z2'])}</td><td>南：明るさと勢い</td></tr>
+<tr><td>${mini(['z3'])}</td><td>西：実りと休息</td><td>${mini(['z4'])}</td><td>北：静けさと蓄え</td></tr>
+<tr><td>${mini(['z5'])}</td><td>白：何でも描ける余白</td><td>${mini(['z6'])}</td><td>發：発展の兆し</td></tr>
+<tr><td>${mini(['z7'])}</td><td>中：狙いが定まる</td><td></td><td></td></tr>
+</table>
+<div class="note">この占いに「凶」の牌はありません。どの牌も前向きな助言です。</div>`,
+`<h4>✨ 役（三枚引きで偶然そろう組み合わせ）</h4>
+<table class="gtbl">
+<tr><th>役</th><th>例</th><th>意味</th></tr>
+<tr><td><b>大三元</b></td><td>${mini(['z5','z6','z7'])}</td><td>白・發・中。滅多に出ない大吉の兆し</td></tr>
+<tr><td>刻子（コーツ）</td><td>${mini(['p3','p3','p3'])}</td><td>同じ牌が 3 枚。強い意志が道を貫く</td></tr>
+<tr><td>順子（シュンツ）</td><td>${mini(['m4','m5','m6'])}</td><td>同じ種類の連番。物事が順調に進む</td></tr>
+<tr><td>風牌三枚</td><td>${mini(['z1','z2','z4'])}</td><td>変化を味方につける時</td></tr>
+<tr><td>字牌三枚</td><td>${mini(['z1','z5','z7'])}</td><td>大きな流れの中にいる</td></tr>
+<tr><td>対子（トイツ）</td><td>${mini(['s7','s7','m2'])}</td><td>同じ牌が 2 枚。良き相棒との巡り合わせ</td></tr>
+</table>
+<div class="note">牌は 34 種 × 4 枚 ＝ 136 枚の本物の構成から混ぜているので、同じ牌が出ることもあります。役がそろうと金色の光が舞います。</div>`,
+`<h4>⌨️ 操作</h4>
+<table class="gtbl">
+<tr><td><b>Space</b></td><td>牌を切る ／ 選択中なら「おまかせ」</td></tr>
+<tr><td><b>← →</b></td><td>牌を選ぶ</td></tr>
+<tr><td><b>Enter</b></td><td>選んだ牌を引く</td></tr>
+<tr><td><b>M</b></td><td>三枚引き ⇔ 今日の一牌</td></tr>
+<tr><td><b>B</b></td><td>📖 牌譜帳（集めた牌と履歴）</td></tr>
+<tr><td><b>Esc</b></td><td>画面を閉じる</td></tr>
+</table>
+<h4>📖 牌譜帳</h4>
+出会った牌が図鑑に記録されます。牌をクリックすると意味をいつでも読み返せます。34 種コンプリートを目指してみてください。
+<div class="note">🥚 隠しコマンドもあります……。</div>`]
+  },
+  en: { title:'📜 Mahjong Oracle Guide', btn:'📜 How to play', close:'Begin', no:"Don't show this automatically again",
+    tabs:['What is it?','How to read','Tile meanings','Special combos','Controls'],
+    pages:[
+`<h4>🀄 What is the Mahjong Oracle?</h4>
+You shuffle face-down mahjong tiles and choose by intuition. Like tarot, <b>each tile has a meaning</b> and its <b>position</b> (past · present · future) shapes the reading.
+<h4>No mahjong knowledge needed</h4>
+You don't need to know any rules or tile designs. Every tile's name and meaning is shown on screen.
+<div class="note">Mahjong divination is said to be a folk tradition, but there is no single fixed method. The meanings here are MeridiPlay's own interpretation — enjoy it as entertainment.</div>`,
+`<h4>🙏 How to read</h4>
+<ol>
+<li><b>Hold a question</b> in mind (typing it is optional).</li>
+<li><b>Shuffle the tiles</b> — they clatter across the table, then line up.</li>
+<li><b>Choose</b> the tiles that call to you. Trust intuition, or press "Pick for me".</li>
+<li><b>Read</b> — tiles flip one by one and the message appears.</li>
+</ol>
+<h4>Two spreads</h4>
+<ul><li><b>🀄 Three tiles</b>: Past · Present · Future.</li><li><b>🀅 Tile of the day</b>: a single word of advice.</li></ul>`,
+`<h4>🀇 Suit = theme</h4>
+<table class="gtbl">
+<tr><td>Characters</td><td>${mini(['m1','m5','m9'])}</td><td>Wealth &amp; work</td></tr>
+<tr><td>Circles</td><td>${mini(['p1','p5','p9'])}</td><td>Heart &amp; relationships</td></tr>
+<tr><td>Bamboo</td><td>${mini(['s1','s5','s9'])}</td><td>Growth &amp; wellbeing</td></tr>
+<tr><td>Honors</td><td>${mini(['z1','z5','z6','z7'])}</td><td>The turning of heaven</td></tr>
+</table>
+<h4>Number = keyword</h4>
+<table class="gtbl"><tr><td>1 Beginning</td><td>2 Connection</td><td>3 Growth</td></tr><tr><td>4 Foundation</td><td>5 Turning point</td><td>6 Harmony</td></tr><tr><td>7 Reflection</td><td>8 Expansion</td><td>9 Fulfillment</td></tr></table>
+<div class="note">There are no "bad" tiles — every tile gives positive advice.</div>`,
+`<h4>✨ Special combos (three-tile spread)</h4>
+<table class="gtbl">
+<tr><td><b>Big Three Dragons</b></td><td>${mini(['z5','z6','z7'])}</td><td>Rare sign of great fortune</td></tr>
+<tr><td>Pung</td><td>${mini(['p3','p3','p3'])}</td><td>Three of a kind: strong will</td></tr>
+<tr><td>Chow</td><td>${mini(['m4','m5','m6'])}</td><td>A run: smooth progress</td></tr>
+<tr><td>Three Winds</td><td>${mini(['z1','z2','z4'])}</td><td>Make change your ally</td></tr>
+<tr><td>Three Honors</td><td>${mini(['z1','z5','z7'])}</td><td>A great current</td></tr>
+<tr><td>Pair</td><td>${mini(['s7','s7','m2'])}</td><td>A good partner appears</td></tr>
+</table>`,
+`<h4>⌨️ Controls</h4>
+<table class="gtbl"><tr><td><b>Space</b></td><td>Shuffle / pick for me</td></tr><tr><td><b>← →</b></td><td>Choose a tile</td></tr><tr><td><b>Enter</b></td><td>Take the tile</td></tr><tr><td><b>M</b></td><td>Switch spread</td></tr><tr><td><b>B</b></td><td>Tile book</td></tr><tr><td><b>Esc</b></td><td>Close</td></tr></table>
+<div class="note">🥚 There are hidden commands, too…</div>`]
+  }
+};
+let gPage = 0;
+function renderGuide(){
+  const G = GUIDE[D.lang];
+  $('gT').textContent = G.title; $('gClose').textContent = G.close; $('gNoL').textContent = G.no; $('gNo').checked = !!D.noGuide;
+  const tb = $('gTabs'); tb.replaceChildren();
+  G.tabs.forEach((n, i) => { const b = H('button', 'tg' + (i === gPage ? ' on' : ''), n); b.onclick = () => { gPage = i; renderGuide(); }; tb.append(b); });
+  $('gBody').innerHTML = `<div class="gpage">${G.pages[gPage]}</div>`;
+  $('gPrev').disabled = gPage === 0; $('gNext').disabled = gPage === G.pages.length - 1;
+}
+function openGuide(p = 0){ gPage = p; renderGuide(); $('guide').classList.add('show'); }
+function closeGuide(){ $('guide').classList.remove('show'); D.noGuide = $('gNo').checked; save(); }
+
+/* ================= UI ================= */
+function ui(){
+  const m = $('bMain'), a = $('bAuto');
+  m.textContent = phase === 'done' ? T('again') : T('cut');
+  m.disabled = !(phase === 'idle' || phase === 'done');
+  a.textContent = T('pickBtn'); a.disabled = !(phase === 'idle' || phase === 'done' || phase === 'choose');
+  $('msg').textContent = phase === 'idle' || phase === 'done' ? (phase === 'idle' ? T('idle') : '') : phase === 'choose' ? T('choose', D.mode - picks.length) : phase === 'wash' ? T('washing') : '';
+}
+function apply(){
+  document.documentElement.lang = D.lang;
+  $('bT').textContent = T('title');
+  $('tLang').textContent = D.lang === 'ja' ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇'; $('tSound').classList.toggle('on', D.sound);
+  $('tMode').textContent = T('mode', D.mode); $('tBook').textContent = T('book'); $('tGuide').textContent = GUIDE[D.lang].btn;
+  if ($('guide').classList.contains('show')) renderGuide();
+  $('qin').placeholder = T('q'); $('hint').textContent = T('hint');
+  if (phase === 'idle' || phase === 'done'){ const keep = phase === 'done' ? picks.slice() : []; resetSpread(); if (phase === 'done'){ keep.forEach((t, k) => { const el = tileEl(t, false); el.classList.add('big'); $('slot' + k).append(el); fillPos(k, t); }); reading(); D.draws--; D.hist.shift(); save(); } }
+  ui(); save();
+}
+
+/* ================= EVENTS ================= */
+$('bMain').onclick = cut;
+$('bAuto').onclick = () => { try { ac(); } catch(e){} auto(); };
+$('tLang').onclick = () => { D.lang = D.lang === 'ja' ? 'en' : 'ja'; apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; try { ac(); } catch(e){} apply(); sfx('clack'); };
+$('tMode').onclick = () => { if (phase !== 'idle' && phase !== 'done') return; D.mode = D.mode === 3 ? 1 : 3; phase = 'idle'; picks = []; $('reading').classList.remove('show'); mat.querySelectorAll('.tile').forEach(t => t.remove()); apply(); };
+$('tBook').onclick = openBook;
+$('tGuide').onclick = () => openGuide(0);
+$('gClose').onclick = closeGuide;
+$('gPrev').onclick = () => { if (gPage > 0){ gPage--; renderGuide(); } };
+$('gNext').onclick = () => { if (gPage < GUIDE[D.lang].pages.length - 1){ gPage++; renderGuide(); } };
+$('guide').onclick = e => { if (e.target.id === 'guide') closeGuide(); };
+$('mClose').onclick = () => $('modal').classList.remove('show');
+$('modal').onclick = e => { if (e.target.id === 'modal') $('modal').classList.remove('show'); };
+$('mReset').onclick = () => { if (!confirm(T('confirm'))) return; D.got = {}; D.hist = []; D.draws = 0; D.ach = {}; save(); openBook(); };
+$('qin').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && !e.isComposing){ e.preventDefault(); $('qin').blur(); if (phase === 'idle' || phase === 'done') cut(); } });
+const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+let buf = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ($('guide').classList.contains('show')){
+    if (k === 'escape' || k === 'enter'){ e.preventDefault(); closeGuide(); }
+    else if (k === 'arrowright') $('gNext').click(); else if (k === 'arrowleft') $('gPrev').click();
+    return;
+  }
+  if ($('modal').classList.contains('show')){ if (k === 'escape') $('modal').classList.remove('show'); return; }
+  if (k === '?' || k === 'g'){ openGuide(0); return; }
+  if (e.repeat && k !== 'arrowleft' && k !== 'arrowright') return;
+  buf.push(k); if (buf.length > 12) buf.shift();
+  const word = buf.filter(x => x.length === 1).join('');
+  if (buf.slice(-10).join() === KONAMI.join()){ buf = []; document.body.classList.toggle('gold'); toast(T('gold')); sparkle(80); return; }
+  if (word.endsWith('kokushi')){ buf = []; toast(T('kokushi')); sparkle(50); return; }
+  if (phase === 'choose'){
+    if (k === 'arrowleft'){ e.preventDefault(); moveCursor(-1); return; }
+    if (k === 'arrowright'){ e.preventDefault(); moveCursor(1); return; }
+    if (k === 'enter'){ e.preventDefault(); choose(cursor); return; }
+  }
+  if (k === ' '){ e.preventDefault(); try { ac(); } catch(err){} if (phase === 'idle' || phase === 'done') cut(); else if (phase === 'choose') auto(); }
+  else if (k === 'enter' && (phase === 'idle' || phase === 'done')){ try { ac(); } catch(err){} cut(); }
+  else if (k === 'm') $('tMode').click();
+  else if (k === 'b') openBook();
+});
+
+/* ================= INIT ================= */
+resetSpread(); apply();
+if (!D.noGuide) setTimeout(() => openGuide(0), 400);
+// 卓に飾りの牌を少し伏せて置く
+(() => { const { w, h } = matSize(); for (let i = 0; i < 9; i++){ const el = tileEl(TILES[ri(34)]); place(el, w / 2 - 240 + i * 58, h / 2 - 40, (rnd() - .5) * 6); mat.append(el); } })();
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

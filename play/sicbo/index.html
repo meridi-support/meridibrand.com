@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — SIC BO 大小</title>
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--g:#39ff14;--pg:#020604;--ink:#d8ffd0;--line:#39ff1433;--panel:#000b;--acc:#39ff14;--felt1:#0b3a1c;--felt2:#021208;--gold:#e8c26a;--red:#e0392e;--blu:#2f7ae8}
+body.light{--pg:#ece8df;--ink:#24201a;--line:#7a5a3a44;--panel:#fffaf0dd;--acc:#1f7a3a;--felt1:#2f7a46;--felt2:#174d2a}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:var(--pg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;overflow-x:hidden;transition:background .6s var(--E),color .6s}
+header{position:relative;z-index:3;display:flex;align-items:center;gap:7px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7;margin-right:4px;color:inherit;text-decoration:none}
+.home:hover{opacity:1;color:var(--acc)}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:10px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+body.light .brand b{color:#1f7a3a;text-shadow:none}
+.brand span{font:bold 13px Georgia,serif;letter-spacing:4px}
+.tg{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.wrap{display:flex;gap:18px;justify-content:center;padding:16px 10px 34px;flex-wrap:wrap;align-items:flex-start}
+.main{width:min(860px,97vw)}
+.table{position:relative;border-radius:22px;padding:16px 14px 16px;background:radial-gradient(ellipse at 50% 20%,var(--felt1),var(--felt2));box-shadow:inset 0 0 80px #000a,0 26px 60px #000b,0 0 0 8px #3a2410,0 0 0 11px #120a04,0 0 0 12px #c9a46e55}
+.dome{position:relative;border-radius:16px;overflow:hidden;box-shadow:inset 0 0 0 3px #24130a,0 2px 0 #ffffff12}
+.dome::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 32% 18%,#ffffff26,transparent 32%),radial-gradient(ellipse at 50% 50%,transparent 55%,#0007 100%)}
+#cv{display:block;width:100%;cursor:pointer;touch-action:manipulation}
+.ov{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;pointer-events:none;padding-top:12px;z-index:2}
+.res{display:flex;gap:10px;align-items:center;font:bold 22px Georgia,serif;color:#fff4c8;text-shadow:0 2px 6px #000;opacity:0;transform:translateY(-8px);transition:opacity .5s,transform .7s var(--E);background:#000a;border:1px solid #f2dca055;border-radius:22px;padding:5px 18px}
+.res.on{opacity:1;transform:none}
+.res .tag{font:bold 13px 'Hiragino Sans','Yu Gothic',sans-serif;padding:2px 10px;border-radius:10px}
+.res .tag.B{background:var(--red);color:#fff}.res .tag.S{background:var(--blu);color:#fff}.res .tag.T{background:var(--gold);color:#2a1a00}
+.log{min-height:22px;margin:10px 4px 8px;text-align:center;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;color:#f6e8c8;line-height:1.6}
+.log b{color:#ffe08a}
+.lay{display:flex;flex-direction:column;gap:6px}
+.row{display:grid;gap:5px}
+.r1{grid-template-columns:1.6fr 1fr 2.4fr 1fr 1.6fr}
+.r6{grid-template-columns:repeat(6,1fr)}
+.r14{grid-template-columns:repeat(14,1fr)}
+.r15{grid-template-columns:repeat(15,1fr)}
+.cell{position:relative;border-radius:9px;border:1.5px solid #f2dca055;color:#f6eedc;text-align:center;padding:6px 2px 18px;cursor:pointer;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .3s var(--E),box-shadow .5s var(--E),background .5s;background:#ffffff06;user-select:none;-webkit-user-select:none}
+.cell:hover{transform:translateY(-2px);border-color:#ffe08a99}
+.cell b{font:bold 15px Georgia,serif;letter-spacing:1px;line-height:1.1}
+.cell .dd{font-size:19px;line-height:1;letter-spacing:-1px}
+.cell .dd.s{font-size:15px}
+.cell small{font:9.5px 'Courier New',monospace;opacity:.75;margin-top:2px}
+.cell .amt{position:absolute;left:50%;bottom:3px;transform:translateX(-50%);font:bold 10.5px 'Courier New',monospace;color:#ffe08a;background:#000b;border-radius:8px;padding:0 6px;opacity:0;transition:opacity .3s;white-space:nowrap}
+.cell .amt.on{opacity:1}
+.cell.big2{background:#e0392e22;border-color:#e0392e99}.cell.small2{background:#2f7ae822;border-color:#2f7ae899}
+.cell.lit{box-shadow:0 0 0 2px #ffe08a,0 0 18px #ffd24a88;background:#ffe08a22}
+.cell.lock{cursor:default;transform:none}
+.sec{font:10px 'Courier New',monospace;letter-spacing:2px;color:#f2dca088;margin:4px 2px -2px}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.chip{width:46px;height:46px;border-radius:50%;border:4px dashed #fff9;font:bold 11px 'Courier New',monospace;color:#fff;cursor:pointer;box-shadow:0 3px 0 #0008;transition:transform .25s var(--E),box-shadow .25s;text-shadow:0 1px 1px #000}
+.chip.on{transform:translateY(-5px);box-shadow:0 0 0 2px #ffe08a,0 8px 10px #0009}
+.ctl{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{flex:1;min-width:92px;border:2px solid #3a2408;border-radius:12px;padding:11px 8px;cursor:pointer;font:bold 14px 'Hiragino Sans','Yu Gothic',sans-serif;color:#2a1406;background:linear-gradient(180deg,#ffe9b8,#e8c27a 50%,#c8964a);box-shadow:0 4px 0 #5a3410,0 6px 10px #0008;transition:transform .08s,box-shadow .08s,filter .3s}
+.btn small{display:block;font-size:10px;font-weight:normal;opacity:.7}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #5a3410}
+.btn:disabled{filter:grayscale(.85) brightness(.55);cursor:default}
+.btn.go{background:linear-gradient(180deg,#ffd0c8,#e8392a 50%,#a81a10);color:#fff;border-color:#5a0a04;box-shadow:0 4px 0 #5a0a04,0 6px 10px #0008}
+.bank{display:flex;justify-content:space-between;margin-top:12px;font:bold 14px 'Courier New',monospace;color:#f6dfae}
+.bank b{color:#ffe08a;font-size:19px}
+.side{width:320px;max-width:97vw;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel h3{font:bold 12px 'Courier New',monospace;letter-spacing:3px;color:var(--acc);margin-bottom:9px}
+.lbl{font-size:11px;opacity:.7;margin:7px 0 4px}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{flex:1;min-width:56px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 4px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;transition:all .3s var(--E)}
+.seg button.on{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
+.seg button small{display:block;font-size:9.5px;opacity:.65}
+.hist{display:flex;flex-direction:column;gap:3px;max-height:230px;overflow:auto}
+.hr{display:flex;align-items:center;gap:8px;font:12px 'Courier New',monospace;animation:hin .6s var(--E) both}
+@keyframes hin{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.hr .d{font-size:18px;letter-spacing:-1px}
+.hr .t{min-width:22px;text-align:right;font-weight:bold}
+.hr .k{font:bold 10px 'Hiragino Sans','Yu Gothic',sans-serif;padding:1px 7px;border-radius:8px;color:#fff}
+.hr .k.B{background:var(--red)}.hr .k.S{background:var(--blu)}.hr .k.T{background:var(--gold);color:#2a1a00}
+.histo{display:flex;align-items:flex-end;gap:2px;height:60px;border-bottom:1px solid var(--line);margin-top:6px}
+.histo i{flex:1;background:var(--acc);opacity:.7;border-radius:2px 2px 0 0;min-height:1px;transition:height .6s var(--E)}
+.histo i.ex{background:transparent;border:1px dashed var(--line);opacity:1}
+.hx{display:flex;justify-content:space-between;font:9px 'Courier New',monospace;opacity:.6}
+.st{font:11.5px 'Courier New',monospace;line-height:1.75}
+.kb{font:10.5px 'Courier New',monospace;opacity:.55;line-height:1.7}
+.mini{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--ink);font:bold 13px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.help{position:fixed;inset:0;z-index:80;background:#000b;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s var(--E);padding:14px}
+.help.show{opacity:1;pointer-events:auto}
+.hbox{width:min(720px,100%);max-height:88vh;overflow:auto;background:#030a05f4;color:#d8ffd0;border:1px solid var(--acc);border-radius:16px;padding:18px 22px;transform:translateY(14px);transition:transform .6s var(--E)}
+body.light .hbox{background:#fffaf0f6;color:#24201a}
+.help.show .hbox{transform:none}
+.htabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.htabs button{background:transparent;color:inherit;border:1px solid var(--line);border-radius:14px;padding:6px 12px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.htabs button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.hc{font-size:13.5px;line-height:1.85}
+.hc h4{color:var(--acc);margin:12px 0 4px;font-size:14px}
+.hc ol,.hc ul{padding-left:22px}
+.hc table{border-collapse:collapse;margin:6px 0;font-size:12.5px}
+.hc td,.hc th{border:1px solid var(--line);padding:3px 8px;text-align:left}
+.toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-10px);background:#020604ee;border:1px solid var(--acc);color:#d8ffd0;padding:10px 22px;border-radius:22px;font-size:14px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:90;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:680px){.r14{grid-template-columns:repeat(7,1fr)}.r15{grid-template-columns:repeat(5,1fr)}.r1{grid-template-columns:1fr 1fr 1fr}.r1 .cell.any{grid-column:span 3;order:-1}.cell b{font-size:13px}.cell .dd{font-size:16px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="../">← MeridiPlay</a>
+  <div class="brand"><b>MERIDIPLAY</b><span>SIC BO · 大小</span></div>
+  <button class="tg" id="tHelp">📖</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<div class="wrap">
+  <div class="main">
+    <div class="table">
+      <div class="dome"><canvas id="cv"></canvas><div class="ov"><div class="res" id="res"></div></div></div>
+      <div class="log" id="log"></div>
+      <div class="lay" id="lay"></div>
+      <div class="chips" id="chips"></div>
+      <div class="ctl">
+        <button class="btn" id="bClear"></button>
+        <button class="btn" id="bRebet"></button>
+        <button class="btn" id="bDbl"></button>
+        <button class="btn go" id="bRoll"></button>
+      </div>
+      <div class="bank"><span><span id="lBank"></span> <b id="bank">0</b></span><span><span id="lBet"></span> <b id="betSum">0</b></span></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><h3 id="hHist"></h3><div class="hist" id="hist"></div></div>
+    <div class="panel"><h3 id="hSt"></h3><div class="st" id="st"></div><div class="histo" id="histo"></div><div class="hx"><span>3</span><span>10 | 11</span><span>18</span></div><button class="mini" id="bRefill" style="display:none"></button></div>
+    <div class="panel"><h3 id="hSet"></h3>
+      <div class="lbl" id="lExp"></div><div class="seg" id="sExp"></div>
+      <div class="lbl" id="lShow"></div><div class="seg" id="sShow"></div>
+    </div>
+    <div class="kb" id="kb"></div>
+  </div>
+</div>
+<div class="help" id="help"><div class="hbox"><div class="htabs" id="htabs"></div><div class="hc" id="hc"></div><button class="mini" id="hClose"></button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+
+/* ================= 保存 ================= */
+const LS = 'meridiplay_sicbo_v1';
+let D = { lang:'ja', sound:true, theme:'dark', exp:1, show:1, bank:10000, chip:100, last:{}, hist:[], tot:{}, rolls:0, best:0, net:0, refills:0, seenHelp:false };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+try { const th = lsGet('meridiplay_theme'); if (th === 'light' || th === 'dark') D.theme = th; } catch(e){}
+if (!Array.isArray(D.hist)) D.hist = []; if (!D.tot || typeof D.tot !== 'object') D.tot = {}; if (!D.last || typeof D.last !== 'object') D.last = {};
+const save = () => { lsSet(LS, JSON.stringify(D)); lsSet('meridiplay_theme', D.theme); };
+
+/* ================= 賭け場所（マカオの標準的な配当） ================= */
+const F = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+const TOTPAY = { 4:50, 5:18, 6:14, 7:12, 8:8, 9:6, 10:6, 11:6, 12:6, 13:8, 14:12, 15:14, 16:18, 17:50 };
+const isTriple = d => d[0] === d[1] && d[1] === d[2];
+const cnt = (d, n) => d.filter(x => x === n).length;
+const SPOTS = {};
+function def(id, o){ SPOTS[id] = Object.assign({ id }, o); }
+def('small', { j:'小', e:'SMALL', sub:'4〜10', pay:'1 : 1', m:d => { const s = d[0] + d[1] + d[2]; return !isTriple(d) && s >= 4 && s <= 10 ? 1 : 0; } });
+def('big',   { j:'大', e:'BIG', sub:'11〜17', pay:'1 : 1', m:d => { const s = d[0] + d[1] + d[2]; return !isTriple(d) && s >= 11 && s <= 17 ? 1 : 0; } });
+def('odd',   { j:'奇', e:'ODD', sub:'', pay:'1 : 1', m:d => !isTriple(d) && (d[0] + d[1] + d[2]) % 2 ? 1 : 0 });
+def('even',  { j:'偶', e:'EVEN', sub:'', pay:'1 : 1', m:d => !isTriple(d) && (d[0] + d[1] + d[2]) % 2 === 0 ? 1 : 0 });
+def('any3',  { j:'全圍', e:'ANY TRIPLE', sub:'', pay:'24 : 1', m:d => isTriple(d) ? 24 : 0 });
+for (let n = 1; n <= 6; n++){
+  def('t' + n, { dd:F[n].repeat(3), pay:'150 : 1', m:d => isTriple(d) && d[0] === n ? 150 : 0 });
+  def('d' + n, { dd:F[n].repeat(2), pay:'10 : 1', m:d => cnt(d, n) >= 2 ? 10 : 0 });
+  def('n' + n, { dd:F[n], pay:'1·2·3', m:d => cnt(d, n) });
+}
+for (let s = 4; s <= 17; s++) def('s' + s, { j:String(s), e:String(s), pay:TOTPAY[s] + ' : 1', m:d => d[0] + d[1] + d[2] === s ? TOTPAY[s] : 0 });
+const COMBOS = []; for (let a = 1; a <= 6; a++) for (let b = a + 1; b <= 6; b++){ COMBOS.push([a, b]); def(`c${a}${b}`, { dd:F[a] + F[b], pay:'5 : 1', m:d => d.includes(a) && d.includes(b) ? 5 : 0 }); }
+
+/* ================= 言葉 ================= */
+const UI = {
+  ja:{ hist:'出目の記録', st:'記録', set:'設定', exp:'表示モード', exps:[['シンプル','結果だけ'],['くわしく','当たった賭けも説明']], show:'当たり場所の光', shows:[['オフ','賭けた所だけ'],['オン','台全体を光らせる']],
+    bankL:'手持ち', betL:'賭け金', clear:['クリア','Backspace'], rebet:['同じ賭け','R'], dbl:['倍にする','X'], roll:['サイコロを振る','Enter'], refill:'両替する（10,000）',
+    sec:{ main:'大小・奇偶・三つ揃い', triple:'ゾロ目（3 つ同じ）', double:'2 つ同じ', total:'3 つの合計', combo:'2 つの組み合わせ', single:'1 つの目' },
+    place:'チップを置いて「サイコロを振る」', noBet:'賭けなしで振ります', short:'手持ちが足りません', rolling:'カップの中でサイコロが躍っています…',
+    tag:{ B:'大', S:'小', T:'ゾロ目' }, win:n => `＋${n.toLocaleString()} 勝ち！`, lose:n => `−${n.toLocaleString()}`, push:'±0', triple:'ゾロ目！ 大・小・奇・偶はハウスの勝ち',
+    why:{ small:'合計が 4〜10', big:'合計が 11〜17', odd:'合計が奇数', even:'合計が偶数', any3:'3 つとも同じ', t:n => `${n} のゾロ目`, d:n => `${n} が 2 つ以上`, n:(n, c) => `${n} が ${c} つ（${c} 倍）`, s:s => `合計 ${s}`, c:(a, b) => `${a} と ${b} の組み合わせ` },
+    stats:() => `振った回数 ${D.rolls} ／ 最大の勝ち ${D.best.toLocaleString()}<br>通算 ${D.net >= 0 ? '+' : ''}${D.net.toLocaleString()}`, histo:'合計の出方（点線は理論値）',
+    kb:'⌨ S：小 ／ B：大 ／ O：奇 ／ E：偶 ／ Enter：振る ／ R：同じ賭け ／ X：倍 ／ Backspace：クリア ／ 右クリック・長押し：チップを外す ／ ?：遊び方', close:'はじめる', theme:t => t === 'light' ? '🌙 ダーク' : '☀️ ノーマル' },
+  en:{ hist:'HISTORY', st:'STATS', set:'SETTINGS', exp:'DISPLAY MODE', exps:[['Simple','Result only'],['Detailed','Explain winning bets']], show:'WINNING LIGHTS', shows:[['Off','Your bets only'],['On','Light the whole table']],
+    bankL:'BANKROLL', betL:'BET', clear:['Clear','Backspace'], rebet:['Rebet','R'], dbl:['Double','X'], roll:['Roll the dice','Enter'], refill:'Buy in (10,000)',
+    sec:{ main:'BIG · SMALL · ODD · EVEN · TRIPLES', triple:'SPECIFIC TRIPLE', double:'SPECIFIC DOUBLE', total:'TOTALS', combo:'TWO-DICE COMBINATION', single:'SINGLE NUMBER' },
+    place:'Place chips, then roll', noBet:'Rolling with no bets', short:'Not enough chips', rolling:'The dice are dancing under the dome…',
+    tag:{ B:'BIG', S:'SMALL', T:'TRIPLE' }, win:n => `Won +${n.toLocaleString()}!`, lose:n => `−${n.toLocaleString()}`, push:'±0', triple:'Triple! Big, Small, Odd and Even lose',
+    why:{ small:'total 4–10', big:'total 11–17', odd:'odd total', even:'even total', any3:'all three match', t:n => `triple ${n}`, d:n => `two or more ${n}s`, n:(n, c) => `${c} × ${n} (pays ${c}:1)`, s:s => `total ${s}`, c:(a, b) => `${a} and ${b}` },
+    stats:() => `Rolls ${D.rolls} / Biggest win ${D.best.toLocaleString()}<br>Net ${D.net >= 0 ? '+' : ''}${D.net.toLocaleString()}`, histo:'Totals (dashed = expected)',
+    kb:'⌨ S: Small / B: Big / O: Odd / E: Even / Enter: roll / R: rebet / X: double / Backspace: clear / Right-click or long-press: remove chip / ?: help', close:'Start', theme:t => t === 'light' ? '🌙 Dark' : '☀️ Normal' }
+};
+const T = k => UI[D.lang][k];
+const J = () => D.lang === 'ja';
+
+/* ================= 音 ================= */
+let AC = null, master = null, NB = null;
+function ac(){ try { if (!AC){ AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .85; master.connect(AC.destination); const len = AC.sampleRate; NB = AC.createBuffer(1, len, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1; } if (AC.state === 'suspended') AC.resume(); } catch(e){} return AC; }
+function tone(f, t, d, v, type = 'sine', f2){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .003); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .03); }
+function noise(t, d, v, type, f, q = 1){ const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = NB; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); s.connect(fl); fl.connect(g); g.connect(master); s.start(t, Math.random() * .5); s.stop(t + d + .02); }
+function sfx(k, v = 1){
+  if (!D.sound || !AC) return;
+  try { const t = AC.currentTime;
+    if (k === 'clack'){ noise(t, .05, .45 * v, 'bandpass', 1400 + Math.random() * 500, 3); tone(260 + Math.random() * 60, t, .08, .08 * v, 'triangle'); }
+    else if (k === 'shake'){ for (let i = 0; i < 9; i++) noise(t + i * .04, .03, .22, 'bandpass', 2200 + Math.random() * 1400, 3); tone(140, t, .3, .03, 'sine'); }
+    else if (k === 'felt'){ noise(t, .05, .18 * v, 'lowpass', 600); }
+    else if (k === 'thud'){ noise(t, .07, .4 * v, 'lowpass', 420); tone(95, t, .12, .14 * v, 'sine', 60); noise(t, .025, .12 * v, 'bandpass', 1600, 3); }
+    else if (k === 'wall'){ noise(t, .04, .3 * v, 'bandpass', 900, 2); tone(180, t, .06, .05 * v, 'sine'); }
+    else if (k === 'chip'){ noise(t, .03, .25, 'bandpass', 4200, 4); tone(3100, t, .08, .02); noise(t + .05, .025, .15, 'bandpass', 3800, 4); }
+    else if (k === 'win'){ [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, t + i * .1, .9, .05, 'triangle')); }
+    else if (k === 'big'){ [523.3, 659.3, 784, 1046.5, 1318.5, 1568, 2093].forEach((f, i) => tone(f, t + i * .09, 1.3, .05, 'triangle')); }
+    else if (k === 'lose'){ tone(330, t, .4, .035, 'triangle', 220); }
+    else if (k === 'gong'){ tone(196, t, 2.4, .08, 'sine'); tone(293.7, t, 1.8, .03, 'sine'); tone(392, t + .02, 1.2, .02, 'triangle'); }
+  } catch(e){}
+}
+
+/* ================= 布とドーム ================= */
+const cv = $('cv'), cx = cv.getContext('2d');
+const CW = 760, CH = 300;
+let DPR = 1, sc = 1, feltImg = null;
+function size(){ DPR = Math.min(2, window.devicePixelRatio || 1); const w = cv.clientWidth || CW; sc = w / CW; cv.width = w * DPR; cv.height = w / CW * CH * DPR; buildFelt(); }
+function buildFelt(){
+  const c = document.createElement('canvas'); c.width = Math.max(1, cv.width); c.height = Math.max(1, cv.height); const g = c.getContext('2d'); g.scale(DPR * sc, DPR * sc);
+  const cs = getComputedStyle(document.body), f1 = cs.getPropertyValue('--felt1').trim() || '#0b3a1c', f2 = cs.getPropertyValue('--felt2').trim() || '#021208';
+  const gr = g.createRadialGradient(CW / 2, CH / 2, 20, CW / 2, CH / 2, CW * .6); gr.addColorStop(0, D.neo ? '#04220a' : f1); gr.addColorStop(1, D.neo ? '#000' : f2);
+  g.fillStyle = gr; g.fillRect(0, 0, CW, CH);
+  let s = 91; const R0 = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  for (let i = 0; i < 2600; i++){ g.fillStyle = `rgba(${R0() < .5 ? '0,0,0' : '255,255,255'},${R0() * .05})`; g.fillRect(R0() * CW, R0() * CH, 1.2, 1.2); }
+  g.strokeStyle = D.neo ? '#39ff1455' : '#e8c26a44'; g.lineWidth = 2; g.beginPath(); g.ellipse(CW / 2, CH / 2, CW * .46, CH * .44, 0, 0, Math.PI * 2); g.stroke();
+  g.lineWidth = 1; g.setLineDash([3, 6]); g.beginPath(); g.ellipse(CW / 2, CH / 2, CW * .43, CH * .40, 0, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+  g.fillStyle = D.neo ? '#39ff1420' : '#e8c26a1c'; g.font = 'bold 54px Georgia,serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(D.neo ? 'WAKE UP, NEO' : '大  ·  小', CW / 2, CH / 2);
+  g.font = 'bold 12px "Courier New",monospace'; g.fillText('🐾 MERIDI SIC BO', CW / 2, CH / 2 + 46);
+  feltImg = c;
+}
+
+/* ================= 立体のサイコロ（Shut the Box と共通） ================= */
+let dice = [], rolling = false;
+const DS = 52, HH = DS / 2, TILT = .55;
+// 本物のサイコロと同じ配置（向かい合う面の合計が 7）
+const FACES = [
+  { n:[0,0,1],  u:[1,0,0],  v:[0,1,0],  val:1 },
+  { n:[0,0,-1], u:[1,0,0],  v:[0,-1,0], val:6 },
+  { n:[1,0,0],  u:[0,1,0],  v:[0,0,1],  val:2 },
+  { n:[-1,0,0], u:[0,-1,0], v:[0,0,1],  val:5 },
+  { n:[0,1,0],  u:[-1,0,0], v:[0,0,1],  val:3 },
+  { n:[0,-1,0], u:[1,0,0],  v:[0,0,1],  val:4 }
+];
+const nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+const VIEW = nrm([0, TILT, 1]), LIGHT = nrm([-.45, -.55, .75]);
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const mv = (R, v) => [R[0] * v[0] + R[1] * v[1] + R[2] * v[2], R[3] * v[0] + R[4] * v[1] + R[5] * v[2], R[6] * v[0] + R[7] * v[1] + R[8] * v[2]];
+function rotM(ax, ang){ const l = Math.hypot(ax[0], ax[1], ax[2]); if (l < 1e-9 || !ang) return [1,0,0,0,1,0,0,0,1]; const x = ax[0] / l, y = ax[1] / l, z = ax[2] / l, c = Math.cos(ang), s = Math.sin(ang), t = 1 - c;
+  return [t*x*x + c, t*x*y - s*z, t*x*z + s*y, t*x*y + s*z, t*y*y + c, t*y*z - s*x, t*x*z - s*y, t*y*z + s*x, t*z*z + c]; }
+function mm(A, B){ const C = new Array(9); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) C[i*3 + j] = A[i*3] * B[j] + A[i*3 + 1] * B[3 + j] + A[i*3 + 2] * B[6 + j]; return C; }
+function ortho(R){ let a = nrm([R[0], R[3], R[6]]), b = [R[1], R[4], R[7]]; const d = dot(a, b); b = nrm(b.map((x, i) => x - d * a[i])); const c = [a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]]; return [a[0], b[0], c[0], a[1], b[1], c[1], a[2], b[2], c[2]]; }
+function randRot(){ let R = [1,0,0,0,1,0,0,0,1]; for (let i = 0; i < 3; i++) R = mm(rotM([rnd() - .5, rnd() - .5, rnd() - .5], rnd() * Math.PI * 2), R); return R; }
+function topFace(R){ let b = FACES[0], bz = -2; FACES.forEach(f => { const z = mv(R, f.n)[2]; if (z > bz){ bz = z; b = f; } }); return [b, bz]; }
+function pips(v){ const a = .25, b = .5, c = .75; return { 1:[[b,b]], 2:[[a,a],[c,c]], 3:[[a,a],[b,b],[c,c]], 4:[[a,a],[c,a],[a,c],[c,c]], 5:[[a,a],[c,a],[b,b],[a,c],[c,c]], 6:[[a,a],[c,a],[a,b],[c,b],[a,c],[c,c]] }[v]; }
+function drawDie(g, d){
+  const k = 1 + d.z / 420;
+  // 影：高く跳ぶほど小さく、薄く
+  const sh = Math.max(.25, 1 - d.z / 220);
+  g.save(); g.globalAlpha = .38 * sh; g.fillStyle = '#000'; g.beginPath(); g.ellipse(d.x + 5 + d.z * .12, d.y + 4, HH * 1.05 * (1.15 - sh * .15), HH * .62, 0, 0, Math.PI * 2); g.fill(); g.restore();
+  const cx0 = d.x, cy0 = d.y - (HH + d.z) * TILT;
+  const P = w => [cx0 + w[0] * k, cy0 + (w[1] - w[2] * TILT) * k];
+  const vis = FACES.map(f => { const n = mv(d.R, f.n); return { f, n, vd:dot(n, VIEW) }; }).filter(o => o.vd > .015).sort((a, b) => a.vd - b.vd);
+  vis.forEach(({ f, n }) => {
+    const L = Math.max(0, dot(n, LIGHT)), br = .58 + .42 * L;
+    const pt = (su, sv, out = 1) => P(mv(d.R, [f.n[0] * HH * out + f.u[0] * su + f.v[0] * sv, f.n[1] * HH * out + f.u[1] * su + f.v[1] * sv, f.n[2] * HH * out + f.u[2] * su + f.v[2] * sv]));
+    const q = HH * .9, cr = HH * .1;  // 角を少し丸めた面
+    const pts = [[-q,-HH],[q,-HH],[HH,-q],[HH,q],[q,HH],[-q,HH],[-HH,q],[-HH,-q]].map(([a, b]) => pt(a * .985, b * .985));
+    const col = D.neo ? `rgb(${8 * br | 0},${(40 + 30 * br) | 0},${14 * br | 0})` : `rgb(${(255 * br) | 0},${(250 * br) | 0},${(238 * br) | 0})`;
+    g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath();
+    g.fillStyle = col; g.fill();
+    g.lineJoin = 'round'; g.lineWidth = 2.4 * k; g.strokeStyle = col; g.stroke();
+    g.lineWidth = .8; g.strokeStyle = D.neo ? '#39ff1488' : 'rgba(0,0,0,.18)'; g.stroke();
+    // 目（面の傾きに合わせてつぶれる）
+    const pr = DS * (f.val === 1 ? .11 : .08);
+    pips(f.val).forEach(([px, py]) => {
+      const ou = (px - .5) * DS * .98, ov = (py - .5) * DS * .98;
+      g.beginPath();
+      for (let i = 0; i <= 12; i++){ const t = i / 12 * Math.PI * 2, p = pt(ou + Math.cos(t) * pr, ov + Math.sin(t) * pr, 1.002); i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); }
+      const pc = D.neo ? '#39ff14' : f.val === 1 ? `rgb(${(200 * br) | 0},${(30 * br) | 0},${(28 * br) | 0})` : `rgb(${(26 * br) | 0},${(24 * br) | 0},${(22 * br) | 0})`;
+      g.fillStyle = pc; g.fill();
+    });
+    // 光の当たる面にうっすらツヤ
+    if (L > .55 && !D.neo){ const c = pt(-HH * .3, -HH * .3); g.fillStyle = `rgba(255,255,255,${(L - .55) * .35})`; g.beginPath(); g.arc(c[0], c[1], HH * .45 * k, 0, Math.PI * 2); g.fill(); }
+  });
+}
+function throwDice(count){
+  return new Promise(res => {
+    sfx('shake');
+    const pad = 22 + HH;
+    dice = Array.from({ length:count }, (_, i) => ({ x:CW - 50, y:CH / 2 + 40 + (i - (count - 1) / 2) * 62 + (rnd() - .5) * 26, vx:-(590 + rnd() * 350), vy:(rnd() - .5) * 350,
+      z:70 + rnd() * 35, vz:115 + rnd() * 135, R:randRot(), w:[(rnd() - .5) * 29, (rnd() - .5) * 29, (rnd() - .5) * 18], v:0, done:false }));
+    rolling = true; const t0 = performance.now();
+    const step = (dt) => {
+      let allDone = true;
+      dice.forEach(d => {
+        if (d.done) return; allDone = false;
+        d.vz -= 2150 * dt; d.z += d.vz * dt;
+        if (d.z <= 0){ d.z = 0; if (Math.abs(d.vz) > 70){ sfx('thud', Math.min(1, Math.abs(d.vz) / 600)); d.vx *= .9; d.vy *= .9; d.w = d.w.map(x => x * .65 + (rnd() - .5) * 8); } d.vz = -d.vz * .33; if (Math.abs(d.vz) < 45) d.vz = 0; }
+        d.x += d.vx * dt; d.y += d.vy * dt;
+        if (d.z === 0){
+          const kf = Math.pow(.14, dt); d.vx *= kf; d.vy *= kf;
+          // 布の上では、進む向きに転がる
+          const sp0 = Math.hypot(d.vx, d.vy), a = Math.min(1, dt * 12) * Math.min(1, sp0 / 70); d.w[0] += (-d.vy / HH - d.w[0]) * a; d.w[1] += (d.vx / HH - d.w[1]) * a; d.w[2] *= Math.pow(.15, dt);
+        } else { d.vx *= Math.pow(.92, dt); d.vy *= Math.pow(.92, dt); }
+        const bx = Math.min(1, Math.abs(d.vx) / 500), by = Math.min(1, Math.abs(d.vy) / 500);
+        if (d.x < pad){ d.x = pad; d.vx = Math.abs(d.vx) * .52; d.w[2] += (rnd() - .5) * 12; sfx('wall', bx); }
+        if (d.x > CW - pad){ d.x = CW - pad; d.vx = -Math.abs(d.vx) * .52; d.w[2] += (rnd() - .5) * 12; sfx('wall', bx); }
+        if (d.y < pad + HH * .6){ d.y = pad + HH * .6; d.vy = Math.abs(d.vy) * .52; d.w[2] += (rnd() - .5) * 12; sfx('wall', by); }
+        if (d.y > CH - pad * .6){ d.y = CH - pad * .6; d.vy = -Math.abs(d.vy) * .52; d.w[2] += (rnd() - .5) * 12; sfx('wall', by); }
+        const wl = Math.hypot(d.w[0], d.w[1], d.w[2]);
+        if (wl > 1e-6) d.R = ortho(mm(rotM(d.w, wl * dt), d.R));
+        const sp = Math.hypot(d.vx, d.vy);
+        if (sp < 70 && d.z === 0){
+          // 止まり際：重心が落ちる向きへ、ばねのようにじわっと倒れて落ち着く
+          const [f, nz] = topFace(d.R), n = mv(d.R, f.n), ang = Math.acos(Math.min(1, Math.max(-1, nz)));
+          const ax = Math.hypot(n[0], n[1]) > 1e-6 ? nrm([n[1], -n[0], 0]) : [0, 0, 0];
+          const blend = Math.min(1, dt * 7 * (1 - sp / 70) + dt * 2);
+          const wt = [ax[0] * ang * 11, ax[1] * ang * 11, d.w[2] * .3];
+          d.w = d.w.map((x, i) => x + (wt[i] - x) * blend);
+          if (ang > .05) d.tip = true;
+          const wl2 = Math.hypot(d.w[0], d.w[1], d.w[2]);
+          if (ang < .004 && sp < 6 && wl2 < .25){
+            if (ang > 1e-5) d.R = ortho(mm(rotM(ax, ang), d.R));
+            d.w = [0, 0, 0]; d.vx = d.vy = 0; d.done = true; d.v = f.val;
+            if (d.tip){ d.tip = false; sfx('thud', .3); }
+          }
+        }
+      });
+      for (let i = 0; i < dice.length; i++) for (let j = i + 1; j < dice.length; j++){
+        const a = dice[i], b = dice[j], dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 1, min = DS * 1.12;
+        if (dist < min){ const nx = dx / dist, ny = dy / dist, ov = (min - dist) / 2; a.x -= nx * ov; a.y -= ny * ov; b.x += nx * ov; b.y += ny * ov;
+          const rv = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+          if (rv < 0){ const imp = -rv * .78; a.vx -= nx * imp; a.vy -= ny * imp; b.vx += nx * imp; b.vy += ny * imp; a.w[2] += (rnd() - .5) * 10; b.w[2] += (rnd() - .5) * 10; if (imp > 60) sfx('clack', Math.min(1, imp / 500)); a.done = b.done = false; } }
+      }
+      if (performance.now() - t0 > 4500) dice.forEach(d => { if (d.done) return; const [f, nz] = topFace(d.R), n = mv(d.R, f.n); d.R = ortho(mm(rotM([n[1], -n[0], 0], Math.acos(Math.min(1, nz))), d.R)); d.z = 0; d.done = true; d.v = f.val; });
+      return allDone;
+    };
+    stepFn = step; doneFn = () => { rolling = false; stepFn = null; res(dice.map(d => d.v)); };
+  });
+}
+let stepFn = null, doneFn = null, prev = performance.now(), settleT = 0;
+function frame(now){
+  const dt = Math.min(.033, (now - prev) / 1000); prev = now;
+  if (stepFn){ let fin = false; for (let i = 0; i < 6; i++) fin = stepFn(dt / 6) || fin; if (fin){ settleT += dt; if (settleT > .18){ settleT = 0; const f = doneFn; doneFn = null; stepFn = null; f && f(); } } else settleT = 0; }
+  const g = cx; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); if (feltImg) g.drawImage(feltImg, 0, 0);
+  g.setTransform(DPR * sc, 0, 0, DPR * sc, 0, 0);
+  dice.slice().sort((a, b) => a.y - b.y).forEach(d => drawDie(g, d));
+  requestAnimationFrame(frame);
+}
+
+
+
+/* ================= 賭け ================= */
+const CHIPS = [[10,'#e8e8e8','#333'],[50,'#e86a1a','#fff'],[100,'#141414','#fff'],[500,'#6a2bb0','#fff'],[1000,'#c9a12e','#2a1a00']];
+let bets = {}, phase = 'bet', stake = 0, playBets = {};
+const total = () => Object.values(bets).reduce((a, b) => a + b, 0);
+function cellHTML(id){
+  const s = SPOTS[id];
+  const top = s.dd ? `<span class="dd${s.dd.length > 4 ? ' s' : ''}">${s.dd}</span>` : `<b>${J() ? s.j : s.e}</b>`;
+  const sub = s.sub ? `<small>${s.sub}</small>` : '';
+  return `${top}${sub}<small>${s.pay}</small><span class="amt"></span>`;
+}
+function mk(id, cls = ''){
+  const el = document.createElement('div'); el.className = 'cell ' + cls; el.dataset.id = id; el.innerHTML = cellHTML(id);
+  el.onclick = () => addBet(id);
+  el.oncontextmenu = e => { e.preventDefault(); removeBet(id); };
+  let lp = null;
+  el.addEventListener('touchstart', () => { lp = setTimeout(() => { removeBet(id); lp = 'x'; }, 550); }, { passive:true });
+  el.addEventListener('touchend', e => { if (lp === 'x') e.preventDefault(); else clearTimeout(lp); lp = null; });
+  return el;
+}
+function sec(t){ const d = document.createElement('div'); d.className = 'sec'; d.textContent = t; return d; }
+function row(cls, ids, c){ const r = document.createElement('div'); r.className = 'row ' + cls; ids.forEach(id => r.append(mk(id, typeof c === 'function' ? c(id) : c || ''))); return r; }
+function buildLayout(){
+  const L = $('lay'); L.replaceChildren();
+  const S = T('sec');
+  L.append(sec(S.main), row('r1', ['small', 'odd', 'any3', 'even', 'big'], id => id === 'big' ? 'big2' : id === 'small' ? 'small2' : id === 'any3' ? 'any' : ''));
+  L.append(sec(S.triple), row('r6', [1,2,3,4,5,6].map(n => 't' + n)));
+  L.append(sec(S.double), row('r6', [1,2,3,4,5,6].map(n => 'd' + n)));
+  L.append(sec(S.total), row('r14', Array.from({ length:14 }, (_, i) => 's' + (i + 4))));
+  L.append(sec(S.combo), row('r15', COMBOS.map(([a, b]) => `c${a}${b}`)));
+  L.append(sec(S.single), row('r6', [1,2,3,4,5,6].map(n => 'n' + n)));
+  updCells();
+}
+function updCells(){ document.querySelectorAll('.cell').forEach(el => { const a = el.querySelector('.amt'), v = bets[el.dataset.id] || 0; a.textContent = v.toLocaleString(); a.classList.toggle('on', v > 0); el.classList.toggle('lock', phase !== 'bet'); }); }
+function addBet(id){ if (phase !== 'bet') return; ac(); clearLit(); if (D.chip > D.bank - total()){ toast(T('short')); return; } bets[id] = (bets[id] || 0) + D.chip; sfx('chip'); updCells(); updBank(); }
+function removeBet(id){ if (phase !== 'bet' || !bets[id]) return; bets[id] = Math.max(0, bets[id] - D.chip); if (!bets[id]) delete bets[id]; sfx('chip'); updCells(); updBank(); }
+function renderChips(){ const box = $('chips'); box.replaceChildren(); CHIPS.forEach(([v, c, t]) => { const el = document.createElement('button'); el.className = 'chip' + (D.chip === v ? ' on' : ''); el.style.background = c; el.style.color = t; el.textContent = v >= 1000 ? '1K' : v; el.onclick = () => { D.chip = v; save(); sfx('chip'); renderChips(); }; box.append(el); }); }
+let shownBank = D.bank;
+function updBank(anim){
+  const target = D.bank - (phase === 'bet' ? total() : 0);
+  if (anim){ const from = shownBank, t0 = performance.now(); const st = now => { const k = Math.min(1, (now - t0) / 900); shownBank = from + (target - from) * (1 - Math.pow(1 - k, 3)); $('bank').textContent = Math.round(shownBank).toLocaleString(); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); }
+  else { shownBank = target; $('bank').textContent = Math.round(target).toLocaleString(); }
+  $('betSum').textContent = (phase === 'bet' ? total() : stake).toLocaleString();
+  const tt = total(), lt = Object.values(D.last).reduce((a, b) => a + b, 0);
+  $('bClear').disabled = phase !== 'bet' || !tt;
+  $('bRebet').disabled = phase !== 'bet' || !lt || lt > D.bank;
+  $('bDbl').disabled = phase !== 'bet' || !tt || tt * 2 > D.bank;
+  $('bRoll').disabled = phase !== 'bet';
+  $('bRefill').style.display = phase === 'bet' && D.bank < 10 ? '' : 'none';
+}
+function clearLit(){ document.querySelectorAll('.cell.lit').forEach(c => c.classList.remove('lit')); }
+
+/* ================= 進行 ================= */
+async function roll(){
+  if (phase !== 'bet') return; ac();
+  stake = total(); if (stake > D.bank){ toast(T('short')); return; }
+  playBets = Object.assign({}, bets); if (stake) D.last = Object.assign({}, bets);
+  D.bank -= stake; phase = 'roll'; save(); clearLit(); updCells(); updBank();
+  $('res').classList.remove('on');
+  $('log').innerHTML = stake ? T('rolling') : T('noBet');
+  const d = await throwDice(3);
+  settle(d);
+}
+function whyText(id, d){
+  const W = T('why');
+  if (W[id]) return W[id];
+  const k = id[0], n = id.slice(1);
+  if (k === 't') return W.t(n); if (k === 'd') return W.d(n); if (k === 'n') return W.n(n, cnt(d, +n)); if (k === 's') return W.s(n); if (k === 'c') return W.c(n[0], n[1]);
+  return id;
+}
+function settle(d){
+  const s = d[0] + d[1] + d[2], trip = isTriple(d), tag = trip ? 'T' : s >= 11 ? 'B' : 'S';
+  let ret = 0; const wins = [];
+  Object.entries(playBets).forEach(([id, v]) => { const m = SPOTS[id].m(d); if (m > 0){ ret += v * (m + 1); wins.push([id, v, m]); } });
+  const net = ret - stake;
+  D.bank += ret; D.rolls++; D.net += net; if (net > D.best) D.best = net; D.tot[s] = (D.tot[s] || 0) + 1;
+  D.hist.push(d.slice()); if (D.hist.length > 40) D.hist = D.hist.slice(-40); save();
+  // 当たった場所を光らせる（点滅させず、ふわっと）
+  Object.keys(SPOTS).forEach(id => { if (SPOTS[id].m(d) > 0 && (D.show || playBets[id])){ const el = document.querySelector(`.cell[data-id="${id}"]`); if (el) el.classList.add('lit'); } });
+  $('res').innerHTML = `<span>${d.map(x => F[x]).join(' ')}</span><span>${s}</span><span class="tag ${tag}">${T('tag')[tag]}</span>`; $('res').classList.add('on');
+  let h = `<b>${d.join(' · ')}</b> = <b>${s}</b>`;
+  if (stake) h += ' — ' + (net > 0 ? T('win')(net) : net < 0 ? T('lose')(-net) : T('push'));
+  if (trip) h += `<br>${T('triple')}`;
+  if (D.exp && wins.length) h += '<br>' + wins.map(([id, v, m]) => `✓ ${whyText(id, d)} → +${(v * m).toLocaleString()}`).join('<br>');
+  $('log').innerHTML = h;
+  if (trip) sfx('gong');
+  if (stake){ if (net > 0) sfx(net >= stake * 8 ? 'big' : 'win'); else if (net < 0) sfx('lose'); }
+  if (stake && net > 0) toast(T('win')(net));
+  phase = 'bet'; bets = {}; updCells(); updBank(true); renderHist(true); renderStats();
+}
+
+/* ================= 記録 ================= */
+function renderHist(anim){
+  const box = $('hist'); box.replaceChildren();
+  D.hist.slice(-20).reverse().forEach((d, i) => {
+    const s = d[0] + d[1] + d[2], tag = isTriple(d) ? 'T' : s >= 11 ? 'B' : 'S';
+    const r = document.createElement('div'); r.className = 'hr'; if (!(anim && i === 0)) r.style.animation = 'none';
+    r.innerHTML = `<span class="d">${d.map(x => F[x]).join('')}</span><span class="t">${s}</span><span class="k ${tag}">${T('tag')[tag]}</span>`;
+    box.append(r);
+  });
+}
+const WAYS = { 3:1, 4:3, 5:6, 6:10, 7:15, 8:21, 9:25, 10:27, 11:27, 12:25, 13:21, 14:15, 15:10, 16:6, 17:3, 18:1 };
+function renderStats(){
+  $('st').innerHTML = T('stats')() + `<div style="margin-top:6px;opacity:.75">${T('histo')}</div>`;
+  const n = D.rolls || 0, arr = []; for (let s = 3; s <= 18; s++) arr.push([D.tot[s] || 0, n * WAYS[s] / 216]);
+  const top = Math.max(1, ...arr.map(a => Math.max(a[0], a[1])));
+  $('histo').innerHTML = arr.map(([v, e]) => `<span style="flex:1;position:relative;height:100%;display:flex;align-items:flex-end"><i style="width:100%;height:${v / top * 100}%"></i>${n ? `<i class="ex" style="position:absolute;left:0;right:0;bottom:0;height:${e / top * 100}%"></i>` : ''}</span>`).join('');
+}
+
+/* ================= 設定・遊び方 ================= */
+function seg(id, opts, key, after){
+  const box = $(id); box.replaceChildren();
+  opts.forEach(([v, l, s]) => { const b = document.createElement('button'); b.innerHTML = l + (s ? `<small>${s}</small>` : ''); b.className = D[key] === v ? 'on' : ''; b.onclick = () => { ac(); sfx('chip'); D[key] = v; save(); renderSettings(); after && after(); }; box.append(b); });
+}
+function renderSettings(){
+  seg('sExp', T('exps').map((v, i) => [i, v[0], v[1]]), 'exp');
+  seg('sShow', T('shows').map((v, i) => [i, v[0], v[1]]), 'show');
+}
+const HELP = {
+  ja:[
+    ['遊び方', `<p>シックボー（骰寶・大小）は、<b>3 つのサイコロの出目を当てる</b>中国生まれのゲームです。マカオのカジノでは、ガラスのドームの中でサイコロが躍る、いちばん人気の台のひとつです。</p>
+      <ol><li>チップを選んで、台の上の当たりそうな場所に置きます。いくつの場所に置いてもかまいません。</li><li>「サイコロを振る」を押すと、3 つのサイコロが転がります。</li><li>出目に合った場所に置いたチップには配当が付き、外れた場所のチップはハウスのものになります。</li></ol>
+      <h4>はじめての人は「大」か「小」から</h4><p>3 つの合計が <b>11〜17 なら大</b>、<b>4〜10 なら小</b>です。当たれば賭けた額と同じだけもらえます（1 : 1）。ほぼ半々の勝負で、いちばんハウスの取り分が小さい賭けです。</p>
+      <p>⚠️ ただし、<b>3 つとも同じ目（ゾロ目）のときは、大も小も負け</b>になります。これがハウスの取り分になっている仕組みで、丁半との大きな違いです。</p>
+      <p>配当の「8 : 1」は、100 賭けて当たると 800 の勝ちで、賭けた 100 も戻ってくる、という意味です。</p>`],
+    ['賭け方の一覧', `<table><tr><th>場所</th><th>当たる条件</th><th>配当</th></tr>
+      <tr><td>小 ／ 大</td><td>合計 4〜10 ／ 11〜17（ゾロ目は負け）</td><td>1 : 1</td></tr>
+      <tr><td>奇 ／ 偶</td><td>合計が奇数 ／ 偶数（ゾロ目は負け）</td><td>1 : 1</td></tr>
+      <tr><td>1 つの目</td><td>選んだ目が 1 つ出たら 1 倍、2 つで 2 倍、3 つで 3 倍</td><td>1 · 2 · 3 : 1</td></tr>
+      <tr><td>2 つの組み合わせ</td><td>選んだ 2 つの目が両方出る（例：⚀⚃）</td><td>5 : 1</td></tr>
+      <tr><td>2 つ同じ</td><td>選んだ目が 2 つ以上出る</td><td>10 : 1</td></tr>
+      <tr><td>合計 9・10・11・12</td><td>3 つの合計がその数</td><td>6 : 1</td></tr>
+      <tr><td>合計 8・13</td><td>〃</td><td>8 : 1</td></tr>
+      <tr><td>合計 7・14</td><td>〃</td><td>12 : 1</td></tr>
+      <tr><td>合計 6・15</td><td>〃</td><td>14 : 1</td></tr>
+      <tr><td>合計 5・16</td><td>〃</td><td>18 : 1</td></tr>
+      <tr><td>合計 4・17</td><td>〃</td><td>50 : 1</td></tr>
+      <tr><td>全圍（どれでもゾロ目）</td><td>3 つとも同じ目</td><td>24 : 1</td></tr>
+      <tr><td>ゾロ目の指定</td><td>選んだ目で 3 つとも同じ（例：⚄⚄⚄）</td><td>150 : 1</td></tr></table>
+      <p>配当はカジノによって少しずつ違います。ここではマカオでよく見かける配当にしています。</p>`],
+    ['確率と取り分', `<p>サイコロ 3 つの出方は、全部で 6 × 6 × 6 ＝ <b>216 通り</b>です。</p>
+      <ul><li><b>大・小：</b>ゾロ目以外で 105 通りずつ。ハウスの取り分は約 <b>2.8%</b> で、いちばん良心的な賭けです。</li><li><b>1 つの目：</b>取り分は約 7.9%。</li><li><b>合計・組み合わせ・ゾロ目：</b>配当が大きい分、取り分も大きく、多くは 10〜30%、高いものでは 40% を超えます。</li><li><b>いちばん出やすい合計は 10 と 11</b>（それぞれ 27 通り）、いちばん出にくいのは 3 と 18（1 通り）です。</li></ul>
+      <p>右の「記録」のグラフでは、実際に出た合計と、理論上の出方（点線）を比べられます。たくさん振るほど、点線に近づいていきます。</p>
+      <p>⚠️ 出目の記録は、次の出目の予想には使えません。サイコロに記憶はありません。</p>`],
+    ['本場の豆知識', `<ul><li><b>どうやって振る？：</b>マカオの多くの台では、ディーラーがボタンを押すと、ガラスのドームの中でサイコロが機械で揺らされます。昔は、茶碗のような器でふたをして振っていました。</li>
+      <li><b>台が光る：</b>出目が決まると、テーブルの当たりの場所が下から光ります。この画面の「当たり場所の光」と同じです。</li>
+      <li><b>名前：</b>「骰寶」は広東語でサイコロの宝。「大小」と呼ばれることも多く、英語では Sic Bo と書きます。</li>
+      <li><b>マナー：</b>ディーラーが合図をしたら、チップに触れないようにします。当たったチップは、ディーラーが精算するまでそのままにしておきます。</li></ul><p>※ MeridiPlay のチップは遊び用で、本物のお金とは関係ありません。</p>`]
+  ],
+  en:[
+    ['How to play', `<p>Sic Bo is a Chinese game of three dice — a Macau favourite, where the dice dance under a glass dome.</p><ol><li>Place chips on any spots.</li><li>Roll the three dice.</li><li>Winning spots pay; losing chips go to the house.</li></ol><h4>Start with Big or Small</h4><p>Total 11–17 is Big, 4–10 is Small, paying 1:1. But <b>any triple loses both</b> — that's the house edge.</p>`],
+    ['Bets', `<table><tr><th>Bet</th><th>Wins when</th><th>Pays</th></tr><tr><td>Small / Big</td><td>4–10 / 11–17 (not triple)</td><td>1:1</td></tr><tr><td>Odd / Even</td><td>odd / even total (not triple)</td><td>1:1</td></tr><tr><td>Single number</td><td>1, 2 or 3 matches</td><td>1·2·3:1</td></tr><tr><td>Two-dice combo</td><td>both numbers appear</td><td>5:1</td></tr><tr><td>Specific double</td><td>2+ of that number</td><td>10:1</td></tr><tr><td>Totals</td><td>9–12: 6, 8/13: 8, 7/14: 12, 6/15: 14, 5/16: 18, 4/17: 50</td><td></td></tr><tr><td>Any triple</td><td>all three match</td><td>24:1</td></tr><tr><td>Specific triple</td><td>three of that number</td><td>150:1</td></tr></table>`],
+    ['Odds', `<p>There are 216 outcomes. Big/Small has a ~2.8% house edge; single numbers ~7.9%; totals, combos and triples are typically 10–30%, some above 40%. Totals 10 and 11 are the most common (27 ways each). Past results don't predict the next roll.</p>`],
+    ['Casino tips', `<ul><li>In Macau the dealer shakes the dice in a glass dome with a button.</li><li>Winning spots light up on the table.</li><li>Don't touch chips after the dealer's signal.</li></ul><p>MeridiPlay chips are for fun only.</p>`]
+  ]
+};
+let hp = 0;
+function renderHelp(){ const H = HELP[D.lang], tb = $('htabs'); tb.replaceChildren(); H.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p[0]; b.className = i === hp ? 'on' : ''; b.onclick = () => { hp = i; renderHelp(); }; tb.append(b); }); $('hc').innerHTML = H[hp][1]; $('hClose').textContent = T('close'); }
+const openHelp = () => { renderHelp(); $('help').classList.add('show'); };
+const closeHelp = () => { $('help').classList.remove('show'); if (!D.seenHelp){ D.seenHelp = true; save(); } };
+
+/* ================= 共通 ================= */
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2700); }
+function btnL(id, a){ $(id).innerHTML = a[0] + `<small>${a[1]}</small>`; }
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.classList.toggle('light', D.theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇';
+  $('tTheme').textContent = T('theme')(D.theme);
+  $('hHist').textContent = T('hist'); $('hSt').textContent = T('st'); $('hSet').textContent = T('set'); $('lExp').textContent = T('exp'); $('lShow').textContent = T('show');
+  $('lBank').textContent = T('bankL'); $('lBet').textContent = T('betL'); $('bRefill').textContent = T('refill'); $('kb').textContent = T('kb');
+  btnL('bClear', T('clear')); btnL('bRebet', T('rebet')); btnL('bDbl', T('dbl')); btnL('bRoll', T('roll'));
+  buildLayout(); renderChips(); renderSettings(); renderHist(); renderStats(); updBank(); buildFelt();
+  if (phase === 'bet' && !$('log').textContent) $('log').textContent = T('place');
+  if ($('help').classList.contains('show')) renderHelp();
+}
+$('bRoll').onclick = roll;
+$('bClear').onclick = () => { if (phase !== 'bet') return; bets = {}; sfx('chip'); updCells(); updBank(); };
+$('bRebet').onclick = () => { if (phase !== 'bet') return; clearLit(); bets = Object.assign({}, D.last); sfx('chip'); updCells(); updBank(); };
+$('bDbl').onclick = () => { if (phase !== 'bet' || total() * 2 > D.bank) return; Object.keys(bets).forEach(k => bets[k] *= 2); sfx('chip'); updCells(); updBank(); };
+$('bRefill').onclick = () => { ac(); D.bank += 10000; D.refills++; save(); sfx('win'); updBank(true); };
+cv.addEventListener('pointerdown', () => roll());
+$('tHelp').onclick = openHelp; $('hClose').onclick = closeHelp;
+$('help').onclick = e => { if (e.target === $('help')) closeHelp(); };
+$('tLang').onclick = () => { D.lang = J() ? 'en' : 'ja'; save(); apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; ac(); save(); apply(); };
+$('tTheme').onclick = () => { D.theme = D.theme === 'light' ? 'dark' : 'light'; save(); apply(); };
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase(); kb.push(k); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; D.neo = !D.neo; buildFelt(); toast(D.neo ? '🟩 Wake up, Neo… the dice are code now.' : '🎲 Back to Macau.'); return; }
+  if (kb.slice(-6).join('') === 'meridi'){ toast(J() ? '🐾 三匹の猫が、ドームの外からのぞいています' : '🐾 Three cats are peeking at the dome'); return; }
+  if ($('help').classList.contains('show')){ if (k === 'escape' || k === '?') closeHelp(); return; }
+  if (e.repeat) return;
+  if (k === 'enter'){ e.preventDefault(); roll(); }
+  else if (k === 's') addBet('small');
+  else if (k === 'b' && kb[kb.length - 2] !== 'b') addBet('big');
+  else if (k === 'o') addBet('odd');
+  else if (k === 'e') addBet('even');
+  else if (k === 'r') $('bRebet').click();
+  else if (k === 'x') $('bDbl').click();
+  else if (k === 'backspace'){ e.preventDefault(); $('bClear').click(); }
+  else if (k === '?') openHelp();
+});
+let rT = null; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(size, 120); });
+
+size(); apply(); requestAnimationFrame(frame);
+$('log').textContent = T('place');
+if (!D.seenHelp) setTimeout(openHelp, 500);
+})();
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

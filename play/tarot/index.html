@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — 猫タロット占い Cat Tarot v1.0.0</title>
+<style>
+:root{--g:#39ff14;--c:#00d4ff;--gold:#e8c26a;--bg:#05050f;--E:cubic-bezier(.22,1,.36,1);--line:#39ff14;
+  --serif:'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',Georgia,serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:var(--bg);color:#e4ecf2;font-family:var(--serif);overflow-x:hidden}
+body.gold{--line:#ffd25a}
+#sky{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+header{position:relative;z-index:5;display:flex;align-items:center;gap:7px;padding:12px 20px;border-bottom:1px solid #39ff1422;flex-wrap:wrap;background:#0008}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:12px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+.brand span{font-size:14px;letter-spacing:6px}
+.tg{background:#000a;color:#cfe9d4;border:1px solid #39ff1440;border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--g);color:var(--g)}
+.tg.on{background:#39ff141c;border-color:var(--g);color:var(--g);box-shadow:0 0 8px #39ff1440}
+.tg:disabled{opacity:.35;cursor:not-allowed}
+.wrap{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+
+/* table / fan */
+.table{position:relative;height:300px;border-radius:18px;border:1px solid #39ff1430;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 110%,#12233a 0%,#0a0f22 50%,#05050f 100%);box-shadow:inset 0 0 60px #000c}
+.table::after{content:'';position:absolute;left:50%;bottom:-120px;width:600px;height:240px;transform:translateX(-50%);border-radius:50%;border:1px solid #39ff1422;pointer-events:none}
+.tlabel{position:absolute;top:12px;left:50%;transform:translateX(-50%);font:11px 'Courier New',monospace;letter-spacing:8px;color:#39ff1455;white-space:nowrap}
+.fan .card{position:absolute;left:50%;bottom:-40px;margin-left:-42px;transform-origin:50% 260%;transform:var(--t,none);transition:transform .45s var(--E)}
+.fan .card.pick{cursor:pointer}
+.fan .card.cur{transform:var(--t,none) translateY(-26px)}
+.fan .card.taken{visibility:hidden}
+
+/* card */
+.card{width:84px;height:140px;perspective:900px;user-select:none}
+.ci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.4,.2,.2,1)}
+.card.down .ci{transform:rotateY(180deg)}
+.cf,.cb{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cf{background:var(--cbg,#040a05);border:1px solid var(--line);box-shadow:0 0 14px color-mix(in srgb,var(--line) 35%,transparent),0 8px 18px #000c;overflow:hidden}
+.cb{transform:rotateY(180deg);border:1px solid #39ff1466;box-shadow:0 8px 18px #000c;
+  background:radial-gradient(circle at 50% 50%,#0f2a1a 0 18%,transparent 19%),repeating-conic-gradient(from 0deg at 50% 50%,#081a10 0 10deg,#04100a 10deg 20deg),#04100a}
+.cb::before{content:'';position:absolute;inset:6px;border:1px solid #39ff1455;border-radius:5px}
+.cb::after{content:'🐾';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:18px;filter:grayscale(1) brightness(1.6) sepia(1) hue-rotate(60deg) saturate(4)}
+body.gold .cb{border-color:#ffd25a88;background:radial-gradient(circle at 50% 50%,#3a2a08 0 18%,transparent 19%),repeating-conic-gradient(from 0deg at 50% 50%,#2a1e06 0 10deg,#1a1203 10deg 20deg)}
+.art{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 4px 7px;transition:transform .6s var(--E)}
+.card.rev .art{transform:rotate(180deg)}
+.art .num{font:bold 11px Georgia,serif;letter-spacing:2px;color:var(--line)}
+.art.cat{padding:0}.art.cat svg{width:100%;height:100%;display:block}
+.art.old svg *{fill:none;stroke:var(--line);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.art.old svg .fl{fill:var(--line);stroke:none}
+.art .nm{font-size:10px;letter-spacing:1px;color:#e9f6ea;text-align:center;line-height:1.2}
+.card.big{width:104px;height:174px}
+.card.big .art .num{font-size:13px}.card.big .art .nm{font-size:12px}
+
+/* spread board */
+.board{position:relative;margin:22px auto 0;transform-origin:top center}
+.slot{position:absolute;width:104px;height:174px;border:1px dashed #39ff1430;border-radius:9px}
+.slot .lb{position:absolute;left:-10px;right:-10px;top:-20px;text-align:center;font-size:11px;letter-spacing:2px;color:#9fd9a8;white-space:nowrap}
+.slot .no{position:absolute;right:-8px;bottom:-8px;width:20px;height:20px;border-radius:50%;background:#000;border:1px solid #39ff1466;font:bold 10px 'Courier New',monospace;display:flex;align-items:center;justify-content:center;color:var(--g)}
+.slot.cross{transform:rotate(90deg)}
+.slot.cross .lb{display:none}
+.slot .card{position:absolute;inset:0}
+.slot.glow{border-color:var(--line);box-shadow:0 0 18px #39ff1444}
+
+/* results */
+.ctrl{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.btn{border:1px solid var(--g);background:radial-gradient(circle,#39ff1418,#000 75%);color:#fff;border-radius:24px;padding:11px 26px;font:15px var(--serif);letter-spacing:3px;cursor:pointer;transition:all .35s var(--E)}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 18px #39ff1455}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.main{font-size:17px;padding:12px 36px}
+.qin{display:block;margin:12px auto 0;width:min(440px,92%);background:#000a;border:1px solid #39ff1440;color:#eaf6ec;border-radius:22px;padding:9px 18px;font:14px var(--serif);text-align:center;letter-spacing:2px;outline:none}
+.qin:focus{border-color:var(--g);box-shadow:0 0 10px #39ff1433}
+.msg{text-align:center;font-size:14px;letter-spacing:3px;margin-top:12px;min-height:22px}
+.results{max-width:900px;margin:26px auto 0;display:flex;flex-direction:column;gap:10px}
+.rs{display:grid;grid-template-columns:150px 1fr;gap:14px;border:1px solid #39ff1422;border-radius:12px;padding:12px 14px;background:#050a12cc;animation:rIn .8s var(--E) both}
+@keyframes rIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.rs .p{font-size:12px;letter-spacing:2px;color:#9fd9a8}
+.rs .p b{display:block;font-size:17px;color:#fff;letter-spacing:2px;margin-top:4px}
+.rs .p i{font-style:normal;font-size:11px;display:inline-block;margin-top:5px;padding:2px 8px;border-radius:10px;border:1px solid}
+.rs .p i.up{color:var(--g);border-color:#39ff1466}.rs .p i.rv{color:var(--c);border-color:#00d4ff66}
+.rs .k{font:11px 'Courier New',monospace;letter-spacing:2px;color:#9fd9a8;opacity:.85}
+.rs .m{font-size:14.5px;line-height:1.95;margin-top:3px}
+@media(max-width:620px){.rs{grid-template-columns:1fr}}
+.summary{border:1px solid #e8c26a55;border-radius:14px;padding:16px 20px;background:#0b0905cc;font-size:15px;line-height:2;animation:rIn .9s var(--E) both}
+.summary h3{font-size:15px;letter-spacing:7px;color:var(--gold);text-align:center;margin-bottom:6px}
+.hint{text-align:center;font:11px 'Courier New',monospace;opacity:.5;margin-top:16px;letter-spacing:1px}
+.disc{text-align:center;font-size:11px;opacity:.45;margin-top:6px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:40;background:#000c;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal.show{opacity:1;pointer-events:auto}
+.mbox{width:min(820px,95vw);max-height:90vh;overflow:auto;background:linear-gradient(#081020,#04060d);border:1px solid #39ff1466;border-radius:14px;padding:22px 24px;box-shadow:0 0 40px #39ff1422;transform:translateY(12px);transition:transform .6s var(--E)}
+.modal.show .mbox{transform:none}
+.mbox h2{font-size:19px;letter-spacing:7px;color:var(--g);text-align:center}
+.gtabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0 16px}
+.gpage{animation:rIn .5s var(--E);font-size:14.5px;line-height:2}
+.gpage h4{font-size:15px;letter-spacing:4px;color:var(--gold);margin:14px 0 6px}
+.gpage ol,.gpage ul{padding-left:1.4em}
+.gpage b{color:#c9ffc0}
+.gpage .note{font-size:12px;opacity:.65;margin-top:10px;line-height:1.8}
+.gtbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.gtbl th,.gtbl td{border-bottom:1px solid #ffffff14;padding:6px;text-align:left;vertical-align:top}
+.gtbl th{color:var(--gold);font-weight:normal;font-size:12px;letter-spacing:2px}
+.gno{display:block;text-align:center;font-size:12px;opacity:.7;margin-top:14px;cursor:pointer}
+.mrow{display:flex;justify-content:space-between;margin-top:18px;gap:8px}
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:14px;justify-items:center}
+.book .card{cursor:pointer;transition:transform .3s var(--E)}
+.book .card:hover{transform:translateY(-4px)}
+.book .card.lock .cf{filter:grayscale(1) brightness(.3)}
+.bdet{margin-top:14px;min-height:70px;font-size:14px;line-height:1.9}
+.bdet b{color:#fff}
+.hist{margin-top:12px;font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+.hist em{font-style:normal;opacity:.5;margin-right:8px;font-family:'Courier New',monospace;font-size:11px}
+.prog{text-align:center;font-size:12px;letter-spacing:3px;opacity:.75;margin-top:6px}
+.fly{position:fixed;z-index:30;pointer-events:none}
+.toasts{position:fixed;right:16px;top:64px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#050c14ee;border:1px solid var(--g);border-radius:12px;padding:9px 14px;font-size:13px;letter-spacing:1px;animation:tin .6s var(--E) both;max-width:320px}
+.toast.out{animation:tout .5s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateX(30px)}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<svg id="defsSvg" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span id="bT">タロット占い</span></div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tSp1"></button><button class="tg" id="tSp3"></button><button class="tg" id="tSp10"></button>
+  <button class="tg" id="tRev"></button>
+  <button class="tg" id="tPal"></button>
+  <button class="tg" id="tBook"></button>
+  <button class="tg" id="tGuide"></button>
+</header>
+
+<div class="wrap">
+  <div class="table fan" id="table"><div class="tlabel">MERIDIPLAY · TAROT · ARCANA</div></div>
+  <input class="qin" id="qin" maxlength="40" autocomplete="off">
+  <div class="ctrl"><button class="btn main" id="bMain"></button><button class="btn" id="bAuto"></button></div>
+  <div class="msg" id="msg"></div>
+  <div class="board" id="board"></div>
+  <div class="results" id="results"></div>
+  <div class="hint" id="hint"></div>
+  <div class="disc" id="disc"></div>
+</div>
+
+<div class="modal" id="guide"><div class="mbox">
+  <h2 id="gT"></h2><div class="gtabs" id="gTabs"></div><div id="gBody"></div>
+  <label class="gno"><input type="checkbox" id="gNo"> <span id="gNoL"></span></label>
+  <div class="mrow"><button class="tg" id="gPrev">‹</button><button class="tg on" id="gClose"></button><button class="tg" id="gNext">›</button></div>
+</div></div>
+<div class="modal" id="bookM"><div class="mbox">
+  <h2 id="bkT"></h2><div class="prog" id="bkP"></div>
+  <div class="book" id="book"></div><div class="bdet" id="bdet"></div><div class="hist" id="hist"></div>
+  <div class="mrow"><button class="tg" id="bkReset"></button><button class="tg on" id="bkClose">OK</button></div>
+</div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const H = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const ri = n => Math.floor(rnd() * n);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const EASE = 'cubic-bezier(.22,1,.36,1)';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+/* ================= 大アルカナ 22 枚（MeridiPlay オリジナル解釈） =================
+   [日本語名, English, 正位置, 逆位置, Upright, Reversed, キーワード, Keyword] */
+const ROMAN = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+const C = [
+ ['愚者','The Fool','新しい旅の始まり。計算より好奇心で、一歩を踏み出してみて。','勢いだけで飛び出す前に、足元を一度確かめて。準備が整えば道は開けます。','A new journey begins. Follow curiosity and take the first step.','Before you leap, check your footing. Once ready, the way opens.','自由・始まり','Freedom · Beginnings'],
+ ['魔術師','The Magician','必要な道具はもう手の中にあります。思いを形にする時です。','力の向け先が散らばっています。一つに絞ると本来の力が戻ります。','You already hold every tool you need. Make your idea real.','Your energy is scattered. Focus on one thing to regain your power.','創造・意志','Creation · Will'],
+ ['女教皇','The High Priestess','答えは内側にあります。静かな時間に、直感の声を聴いて。','頭で考えすぎかもしれません。心の声にも耳を澄ませて。','The answer lies within. Listen to your intuition in quiet moments.','You may be overthinking. Listen to your heart, too.','直感・知恵','Intuition · Wisdom'],
+ ['女帝','The Empress','豊かさと実りの時。育ててきたものが花開きます。','与えすぎて疲れていませんか。自分を満たすことも大切に。','A time of abundance. What you nurtured is blooming.','Are you giving too much? Fill your own cup as well.','豊穣・愛情','Abundance · Nurturing'],
+ ['皇帝','The Emperor','責任と計画が実を結びます。どっしり構えて導く側に。','力みすぎに注意。柔らかさが信頼を深めます。','Structure and responsibility pay off. Lead with steady confidence.','Ease your grip. Flexibility builds deeper trust.','安定・統率','Stability · Leadership'],
+ ['教皇','The Hierophant','信頼できる教えや師に学ぶと吉。基本に立ち返って。','型にとらわれすぎず、自分なりのやり方を試してみて。','Learn from a trusted mentor or tradition. Return to the basics.','Don\'t be bound by rules; try your own way.','教え・信頼','Guidance · Tradition'],
+ ['恋人','The Lovers','心が響き合う出会いや選択。素直な気持ちで選んで。','迷いがあるなら、本当の気持ちを確かめる時間を。','A meeting or choice where hearts resonate. Choose honestly.','If torn, take time to find what you truly feel.','調和・選択','Harmony · Choice'],
+ ['戦車','The Chariot','前進あるのみ。意志の力で困難を乗り越えられます。','急ぎすぎて方向を見失わないよう、ハンドルを握り直して。','Full speed ahead. Willpower carries you through.','Don\'t rush and lose direction. Take the reins again.','前進・勝利','Drive · Victory'],
+ ['力','Strength','優しさこそ本当の強さ。穏やかに向き合えば道は開けます。','自信が揺らいでも大丈夫。あなたは思っているより強い。','Gentleness is true strength. Face things calmly.','Even if confidence wavers, you are stronger than you think.','勇気・忍耐','Courage · Patience'],
+ ['隠者','The Hermit','一人で考える時間が光を灯します。焦らず内省を。','閉じこもりすぎず、誰かに話してみると灯りが増えます。','Time alone lights the way. Reflect without hurry.','Don\'t isolate too long — sharing adds more light.','内省・探求','Reflection · Search'],
+ ['運命の輪','Wheel of Fortune','流れが変わる好機。巡ってきたチャンスに乗って。','今は巡りが一休み。次の波に備えて力を蓄えて。','The tide is turning. Ride the chance that comes around.','The wheel is resting. Gather strength for the next wave.','転機・巡り','Cycles · Fortune'],
+ ['正義','Justice','公平な判断が良い結果を呼びます。誠実さが鍵。','偏りがないか見直して。釣り合いを取り戻す時です。','Fair judgment brings good results. Honesty is the key.','Check for imbalance. It is time to restore fairness.','公正・均衡','Fairness · Balance'],
+ ['吊るされた男','The Hanged Man','立ち止まることで見える景色があります。視点を変えて。','我慢しすぎていませんか。手放す勇気も時には必要です。','Pausing shows a new view. Try another perspective.','Are you enduring too much? Sometimes letting go takes courage.','視点・待機','Perspective · Pause'],
+ ['死神','Death','終わりは新しい始まり。古いものを手放すと、次が芽吹きます。','変化を怖がらなくて大丈夫。少しずつ扉を開けてみて。','An ending is a new beginning. Let go, and something new grows.','No need to fear change. Open the door little by little.','再生・変容','Transformation'],
+ ['節制','Temperance','ちょうど良い配分が心地よさを生みます。ゆっくり調和を。','無理が重なっているかも。ペースを整えて。','The right balance brings ease. Blend things slowly.','Strain may be piling up. Adjust your pace.','調和・節度','Balance · Moderation'],
+ ['悪魔','The Devil','手放せない何かに気づく時。気づけた時点で、もう自由への一歩です。','鎖は思ったより緩いもの。抜け出すきっかけが訪れます。','Notice what holds you. Noticing is already a step toward freedom.','The chains are looser than they seem. A way out is coming.','執着・誘惑','Attachment'],
+ ['塔','The Tower','思いがけない変化が、凝り固まったものを壊してくれます。再建のチャンス。','大きな崩れは避けられそう。小さな修正で乗り切れます。','A sudden change breaks what was stuck — a chance to rebuild.','A big collapse can be avoided. Small fixes will see you through.','変革・目覚め','Upheaval · Awakening'],
+ ['星','The Star','希望の光が差します。願いを素直に持ち続けて。','希望が見えにくい時も、星は空にあります。小さな光を信じて。','A light of hope shines. Keep your wish close.','Even when hope is hard to see, the stars remain. Trust small lights.','希望・癒し','Hope · Healing'],
+ ['月','The Moon','見えないものに不安を感じる時。想像より現実は穏やかです。','霧が晴れ始めます。少しずつ本当の姿が見えてきます。','Uncertainty may unsettle you; reality is gentler than imagined.','The fog begins to lift. The truth is coming into view.','不安・直感','Dreams · Intuition'],
+ ['太陽','The Sun','明るい成功と喜び。あなたらしさが周りを照らします。','少し雲がかかっても太陽は消えません。楽しむ心を忘れずに。','Bright success and joy. Being yourself lights up others.','Clouds may pass, but the sun remains. Keep your joy.','成功・喜び','Joy · Success'],
+ ['審判','Judgement','目覚めと復活の時。過去の努力が呼び覚まされます。','自分を責めすぎないで。もう一度やり直すチャンスはあります。','A time of awakening. Past efforts are called back to life.','Don\'t judge yourself too harshly. There is another chance.','復活・覚醒','Rebirth · Calling'],
+ ['世界','The World','一つの物語の完成。達成を祝い、次の旅へ。','あと少しで完成です。最後の一片を丁寧に。','A story is complete. Celebrate, then begin the next journey.','Almost complete. Place the last piece with care.','完成・統合','Completion']
+];
+// オリジナル図柄（ネオン線画）
+const ART = [
+ '<path d="M8 104 L40 104 L48 92"/><circle cx="66" cy="36" r="10"/><path d="M66 46 L62 74 L52 90 M62 74 L74 88 M64 56 L82 50 M64 56 L48 64"/><path d="M18 30 Q30 12 46 22" stroke-dasharray="3 5"/>',
+ '<path d="M30 30 C30 16 50 16 50 30 C50 44 70 44 70 30 C70 16 50 16 50 30 C50 44 30 44 30 30"/><path d="M50 50 L50 104"/><circle class="fl" cx="50" cy="50" r="4"/><path d="M28 104 L72 104 M34 116 L66 116"/>',
+ '<path d="M20 22 L20 110 M80 22 L80 110"/><path d="M16 22 L24 22 M76 22 L84 22"/><path d="M60 46 A18 18 0 1 1 60 74 A13 13 0 1 0 60 46"/><path d="M38 96 L62 96"/>',
+ '<circle cx="50" cy="44" r="18"/><path d="M50 62 L50 96 M36 82 L64 82"/><path d="M24 110 Q34 98 30 86 M76 110 Q66 98 70 86"/>',
+ '<rect x="26" y="54" width="48" height="52"/><path d="M26 54 Q16 40 28 30 Q36 40 32 48 M74 54 Q84 40 72 30 Q64 40 68 48"/><path d="M38 70 L62 70 M50 70 L50 96"/>',
+ '<path d="M50 18 L50 110 M36 34 L64 34 M30 50 L70 50 M24 66 L76 66"/><circle cx="50" cy="96" r="8"/>',
+ '<circle cx="38" cy="56" r="18"/><circle cx="62" cy="56" r="18"/><path d="M50 100 L36 88 Q28 80 36 74 Q44 70 50 78 Q56 70 64 74 Q72 80 64 88 Z"/><path d="M50 16 L50 30 M40 22 L60 22"/>',
+ '<rect x="24" y="40" width="52" height="40"/><circle cx="32" cy="94" r="12"/><circle cx="68" cy="94" r="12"/><path d="M50 18 L58 32 L42 32 Z"/><path d="M36 60 L64 60"/>',
+ '<path d="M34 24 C34 14 50 14 50 24 C50 34 66 34 66 24 C66 14 50 14 50 24 C50 34 34 34 34 24"/><circle cx="50" cy="74" r="24"/><path d="M38 70 Q44 64 50 70 Q56 64 62 70 M42 84 Q50 90 58 84"/>',
+ '<path d="M50 16 L46 28 L54 28 Z" class="fl"/><rect x="38" y="46" width="24" height="30" rx="4"/><path d="M50 30 L50 46 M42 76 L58 76 M50 54 L50 68"/><path d="M28 112 L72 112" stroke-dasharray="3 5"/>',
+ '<circle cx="50" cy="64" r="36"/><circle cx="50" cy="64" r="12"/><path d="M50 28 L50 100 M14 64 L86 64 M25 39 L75 89 M75 39 L25 89"/>',
+ '<path d="M50 20 L50 108 M22 40 L78 40"/><path d="M22 40 L12 70 L32 70 Z M78 40 L68 70 L88 70 Z"/><path d="M36 108 L64 108"/>',
+ '<path d="M20 20 L80 20 M50 20 L50 54"/><circle cx="50" cy="98" r="12"/><path d="M50 54 L50 86 M50 66 L36 56 M50 66 L64 56"/><path d="M50 54 L38 40 M50 54 L62 40"/>',
+ '<path d="M10 96 L90 96"/><path d="M28 96 A22 22 0 0 1 72 96"/><path d="M50 60 L50 46 M24 70 L16 62 M76 70 L84 62"/><path d="M18 30 L18 96 M82 30 L82 96" stroke-dasharray="2 6"/>',
+ '<path d="M24 40 L36 40 L34 60 L26 60 Z M64 70 L76 70 L74 90 L66 90 Z"/><path d="M36 46 Q54 52 66 74" stroke-dasharray="4 4"/><path d="M50 18 L58 30 L42 30 Z"/><path d="M30 108 Q50 98 70 108"/>',
+ '<ellipse cx="40" cy="50" rx="10" ry="15"/><ellipse cx="60" cy="72" rx="10" ry="15"/><ellipse cx="40" cy="94" rx="10" ry="15" stroke-dasharray="4 4"/><path d="M50 18 L50 30 M38 24 L62 24"/>',
+ '<path d="M34 110 L38 40 L62 40 L66 110 Z"/><path d="M32 40 L50 22 L68 40"/><path d="M78 14 L62 42 L74 44 L58 72"/><rect x="45" y="60" width="10" height="14"/>',
+ '<path d="M50 22 L56 46 L80 52 L56 58 L50 82 L44 58 L20 52 L44 46 Z"/><circle class="fl" cx="22" cy="24" r="2.5"/><circle class="fl" cx="80" cy="22" r="2.5"/><circle class="fl" cx="24" cy="96" r="2.5"/><circle class="fl" cx="78" cy="100" r="2.5"/><path d="M30 112 Q50 102 70 112"/>',
+ '<path d="M62 22 A24 24 0 1 0 62 66 A18 18 0 1 1 62 22"/><path d="M16 110 L16 76 L28 76 L28 110 M72 110 L72 76 L84 76 L84 110"/><path d="M36 112 Q50 94 64 112"/>',
+ '<circle cx="50" cy="56" r="20"/><path d="M50 20 L50 28 M50 84 L50 92 M14 56 L22 56 M78 56 L86 56 M25 31 L31 37 M69 75 L75 81 M75 31 L69 37 M31 75 L25 81"/><path d="M20 108 L80 108"/>',
+ '<path d="M28 60 L64 40 L64 76 Z"/><path d="M64 46 L82 34 M64 58 L86 58 M64 70 L82 82"/><path d="M28 104 L40 92 L50 104 L60 92 L72 104"/>',
+ '<ellipse cx="50" cy="64" rx="28" ry="42"/><circle cx="50" cy="44" r="7"/><path d="M50 51 L50 82 M50 60 L40 70 M50 60 L60 70 M50 82 L42 96 M50 82 L58 96"/><circle class="fl" cx="16" cy="18" r="3"/><circle class="fl" cx="84" cy="18" r="3"/><circle class="fl" cx="16" cy="112" r="3"/><circle class="fl" cx="84" cy="112" r="3"/>'
+];
+
+
+/* ================= 猫タロット 浮世絵風 絵柄 ================= */
+let INK, FILL, FILL2, MID, BG, LANG = 'ja';
+const PALS = {
+  matrix: { ink:'#39ff14', fill:'#0d2e0e', fill2:'#164a17', mid:'#0a240b', bg:'#040a05', page:'#030604', txt:'#e4f2e4', glow:'#39ff1433', ja:'Matrix Green', en:'Matrix Green' },
+  sumi:   { ink:'#2b2622', fill:'#ddd2bb', fill2:'#c8b898', mid:'#e8dfcb', bg:'#f4eddd', page:'#e6dccb', txt:'#2b2622', glow:'#00000000', ja:'和紙と墨（目にやさしい）', en:'Washi & Sumi (easy on the eyes)' },
+  ai:     { ink:'#9cc0ff', fill:'#17284a', fill2:'#22385f', mid:'#111e38', bg:'#0a1326', page:'#070d1a', txt:'#dfe8f7', glow:'#9cc0ff22', ja:'藍（暗い部屋向き）', en:'Indigo (for dark rooms)' },
+  kin:    { ink:'#e8c26a', fill:'#33270c', fill2:'#4a3912', mid:'#241b08', bg:'#120d04', page:'#0b0803', txt:'#f2e8d0', glow:'#e8c26a22', ja:'金', en:'Gold' },
+  sakura: { ink:'#ffb3cf', fill:'#3a1a28', fill2:'#52243a', mid:'#261019', bg:'#140a10', page:'#0d070a', txt:'#f7e4ec', glow:'#ffb3cf22', ja:'夜桜', en:'Night Sakura' }
+};
+function applyPal(){
+  const P = PALS[(typeof D !== 'undefined' && D.pal) || 'matrix'] || PALS.matrix;
+  INK = P.ink; FILL = P.fill; FILL2 = P.fill2; MID = P.mid; BG = P.bg;
+  const b = document.body.style; b.setProperty('--line', P.ink); b.setProperty('--cbg', P.bg);
+  b.setProperty('--glow', P.glow);
+  document.getElementById('defsSvg').innerHTML = `<defs>
+    <filter id="brush" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/></filter>
+    <pattern id="seigaiha" width="20" height="10" patternUnits="userSpaceOnUse"><g fill="none" stroke="${INK}" stroke-opacity=".16" stroke-width=".8"><circle cx="10" cy="10" r="9"/><circle cx="10" cy="10" r="6"/><circle cx="10" cy="10" r="3"/><circle cx="0" cy="5" r="9"/><circle cx="20" cy="5" r="9"/></g></pattern>
+    <pattern id="asanoha" width="24" height="14" patternUnits="userSpaceOnUse"><g fill="none" stroke="${INK}" stroke-opacity=".12" stroke-width=".6"><path d="M0 0 L12 7 L24 0 M0 14 L12 7 L24 14 M12 0 L12 14 M0 7 L24 7"/></g></pattern>
+    <pattern id="stripe" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><path d="M0 0 L0 5" stroke="${INK}" stroke-opacity=".35" stroke-width="1.6"/></pattern>
+    <linearGradient id="bokashi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${INK}" stop-opacity=".22"/><stop offset=".35" stop-color="${INK}" stop-opacity="0"/></linearGradient>
+  </defs>`;
+}
+
+/* ===== 共通パーツ（国芳風：太い輪郭＋濃緑の塗り＋とら縞） ===== */
+
+// 猫の顔：つり目・ひげ・口元。eye: 'open'|'closed'|'sly'
+function face(x, y, r, eye = 'open', rot = 0){
+  const ex = r * .42, ey = y - r * .05;
+  const eyes = eye === 'closed'
+    ? `<path d="M${x - ex - r * .22} ${ey} Q${x - ex} ${ey + r * .22} ${x - ex + r * .22} ${ey} M${x + ex - r * .22} ${ey} Q${x + ex} ${ey + r * .22} ${x + ex + r * .22} ${ey}" stroke-width="${r * .12}"/>`
+    : `<path d="M${x - ex - r * .26} ${ey + r * .05} Q${x - ex} ${ey - r * .28} ${x - ex + r * .26} ${ey - r * .06} Q${x - ex} ${ey + r * .16} ${x - ex - r * .26} ${ey + r * .05} Z
+              M${x + ex + r * .26} ${ey + r * .05} Q${x + ex} ${ey - r * .28} ${x + ex - r * .26} ${ey - r * .06} Q${x + ex} ${ey + r * .16} ${x + ex + r * .26} ${ey + r * .05} Z" fill="${INK}" stroke-width="${r * .06}"/>
+       <path d="M${x - ex} ${ey - r * .14} L${x - ex} ${ey + r * .1} M${x + ex} ${ey - r * .14} L${x + ex} ${ey + r * .1}" stroke="${BG}" stroke-width="${r * (eye === 'sly' ? .05 : .09)}"/>`;
+  return `<g transform="rotate(${rot} ${x} ${y})" stroke="${INK}" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M${x - r * .95} ${y - r * .1} L${x - r * .82} ${y - r * 1.35} Q${x - r * .55} ${y - r * 1.05} ${x - r * .25} ${y - r * .92}
+             Q${x} ${y - r * 1.02} ${x + r * .25} ${y - r * .92} Q${x + r * .55} ${y - r * 1.05} ${x + r * .82} ${y - r * 1.35} L${x + r * .95} ${y - r * .1}
+             Q${x + r * 1.1} ${y + r * .75} ${x} ${y + r * .9} Q${x - r * 1.1} ${y + r * .75} ${x - r * .95} ${y - r * .1} Z" fill="${FILL2}" stroke-width="${r * .14}"/>
+    <path d="M${x - r * .7} ${y - r * 1.05} L${x - r * .62} ${y - r * .55} M${x + r * .7} ${y - r * 1.05} L${x + r * .62} ${y - r * .55}" stroke-width="${r * .07}" opacity=".7"/>
+    <path d="M${x - r * .2} ${y - r * .75} Q${x} ${y - r * .5} ${x + r * .2} ${y - r * .75} M${x - r * .1} ${y - r * .55} L${x} ${y - r * .4} L${x + r * .1} ${y - r * .55}" fill="none" stroke-width="${r * .08}" opacity=".8"/>
+    ${eyes}
+    <path d="M${x - r * .1} ${y + r * .32} L${x} ${y + r * .42} L${x + r * .1} ${y + r * .32} M${x} ${y + r * .42} Q${x - r * .18} ${y + r * .62} ${x - r * .3} ${y + r * .5} M${x} ${y + r * .42} Q${x + r * .18} ${y + r * .62} ${x + r * .3} ${y + r * .5}" fill="none" stroke-width="${r * .08}"/>
+    <path d="M${x - r * .45} ${y + r * .35} Q${x - r * .9} ${y + r * .2} ${x - r * 1.5} ${y + r * .1} M${x - r * .45} ${y + r * .48} Q${x - r * .9} ${y + r * .5} ${x - r * 1.45} ${y + r * .62}
+             M${x + r * .45} ${y + r * .35} Q${x + r * .9} ${y + r * .2} ${x + r * 1.5} ${y + r * .1} M${x + r * .45} ${y + r * .48} Q${x + r * .9} ${y + r * .5} ${x + r * 1.45} ${y + r * .62}" fill="none" stroke-width="${r * .05}"/>
+  </g>`;
+}
+// 縦書き題箋（右上）＋番号
+function cartoucheBase(title, num){
+  const h = 16 + title.length * 15;
+  let t = ''; [...title].forEach((ch, i) => t += `<text x="164" y="${30 + i * 15}" font-size="13" text-anchor="middle" fill="${INK}" font-weight="700">${ch}</text>`);
+  return `<rect x="154" y="12" width="20" height="${h}" fill="${BG}" stroke="${INK}" stroke-width="1.2"/><rect x="156.5" y="14.5" width="15" height="${h - 5}" fill="none" stroke="${INK}" stroke-width=".5" opacity=".6"/>${t}
+    <text x="14" y="26" font-size="12" fill="${INK}" font-family="Georgia,serif" font-weight="700" letter-spacing="1">${num}</text>`;
+}
+// 落款（左下）
+const seal = (x = 14, y = 268) => `<g transform="translate(${x},${y})"><rect width="18" height="18" rx="2" fill="${INK}"/><text x="9" y="8" font-size="7" text-anchor="middle" fill="${BG}" font-weight="700">子</text><text x="9" y="15.5" font-size="7" text-anchor="middle" fill="${BG}" font-weight="700">午</text></g>`;
+// 外枠＋ぼかし空
+const frame = (bg = 'seigaiha') => `<rect x="6" y="6" width="168" height="288" fill="url(#${bg})"/><rect x="6" y="6" width="168" height="288" fill="url(#bokashi)"/>
+  <rect x="6" y="6" width="168" height="288" fill="none" stroke="${INK}" stroke-width="1.6"/>`;
+// とら縞の胴（楕円）
+const body = (cx, cy, rx, ry, rot = 0) => `<g transform="rotate(${rot} ${cx} ${cy})"><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+  <ellipse cx="${cx}" cy="${cy}" rx="${rx - 2}" ry="${ry - 2}" fill="url(#stripe)"/></g>`;
+// しっぽ（太い筆）
+const tail = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${FILL}" stroke-width="3" stroke-linecap="round"/>`;
+const leg = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${FILL}" stroke-width="2.4" stroke-linecap="round"/>`;
+const wave = (y) => `<path d="M6 ${y} Q26 ${y - 14} 46 ${y} T86 ${y} T126 ${y} T174 ${y}" fill="none" stroke="${INK}" stroke-width="2.4"/>
+  <path d="M6 ${y + 8} Q26 ${y - 4} 46 ${y + 8} T86 ${y + 8} T126 ${y + 8} T174 ${y + 8}" fill="none" stroke="${INK}" stroke-width="1" opacity=".6"/>`;
+const cloud = (x, y, s = 1) => `<g transform="translate(${x},${y}) scale(${s})" fill="${BG}" stroke="${INK}" stroke-width="1.4"><path d="M0 10 Q0 0 10 2 Q14 -6 24 -2 Q34 -6 38 4 Q48 4 46 12 Z"/><path d="M8 8 Q14 4 20 8 M26 6 Q32 2 36 8" fill="none" opacity=".7"/></g>`;
+
+/* ===== 6 枚 ===== */
+
+// 題箋（日英対応で上書き）
+function cartouche(title, num){
+  let t = '', h;
+  if (LANG === 'en'){
+    const name = (EN[num] || [title])[0];
+    h = 18 + name.length * 6.6;
+    t = `<text transform="translate(164,${19}) rotate(90)" font-size="10.5" fill="${INK}" font-weight="700" font-family="Georgia,serif" dominant-baseline="central" letter-spacing=".5">${name}</text>`;
+  } else {
+    h = 16 + title.length * 15;
+    [...title].forEach((ch, i) => t += `<text x="164" y="${30 + i * 15}" font-size="13" text-anchor="middle" fill="${INK}" font-weight="700">${ch}</text>`);
+  }
+  return `<rect x="154" y="12" width="20" height="${h}" fill="${BG}" stroke="${INK}" stroke-width="1.2"/><rect x="156.5" y="14.5" width="15" height="${h - 5}" fill="none" stroke="${INK}" stroke-width=".5" opacity=".6"/>${t}
+    <text x="14" y="26" font-size="12" fill="${INK}" font-family="Georgia,serif" font-weight="700" letter-spacing="1">${num}</text>`;
+}
+const EN = {"0": ["The Fool", "Freedom · Beginnings", "A kitten with a furoshiki bundle leaps from a stone wall toward a great wave. Take the first step on curiosity alone."], "I": ["The Magician", "Creation · Will", "A cat conjurer in a tatami room with yarn, a bell, a teaser and a sea bream. Everything you need is within paw's reach."], "II": ["The High Priestess", "Intuition · Wisdom", "Eyes closed before a moonlit shoji, holding a scroll. The answer lies in the stillness."], "III": ["The Empress", "Abundance · Nurturing", "A mother cat lounging under wisteria, surrounded by kittens. What you nurtured is blooming."], "IV": ["The Emperor", "Stability · Leadership", "A great cat in a jinbaori coat before the castle walls. Stand firm and lead."], "V": ["The Hierophant", "Guidance · Tradition", "An old master cat teaching calligraphy to two kittens at a temple school. Return to the basics."], "VI": ["The Lovers", "Harmony · Choice", "Two cats on an arched bridge, their tails forming a heart. Choose with an honest heart."], "VII": ["The Chariot", "Drive · Victory", "A young cat raises a fan atop an ox-cart drawn by two carp over the waves. Straight ahead, by willpower."], "VIII": ["Strength", "Courage · Patience", "Among the peonies, a small cat gently strokes a great shishi lion. Gentleness is true strength."], "IX": ["The Hermit", "Reflection · Search", "On a snowy night pass, an old cat walks with a lantern. Light only the path at your feet."], "X": ["Wheel of Fortune", "Cycles · Fortune", "A cat runs atop a turning water wheel. When the chance comes around, ride it."], "XI": ["Justice", "Fairness · Balance", "A cat weighs a sea bream against a ball of yarn. A fair heart finds the balance."], "XII": ["The Hanged Man", "Perspective · Pause", "Hanging calmly by its tail from a pine branch. Upside down, the world looks different."], "XIII": ["Rebirth", "Endings · Beginnings (Death)", "Grooming a new coat under falling cherry blossoms, a sprout at its feet. Rebirth, not fear."], "XIV": ["Temperance", "Balance · Moderation", "Beside a waterfall, a cat pours water between two teacups. Slowly, just right."], "XV": ["The Devil", "Attachment", "Beneath an oni mask, a cat is tangled in yarn — but the threads are looser than they look."], "XVI": ["The Tower", "Upheaval · Awakening", "Lightning topples a tower of tea crates and the cat leaps free. Rebuild it better."], "XVII": ["The Star", "Hope · Healing", "By a still pond, a cat gazes up at a great star. Keep your wish close."], "XVIII": ["The Moon", "Dreams · Intuition", "Two cats in the pampas grass under a clouded full moon. When the mist clears, reality is gentler."], "XIX": ["The Sun", "Joy · Success", "Belly up on the veranda under a smiling morning sun. The deepest comfort, the brightest smile."], "XX": ["Judgement", "Rebirth · Calling", "From the clouds a cat blows a conch shell; kittens pop up from their crates, wide awake."], "XXI": ["The World", "Completion", "Curled atop a globe floating in the clouds. The journey is complete; the whole world is home."]};
+
+const CARDS = [
+ { t: '愚者', n: '0', k: '始まり・自由', d: '風呂敷を背負い、塀から大波へ跳ぶ子猫。北斎の波を背に、好奇心だけで一歩を。',
+   s: () => `${frame('seigaiha')}
+     <path d="M6 200 Q40 120 100 150 Q130 165 150 140 Q160 125 174 130 L174 294 L6 294 Z" fill="${MID}" stroke="${INK}" stroke-width="2"/>
+     <path d="M110 150 Q120 130 140 132 Q132 138 136 146 Q144 138 152 142" fill="none" stroke="${INK}" stroke-width="2"/>
+     ${wave(230)}${wave(255)}
+     <path d="M16 294 L16 214 L58 214 L58 294" fill="${MID}" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M16 234 L58 234 M16 254 L58 254 M16 274 L58 274 M37 214 L37 234 M26 234 L26 254 M48 234 L48 254 M37 254 L37 274" stroke="${INK}" stroke-width="1" opacity=".6"/>
+     ${body(92, 128, 26, 13, -24)}
+     ${leg('M76 140 L62 156')}${leg('M82 142 L76 162')}${leg('M106 118 L124 112')}${leg('M104 124 L120 132')}
+     ${tail('M70 138 Q50 128 52 106 Q54 96 62 100')}
+     ${face(116, 98, 14, 'open', 18)}
+     <path d="M96 116 L132 62" stroke="${INK}" stroke-width="2.6"/>
+     <path d="M126 54 Q140 40 150 56 Q148 72 132 70 Q120 66 126 54 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M130 56 L146 64 M132 64 L144 54" stroke="${INK}" stroke-width="1" opacity=".7"/>
+     ${cartouche('愚者', '0')}${seal()}`},
+ { t: '魔術師', n: 'I', k: '創造・意志', d: '座敷で道具を並べる猫の手妻（てづま）師。毛糸玉・鈴・猫じゃらし・鯛。必要なものは前足の届くところに。',
+   s: () => `${frame('asanoha')}
+     <path d="M6 206 L174 206" stroke="${INK}" stroke-width="2.4"/><path d="M6 214 L174 214" stroke="${INK}" stroke-width="1" opacity=".5"/>
+     <path d="M70 48 C70 34 90 34 90 48 C90 62 110 62 110 48 C110 34 90 34 90 48 C90 62 70 62 70 48" fill="none" stroke="${INK}" stroke-width="2.6"/>
+     <path d="M62 196 Q50 160 66 130 L114 130 Q130 160 118 196 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M66 136 L114 136 M64 150 L116 150 M62 166 L118 166 M62 182 L118 182" stroke="${INK}" stroke-width="1.2" opacity=".45"/>
+     <path d="M78 134 L90 196 L102 134" fill="none" stroke="${INK}" stroke-width="1.6" opacity=".8"/>
+     ${face(90, 104, 22, 'sly')}
+     ${leg('M116 150 Q132 128 136 108')}<circle cx="137" cy="102" r="4" fill="${INK}"/>
+     ${tail('M64 188 Q36 190 36 166 Q36 152 48 156')}
+     <circle cx="34" cy="240" r="13" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/><path d="M24 234 Q34 246 44 234 M24 244 Q34 236 44 248 M30 228 Q40 240 30 252" stroke="${INK}" stroke-width="1" fill="none"/>
+     <circle cx="72" cy="244" r="9" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/><path d="M64 246 L80 246" stroke="${INK}" stroke-width="1.4"/><circle cx="72" cy="251" r="1.8" fill="${INK}"/>
+     <path d="M96 262 L112 228" stroke="${INK}" stroke-width="2.4"/><path d="M112 228 Q118 214 114 210 M112 228 Q124 220 126 214 M112 228 Q122 230 130 226" stroke="${INK}" stroke-width="1.6" fill="none"/>
+     <path d="M126 248 Q144 234 162 248 Q144 262 126 248 Z M162 248 L170 240 L170 256 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/><circle cx="134" cy="246" r="1.8" fill="${INK}"/>
+     ${cartouche('魔術師', 'I')}${seal()}`},
+ { t: '隠者', n: 'IX', k: '内省・探求', d: '雪の夜、提灯を提げて峠をゆく老猫。急がず、自分の足元だけを照らして。',
+   s: () => `${frame('seigaiha')}
+     <circle cx="44" cy="54" r="20" fill="none" stroke="${INK}" stroke-width="2"/><circle cx="52" cy="50" r="18" fill="${BG}"/>
+     ${cloud(96, 40, .9)}${cloud(20, 92, .7)}
+     <path d="M6 230 Q60 200 100 214 Q140 226 174 206 L174 294 L6 294 Z" fill="${MID}" stroke="${INK}" stroke-width="2"/>
+     ${[...Array(26)].map((_, i) => `<circle cx="${12 + (i * 37) % 160}" cy="${20 + (i * 53) % 260}" r="${1 + i % 3 * .6}" fill="${INK}" opacity=".7"/>`).join('')}
+     <path d="M60 210 Q56 168 70 144 L102 144 Q114 170 110 210 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M58 150 Q86 132 116 150 L120 166 Q86 150 54 166 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/>
+     ${face(84, 124, 17, 'closed', -6)}
+     <path d="M66 98 Q84 82 104 98 Q84 94 66 98 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2"/>
+     <path d="M100 168 L132 136" stroke="${INK}" stroke-width="2.4"/><path d="M132 136 L138 136 L138 146" stroke="${INK}" stroke-width="2"/>
+     <rect x="128" y="146" width="20" height="28" rx="9" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M128 156 L148 156 M128 164 L148 164" stroke="${INK}" stroke-width="1"/><circle cx="138" cy="160" r="3.4" fill="${INK}"/>
+     <path d="M66 220 L60 236 M100 220 L106 236" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+     ${tail('M62 200 Q40 206 38 188')}
+     ${cartouche('隠者', 'IX')}${seal()}`},
+ { t: '再生', n: 'XIII', k: '終わりと始まり（死神）', d: '散りゆく桜の下、冬毛を脱いで新しい毛並みを整える猫。怖くない「生まれ変わり」。',
+   s: () => `${frame('asanoha')}
+     <path d="M174 30 Q130 40 110 70 Q100 86 76 90 M136 44 Q140 60 156 64 M118 62 Q112 44 96 40" fill="none" stroke="${INK}" stroke-width="3.4" stroke-linecap="round"/>
+     ${[[100,36],[150,72],[84,84],[126,90],[60,60],[36,120],[148,120],[30,180],[160,170]].map(([x, y], i) => `<g transform="translate(${x},${y}) rotate(${i * 40})"><path d="M0 -5 Q4 -4 3 0 Q6 2 3 5 Q0 7 -3 5 Q-6 2 -3 0 Q-4 -4 0 -5 Z" fill="${i % 2 ? INK : FILL2}" stroke="${INK}" stroke-width=".8"/></g>`).join('')}
+     <path d="M6 236 L174 236" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M36 236 Q30 226 40 220 Q48 228 42 236 M128 236 Q122 222 134 218 Q144 228 136 236" fill="none" stroke="${INK}" stroke-width="1.4" stroke-dasharray="3 3" opacity=".8"/>
+     ${body(90, 196, 30, 30, 0)}
+     ${face(90, 150, 21, 'closed', -12)}
+     ${leg('M70 216 Q66 230 74 234')}${leg('M108 216 Q114 230 106 234')}
+     ${leg('M74 186 Q62 168 72 156')}
+     ${tail('M118 214 Q146 214 144 190 Q142 178 132 182')}
+     <path d="M56 236 L56 214" stroke="${INK}" stroke-width="2"/><path d="M56 218 Q44 210 44 200 Q54 202 56 214 M56 222 Q68 214 68 204 Q58 206 56 218" fill="${FILL2}" stroke="${INK}" stroke-width="1.6"/>
+     ${wave(262)}
+     ${cartouche('再生', 'XIII')}${seal()}`},
+ { t: '太陽', n: 'XIX', k: '喜び・成功', d: '日の出の縁側で、お腹を見せて眠る猫。いちばん安心しているときの、いちばんの笑顔。',
+   s: () => `${frame('seigaiha')}
+     <circle cx="90" cy="96" r="40" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     ${[...Array(16)].map((_, i) => { const a = i / 16 * Math.PI * 2; return `<path d="M${90 + Math.cos(a) * 48} ${96 + Math.sin(a) * 48} L${90 + Math.cos(a) * (i % 2 ? 62 : 72)} ${96 + Math.sin(a) * (i % 2 ? 62 : 72)}" stroke="${INK}" stroke-width="${i % 2 ? 1.4 : 3}" stroke-linecap="round"/>`; }).join('')}
+     <path d="M74 92 Q80 100 86 92 M94 92 Q100 100 106 92 M76 110 Q90 122 104 110" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>
+     ${cloud(16, 150, .8)}${cloud(120, 160, .7)}
+     <path d="M6 222 L174 222 M6 230 L174 230" stroke="${INK}" stroke-width="2.2"/>
+     ${[...Array(9)].map((_, i) => `<path d="M${12 + i * 20} 230 L${12 + i * 20} 294" stroke="${INK}" stroke-width="1" opacity=".5"/>`).join('')}
+     ${body(100, 208, 42, 14, 0)}
+     <ellipse cx="102" cy="204" rx="22" ry="7" fill="${FILL2}" stroke="${INK}" stroke-width="1.4"/>
+     ${face(46, 206, 15, 'closed', -78)}
+     ${leg('M76 198 L68 178')}${leg('M90 196 L90 176')}${leg('M114 196 L118 176')}${leg('M128 198 L138 180')}
+     ${tail('M140 212 Q164 214 162 196')}
+     ${cartouche('太陽', 'XIX')}${seal()}`},
+ { t: '世界', n: 'XXI', k: '完成・統合', d: '雲に浮かぶ地球儀の上で丸くなる猫。旅が終わり、世界ぜんぶが自分の居場所になる。',
+   s: () => `${frame('asanoha')}
+     ${cloud(14, 40, 1)}${cloud(108, 30, .9)}${cloud(20, 226, 1.1)}${cloud(104, 240, 1)}
+     <circle cx="90" cy="176" r="52" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <ellipse cx="90" cy="176" rx="22" ry="52" fill="none" stroke="${INK}" stroke-width="1.6"/>
+     <path d="M38 176 L142 176 M46 150 Q90 160 134 150 M46 202 Q90 192 134 202" fill="none" stroke="${INK}" stroke-width="1.4"/>
+     <path d="M62 150 Q72 140 84 148 Q90 160 78 166 Q66 168 62 150 Z M102 182 Q116 176 122 190 Q116 204 104 198 Z" fill="${FILL2}" stroke="${INK}" stroke-width="1.2"/>
+     <path d="M80 228 L100 228 M90 228 L90 244 M72 246 L108 246" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+     <path d="M42 126 Q46 100 90 98 Q136 100 140 126 Q116 134 90 134 Q62 134 42 126 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M54 124 L58 106 M74 128 L76 102 M98 130 L100 102 M120 126 L122 106" stroke="${INK}" stroke-width="1.4" opacity=".5"/>
+     ${face(56, 110, 15, 'closed', -10)}
+     ${tail('M138 124 Q160 118 154 98 Q150 88 140 94')}
+     ${cartouche('世界', 'XXI')}${seal()}`},
+ { t: '女教皇', n: 'II', k: '直感・知恵', d: '月明かりの障子の前、巻物を抱いて目を閉じる白猫。答えは静けさの中に。',
+   s: () => `${frame('asanoha')}
+     <rect x="20" y="30" width="140" height="170" fill="${MID}" stroke="${INK}" stroke-width="2"/>
+     <path d="M20 72 L160 72 M20 114 L160 114 M20 156 L160 156 M66 30 L66 200 M114 30 L114 200" stroke="${INK}" stroke-width="1.2" opacity=".55"/>
+     <circle cx="90" cy="72" r="26" fill="${FILL}" stroke="${INK}" stroke-width="2.4"/><circle cx="100" cy="66" r="22" fill="${MID}"/>
+     <path d="M6 236 L174 236" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M58 232 Q48 190 64 160 L116 160 Q132 190 122 232 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M64 166 Q90 182 116 166" fill="none" stroke="${INK}" stroke-width="1.4" opacity=".6"/>
+     ${face(90, 136, 20, 'closed')}
+     <rect x="74" y="186" width="32" height="14" rx="4" fill="${FILL2}" stroke="${INK}" stroke-width="2"/><path d="M80 193 L100 193" stroke="${INK}" stroke-width="1"/>
+     ${tail('M120 226 Q146 228 146 206 Q146 196 136 198')}
+     ${wave(262)}
+     ${cartouche('女教皇', 'II')}${seal()}`},
+ { t: '女帝', n: 'III', k: '豊穣・愛情', d: '満開の藤棚の下、子猫たちに囲まれて寝そべる母猫。育てたものが花ひらく時。',
+   s: () => `${frame('seigaiha')}
+     <path d="M6 30 Q90 46 174 30" fill="none" stroke="${INK}" stroke-width="3"/>
+     ${[20,44,68,92,116,140,162].map((x, i) => `<g>${[0,1,2,3,4].map(k => `<circle cx="${x + (k % 2 ? 3 : -3)}" cy="${42 + k * 10 + (i % 2) * 6}" r="${5 - k * .7}" fill="${k % 2 ? FILL2 : INK}" opacity="${1 - k * .12}"/>`).join('')}</g>`).join('')}
+     <path d="M6 240 L174 240" stroke="${INK}" stroke-width="2.4"/>
+     ${body(96, 206, 50, 22, 0)}
+     ${face(48, 190, 19, 'closed', -8)}
+     ${tail('M146 212 Q168 210 164 188')}
+     ${face(84, 176, 9, 'open', -10)}${face(112, 172, 9, 'open', 12)}${face(136, 186, 8, 'closed', 20)}
+     <path d="M72 226 L66 240 M92 228 L92 240 M120 228 L124 240" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+     <path d="M20 270 Q40 252 60 270 M120 270 Q140 252 160 270" fill="none" stroke="${INK}" stroke-width="1.6"/>
+     ${cartouche('女帝', 'III')}${seal()}`},
+ { t: '皇帝', n: 'IV', k: '安定・統率', d: '城の石垣の上、陣羽織をまとって構える大猫。どっしり構えて、導く側に。',
+   s: () => `${frame('asanoha')}
+     <path d="M40 92 L90 54 L140 92 Z" fill="${FILL}" stroke="${INK}" stroke-width="2.6"/><path d="M30 92 Q90 82 150 92" fill="none" stroke="${INK}" stroke-width="3"/>
+     <path d="M50 68 Q40 58 32 64 M130 68 Q140 58 148 64" fill="none" stroke="${INK}" stroke-width="2"/>
+     <path d="M6 294 L6 236 L174 236 L174 294" fill="${MID}" stroke="${INK}" stroke-width="2.4"/>
+     ${[0,1,2,3].map(r => [0,1,2,3,4,5].map(c => `<rect x="${8 + c * 28 + (r % 2) * 14}" y="${238 + r * 14}" width="26" height="12" fill="none" stroke="${INK}" stroke-width=".9" opacity=".55"/>`).join('')).join('')}
+     <path d="M54 232 Q44 178 62 146 L118 146 Q136 178 126 232 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M54 150 L44 176 L66 170 Z M126 150 L136 176 L114 170 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M90 152 L90 228 M70 176 Q90 186 110 176 M70 200 Q90 210 110 200" fill="none" stroke="${INK}" stroke-width="1.4" opacity=".7"/>
+     <circle cx="90" cy="190" r="7" fill="none" stroke="${INK}" stroke-width="1.6"/><path d="M86 190 L94 190 M90 186 L90 194" stroke="${INK}" stroke-width="1.2"/>
+     ${face(90, 122, 22, 'sly')}
+     ${tail('M126 222 Q156 224 154 196 Q152 184 140 188')}
+     ${cartouche('皇帝', 'IV')}${seal()}`},
+ { t: '教皇', n: 'V', k: '教え・信頼', d: '寺子屋で、二匹の子猫に筆を教える老師猫。基本に立ち返ると道が見える。',
+   s: () => `${frame('seigaiha')}
+     <path d="M30 40 L150 40 L150 120 L30 120 Z" fill="${MID}" stroke="${INK}" stroke-width="2"/>
+     <text x="122" y="70" font-size="20" fill="${INK}" font-weight="700">猫</text><text x="96" y="70" font-size="20" fill="${INK}" font-weight="700" opacity=".7">学</text>
+     <path d="M44 64 Q54 58 60 66 Q66 76 54 82" fill="none" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M6 236 L174 236" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M62 226 Q52 186 68 160 L112 160 Q128 186 118 226 Z" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M64 168 L116 168" stroke="${INK}" stroke-width="1.4" opacity=".6"/>
+     ${face(90, 138, 19, 'wise')}
+     <path d="M70 128 Q90 118 110 128" fill="none" stroke="${INK}" stroke-width="2.4" opacity=".8"/>
+     ${leg('M116 188 Q132 176 138 160')}<path d="M138 160 L146 140" stroke="${INK}" stroke-width="2.4"/><path d="M146 140 L149 133" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+     ${face(36, 214, 11, 'open', -6)}${face(146, 214, 11, 'open', 6)}
+     <rect x="24" y="226" width="26" height="8" fill="${FILL2}" stroke="${INK}" stroke-width="1.4"/><rect x="132" y="226" width="26" height="8" fill="${FILL2}" stroke="${INK}" stroke-width="1.4"/>
+     ${wave(264)}
+     ${cartouche('教皇', 'V')}${seal()}`},
+ { t: '恋人', n: 'VI', k: '調和・選択', d: '朱塗りの太鼓橋の上、しっぽでハートを結ぶ二匹。素直な心で選んで。',
+   s: () => `${frame('asanoha')}
+     ${cloud(18, 34, .9)}${cloud(110, 50, .8)}
+     <path d="M90 66 Q78 52 70 60 Q62 70 90 92 Q118 70 110 60 Q102 52 90 66 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M6 230 Q90 150 174 230" fill="none" stroke="${INK}" stroke-width="4"/><path d="M6 242 Q90 162 174 242" fill="none" stroke="${INK}" stroke-width="2"/>
+     ${[30,58,90,122,150].map(x => `<path d="M${x} ${x === 90 ? 178 : x < 90 ? 230 - (x - 6) * 1.05 : 230 - (174 - x) * 1.05} L${x} ${x === 90 ? 194 : x < 90 ? 244 - (x - 6) * 1.05 : 244 - (174 - x) * 1.05}" stroke="${INK}" stroke-width="2"/>`).join('')}
+     ${wave(262)}
+     ${body(62, 162, 20, 13, -8)}${body(118, 162, 20, 13, 8)}
+     ${face(52, 136, 14, 'closed', 10)}${face(128, 136, 14, 'closed', -10)}
+     ${tail('M76 158 Q90 120 82 110 Q76 104 72 112')}${tail('M104 158 Q90 120 98 110 Q104 104 108 112')}
+     ${cartouche('恋人', 'VI')}${seal()}`},
+ { t: '戦車', n: 'VII', k: '前進・勝利', d: '二匹の鯉が引く牛車を、扇を掲げて駆る若猫。意志の力で、まっすぐ前へ。',
+   s: () => `${frame('seigaiha')}
+     ${wave(200)}${wave(226)}${wave(252)}
+     <path d="M30 196 Q24 178 40 172 Q58 168 66 184 Q60 196 44 198 Z M66 184 L78 176 L76 194 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/><circle cx="36" cy="182" r="2" fill="${INK}"/>
+     <path d="M30 230 Q24 212 40 206 Q58 202 66 218 Q60 230 44 232 Z M66 218 L78 210 L76 228 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/><circle cx="36" cy="216" r="2" fill="${INK}"/>
+     <path d="M66 190 L96 180 M66 224 L96 200" stroke="${INK}" stroke-width="1.6"/>
+     <rect x="92" y="130" width="64" height="64" rx="4" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <path d="M88 130 Q124 108 160 130" fill="${FILL2}" stroke="${INK}" stroke-width="2.6"/>
+     <path d="M100 142 L148 142 M100 156 L148 156" stroke="${INK}" stroke-width="1" opacity=".5"/>
+     <circle cx="124" cy="206" r="20" fill="none" stroke="${INK}" stroke-width="3"/>
+     <path d="M124 186 L124 226 M104 206 L144 206 M110 192 L138 220 M138 192 L110 220" stroke="${INK}" stroke-width="1.4"/>
+     ${face(124, 112, 15, 'sly')}
+     ${leg('M110 126 Q96 100 100 82')}
+     <path d="M100 82 L86 62 Q100 54 114 62 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2"/><path d="M100 82 L92 64 M100 82 L100 60 M100 82 L108 64" stroke="${INK}" stroke-width="1"/>
+     ${cartouche('戦車', 'VII')}${seal()}`},
+ { t: '力', n: 'VIII', k: '勇気・忍耐', d: '牡丹の咲く庭で、大きな獅子をやさしく撫でる小さな猫。優しさこそ本当の強さ。',
+   s: () => `${frame('seigaiha')}
+     <path d="M6 252 L174 252" stroke="${INK}" stroke-width="2.4"/>
+     ${body(124, 228, 36, 16, 0)}
+     ${[...Array(14)].map((_, i) => { const a = i / 14 * Math.PI * 2; return `<circle cx="${(116 + Math.cos(a) * 34).toFixed(1)}" cy="${(168 + Math.sin(a) * 34).toFixed(1)}" r="11" fill="${FILL2}" stroke="${INK}" stroke-width="2"/>`; }).join('')}
+     <circle cx="116" cy="168" r="30" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     ${face(116, 170, 22, 'closed')}
+     <path d="M98 244 L96 252 M146 244 L150 252" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+     ${body(42, 222, 15, 22, 0)}
+     ${face(40, 188, 13, 'open', 10)}
+     ${leg('M52 208 Q70 190 86 176')}
+     ${tail('M28 238 Q12 238 14 220')}
+     <path d="M30 156 C30 148 40 148 40 156 C40 164 50 164 50 156 C50 148 40 148 40 156 C40 164 30 164 30 156" fill="none" stroke="${INK}" stroke-width="1.8"/>
+     ${[[24,274],[70,280],[150,276]].map(([x, y]) => `<g><circle cx="${x}" cy="${y}" r="10" fill="${FILL2}" stroke="${INK}" stroke-width="1.6"/><circle cx="${x}" cy="${y}" r="5" fill="none" stroke="${INK}" stroke-width="1"/><path d="M${x - 10} ${y} Q${x} ${y - 6} ${x + 10} ${y}" fill="none" stroke="${INK}" stroke-width="1"/></g>`).join('')}
+     ${cartouche('力', 'VIII')}${seal()}`},
+ { t: '運命の輪', n: 'X', k: '転機・巡り', d: '回る水車の上を駆ける猫。巡ってきた好機には、迷わず乗って。',
+   s: () => `${frame('asanoha')}
+     ${cloud(14, 30, .8)}${cloud(108, 24, .7)}
+     <circle cx="90" cy="164" r="64" fill="none" stroke="${INK}" stroke-width="4"/>
+     <circle cx="90" cy="164" r="52" fill="${FILL}" stroke="${INK}" stroke-width="2"/>
+     ${[...Array(12)].map((_, i) => { const a = i / 12 * Math.PI * 2, x1 = 90 + Math.cos(a) * 52, y1 = 164 + Math.sin(a) * 52, x2 = 90 + Math.cos(a) * 74, y2 = 164 + Math.sin(a) * 74; return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)}" stroke="${INK}" stroke-width="5" stroke-linecap="square"/>`; }).join('')}
+     ${[...Array(8)].map((_, i) => { const a = i / 8 * Math.PI * 2; return `<path d="M90 164 L${(90 + Math.cos(a) * 52).toFixed(1)} ${(164 + Math.sin(a) * 52).toFixed(1)}" stroke="${INK}" stroke-width="1.4" opacity=".6"/>`; }).join('')}
+     <circle cx="90" cy="164" r="9" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/>
+     ${body(86, 92, 22, 10, 0)}
+     ${leg('M70 96 L60 108')}${leg('M76 98 L74 110')}${leg('M98 96 L108 106')}${leg('M104 94 L118 98')}
+     ${tail('M64 90 Q48 82 52 68')}
+     ${face(112, 80, 12, 'open', 14)}
+     ${wave(250)}${wave(272)}
+     ${cartouche('運命の輪', 'X')}${seal()}`},
+ { t: '正義', n: 'XI', k: '公正・均衡', d: '天秤に鯛と毛糸玉をのせて量る猫。公平な心が、ちょうどいい釣り合いを見つける。',
+   s: () => `${frame('seigaiha')}
+     <path d="M90 60 L90 170" stroke="${INK}" stroke-width="4"/><circle cx="90" cy="56" r="6" fill="${FILL2}" stroke="${INK}" stroke-width="2"/>
+     <path d="M26 76 L154 76" stroke="${INK}" stroke-width="3.4" stroke-linecap="round"/>
+     <path d="M36 76 L22 128 M36 76 L50 128 M144 76 L130 128 M144 76 L158 128" stroke="${INK}" stroke-width="1.4"/>
+     <path d="M16 128 Q36 146 56 128 Z M124 128 Q144 146 164 128 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M22 122 Q34 112 46 122 Q34 130 22 122 Z M46 122 L52 117 L52 127 Z" fill="${FILL}" stroke="${INK}" stroke-width="1.8"/>
+     <circle cx="144" cy="118" r="10" fill="${FILL}" stroke="${INK}" stroke-width="1.8"/><path d="M136 114 Q144 122 152 114 M136 121 Q144 115 152 124" stroke="${INK}" stroke-width="1" fill="none"/>
+     <path d="M6 244 L174 244" stroke="${INK}" stroke-width="2.4"/>
+     ${body(90, 216, 28, 26, 0)}
+     ${face(90, 178, 19, 'sly')}
+     ${leg('M70 214 Q64 230 72 240')}${leg('M110 214 Q116 230 108 240')}
+     ${tail('M118 232 Q146 236 144 212')}
+     ${wave(268)}
+     ${cartouche('正義', 'XI')}${seal()}`},
+ { t: '吊るされた男', n: 'XII', k: '視点・待機', d: '松の枝から、しっぽ一本でのんびりぶら下がる猫。逆さに見れば、世界はちがって見える。',
+   s: () => `${frame('asanoha')}
+     <path d="M6 44 Q70 30 120 40 Q150 46 174 36" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
+     ${[[30,36],[64,30],[140,40],[164,30]].map(([x, y]) => `<g stroke="${INK}" stroke-width="1.4">${[-50,-25,0,25,50].map(d => `<path d="M${x} ${y} L${(x + Math.sin(d * Math.PI / 180) * 16).toFixed(1)} ${(y - Math.cos(d * Math.PI / 180) * 16).toFixed(1)}"/>`).join('')}</g>`).join('')}
+     ${tail('M100 40 Q94 58 100 78')}
+     ${body(100, 120, 17, 36, 0)}
+     ${leg('M90 92 Q82 80 88 70')}${leg('M110 92 Q118 80 112 70')}
+     ${leg('M88 150 Q78 162 86 172')}${leg('M112 150 Q122 162 114 172')}
+     <circle cx="100" cy="184" r="32" fill="none" stroke="${INK}" stroke-width="1.6" stroke-dasharray="4 5"/>
+     ${face(100, 182, 18, 'closed', 180)}
+     <path d="M30 226 Q50 214 70 226" fill="none" stroke="${INK}" stroke-width="1.4"/>
+     ${wave(258)}${wave(278)}
+     ${cartouche('吊るされた男', 'XII')}${seal()}`},
+ { t: '節制', n: 'XIV', k: '調和・節度', d: '滝のそばで、二つの湯呑みのあいだに水を注ぎ分ける猫。ゆっくり、ちょうどよく。',
+   s: () => `${frame('seigaiha')}
+     <path d="M14 30 L14 230 M24 30 L24 230 M34 30 L34 230" stroke="${INK}" stroke-width="1.6" opacity=".55"/>
+     <path d="M6 26 L44 26" stroke="${INK}" stroke-width="3"/>
+     <path d="M8 236 Q24 224 40 236" fill="none" stroke="${INK}" stroke-width="2"/>
+     <path d="M86 46 L94 46 L98 60 L90 66 L82 60 Z" fill="${FILL2}" stroke="${INK}" stroke-width="1.6"/>
+     ${body(96, 196, 24, 36, 0)}
+     ${face(96, 144, 19, 'closed')}
+     ${leg('M78 178 Q66 170 60 160')}${leg('M114 186 Q128 196 130 206')}
+     <path d="M48 150 L72 150 L68 170 L52 170 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M120 206 L144 206 L140 226 L124 226 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M70 152 Q100 150 132 206" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="3 4"/>
+     ${tail('M76 222 Q56 232 58 212')}
+     <path d="M66 236 Q96 226 126 236 L130 248 L62 248 Z" fill="${MID}" stroke="${INK}" stroke-width="2"/>
+     ${wave(266)}
+     ${cartouche('節制', 'XIV')}${seal()}`},
+ { t: '悪魔', n: 'XV', k: '執着・誘惑', d: '鬼の面の下、毛糸にぐるぐる絡まった猫。でもその糸、思っているよりずっとゆるい。',
+   s: () => `${frame('asanoha')}
+     <path d="M62 40 L56 18 L72 34 M118 40 L124 18 L108 34" fill="${FILL2}" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round"/>
+     <path d="M58 44 Q60 30 90 30 Q120 30 122 44 Q126 76 112 92 Q90 106 68 92 Q54 76 58 44 Z" fill="${FILL2}" stroke="${INK}" stroke-width="3"/>
+     <path d="M66 56 L82 60 M114 56 L98 60" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+     <circle cx="76" cy="66" r="5" fill="${INK}"/><circle cx="104" cy="66" r="5" fill="${INK}"/>
+     <path d="M72 84 Q90 94 108 84 M78 86 L80 94 M102 86 L100 94" fill="none" stroke="${INK}" stroke-width="2"/>
+     <path d="M6 250 L174 250" stroke="${INK}" stroke-width="2.4"/>
+     ${body(88, 214, 32, 26, 0)}
+     ${face(86, 174, 20, 'open')}
+     ${tail('M118 230 Q140 232 136 212')}
+     <path d="M54 196 Q90 230 122 200 M52 220 Q90 190 124 226 M60 236 Q90 214 116 240 M146 238 Q120 226 112 206" fill="none" stroke="${INK}" stroke-width="1.8" stroke-dasharray="6 3"/>
+     <circle cx="150" cy="236" r="14" fill="${FILL}" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M139 230 Q150 242 161 230 M139 240 Q150 232 161 244 M146 223 Q156 236 146 249" fill="none" stroke="${INK}" stroke-width="1"/>
+     ${cartouche('悪魔', 'XV')}${seal()}`},
+ { t: '塔', n: 'XVI', k: '変革・目覚め', d: '雷で崩れる茶箱の塔から、ひらりと飛び出す猫。壊れたあとに、もっといい形で建て直せる。',
+   s: () => `${frame('seigaiha')}
+     ${cloud(96, 20, 1)}
+     <path d="M150 34 L126 84 L140 86 L112 146" fill="none" stroke="${INK}" stroke-width="3.4" stroke-linejoin="round"/>
+     <path d="M6 252 L174 252" stroke="${INK}" stroke-width="2.4"/>
+     <rect x="56" y="212" width="64" height="40" fill="${FILL}" stroke="${INK}" stroke-width="2.6"/>
+     <g transform="rotate(5 86 192)"><rect x="60" y="174" width="56" height="38" fill="${FILL}" stroke="${INK}" stroke-width="2.6"/></g>
+     <g transform="rotate(-10 82 156)"><rect x="56" y="140" width="54" height="34" fill="${FILL}" stroke="${INK}" stroke-width="2.6"/></g>
+     <g transform="rotate(28 128 112)"><rect x="110" y="98" width="38" height="28" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/></g>
+     <path d="M64 230 L112 230 M70 192 L110 192 M64 156 L104 156" stroke="${INK}" stroke-width="1" opacity=".5"/>
+     <text x="80" y="238" font-size="11" fill="${INK}" font-weight="700" opacity=".7">茶</text>
+     ${body(48, 96, 22, 10, -34)}
+     ${leg('M60 108 L74 120')}${leg('M54 112 L62 128')}${leg('M38 84 L28 72')}${leg('M34 90 L20 86')}
+     ${tail('M64 112 Q82 120 84 104')}
+     ${face(28, 74, 12, 'open', -34)}
+     ${[[30,140,20],[150,170,-15],[140,210,40]].map(([x, y, r]) => `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 5}" y="${y - 4}" width="10" height="8" fill="none" stroke="${INK}" stroke-width="1.4"/></g>`).join('')}
+     ${cartouche('塔', 'XVI')}${seal()}`},
+ { t: '星', n: 'XVII', k: '希望・癒し', d: '静かな池のほとりで、大きな星を見上げる猫。願いを、素直に持ち続けて。',
+   s: () => `${frame('asanoha')}
+     <path d="M90 26 L98 58 L130 66 L98 74 L90 106 L82 74 L50 66 L82 58 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.6"/>
+     <path d="M90 42 L90 90 M66 66 L114 66" stroke="${INK}" stroke-width="1" opacity=".6"/>
+     ${[[26,36],[150,40],[36,104],[146,110],[120,24],[60,24]].map(([x, y]) => `<path d="M${x} ${y - 5} L${x} ${y + 5} M${x - 5} ${y} L${x + 5} ${y}" stroke="${INK}" stroke-width="1.6"/>`).join('')}
+     <ellipse cx="96" cy="240" rx="72" ry="18" fill="${MID}" stroke="${INK}" stroke-width="2.2"/>
+     <path d="M70 236 L120 236 M80 244 L112 244" stroke="${INK}" stroke-width="1.2" opacity=".6"/>
+     <path d="M96 232 L99 238 L105 239 L99 241 L96 247 L93 241 L87 239 L93 238 Z" fill="${INK}" opacity=".6"/>
+     ${body(64, 204, 22, 26, 0)}
+     ${face(66, 166, 16, 'open', -18)}
+     ${tail('M84 222 Q104 226 100 208')}
+     <path d="M150 230 L150 190 M158 232 L162 196 M142 232 L136 200" stroke="${INK}" stroke-width="1.6"/>
+     <ellipse cx="150" cy="188" rx="3" ry="8" fill="${INK}"/><ellipse cx="162" cy="194" rx="3" ry="8" fill="${INK}"/>
+     ${cartouche('星', 'XVII')}${seal()}`},
+ { t: '月', n: 'XVIII', k: '不安・直感', d: '雲のかかる満月の下、すすき野の二匹。霧が晴れれば、現実は思ったより穏やか。',
+   s: () => `${frame('seigaiha')}
+     <circle cx="90" cy="82" r="40" fill="${FILL}" stroke="${INK}" stroke-width="3"/>
+     <circle cx="76" cy="70" r="6" fill="none" stroke="${INK}" stroke-width="1.2" opacity=".6"/><circle cx="104" cy="92" r="9" fill="none" stroke="${INK}" stroke-width="1.2" opacity=".6"/>
+     ${cloud(54, 100, 1.2)}
+     <path d="M90 294 Q66 266 96 244 Q122 226 92 206" fill="none" stroke="${INK}" stroke-width="2" stroke-dasharray="5 4"/>
+     ${[18,30,150,162,64,118].map((x, i) => `<path d="M${x} 294 Q${x + (i % 2 ? 6 : -6)} 240 ${x + (i % 2 ? 16 : -14)} ${206 + i * 4}" fill="none" stroke="${INK}" stroke-width="1.6"/><path d="M${x + (i % 2 ? 16 : -14)} ${206 + i * 4} q${i % 2 ? 6 : -6} 8 ${i % 2 ? 2 : -2} 18" fill="none" stroke="${INK}" stroke-width="3" opacity=".7"/>`).join('')}
+     ${body(44, 232, 15, 20, 0)}${face(44, 204, 12, 'sly', 8)}${tail('M30 246 Q16 246 18 230')}
+     ${body(136, 232, 15, 20, 0)}${face(136, 204, 12, 'open', -8)}${tail('M150 246 Q164 246 162 230')}
+     ${cartouche('月', 'XVIII')}${seal()}`},
+ { t: '審判', n: 'XX', k: '復活・覚醒', d: '雲の上から法螺貝を吹く猫。その音で、茶箱の子猫たちがぱっと目を覚ます。',
+   s: () => `${frame('asanoha')}
+     ${cloud(8, 60, 1.3)}${cloud(96, 66, 1.2)}
+     ${face(66, 54, 16, 'closed', -6)}
+     <path d="M80 62 Q108 46 140 34 L146 56 Q114 64 82 70 Z" fill="${FILL2}" stroke="${INK}" stroke-width="2.4"/>
+     <path d="M96 58 Q100 52 106 56 M112 52 Q116 46 122 50 M128 46 Q132 40 138 44" fill="none" stroke="${INK}" stroke-width="1.2"/>
+     <path d="M150 34 Q160 44 152 58 M156 26 Q172 44 158 64" fill="none" stroke="${INK}" stroke-width="1.6" stroke-dasharray="3 3"/>
+     <path d="M6 252 L174 252" stroke="${INK}" stroke-width="2.4"/>
+     ${[[46,206],[90,198],[134,206]].map(([x, y]) => `<rect x="${x - 22}" y="${y + 10}" width="44" height="${252 - y - 10}" fill="${FILL}" stroke="${INK}" stroke-width="2.4"/><path d="M${x - 22} ${y + 18} L${x + 22} ${y + 18}" stroke="${INK}" stroke-width="1" opacity=".5"/>`).join('')}
+     ${face(46, 202, 12, 'open')}${face(90, 192, 13, 'open')}${face(134, 202, 12, 'open')}
+     ${leg('M78 206 L68 186')}${leg('M102 206 L112 186')}
+     ${wave(276)}
+     ${cartouche('審判', 'XX')}${seal()}`}
+];
+const ORDER = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+CARDS.sort((a, b) => ORDER.indexOf(a.n) - ORDER.indexOf(b.n));
+
+
+function catSvg(i){ LANG = D.lang; const c = CARDS[i]; return `<svg viewBox="0 0 180 300" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif"><g filter="url(#brush)">${c.s()}</g></svg>`; }
+function refreshArt(){ applyPal(); document.querySelectorAll('.card').forEach(el => { const a = el.querySelector('.art'); if (a && el._i != null) a.innerHTML = catSvg(el._i); }); }
+
+/* ================= SPREADS ================= */
+const SPREADS = {
+  1: { pos: [[0, 0]], w: 104, h: 174, ja: ['今のあなたへ'], en: ['Message for you'] },
+  3: { pos: [[0, 0], [150, 0], [300, 0]], w: 404, h: 174, ja: ['過去','現在','未来'], en: ['Past','Present','Future'] },
+  10: { pos: [[150, 214], [150, 214, 1], [150, 410], [20, 214], [150, 18], [280, 214], [470, 470], [470, 314], [470, 158], [470, 2]], w: 574, h: 646,
+    ja: ['現状','試練（交差）','根底にあるもの','過去','目標・意識','近い未来','あなた自身','周囲の状況','願いと不安','結末'],
+    en: ['Present','Challenge (crossing)','Foundation','Past','Goal · conscious','Near future','Yourself','Surroundings','Hopes & fears','Outcome'] }
+};
+
+/* ================= SAVE / I18N ================= */
+const LS = 'meridiplay_tarot_v1';
+let D = { lang: 'ja', sound: true, sp: 3, rev: true, pal: 'matrix', got: {}, hist: [], draws: 0, noGuide: false };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+const UI = {
+  ja: { title:'猫タロット v1.0.0', sp1:'🂠 1 枚引き', sp3:'🂠 3 枚引き', sp10:'🂠 ケルト十字', rev:v=>'↕ 逆位置 '+(v?'あり':'なし'), book:'📖 カード図鑑', guide:'📜 遊び方',
+    cut:'カードを切る', again:'もう一度', auto:'おまかせで引く', q:'占いたいこと（任意）',
+    idle:'問いを思い浮かべて「カードを切る」（Space）', cutting:'カードを切っています…', choose:n=>`心が惹かれるカードを、あと ${n} 枚選んでください（← → ・ Enter）`, reading:'カードを開いています…', done:'',
+    up:'正位置', rv:'逆位置', sumT:'総合のメッセージ', q2:q=>`問い：「${q}」`,
+    sumUp:'正位置のカードが多く、流れは素直に前へ進んでいます。今の気持ちを信じて大丈夫です。', sumRv:'逆位置のカードが多く出ました。悪い意味ではなく「立ち止まって整える時」というサインです。焦らず、足元を整えましょう。', sumMix:'正位置と逆位置がほどよく混ざっています。進むことと整えることを、交互に意識すると吉。',
+    key:(a,b)=>`鍵となるのは「${a}」のカード。${b}`, final:(a)=>`そして行き着く先には「${a}」。`,
+    hint:'🎨＝配色切替（「和紙と墨」は目にやさしい） ・ Space＝切る／おまかせ ・ ← →＝選ぶ ・ Enter＝引く ・ 1 / 3 / 0＝引き方 ・ R＝逆位置 ・ B＝図鑑 ・ G＝遊び方', disc:'※ 浮世絵風の猫の図柄と解釈は MeridiPlay オリジナルです。娯楽としてお楽しみください。',
+    bkT:'カード図鑑', bkP:(a,c)=>`${a} / 22 枚 ・ 占った回数 ${c}`, reset:'記録を消す', confirm:'図鑑と履歴をすべて消しますか？', newC:'初めて出会ったカード：', lock:'？？？',
+    gold:'✨ 星の金色に染まりました', meridi:'🐾 23 枚目のカード……は、まだ存在しません' },
+  en: { title:'Cat Tarot v1.0.0', sp1:'🂠 One card', sp3:'🂠 Three cards', sp10:'🂠 Celtic Cross', rev:v=>'↕ Reversals '+(v?'ON':'OFF'), book:'📖 Card book', guide:'📜 How to play',
+    cut:'Shuffle the cards', again:'Again', auto:'Pick for me', q:'What would you like to ask? (optional)',
+    idle:'Hold your question in mind, then shuffle (Space)', cutting:'Shuffling…', choose:n=>`Choose ${n} more card${n > 1 ? 's' : ''} that call to you (← → · Enter)`, reading:'Turning the cards…', done:'',
+    up:'Upright', rv:'Reversed', sumT:'Overall message', q2:q=>`Question: "${q}"`,
+    sumUp:'Most cards are upright — the flow is moving forward. Trust how you feel.', sumRv:'Many cards are reversed. Not a bad sign: it is time to pause and re-balance.', sumMix:'Upright and reversed cards are mixed. Alternate between moving forward and tidying up.',
+    key:(a,b)=>`The key card is "${a}". ${b}`, final:a=>`And at the end of the road: "${a}".`,
+    hint:'Space = shuffle / pick for me · ← → = choose · Enter = take · 1 / 3 / 0 = spread · R = reversals · B = book · G = guide', disc:'Artwork and interpretations are original to MeridiPlay. For entertainment.',
+    bkT:'CARD BOOK', bkP:(a,c)=>`${a} / 22 cards · ${c} readings`, reset:'Erase records', confirm:'Erase the book and history?', newC:'New card met: ', lock:'???',
+    gold:'✨ Bathed in starlight gold', meridi:'🐾 The 23rd card… does not exist yet' }
+};
+const T = (k, ...a) => { const v = UI[D.lang][k]; return typeof v === 'function' ? v(...a) : v; };
+const cName = i => C[i][D.lang === 'ja' ? 0 : 1];
+const cMean = (i, r) => C[i][D.lang === 'ja' ? (r ? 3 : 2) : (r ? 5 : 4)];
+const cKey = i => C[i][D.lang === 'ja' ? 6 : 7];
+
+/* ================= SOUND ================= */
+let AC = null, master = null;
+function ac(){
+  if (!AC){
+    AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .9; master.connect(AC.destination);
+    const cv = AC.createConvolver(), len = AC.sampleRate * 2.2, ir = AC.createBuffer(2, len, AC.sampleRate);
+    for (let c = 0; c < 2; c++){ const ch = ir.getChannelData(c); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    cv.buffer = ir; const w = AC.createGain(); w.gain.value = .3; master.connect(cv); cv.connect(w); w.connect(AC.destination);
+  }
+  if (AC.state === 'suspended') AC.resume(); return AC;
+}
+function tone(f, t, d, v, type = 'sine'){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05); }
+function noise(t, d, v, f){ const len = Math.max(1, Math.floor(AC.sampleRate * d)), b = AC.createBuffer(1, len, AC.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len); const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = b; fl.type = 'highpass'; fl.frequency.value = f; g.gain.value = v; s.connect(fl); fl.connect(g); g.connect(master); s.start(t); }
+function sfx(k){
+  if (!D.sound || !AC) return;
+  try { const t = AC.currentTime;
+    if (k === 'riffle') for (let i = 0; i < 20; i++) noise(t + i * .022, .02, .06 + Math.random() * .05, 2600 + Math.random() * 2000);
+    else if (k === 'slide') noise(t, .12, .08, 1800);
+    else if (k === 'flip'){ noise(t, .05, .1, 3600); tone(880, t, .6, .015); }
+    else if (k === 'pick') tone(659.25, t, .7, .02);
+    else if (k === 'chime') [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, t + i * .18, 2.2, .022));
+  } catch(e){}
+}
+
+/* ================= SKY (slow, no flashing) ================= */
+const sky = $('sky'), sx = sky.getContext('2d'); let stars = [];
+function skySize(){ sky.width = innerWidth; sky.height = innerHeight; stars = Array.from({ length: 160 }, () => ({ x: rnd() * innerWidth, y: rnd() * innerHeight, r: .4 + rnd() * 1.2, p: rnd() * 6, s: .2 + rnd() * .4 })); }
+function skyLoop(t){
+  sx.clearRect(0, 0, sky.width, sky.height);
+  const gr = sx.createRadialGradient(sky.width / 2, -100, 50, sky.width / 2, 0, sky.height); gr.addColorStop(0, '#0d1a36'); gr.addColorStop(1, '#05050f'); sx.fillStyle = gr; sx.fillRect(0, 0, sky.width, sky.height);
+  stars.forEach(s => { const a = .35 + .3 * Math.sin(t / 1000 * s.s + s.p); sx.fillStyle = `rgba(210,255,215,${a})`; sx.beginPath(); sx.arc(s.x, s.y, s.r, 0, 7); sx.fill(); });
+  requestAnimationFrame(skyLoop);
+}
+
+/* ================= CARD DOM ================= */
+function cardEl(i, opts = {}){
+  const el = H('div', 'card' + (opts.down !== false ? ' down' : '') + (opts.big ? ' big' : '') + (opts.rev ? ' rev' : ''));
+  el.innerHTML = `<div class="ci"><div class="cf"><div class="art cat">${catSvg(i)}</div></div><div class="cb"></div></div>`;
+  el._i = i; return el;
+}
+
+/* ================= FLOW ================= */
+const table = $('table'), board = $('board');
+let phase = 'idle', deck = [], fan = [], picks = [], cursor = 0;
+function buildBoard(){
+  const sp = SPREADS[D.sp], L = D.lang === 'ja' ? sp.ja : sp.en;
+  board.replaceChildren(); board.style.width = sp.w + 'px'; board.style.height = (sp.h + 26) + 'px';
+  sp.pos.forEach(([x, y, cr], k) => {
+    const s = H('div', 'slot' + (cr ? ' cross' : '')); s.id = 'sl' + k; s.style.left = x + 'px'; s.style.top = (y + 22) + 'px';
+    s.append(H('div', 'lb', L[k])); if (D.sp === 10) s.append(H('div', 'no', k + 1)); board.append(s);
+  });
+  fitBoard();
+}
+function fitBoard(){
+  const sp = SPREADS[D.sp], avail = Math.min(1060, innerWidth - 40), sc = Math.min(1, avail / sp.w);
+  board.style.transform = `scale(${sc})`; board.style.marginBottom = (-(sp.h + 26) * (1 - sc)) + 'px';
+}
+function layFan(){
+  const N = fan.length, W = table.clientWidth, spreadDeg = Math.min(62, 40 + W / 30);
+  fan.forEach((el, k) => {
+    const a = N > 1 ? -spreadDeg / 2 + spreadDeg * k / (N - 1) : 0;
+    el.style.setProperty('--t', `rotate(${a.toFixed(2)}deg)`);
+  });
+}
+async function shuffle(){
+  if (phase !== 'idle' && phase !== 'done') return;
+  try { ac(); } catch(e){}
+  phase = 'cut'; ui();
+  picks = []; $('results').replaceChildren(); buildBoard();
+  table.querySelectorAll('.card').forEach(c => c.remove());
+  deck = Array.from({ length: 22 }, (_, i) => i); for (let i = 21; i > 0; i--){ const j = ri(i + 1); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  fan = deck.map(i => { const el = cardEl(i); el.style.setProperty('--t', 'rotate(0deg)'); table.append(el); return el; });
+  // 切る：左右に分けて重ねる（リフル）を 3 回
+  for (let r = 0; r < 3; r++){
+    sfx('riffle');
+    await Promise.all(fan.map((el, k) => el.animate([
+      { transform: 'rotate(0deg)' },
+      { transform: `translateX(${k % 2 ? 90 : -90}px) translateY(-30px) rotate(${k % 2 ? 6 : -6}deg)`, offset: .45 },
+      { transform: `translateX(${(rnd() - .5) * 8}px) rotate(${(rnd() - .5) * 4}deg)` }
+    ], { duration: 640, delay: k * 6, easing: 'cubic-bezier(.45,.05,.3,1)' }).finished));
+  }
+  // 扇状に広げる
+  sfx('slide'); layFan();
+  await sleep(600);
+  fan.forEach((el, k) => { el.classList.add('pick'); el.onclick = () => take(k); el.onmouseenter = () => setCur(k); });
+  phase = 'choose'; setCur(Math.floor(fan.length / 2)); ui();
+}
+function avail(){ return fan.map((el, k) => el._taken ? -1 : k).filter(k => k >= 0); }
+function setCur(k){
+  if (phase !== 'choose') return; const av = avail(); if (!av.length) return;
+  if (!av.includes(k)) k = av.reduce((b, x) => Math.abs(x - k) < Math.abs(b - k) ? x : b, av[0]);
+  cursor = k; fan.forEach((el, x) => el.classList.toggle('cur', x === k));
+}
+function move(d){ const av = avail(); let i = av.indexOf(cursor); i = (i + d + av.length) % av.length; setCur(av[i]); }
+async function take(k){
+  if (phase !== 'choose' || fan[k]._taken) return;
+  const src = fan[k], idx = picks.length, i = src._i, rev = D.rev && rnd() < .35;
+  src._taken = true; src.classList.remove('cur', 'pick'); picks.push({ i, rev });
+  sfx('pick');
+  const slot = $('sl' + idx), real = cardEl(i, { big: true, rev });
+  slot.append(real);
+  // 飛ばす（平面のクローンで移動 → 実物を表示）
+  const a = src.getBoundingClientRect(), b = slot.getBoundingClientRect();
+  const fly = cardEl(i); fly.classList.add('fly'); fly.style.left = a.left + 'px'; fly.style.top = a.top + 'px'; document.body.append(fly);
+  real.style.visibility = 'hidden'; src.classList.add('taken');
+  const cross = slot.classList.contains('cross');
+  if (picks.length >= D.sp){ phase = 'reveal'; ui(); } else { move(1); ui(); }
+  const sc = b.width / a.width;
+  await fly.animate([{ transform: 'none' }, { transform: `translate(${b.left + b.width / 2 - a.left - a.width / 2}px,${b.top + b.height / 2 - a.top - a.height / 2}px) rotate(${cross ? 90 : 0}deg) scale(${cross ? b.height / a.width : sc})` }],
+    { duration: 700, easing: EASE, fill: 'forwards' }).finished;
+  fly.remove(); real.style.visibility = ''; sfx('slide');
+  if (picks.length >= D.sp && idx === D.sp - 1) reveal();
+}
+async function auto(){
+  if (phase === 'idle' || phase === 'done') await shuffle();
+  while (phase === 'choose'){ const av = avail(); setCur(av[ri(av.length)]); await sleep(360); await take(cursor); await sleep(160); }
+}
+async function reveal(){
+  await sleep(500);
+  for (let k = 0; k < picks.length; k++){
+    const s = $('sl' + k), el = s.querySelector('.card');
+    el.classList.remove('down'); s.classList.add('glow'); sfx('flip');
+    const p = picks[k];
+    if (!D.got[p.i]){ D.got[p.i] = 0; toast(T('newC') + cName(p.i)); }
+    D.got[p.i]++;
+    addResult(k, p);
+    await sleep(D.sp === 10 ? 650 : 1000);
+  }
+  summary(); sfx('chime');
+  D.draws++; D.hist.unshift({ d: new Date().toISOString().slice(0, 16).replace('T', ' '), sp: D.sp, c: picks.map(p => [p.i, p.rev ? 1 : 0]), q: $('qin').value.trim() });
+  if (D.hist.length > 30) D.hist.length = 30; save();
+  phase = 'done'; ui();
+}
+function addResult(k, p){
+  const sp = SPREADS[D.sp], L = D.lang === 'ja' ? sp.ja : sp.en, r = H('div', 'rs');
+  r.innerHTML = `<div class="p">${k + 1}. ${esc(L[k])}<b>${esc(cName(p.i))}</b><i class="${p.rev ? 'rv' : 'up'}">${p.rev ? T('rv') : T('up')}</i></div><div><div class="k">${ROMAN[p.i]} · ${esc(cKey(p.i))}</div><div class="m">${esc(cMean(p.i, p.rev))}</div></div>`;
+  $('results').append(r);
+}
+function summary(){
+  const n = picks.length, rv = picks.filter(p => p.rev).length, q = $('qin').value.trim();
+  let t = q ? T('q2', esc(q)) + '<br>' : '';
+  t += rv === 0 || rv / n < .34 ? T('sumUp') : rv / n > .66 ? T('sumRv') : T('sumMix');
+  const key = D.sp === 3 ? picks[1] : picks[0];
+  if (D.sp > 1) t += '<br>' + T('key', esc(cName(key.i)), esc(cMean(key.i, key.rev)));
+  if (D.sp > 1){ const last = picks[n - 1]; t += '<br>' + T('final', esc(cName(last.i))); }
+  const s = H('div', 'summary'); s.innerHTML = `<h3>${T('sumT')}</h3>${t}`;
+  $('results').prepend(s);
+  setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+}
+
+/* ================= GUIDE ================= */
+const GUIDE = {
+  ja: { title:'📜 タロット占いの手引き', close:'はじめる', no:'次回から自動で表示しない', tabs:['タロットとは','占い方','正位置と逆位置','引き方','22 枚の意味','怖いカード？','操作'],
+  pages:[
+`<h4>🔮 タロットとは</h4>
+タロットは 78 枚のカードを使う占いで、15 世紀ごろのヨーロッパでカードゲームとして生まれ、のちに占いに使われるようになったと言われています。そのうち特に大切な <b>22 枚の「大アルカナ」</b>が、この占いで使うカードです。
+<h4>未来を当てる道具ではなく、心を映す鏡</h4>
+タロットは「運命を決めつける」ものではありません。カードの絵と意味をきっかけに、<b>今の自分の気持ちや状況を見つめ直す</b>ための道具です。引いたカードをどう受け取るかは、あなた次第です。
+<div class="note">※ この占いの図柄と解釈は MeridiPlay オリジナルです（伝統的なカードの絵柄を写したものではありません）。娯楽としてお楽しみください。</div>`,
+`<h4>🙏 占い方（4 ステップ）</h4>
+<ol>
+<li><b>問いを決める</b>：「今週の仕事はどう？」「あの人との関係は？」など。具体的なほど読みやすくなります。入力欄に書くと結果にも記されます（空欄でも OK）。</li>
+<li><b>カードを切る</b>：カードがシャッフルされ、扇のように広がります。</li>
+<li><b>直感で選ぶ</b>：考えすぎず「なんとなく気になる」カードを選びます。迷ったら「おまかせで引く」。</li>
+<li><b>読み解く</b>：カードが 1 枚ずつ表になり、位置ごとの意味と、総合のメッセージが表示されます。</li>
+</ol>
+<div class="note">同じ問いを何度も引き直すと、答えがぼやけてしまうと言われています。一つの問いには一度だけ、が目安です。</div>`,
+`<h4>↕ 正位置と逆位置</h4>
+カードが<b>上向き</b>に出たら「正位置」、<b>逆さま</b>に出たら「逆位置」です。
+<table class="gtbl">
+<tr><th>向き</th><th>読み方</th></tr>
+<tr><td>正位置</td><td>カード本来の意味が、まっすぐ素直に表れている</td></tr>
+<tr><td>逆位置</td><td>その意味が「行き過ぎ」「足りない」「一休み中」。<b>悪い意味ではなく、整えるべきポイント</b>を教えてくれる</td></tr>
+</table>
+<div class="note">初めての方は、ヘッダーの「↕ 逆位置」を「なし」にすると、正位置だけで占えます。</div>`,
+`<h4>🂠 3 つの引き方</h4>
+<table class="gtbl">
+<tr><th>引き方</th><th>枚数</th><th>向いている問い</th></tr>
+<tr><td><b>1 枚引き</b></td><td>1</td><td>今日の運勢、ひとことの助言。毎朝の習慣に</td></tr>
+<tr><td><b>3 枚引き</b></td><td>3</td><td>左から「過去・現在・未来」。物事の流れを知りたいとき</td></tr>
+<tr><td><b>ケルト十字</b></td><td>10</td><td>じっくり深く見たい悩みに。伝統的な展開法</td></tr>
+</table>
+<h4>ケルト十字の位置</h4>
+<table class="gtbl">
+<tr><td>1 現状</td><td>今のあなたの状況</td></tr><tr><td>2 試練</td><td>1 に横向きに重なる。乗り越えるべき課題</td></tr>
+<tr><td>3 根底</td><td>問題の奥にあるもの</td></tr><tr><td>4 過去</td><td>過ぎ去りつつある影響</td></tr>
+<tr><td>5 目標</td><td>意識していること、目指すもの</td></tr><tr><td>6 近い未来</td><td>これから訪れること</td></tr>
+<tr><td>7 自分自身</td><td>あなたの姿勢</td></tr><tr><td>8 周囲</td><td>まわりの人や環境</td></tr>
+<tr><td>9 願いと不安</td><td>期待と心配は表裏一体</td></tr><tr><td>10 結末</td><td>このまま進んだときの行き先</td></tr>
+</table>`,
+`<h4>🃏 22 枚のキーワード</h4>
+<table class="gtbl">
+${C.map((c, i) => `<tr><td>${ROMAN[i]}</td><td><b>${c[0]}</b></td><td>${c[6]}</td></tr>`).join('')}
+</table>
+<div class="note">番号は「愚者（0）」から「世界（21）」までの旅の物語になっています。くわしい意味は「📖 カード図鑑」でいつでも読めます。</div>`,
+`<h4>💀 怖そうなカードについて</h4>
+「死神」「塔」「悪魔」は名前が怖いですが、<b>不吉な予言ではありません</b>。
+<table class="gtbl">
+<tr><td><b>死神</b></td><td>終わりと再生。古いものを手放すと新しいものが芽吹く</td></tr>
+<tr><td><b>塔</b></td><td>突然の変化が、凝り固まったものを壊してくれる。再建のチャンス</td></tr>
+<tr><td><b>悪魔</b></td><td>手放せない何かへの気づき。気づいた時点で自由への一歩</td></tr>
+</table>
+<div class="note">この占いでは、どのカードも前向きな助言として読めるように書いています。</div>`,
+`<h4>⌨️ 操作</h4>
+<table class="gtbl">
+<tr><td><b>Space</b></td><td>カードを切る ／ 選択中なら「おまかせ」</td></tr>
+<tr><td><b>← →</b></td><td>カードを選ぶ</td></tr><tr><td><b>Enter</b></td><td>選んだカードを引く</td></tr>
+<tr><td><b>1 / 3 / 0</b></td><td>1 枚引き ／ 3 枚引き ／ ケルト十字</td></tr>
+<tr><td><b>R</b></td><td>逆位置 あり ⇔ なし</td></tr>
+<tr><td><b>B</b></td><td>📖 カード図鑑（集めたカード・履歴）</td></tr>
+<tr><td><b>G</b> または <b>?</b></td><td>この手引き</td></tr><tr><td><b>Esc</b></td><td>閉じる</td></tr>
+</table>
+<div class="note">🥚 隠しコマンドもあります……。</div>`]},
+  en: { title:'📜 Tarot Guide', close:'Begin', no:"Don't show this automatically again", tabs:['What is tarot?','How to read','Upright & reversed','Spreads','The 22 cards','Scary cards?','Controls'],
+  pages:[
+`<h4>🔮 What is tarot?</h4>Tarot uses a deck of 78 cards. It is said to have begun as a card game in 15th-century Europe and later became a tool for divination. This app uses the most important <b>22 cards, the Major Arcana</b>.
+<h4>A mirror, not a prophecy</h4>Tarot does not decide your fate. The images and meanings help you <b>reflect on your feelings and situation</b>. How you take a card is up to you.
+<div class="note">Artwork and interpretations are original to MeridiPlay. For entertainment.</div>`,
+`<h4>🙏 Four steps</h4><ol><li><b>Choose a question</b> — the more specific, the clearer.</li><li><b>Shuffle</b> — the cards fan out.</li><li><b>Pick by intuition</b>, or press "Pick for me".</li><li><b>Read</b> each position and the overall message.</li></ol>
+<div class="note">Asking the same question again and again is said to blur the answer. Once per question is a good rule.</div>`,
+`<h4>↕ Upright & reversed</h4><table class="gtbl"><tr><td>Upright</td><td>The card's meaning appears directly</td></tr><tr><td>Reversed</td><td>The meaning is overdone, lacking, or resting — <b>a point to re-balance, not a bad omen</b></td></tr></table>
+<div class="note">Beginners can turn reversals off in the header.</div>`,
+`<h4>🂠 Spreads</h4><table class="gtbl"><tr><td><b>One card</b></td><td>Daily advice</td></tr><tr><td><b>Three cards</b></td><td>Past · Present · Future</td></tr><tr><td><b>Celtic Cross</b></td><td>10 cards for deep questions</td></tr></table>
+<h4>Celtic Cross positions</h4><table class="gtbl">${SPREADS[10].en.map((n, i) => `<tr><td>${i + 1}</td><td>${n}</td></tr>`).join('')}</table>`,
+`<h4>🃏 Keywords</h4><table class="gtbl">${C.map((c, i) => `<tr><td>${ROMAN[i]}</td><td><b>${c[1]}</b></td><td>${c[7]}</td></tr>`).join('')}</table>
+<div class="note">From The Fool (0) to The World (21), the cards tell the story of a journey.</div>`,
+`<h4>💀 About the "scary" cards</h4><table class="gtbl"><tr><td><b>Death</b></td><td>Endings and rebirth</td></tr><tr><td><b>The Tower</b></td><td>Sudden change that breaks what was stuck</td></tr><tr><td><b>The Devil</b></td><td>Noticing what holds you — the first step to freedom</td></tr></table>
+<div class="note">Every card here is written as positive advice.</div>`,
+`<h4>⌨️ Controls</h4><table class="gtbl"><tr><td><b>Space</b></td><td>Shuffle / pick for me</td></tr><tr><td><b>← →</b></td><td>Choose</td></tr><tr><td><b>Enter</b></td><td>Take</td></tr><tr><td><b>1 / 3 / 0</b></td><td>Spread</td></tr><tr><td><b>R</b></td><td>Reversals</td></tr><tr><td><b>B</b></td><td>Card book</td></tr><tr><td><b>G</b> / <b>?</b></td><td>Guide</td></tr><tr><td><b>Esc</b></td><td>Close</td></tr></table>
+<div class="note">🥚 There are hidden commands, too…</div>`]}
+};
+let gp = 0;
+function renderGuide(){
+  const G = GUIDE[D.lang];
+  $('gT').textContent = G.title; $('gClose').textContent = G.close; $('gNoL').textContent = G.no; $('gNo').checked = !!D.noGuide;
+  const tb = $('gTabs'); tb.replaceChildren();
+  G.tabs.forEach((n, i) => { const b = H('button', 'tg' + (i === gp ? ' on' : ''), n); b.onclick = () => { gp = i; renderGuide(); }; tb.append(b); });
+  $('gBody').innerHTML = `<div class="gpage">${G.pages[gp]}</div>`;
+  $('gPrev').disabled = gp === 0; $('gNext').disabled = gp === G.pages.length - 1;
+}
+const openGuide = () => { gp = 0; renderGuide(); $('guide').classList.add('show'); };
+const closeGuide = () => { $('guide').classList.remove('show'); D.noGuide = $('gNo').checked; save(); };
+
+/* ================= BOOK ================= */
+function openBook(){
+  const n = Object.keys(D.got).length;
+  $('bkT').textContent = T('bkT'); $('bkP').textContent = T('bkP', n, D.draws); $('bkReset').textContent = T('reset');
+  const b = $('book'); b.replaceChildren(); $('bdet').textContent = '';
+  C.forEach((c, i) => {
+    const got = D.got[i] != null, el = cardEl(i, { down: false }); if (!got) el.classList.add('lock');
+    el.onclick = () => { $('bdet').innerHTML = got ? `<b>${ROMAN[i]} ${esc(cName(i))}</b>（${esc(cKey(i))}）×${D.got[i]}<br>【${T('up')}】${esc(cMean(i, 0))}<br>【${T('rv')}】${esc(cMean(i, 1))}` : T('lock'); };
+    b.append(el);
+  });
+  const h = $('hist'); h.replaceChildren();
+  D.hist.forEach(x => { const d = H('div'); d.innerHTML = `<em>${x.d}</em>${x.c.map(([i, r]) => esc(cName(i)) + (r ? '↓' : '')).join(' ・ ')}${x.q ? ' — ' + esc(x.q) : ''}`; h.append(d); });
+  $('bookM').classList.add('show');
+}
+
+/* ================= UI ================= */
+function toast(m){ const t = H('div', 'toast', m); $('toasts').append(t); setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 550); }, 3200); }
+function ui(){
+  const m = $('bMain'), a = $('bAuto'), free = phase === 'idle' || phase === 'done';
+  m.textContent = phase === 'done' ? T('again') : T('cut'); m.disabled = !free;
+  a.textContent = T('auto'); a.disabled = !(free || phase === 'choose');
+  ['tSp1', 'tSp3', 'tSp10'].forEach(id => $(id).disabled = !free);
+  $('msg').textContent = phase === 'idle' ? T('idle') : phase === 'cut' ? T('cutting') : phase === 'choose' ? T('choose', D.sp - picks.length) : phase === 'reveal' ? T('reading') : '';
+}
+function apply(){
+  document.documentElement.lang = D.lang;
+  $('bT').textContent = T('title');
+  $('tLang').textContent = D.lang === 'ja' ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇'; $('tSound').classList.toggle('on', D.sound);
+  [['tSp1', 1], ['tSp3', 3], ['tSp10', 10]].forEach(([id, n]) => { $(id).textContent = T('sp' + n); $(id).classList.toggle('on', D.sp === n); });
+  $('tRev').textContent = T('rev', D.rev); $('tRev').classList.toggle('on', D.rev);
+  $('tBook').textContent = T('book'); $('tGuide').textContent = T('guide');
+  $('tPal').textContent = '🎨 ' + (PALS[D.pal] || PALS.matrix)[D.lang];
+  $('qin').placeholder = T('q'); $('hint').textContent = T('hint'); $('disc').textContent = T('disc');
+  if ($('guide').classList.contains('show')) renderGuide();
+  ui(); save();
+}
+function setSpread(n){
+  if (!(phase === 'idle' || phase === 'done')) return;
+  D.sp = n; phase = 'idle'; picks = []; $('results').replaceChildren(); table.querySelectorAll('.card').forEach(c => c.remove()); buildBoard(); idleDeck(); apply();
+}
+function idleDeck(){ table.querySelectorAll('.card').forEach(c => c.remove()); for (let k = 0; k < 7; k++){ const el = cardEl(0); el.style.setProperty('--t', `rotate(${(k - 3) * 2}deg) translateY(${-k}px)`); table.append(el); } }
+
+/* ================= EVENTS ================= */
+$('bMain').onclick = shuffle;
+$('bAuto').onclick = () => { try { ac(); } catch(e){} auto(); };
+$('tLang').onclick = () => { D.lang = D.lang === 'ja' ? 'en' : 'ja'; apply(); refreshArt(); if (phase === 'idle' || phase === 'done'){ const keep = phase === 'done' ? picks.slice() : null; buildBoard(); $('results').replaceChildren(); if (keep){ keep.forEach((p, k) => { const el = cardEl(p.i, { big: true, rev: p.rev, down: false }); $('sl' + k).append(el); $('sl' + k).classList.add('glow'); addResult(k, p); }); summary(); } } };
+$('tSound').onclick = () => { D.sound = !D.sound; try { ac(); } catch(e){} apply(); sfx('pick'); };
+$('tSp1').onclick = () => setSpread(1); $('tSp3').onclick = () => setSpread(3); $('tSp10').onclick = () => setSpread(10);
+$('tRev').onclick = () => { D.rev = !D.rev; apply(); };
+$('tPal').onclick = () => { const k = Object.keys(PALS); D.pal = k[(k.indexOf(D.pal) + 1) % k.length]; refreshArt(); apply(); };
+$('tBook').onclick = openBook; $('tGuide').onclick = openGuide;
+$('gClose').onclick = closeGuide;
+$('gPrev').onclick = () => { if (gp > 0){ gp--; renderGuide(); } };
+$('gNext').onclick = () => { if (gp < GUIDE[D.lang].pages.length - 1){ gp++; renderGuide(); } };
+$('guide').onclick = e => { if (e.target.id === 'guide') closeGuide(); };
+$('bkClose').onclick = () => $('bookM').classList.remove('show');
+$('bookM').onclick = e => { if (e.target.id === 'bookM') $('bookM').classList.remove('show'); };
+$('bkReset').onclick = () => { if (!confirm(T('confirm'))) return; D.got = {}; D.hist = []; D.draws = 0; save(); openBook(); };
+$('qin').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && !e.isComposing){ e.preventDefault(); $('qin').blur(); shuffle(); } });
+const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+let buf = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ($('guide').classList.contains('show')){ if (k === 'escape' || k === 'enter'){ e.preventDefault(); closeGuide(); } else if (k === 'arrowright') $('gNext').click(); else if (k === 'arrowleft') $('gPrev').click(); return; }
+  if ($('bookM').classList.contains('show')){ if (k === 'escape') $('bookM').classList.remove('show'); return; }
+  buf.push(k); if (buf.length > 12) buf.shift();
+  const word = buf.filter(x => x.length === 1).join('');
+  if (buf.slice(-10).join() === KONAMI.join()){ buf = []; document.body.classList.toggle('gold'); toast(T('gold')); return; }
+  if (word.endsWith('meridi')){ buf = []; toast(T('meridi')); return; }
+  if (phase === 'choose'){
+    if (k === 'arrowleft'){ e.preventDefault(); move(-1); return; }
+    if (k === 'arrowright'){ e.preventDefault(); move(1); return; }
+    if (k === 'enter'){ e.preventDefault(); take(cursor); return; }
+  }
+  if (e.repeat) return;
+  if (k === ' '){ e.preventDefault(); try { ac(); } catch(err){} if (phase === 'idle' || phase === 'done') shuffle(); else if (phase === 'choose') auto(); }
+  else if (k === 'enter' && (phase === 'idle' || phase === 'done')){ try { ac(); } catch(err){} shuffle(); }
+  else if (k === '1') setSpread(1); else if (k === '3') setSpread(3); else if (k === '0') setSpread(10);
+  else if (k === 'r') $('tRev').click(); else if (k === 'b') openBook(); else if (k === 'g' || k === '?') openGuide();
+});
+window.addEventListener('resize', () => { skySize(); fitBoard(); if (phase === 'choose') layFan(); });
+
+/* ================= INIT ================= */
+applyPal(); skySize(); requestAnimationFrame(skyLoop);
+buildBoard(); idleDeck(); apply();
+if (!D.noGuide) setTimeout(openGuide, 400);
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

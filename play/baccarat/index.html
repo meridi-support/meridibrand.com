@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — BACCARAT</title>
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--g:#39ff14;--pg:#020604;--ink:#d8ffd0;--line:#39ff1433;--panel:#000b;--acc:#39ff14;--felt1:#0b3a1c;--felt2:#021208;--gold:#e8c26a;--pl:#2f7ae8;--bk:#e0392e;--tie:#2fbf5a}
+body.light{--pg:#ece8df;--ink:#24201a;--line:#7a5a3a44;--panel:#fffaf0dd;--acc:#1f7a3a;--felt1:#2f7a46;--felt2:#174d2a}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:var(--pg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;overflow-x:hidden;transition:background .6s var(--E),color .6s}
+header{position:relative;z-index:3;display:flex;align-items:center;gap:7px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:10px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+body.light .brand b{color:#1f7a3a;text-shadow:none}
+.brand span{font:bold 13px Georgia,serif;letter-spacing:4px}
+.tg{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.wrap{display:flex;gap:18px;justify-content:center;padding:16px 10px 34px;flex-wrap:wrap;align-items:flex-start}
+.main{width:min(800px,97vw)}
+.table{position:relative;border-radius:200px 200px 22px 22px / 120px 120px 22px 22px;padding:26px 22px 18px;background:radial-gradient(ellipse at 50% 30%,var(--felt1),var(--felt2));
+  box-shadow:inset 0 0 80px #000a,0 26px 60px #000b,0 0 0 8px #3a2410,0 0 0 11px #120a04,0 0 0 12px #c9a46e55}
+.table::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.14;background-image:radial-gradient(#000 1px,transparent 1px);background-size:3px 3px}
+.logo{text-align:center;font:bold 13px Georgia,serif;letter-spacing:8px;color:#f2dca088;margin-bottom:4px}
+.rule{text-align:center;font:11px Georgia,serif;letter-spacing:2px;color:#f2dca066;margin-bottom:10px}
+.hands{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.side2{position:relative;border-radius:16px;padding:10px 8px 12px;border:2px solid #ffffff14;transition:box-shadow .8s var(--E),border-color .8s}
+.side2.P{border-color:#2f7ae855}.side2.B{border-color:#e0392e55}
+.side2.win.P{box-shadow:0 0 0 2px var(--pl),0 0 36px #2f7ae888}
+.side2.win.B{box-shadow:0 0 0 2px var(--bk),0 0 36px #e0392e88}
+.side2.win.T{box-shadow:0 0 0 2px var(--tie),0 0 30px #2fbf5a77}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font:bold 15px Georgia,serif;letter-spacing:4px;color:#f2dca0}
+.sh .tot{min-width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 22px Georgia,serif;letter-spacing:0;color:#fff;background:#0007;border:2px solid #f2dca055;transition:all .5s var(--E)}
+.side2.P .tot{border-color:var(--pl)}.side2.B .tot{border-color:var(--bk)}
+.cards{position:relative;height:134px;display:flex;justify-content:center;gap:8px}
+.cd{position:relative;width:88px;height:124px;border-radius:8px;flex:none;touch-action:none;user-select:none;-webkit-user-select:none}
+.cd.third{transform:rotate(90deg) translateX(8px)}
+.fc{position:absolute;inset:0;border-radius:8px;background:#fffdf6;color:#151515;box-shadow:0 4px 10px #0009;font-family:Georgia,'Times New Roman',serif}
+.fc.r{color:#c8181e}
+.fc .ix{position:absolute;left:7px;top:5px;text-align:center;line-height:.95;font-weight:bold;font-size:20px}
+.fc .ix.b{left:auto;top:auto;right:7px;bottom:5px;transform:rotate(180deg)}
+.fc .ix i{display:block;font-style:normal;font-size:15px}
+.fc .pp{position:absolute;inset:22px 16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);font-size:17px;line-height:1}
+.fc .pp span{display:flex;align-items:center;justify-content:center}
+.fc .big{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px}
+.fc .face{position:absolute;inset:20px 16px;border:2px solid currentColor;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:30px;background:repeating-linear-gradient(135deg,#0000 0 5px,#00000009 5px 10px)}
+.fc .face i{font-style:normal;font-size:18px}
+.bkk{position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(45deg,#7a1018 0 6px,#4e0a10 6px 12px);border:3px solid #f6eedc;box-shadow:0 4px 10px #0009}
+.bkk::after{content:'🐾';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.55}
+body.neo .bkk{background:#000;border-color:#39ff14}
+body.neo .bkk::after{content:'01';font:bold 22px 'Courier New',monospace;color:#39ff14;opacity:.9}
+body.cat .bkk{background:repeating-linear-gradient(45deg,#1a1a1a 0 7px,#c98a3e 7px 11px,#8c9198 11px 15px)}
+.curl{position:absolute;left:0;right:0;height:14px;pointer-events:none;border-radius:4px;background:linear-gradient(180deg,#0000,#00000066 45%,#fff8 55%,#0000);opacity:0}
+.cd.sq{cursor:grab}
+.cd.sq .bkk{outline:2px dashed #ffe08a;outline-offset:3px}
+.cd.sq::before{content:'⇡';position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);color:#ffe08a;font-size:15px;animation:hint 1.6s ease-in-out infinite}
+@keyframes hint{0%,100%{opacity:.25;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,-5px)}}
+.log{position:relative;z-index:2;min-height:38px;margin:10px 4px 6px;text-align:center;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;color:#f6e8c8;line-height:1.5}
+.log b{color:#ffe08a}
+.bets{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1.4fr 1fr 1.4fr 1fr;gap:8px;margin-top:6px}
+.spot{position:relative;border-radius:12px;padding:10px 4px 26px;text-align:center;cursor:pointer;border:2px solid #f2dca055;color:#f6eedc;transition:all .35s var(--E);min-height:78px}
+.spot:hover{transform:translateY(-2px)}
+.spot b{display:block;font:bold 14px Georgia,serif;letter-spacing:2px}
+.spot small{font:10px 'Courier New',monospace;opacity:.75}
+.spot.P{background:#2f7ae822;border-color:#2f7ae888}.spot.B{background:#e0392e22;border-color:#e0392e88}.spot.T{background:#2fbf5a22;border-color:#2fbf5a88}
+.spot.pp,.spot.bp{background:#ffffff08}
+.spot .amt{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);font:bold 12px 'Courier New',monospace;color:#ffe08a;background:#000a;border-radius:9px;padding:1px 8px;opacity:0;transition:opacity .3s}
+.spot .amt.on{opacity:1}
+.spot.win{box-shadow:0 0 0 2px #ffe08a,0 0 18px #ffd24a88}
+.spot.lock{cursor:default;transform:none}
+.chips{position:relative;z-index:2;display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.chip{width:48px;height:48px;border-radius:50%;border:4px dashed #fff9;font:bold 11px 'Courier New',monospace;color:#fff;cursor:pointer;box-shadow:0 3px 0 #0008;transition:transform .25s var(--E),box-shadow .25s;text-shadow:0 1px 1px #000}
+.chip.on{transform:translateY(-5px);box-shadow:0 0 0 2px #ffe08a,0 8px 10px #0009}
+.ctl{position:relative;z-index:2;display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{flex:1;min-width:96px;border:2px solid #3a2408;border-radius:12px;padding:11px 8px;cursor:pointer;font:bold 14px 'Hiragino Sans','Yu Gothic',sans-serif;color:#2a1406;background:linear-gradient(180deg,#ffe9b8,#e8c27a 50%,#c8964a);box-shadow:0 4px 0 #5a3410,0 6px 10px #0008;transition:transform .08s,box-shadow .08s,filter .3s}
+.btn small{display:block;font-size:10px;font-weight:normal;opacity:.7}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #5a3410}
+.btn:disabled{filter:grayscale(.85) brightness(.55);cursor:default}
+.btn.go{background:linear-gradient(180deg,#c8ffb8,#5ad84a 50%,#2a9a2a);border-color:#0a3a0a;box-shadow:0 4px 0 #0a3a0a,0 6px 10px #0008}
+.bank{position:relative;z-index:2;display:flex;justify-content:space-between;margin-top:12px;font:bold 14px 'Courier New',monospace;color:#f6dfae}
+.bank b{color:#ffe08a;font-size:19px}
+.shoe{position:absolute;right:26px;top:22px;z-index:2;width:58px;height:44px;border-radius:6px 14px 6px 6px;background:linear-gradient(135deg,#2a1a0a,#000);border:1px solid #c9a46e88;font:10px 'Courier New',monospace;color:#c9a46e;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px}
+.side{width:330px;max-width:97vw;display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel h3{font:bold 12px 'Courier New',monospace;letter-spacing:3px;color:var(--acc);margin-bottom:9px}
+.lbl{font-size:11px;opacity:.7;margin:7px 0 4px}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{flex:1;min-width:56px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 4px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;transition:all .3s var(--E)}
+.seg button.on{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
+.seg button small{display:block;font-size:9.5px;opacity:.65}
+.road{display:grid;grid-auto-flow:column;grid-template-rows:repeat(6,18px);grid-auto-columns:18px;gap:1px;background:#ffffff10;border:1px solid var(--line);border-radius:6px;padding:2px;overflow-x:auto;width:100%;min-height:118px}
+body.light .road{background:#00000008}
+.road i{display:flex;align-items:center;justify-content:center;font:bold 9px 'Courier New',monospace;font-style:normal;position:relative}
+.road i.bP{background:var(--pl);color:#fff;border-radius:50%}.road i.bB{background:var(--bk);color:#fff;border-radius:50%}.road i.bT{background:var(--tie);color:#fff;border-radius:50%}
+.road i.gP{border:2.5px solid var(--pl);border-radius:50%}.road i.gB{border:2.5px solid var(--bk);border-radius:50%}
+.road i .t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tie);font-size:12px;font-weight:bold}
+.road i .t::before{content:'';position:absolute;width:120%;height:2px;background:var(--tie);transform:rotate(-45deg)}
+.road i .n{position:relative;font-size:8px;color:var(--tie);background:var(--panel);border-radius:3px;padding:0 1px;margin:-10px -10px 0 0}
+.road i.lp::after,.road i.lb::after{content:'';position:absolute;width:5px;height:5px;border-radius:50%}
+.road i.lp::after{left:0;bottom:0;background:var(--pl);box-shadow:0 0 0 1px #fff}
+.road i.lb::before{content:'';position:absolute;right:0;top:0;width:5px;height:5px;border-radius:50%;background:var(--bk);box-shadow:0 0 0 1px #fff}
+.st{font:11.5px 'Courier New',monospace;line-height:1.75}
+.bar3{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0}
+.bar3 i{transition:width .8s var(--E)}
+.kb{font:10.5px 'Courier New',monospace;opacity:.55;line-height:1.7}
+.mini{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 15%,transparent);color:var(--ink);font:bold 13px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.help{position:fixed;inset:0;z-index:80;background:#000b;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s var(--E);padding:14px}
+.help.show{opacity:1;pointer-events:auto}
+.hbox{width:min(720px,100%);max-height:88vh;overflow:auto;background:#030a05f4;color:#d8ffd0;border:1px solid var(--acc);border-radius:16px;padding:18px 22px;transform:translateY(14px);transition:transform .6s var(--E)}
+body.light .hbox{background:#fffaf0f6;color:#24201a}
+.help.show .hbox{transform:none}
+.htabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.htabs button{background:transparent;color:inherit;border:1px solid var(--line);border-radius:14px;padding:6px 12px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.htabs button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.hc{font-size:13.5px;line-height:1.85}
+.hc h4{color:var(--acc);margin:12px 0 4px;font-size:14px}
+.hc ol,.hc ul{padding-left:22px}
+.hc table{border-collapse:collapse;margin:6px 0;font-size:12.5px}
+.hc td,.hc th{border:1px solid var(--line);padding:3px 8px;text-align:left}
+.hc .ex{display:inline-block;min-width:16px;height:16px;border-radius:50%;vertical-align:middle;margin:0 2px}
+.toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-10px);background:#020604ee;border:1px solid var(--acc);color:#d8ffd0;padding:10px 22px;border-radius:22px;font-size:14px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:90;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:620px){.cd{width:62px;height:88px}.cards{height:98px;gap:5px}.fc .ix{font-size:15px}.fc .ix i{font-size:11px}.fc .pp{inset:16px 10px;font-size:11px}.fc .face{inset:15px 10px;font-size:20px}.fc .big{font-size:32px}.bets{grid-template-columns:1fr 1fr 1fr}.spot.pp,.spot.bp{order:5}.shoe{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span>BACCARAT</span></div>
+  <button class="tg" id="tHelp">📖</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<div class="wrap">
+  <div class="main">
+    <div class="table" id="table">
+      <div class="shoe" id="shoe">SHOE</div>
+      <div class="logo">MERIDI · BACCARAT</div>
+      <div class="rule" id="rule"></div>
+      <div class="hands">
+        <div class="side2 P" id="sideP"><div class="sh"><span>PLAYER</span><span class="tot" id="totP">–</span></div><div class="cards" id="cardsP"></div></div>
+        <div class="side2 B" id="sideB"><div class="sh"><span>BANKER</span><span class="tot" id="totB">–</span></div><div class="cards" id="cardsB"></div></div>
+      </div>
+      <div class="log" id="log"></div>
+      <div class="bets" id="bets"></div>
+      <div class="chips" id="chips"></div>
+      <div class="ctl">
+        <button class="btn" id="bClear"></button>
+        <button class="btn" id="bRebet"></button>
+        <button class="btn" id="bOpen" style="display:none"></button>
+        <button class="btn go" id="bDeal"></button>
+      </div>
+      <div class="bank"><span><span id="lBank"></span> <b id="bank">0</b></span><span><span id="lBet"></span> <b id="betSum">0</b></span></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><h3 id="hRoad"></h3><div class="lbl" id="lBig"></div><div class="road" id="bigRoad"></div><div class="lbl" id="lBead"></div><div class="road" id="bead"></div></div>
+    <div class="panel"><h3 id="hSet"></h3>
+      <div class="lbl" id="lComm"></div><div class="seg" id="sComm"></div>
+      <div class="lbl" id="lSq"></div><div class="seg" id="sSq"></div>
+      <div class="lbl" id="lSpd"></div><div class="seg" id="sSpd"></div>
+      <div class="lbl" id="lExp"></div><div class="seg" id="sExp"></div>
+    </div>
+    <div class="panel"><h3 id="hSt"></h3><div class="st" id="st"></div><button class="mini" id="bRefill" style="display:none"></button></div>
+    <div class="kb" id="kb"></div>
+  </div>
+</div>
+<div class="help" id="help"><div class="hbox"><div class="htabs" id="htabs"></div><div class="hc" id="hc"></div><button class="mini" id="hClose"></button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+function shuffle(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+
+/* ================= 保存 ================= */
+const LS = 'meridiplay_baccarat_v1';
+let D = { lang:'ja', sound:true, theme:'dark', comm:'std', sq:1, spd:1, exp:1, bank:10000, chip:100, last:{}, hands:0, w:{ P:0, B:0, T:0 }, best:0, net:0, refills:0, seenHelp:false, cat:false };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+try { const th = lsGet('meridiplay_theme'); if (th === 'light' || th === 'dark') D.theme = th; } catch(e){}
+if (!D.w) D.w = { P:0, B:0, T:0 }; if (!D.last || typeof D.last !== 'object') D.last = {};
+const save = () => { lsSet(LS, JSON.stringify(D)); lsSet('meridiplay_theme', D.theme); };
+
+/* ================= 言葉 ================= */
+const UI = {
+  ja:{ road:'罫線（けいせん）', big:'大路（ビッグロード）', bead:'珠盤路（ビーズプレート）', set:'設定', comm:'バンカーの配当', comms:{ std:['手数料あり','勝ち×0.95'], nc:['ノーコミッション','6で勝つと半額'] },
+    sq:'絞り（しぼり）', sqs:[['オフ','すぐ開く'],['自分の側','多く賭けた側を絞る'],['両方','全部絞る']], spd:'配る速さ', spds:['ゆっくり','ふつう','はやい'], exp:'表示モード', exps:[['シンプル','勝ち負けだけ'],['くわしく','3 枚目の理由も']],
+    st:'記録', bankL:'手持ち', betL:'賭け金', clear:['クリア','Backspace'], rebet:['同じ賭け','R'], open:['全部めくる','Space'], deal:['配る','Enter'], refill:'両替する（10,000）',
+    spots:{ pp:['P ペア','11 : 1'], P:['PLAYER','1 : 1'], T:['TIE','8 : 1'], B:['BANKER', '0.95 : 1'], bp:['B ペア','11 : 1'] }, bNC:'1 : 1 (6→½)',
+    rule:c => c === 'nc' ? 'NO COMMISSION · BANKER 6 PAYS 1 : 2 · TIE 8 : 1 · 8 DECKS' : 'BANKER PAYS 0.95 : 1 · TIE 8 : 1 · PAIRS 11 : 1 · 8 DECKS',
+    placeBets:'チップを置いて「配る」', noBet:'賭けなしで見る', short:'手持ちが足りません', squeezeNow:'カードを下から上へ、ゆっくり絞ってください',
+    natural:(s, n) => `${s === 'P' ? 'プレイヤー' : 'バンカー'} ナチュラル <b>${n}</b>！ 3 枚目は引きません`,
+    p3draw:n => `プレイヤー <b>${n}</b> → 5 以下なので 3 枚目を引きます`, p3stand:n => `プレイヤー <b>${n}</b> → 6・7 なので引きません`,
+    b3draw:(n, why) => `バンカー <b>${n}</b> → ${why}引きます`, b3stand:(n, why) => `バンカー <b>${n}</b> → ${why}引きません`,
+    whyStood:'プレイヤーが引かなかったので、5 以下なら', whyTable:p => `プレイヤーの 3 枚目が ${p} なので、表のとおり`,
+    win:{ P:'プレイヤーの勝ち', B:'バンカーの勝ち', T:'タイ（引き分け）' }, pair:{ P:'プレイヤーペア', B:'バンカーペア' },
+    net:n => n > 0 ? `＋${n.toLocaleString()} 勝ち！` : n < 0 ? `${n.toLocaleString()}` : '±0', shoeNew:'シューを切り直します（8 デッキ）', cut:'カットカードが出ました。この勝負で、このシューは終わりです',
+    stats:() => `勝負 ${D.hands} 回 ／ 最大の勝ち ${D.best.toLocaleString()}<br>通算 ${D.net >= 0 ? '+' : ''}${D.net.toLocaleString()}`,
+    left:n => `残り ${n} 枚`, kb:'⌨ P：プレイヤー ／ B：バンカー ／ T：タイ ／ 1・2：ペア ／ Enter：配る ／ Space：全部めくる ／ R：同じ賭け ／ Backspace：クリア ／ ?：遊び方', close:'はじめる' },
+  en:{ road:'SCOREBOARD', big:'Big Road', bead:'Bead Plate', set:'SETTINGS', comm:'BANKER PAYOUT', comms:{ std:['Standard','0.95 to 1'], nc:['No commission','Banker 6 pays half'] },
+    sq:'SQUEEZE', sqs:[['Off','Open instantly'],['My side','Squeeze your bigger bet'],['Both','Squeeze all']], spd:'DEAL SPEED', spds:['Slow','Normal','Fast'], exp:'DISPLAY MODE', exps:[['Simple','Result only'],['Detailed','Explain third cards']],
+    st:'STATS', bankL:'BANKROLL', betL:'BET', clear:['Clear','Backspace'], rebet:['Rebet','R'], open:['Reveal all','Space'], deal:['Deal','Enter'], refill:'Buy in (10,000)',
+    spots:{ pp:['P PAIR','11 : 1'], P:['PLAYER','1 : 1'], T:['TIE','8 : 1'], B:['BANKER','0.95 : 1'], bp:['B PAIR','11 : 1'] }, bNC:'1 : 1 (6→½)',
+    rule:c => c === 'nc' ? 'NO COMMISSION · BANKER 6 PAYS 1 : 2 · TIE 8 : 1 · 8 DECKS' : 'BANKER PAYS 0.95 : 1 · TIE 8 : 1 · PAIRS 11 : 1 · 8 DECKS',
+    placeBets:'Place chips, then Deal', noBet:'Watch without betting', short:'Not enough chips', squeezeNow:'Drag the card up slowly to squeeze',
+    natural:(s, n) => `${s === 'P' ? 'Player' : 'Banker'} natural <b>${n}</b>! No third cards`,
+    p3draw:n => `Player <b>${n}</b> → 0–5 draws`, p3stand:n => `Player <b>${n}</b> → 6–7 stands`,
+    b3draw:(n, why) => `Banker <b>${n}</b> → ${why}draws`, b3stand:(n, why) => `Banker <b>${n}</b> → ${why}stands`,
+    whyStood:'Player stood, so 0–5 ', whyTable:p => `Player's third card is ${p}; per the table, `,
+    win:{ P:'Player wins', B:'Banker wins', T:'Tie' }, pair:{ P:'Player pair', B:'Banker pair' },
+    net:n => n > 0 ? `Won +${n.toLocaleString()}!` : n < 0 ? `${n.toLocaleString()}` : '±0', shoeNew:'Shuffling a new 8-deck shoe', cut:'Cut card is out — last hand of this shoe',
+    stats:() => `Hands ${D.hands} / Biggest win ${D.best.toLocaleString()}<br>Net ${D.net >= 0 ? '+' : ''}${D.net.toLocaleString()}`,
+    left:n => `${n} left`, kb:'⌨ P: Player / B: Banker / T: Tie / 1·2: pairs / Enter: deal / Space: reveal / R: rebet / Backspace: clear / ?: help', close:'Start' }
+};
+const T = k => UI[D.lang][k];
+const J = () => D.lang === 'ja';
+
+/* ================= 音 ================= */
+let AC = null, master = null, NB = null;
+function ac(){ try { if (!AC){ AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .85; master.connect(AC.destination); const len = AC.sampleRate; NB = AC.createBuffer(1, len, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1; } if (AC.state === 'suspended') AC.resume(); } catch(e){} return AC; }
+function tone(f, t, d, v, type = 'sine', f2){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .03); }
+function noise(t, d, v, f, q = 1){ const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = NB; fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); s.connect(fl); fl.connect(g); g.connect(master); s.start(t, Math.random() * .5); s.stop(t + d + .02); }
+function sfx(k){
+  if (!D.sound || !AC) return;
+  try { const t = AC.currentTime;
+    if (k === 'slide'){ noise(t, .12, .25, 1800, .8); }
+    else if (k === 'flip'){ noise(t, .05, .35, 3200, 1.5); }
+    else if (k === 'peel'){ noise(t, .04, .08, 4200, 3); }
+    else if (k === 'chip'){ noise(t, .03, .25, 4200, 4); tone(3100, t, .08, .02); noise(t + .05, .025, .15, 3800, 4); }
+    else if (k === 'win'){ [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, t + i * .1, .9, .05, 'triangle')); }
+    else if (k === 'big'){ [523.3, 659.3, 784, 1046.5, 1318.5, 1568].forEach((f, i) => tone(f, t + i * .09, 1.3, .05, 'triangle')); }
+    else if (k === 'lose'){ tone(330, t, .4, .035, 'triangle', 220); }
+    else if (k === 'push'){ tone(660, t, .3, .03, 'triangle'); }
+    else if (k === 'shuffle'){ for (let i = 0; i < 40; i++) noise(t + i * .022, .03, .16, 2800 + Math.random() * 1500, 2); }
+    else if (k === 'nat'){ tone(1318.5, t, .8, .04); tone(1760, t + .12, 1, .035); }
+  } catch(e){}
+}
+
+/* ================= シュー ================= */
+let shoe = [], cutAt = 0, lastShoeHand = false;
+function newShoe(){
+  shoe = []; for (let d = 0; d < 8; d++) for (let c = 0; c < 52; c++) shoe.push(c);
+  shuffle(shoe); cutAt = 14 + Math.floor(rnd() * 10); lastShoeHand = false; sfx('shuffle'); updShoe();
+  road = []; renderRoads();
+}
+const rankOf = c => c % 13;             // 0=A … 12=K
+const valOf = c => Math.min(rankOf(c) + 1, 10) % 10;
+const RK = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'], SU = ['♠','♥','♦','♣'];
+const red = c => { const s = (c / 13) | 0; return s === 1 || s === 2; };
+function draw(){ const c = shoe.pop(); if (shoe.length <= cutAt && !lastShoeHand){ lastShoeHand = true; setTimeout(() => toast('✂️ ' + T('cut')), 300); } updShoe(); return c; }
+function updShoe(){ $('shoe').textContent = T('left')(shoe.length); }
+
+/* ================= カード ================= */
+const PIP = { 1:[[2,3]], 2:[[2,1],[2,5]], 3:[[2,1],[2,3],[2,5]], 4:[[1,1],[3,1],[1,5],[3,5]], 5:[[1,1],[3,1],[2,3],[1,5],[3,5]], 6:[[1,1],[3,1],[1,3],[3,3],[1,5],[3,5]], 7:[[1,1],[3,1],[2,2],[1,3],[3,3],[1,5],[3,5]], 8:[[1,1],[3,1],[2,2],[1,3],[3,3],[2,4],[1,5],[3,5]], 9:[[1,1],[3,1],[1,2],[3,2],[2,3],[1,4],[3,4],[1,5],[3,5]], 10:[[1,1],[3,1],[2,2],[1,2],[3,2],[1,4],[3,4],[2,4],[1,5],[3,5]] };
+function faceHTML(c){
+  const r = rankOf(c), R = RK[r], S = SU[(c / 13) | 0];
+  let mid;
+  if (r === 0) mid = `<div class="big">${S}</div>`;
+  else if (r >= 10) mid = `<div class="face">${R}<i>${S}</i></div>`;
+  else mid = `<div class="pp">${PIP[r + 1].map(([x, y]) => `<span style="grid-column:${x};grid-row:${y}${y > 3 ? ';transform:rotate(180deg)' : ''}">${S}</span>`).join('')}</div>`;
+  return `<div class="fc${red(c) ? ' r' : ''}"><div class="ix">${R}<i>${S}</i></div>${mid}<div class="ix b">${R}<i>${S}</i></div></div>`;
+}
+const spd = () => [1.6, 1, .55][D.spd];
+async function placeCard(side, c, third){
+  const box = $(side === 'P' ? 'cardsP' : 'cardsB');
+  const el = document.createElement('div'); el.className = 'cd' + (third ? ' third' : '');
+  el.innerHTML = faceHTML(c) + '<div class="curl"></div><div class="bkk"></div>';
+  el._c = c; box.append(el);
+  const sr = $('shoe').getBoundingClientRect(), er = el.getBoundingClientRect();
+  const dx = sr.left - er.left, dy = sr.top - er.top;
+  sfx('slide');
+  const base = third ? 'rotate(90deg) translateX(8px)' : '';
+  try { await el.animate([{ transform:`translate(${dx}px,${dy}px) rotate(-20deg) scale(.7)`, opacity:.4 }, { transform:base || 'none', opacity:1 }], { duration:480 * spd(), easing:'cubic-bezier(.22,1,.36,1)' }).finished; } catch(e){}
+  return el;
+}
+async function flipOpen(el){
+  const bk = el.querySelector('.bkk'); if (!bk) return;
+  const base = el.classList.contains('third') ? 'rotate(90deg) translateX(8px) ' : '';
+  sfx('flip');
+  try { await el.animate([{ transform:base + 'scaleX(1)' }, { transform:base + 'scaleX(0)' }], { duration:150 * spd(), easing:'ease-in' }).finished; } catch(e){}
+  bk.remove(); el.querySelector('.curl').remove();
+  try { await el.animate([{ transform:base + 'scaleX(0)' }, { transform:base + 'scaleX(1)' }], { duration:150 * spd(), easing:'ease-out' }).finished; } catch(e){}
+}
+// 絞り：下から上へドラッグすると、裏がめくれて少しずつ見えてくる
+let openAll = null;
+function squeeze(el){
+  return new Promise(res => {
+    const bk = el.querySelector('.bkk'), curl = el.querySelector('.curl'); let p = 0, y0 = null, done = false, last = 0;
+    el.classList.add('sq');
+    const third = el.classList.contains('third');
+    const set = v => { p = Math.max(0, Math.min(1, v)); bk.style.clipPath = `inset(0 0 ${p * 100}% 0)`; curl.style.opacity = p > .01 && p < .98 ? 1 : 0; curl.style.top = `calc(${(1 - p) * 100}% - 7px)`; if (Math.abs(p - last) > .05){ sfx('peel'); last = p; } };
+    const finish = async () => { if (done) return; done = true; el.classList.remove('sq'); cleanup();
+      const from = p; const t0 = performance.now();
+      await new Promise(r => { const st = now => { const k = Math.min(1, (now - t0) / 260); set(from + (1 - from) * k); if (k < 1) requestAnimationFrame(st); else r(); }; requestAnimationFrame(st); });
+      sfx('flip'); bk.remove(); curl.remove(); res(); };
+    const down = e => { if (done) return; e.preventDefault(); ac(); y0 = e.clientY; const sx = e.clientX; el._sx = sx; el._p0 = p; el.setPointerCapture(e.pointerId); el.style.cursor = 'grabbing'; };
+    const move = e => { if (y0 == null || done) return; const h = el.offsetHeight; const d = third ? (el._sx - e.clientX) : (y0 - e.clientY); set(el._p0 + d / h); if (p > .82) finish(); };
+    const up = () => { y0 = null; el.style.cursor = ''; if (!done && p > .6) finish(); };
+    const dbl = () => finish();
+    el.addEventListener('pointerdown', down); el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('dblclick', dbl);
+    const cleanup = () => { el.removeEventListener('pointerdown', down); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); el.removeEventListener('dblclick', dbl); };
+    el._finish = finish;
+  });
+}
+
+/* ================= 賭け ================= */
+const SPOTS = ['pp', 'P', 'T', 'B', 'bp'];
+const CHIPS = [[10,'#e8e8e8','#333'],[50,'#e86a1a','#fff'],[100,'#141414','#fff'],[500,'#6a2bb0','#fff'],[1000,'#c9a12e','#2a1a00']];
+let bets = {}, phase = 'bet';
+const total = () => Object.values(bets).reduce((a, b) => a + b, 0);
+function renderBets(){
+  const box = $('bets'); box.replaceChildren();
+  SPOTS.forEach(k => {
+    const s = T('spots')[k], el = document.createElement('div'); el.className = 'spot ' + k + (phase !== 'bet' ? ' lock' : ''); el.dataset.k = k;
+    const odds = k === 'B' && D.comm === 'nc' ? T('bNC') : s[1];
+    el.innerHTML = `<b>${s[0]}</b><small>${odds}</small><span class="amt ${bets[k] ? 'on' : ''}">${(bets[k] || 0).toLocaleString()}</span>`;
+    el.onclick = () => addBet(k);
+    el.oncontextmenu = e => { e.preventDefault(); removeBet(k); };
+    let lp = null;
+    el.addEventListener('touchstart', () => { lp = setTimeout(() => { removeBet(k); lp = 'x'; }, 550); }, { passive:true });
+    el.addEventListener('touchend', e => { if (lp === 'x') e.preventDefault(); else clearTimeout(lp); lp = null; });
+    box.append(el);
+  });
+}
+function addBet(k){ if (phase !== 'bet') return; ac(); if (D.chip > D.bank - total()){ toast(T('short')); return; } bets[k] = (bets[k] || 0) + D.chip; sfx('chip'); renderBets(); updBank(); }
+function removeBet(k){ if (phase !== 'bet' || !bets[k]) return; bets[k] = Math.max(0, bets[k] - D.chip); if (!bets[k]) delete bets[k]; sfx('chip'); renderBets(); updBank(); }
+function renderChips(){ const box = $('chips'); box.replaceChildren(); CHIPS.forEach(([v, c, t]) => { const el = document.createElement('button'); el.className = 'chip' + (D.chip === v ? ' on' : ''); el.style.background = c; el.style.color = t; el.textContent = v >= 1000 ? '1K' : v; el.onclick = () => { D.chip = v; save(); sfx('chip'); renderChips(); }; box.append(el); }); }
+let shownBank = D.bank;
+function updBank(anim){
+  const target = D.bank - (phase === 'bet' ? total() : 0);
+  if (anim){ const from = shownBank, t0 = performance.now(); const st = now => { const k = Math.min(1, (now - t0) / 900); shownBank = from + (target - from) * (1 - Math.pow(1 - k, 3)); $('bank').textContent = Math.round(shownBank).toLocaleString(); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); }
+  else { shownBank = target; $('bank').textContent = Math.round(target).toLocaleString(); }
+  $('betSum').textContent = (phase === 'bet' ? total() : stake).toLocaleString();
+  $('bClear').disabled = phase !== 'bet' || !total();
+  const lt = Object.values(D.last).reduce((a, b) => a + b, 0); $('bRebet').disabled = phase !== 'bet' || !lt || lt > D.bank;
+  $('bDeal').disabled = phase !== 'bet';
+  $('bRefill').style.display = phase === 'bet' && D.bank < 10 ? '' : 'none';
+}
+
+/* ================= 進行 ================= */
+let stake = 0, playBets = {};
+function setLog(h){ $('log').innerHTML = h; }
+function addLog(h){ if (!D.exp) return; $('log').innerHTML += ($('log').innerHTML ? '<br>' : '') + h; }
+const tot = cs => cs.reduce((a, c) => a + valOf(c), 0) % 10;
+function sqSide(){ if (!D.sq) return null; if (D.sq === 2) return 'both'; const p = playBets.P || 0, b = playBets.B || 0; if (!p && !b) return null; return p >= b ? 'P' : 'B'; }
+const shouldSq = s => { const q = sqSide(); return q === 'both' || q === s; };
+async function reveal(els, side){
+  if (!shouldSq(side)){ for (const e of els) await flipOpen(e); return; }
+  setLog(T('squeezeNow')); $('bOpen').style.display = ''; phase = 'squeeze';
+  openAll = () => els.forEach(e => e._finish && e._finish());
+  await Promise.all(els.map(e => squeeze(e)));
+  $('bOpen').style.display = 'none'; openAll = null; phase = 'deal';
+}
+async function deal(){
+  if (phase !== 'bet') return; ac();
+  stake = total(); if (stake > D.bank){ toast(T('short')); return; }
+  if (!shoe.length || lastShoeHand){ toast('🃏 ' + T('shoeNew')); newShoe(); await sleep(900); }
+  playBets = Object.assign({}, bets); if (stake) D.last = Object.assign({}, bets);
+  D.bank -= stake; phase = 'deal'; save(); renderBets(); updBank();
+  ['sideP','sideB'].forEach(i => $(i).classList.remove('win','P','B','T')); $('sideP').classList.add('P'); $('sideB').classList.add('B');
+  document.querySelectorAll('.spot').forEach(s => s.classList.remove('win'));
+  $('cardsP').replaceChildren(); $('cardsB').replaceChildren(); $('totP').textContent = '–'; $('totB').textContent = '–';
+  setLog(stake ? '' : T('noBet'));
+  const P = [draw()], B = [draw()]; P.push(draw()); B.push(draw());
+  const pe = [], be = [];
+  pe.push(await placeCard('P', P[0])); be.push(await placeCard('B', B[0]));
+  pe.push(await placeCard('P', P[1])); be.push(await placeCard('B', B[1]));
+  await sleep(200 * spd());
+  // プレイヤー側から開く（本場と同じ順）
+  await reveal(pe, 'P'); $('totP').textContent = tot(P);
+  await reveal(be, 'B'); $('totB').textContent = tot(B);
+  setLog('');
+  let pt = tot(P), bt = tot(B), p3 = null;
+  if (pt >= 8 || bt >= 8){ sfx('nat'); addLog(T('natural')(pt >= bt ? 'P' : 'B', Math.max(pt, bt))); }
+  else {
+    if (pt <= 5){
+      addLog(T('p3draw')(pt)); await sleep(400 * spd());
+      const c = draw(); P.push(c); p3 = valOf(c);
+      const e = await placeCard('P', c, true); await reveal([e], 'P'); pt = tot(P); $('totP').textContent = pt;
+    } else addLog(T('p3stand')(pt));
+    let draws, why;
+    if (p3 == null){ draws = bt <= 5; why = T('whyStood'); }
+    else {
+      why = T('whyTable')(p3);
+      draws = bt <= 2 || (bt === 3 && p3 !== 8) || (bt === 4 && p3 >= 2 && p3 <= 7) || (bt === 5 && p3 >= 4 && p3 <= 7) || (bt === 6 && (p3 === 6 || p3 === 7));
+    }
+    await sleep(350 * spd());
+    if (draws){
+      addLog(T('b3draw')(bt, why)); await sleep(350 * spd());
+      const c = draw(); B.push(c); const e = await placeCard('B', c, true); await reveal([e], 'B'); bt = tot(B); $('totB').textContent = bt;
+    } else addLog(T('b3stand')(bt, why));
+  }
+  await sleep(300 * spd());
+  settle(P, B, pt, bt);
+}
+function settle(P, B, pt, bt){
+  const w = pt > bt ? 'P' : bt > pt ? 'B' : 'T';
+  const ppair = rankOf(P[0]) === rankOf(P[1]), bpair = rankOf(B[0]) === rankOf(B[1]);
+  let ret = 0; const b = playBets;
+  if (w === 'P') ret += (b.P || 0) * 2;
+  if (w === 'B') ret += D.comm === 'nc' ? (bt === 6 ? (b.B || 0) * 1.5 : (b.B || 0) * 2) : (b.B || 0) * 1.95;
+  if (w === 'T'){ ret += (b.T || 0) * 9 + (b.P || 0) + (b.B || 0); }
+  if (ppair) ret += (b.pp || 0) * 12;
+  if (bpair) ret += (b.bp || 0) * 12;
+  ret = Math.round(ret);
+  const net = ret - stake;
+  D.bank += ret; D.hands++; D.w[w]++; D.net += net; if (net > D.best) D.best = net; save();
+  $(w === 'B' ? 'sideB' : 'sideP').classList.add('win'); if (w === 'T'){ $('sideP').classList.add('win','T'); $('sideB').classList.add('win','T'); }
+  document.querySelectorAll('.spot').forEach(s => { const k = s.dataset.k; if (k === w || (k === 'pp' && ppair) || (k === 'bp' && bpair)) s.classList.add('win'); });
+  let msg = `<b>${T('win')[w]}</b>（${pt} : ${bt}）`;
+  if (ppair) msg += ' · ' + T('pair').P; if (bpair) msg += ' · ' + T('pair').B;
+  if (stake) msg += ' — ' + T('net')(net);
+  if (D.exp) addLog(msg); else setLog(msg);
+  if (stake){ if (net > 0) sfx(net >= stake * 5 ? 'big' : 'win'); else if (net === 0) sfx('push'); else sfx('lose'); }
+  if (stake && net > 0) toast(T('net')(net));
+  road.push({ w, pp:ppair, bp:bpair, n:w === 'P' ? pt : bt }); renderRoads();
+  phase = 'bet'; bets = {}; renderBets(); updBank(true); renderStats();
+}
+
+/* ================= 罫線 ================= */
+let road = [];
+function renderRoads(){
+  // 珠盤路
+  const bead = $('bead'); bead.replaceChildren();
+  const cols = Math.max(12, Math.ceil(road.length / 6));
+  for (let i = 0; i < cols * 6; i++){ const e = document.createElement('i'); const r = road[i]; if (r){ e.className = 'b' + r.w + (r.pp ? ' lp' : '') + (r.bp ? ' lb' : ''); e.textContent = r.w === 'P' ? (J() ? '閑' : 'P') : r.w === 'B' ? (J() ? '庄' : 'B') : (J() ? '和' : 'T'); } bead.append(e); }
+  bead.scrollLeft = bead.scrollWidth;
+  // 大路
+  const cells = {}; let c = -1, r = 0, startCol = -1, lastW = null, lastKey = null, pendT = 0;
+  road.forEach(x => {
+    if (x.w === 'T'){ if (lastKey) cells[lastKey].t++; else pendT++; return; }
+    if (x.w === lastW){
+      if (r + 1 < 6 && !cells[`${c},${r + 1}`]) r++; else c++;
+    } else { startCol++; c = startCol; r = 0; while (cells[`${c},${r}`]) c++; startCol = c; }
+    lastW = x.w; lastKey = `${c},${r}`; cells[lastKey] = { w:x.w, t:pendT, pp:x.pp, bp:x.bp }; pendT = 0;
+  });
+  const big = $('bigRoad'); big.replaceChildren();
+  const maxC = Math.max(14, c + 2);
+  for (let cc = 0; cc < maxC; cc++) for (let rr = 0; rr < 6; rr++){
+    const e = document.createElement('i'), v = cells[`${cc},${rr}`];
+    if (v){ e.className = 'g' + v.w + (v.pp ? ' lp' : '') + (v.bp ? ' lb' : ''); if (v.t) e.innerHTML = v.t > 1 ? `<span class="t"></span><span class="n">${v.t}</span>` : '<span class="t"></span>'; }
+    big.append(e);
+  }
+  big.scrollLeft = big.scrollWidth;
+}
+function renderStats(){
+  const n = D.w.P + D.w.B + D.w.T || 1;
+  $('st').innerHTML = T('stats')() + `<div class="bar3"><i style="width:${D.w.P / n * 100}%;background:var(--pl)"></i><i style="width:${D.w.T / n * 100}%;background:var(--tie)"></i><i style="width:${D.w.B / n * 100}%;background:var(--bk)"></i></div>`
+    + `P ${D.w.P}（${(D.w.P / n * 100).toFixed(1)}%） T ${D.w.T}（${(D.w.T / n * 100).toFixed(1)}%） B ${D.w.B}（${(D.w.B / n * 100).toFixed(1)}%）`;
+}
+
+/* ================= 設定 ================= */
+function seg(id, opts, key, after){
+  const box = $(id); box.replaceChildren();
+  opts.forEach(([v, l, s]) => { const b = document.createElement('button'); b.innerHTML = l + (s ? `<small>${s}</small>` : ''); b.className = D[key] === v ? 'on' : ''; b.onclick = () => { if (key === 'comm' && phase !== 'bet') return; ac(); sfx('chip'); D[key] = v; save(); renderSettings(); after && after(); }; box.append(b); });
+}
+function renderSettings(){
+  seg('sComm', Object.entries(T('comms')).map(([k, v]) => [k, v[0], v[1]]), 'comm', () => { renderBets(); $('rule').textContent = T('rule')(D.comm); });
+  seg('sSq', T('sqs').map((v, i) => [i, v[0], v[1]]), 'sq');
+  seg('sSpd', T('spds').map((v, i) => [i, v]), 'spd');
+  seg('sExp', T('exps').map((v, i) => [i, v[0], v[1]]), 'exp');
+}
+
+/* ================= 遊び方 ================= */
+const HELP = {
+  ja:[
+    ['遊び方', `<p>バカラは、<b>「プレイヤー」と「バンカー」のどちらの手が 9 に近くなるか</b>を当てるゲームです。名前は「プレイヤー（客）」「バンカー（胴元）」ですが、<b>あなたはどちらにも賭けられます</b>。カードを引くかどうかは決まったルールで自動で進むので、あなたが判断するのは「どこに賭けるか」だけです。</p>
+      <ol><li>チップを選んで、<b>PLAYER・BANKER・TIE（引き分け）</b>のどれかに置きます。ペアへの賭けは追加でできます。</li><li>「配る」を押すと、プレイヤーとバンカーに 2 枚ずつ配られます。</li><li>必要なら、決まりに従って 3 枚目が配られます（「3 枚目のルール」を参照）。</li><li>9 に近いほうの勝ちです。</li></ol>
+      <h4>数え方</h4><table><tr><th>カード</th><th>点数</th></tr><tr><td>A</td><td>1</td></tr><tr><td>2〜9</td><td>そのまま</td></tr><tr><td>10・J・Q・K</td><td>0</td></tr></table>
+      合計の<b>一の位</b>だけを使います。たとえば 7＋8＝15 なら <b>5</b>、K＋9 なら <b>9</b>。だから最高は 9 で、「10 を超えてバースト」はありません。
+      <h4>配当</h4><table><tr><th>賭け</th><th>配当</th><th>メモ</th></tr><tr><td>PLAYER</td><td>1 : 1</td><td>賭けた額と同じだけ勝ち</td></tr><tr><td>BANKER</td><td>0.95 : 1</td><td>5% の手数料が引かれます</td></tr><tr><td>TIE</td><td>8 : 1</td><td>引き分けのとき。PLAYER と BANKER への賭けは返ってきます</td></tr><tr><td>P ペア／B ペア</td><td>11 : 1</td><td>最初の 2 枚が同じ数字</td></tr></table>
+      <p>「ノーコミッション」の台では、BANKER は手数料なしの 1 : 1 ですが、<b>バンカーが 6 で勝ったときだけ半額</b>になります。</p>`],
+    ['3 枚目のルール', `<p>覚えなくても自動で進みます。設定の「表示モード」を「くわしく」にすると、毎回なぜ引いたのか（引かなかったのか）が表示されます。</p>
+      <h4>① ナチュラル</h4>どちらかの最初の 2 枚が <b>8 か 9</b> なら、そこで勝負は終わりです。
+      <h4>② プレイヤー</h4><b>0〜5 なら 1 枚引き</b>、6・7 なら引きません。
+      <h4>③ バンカー</h4>プレイヤーが引かなかったときは、<b>0〜5 なら引き</b>、6・7 なら引きません。<br>プレイヤーが 3 枚目を引いたときは、そのカードの点数によって次の表のとおりです。
+      <table><tr><th>バンカーの合計</th><th>引くのは、プレイヤーの 3 枚目が…</th></tr><tr><td>0・1・2</td><td>いつでも引く</td></tr><tr><td>3</td><td>8 以外</td></tr><tr><td>4</td><td>2〜7</td></tr><tr><td>5</td><td>4〜7</td></tr><tr><td>6</td><td>6・7</td></tr><tr><td>7</td><td>引かない</td></tr></table>`],
+    ['絞りと罫線', `<h4>絞り（しぼり）</h4><p>アジアのカジノの名物です。伏せたカードの端を少しずつめくって、マークの並びから数字を推理していく、いちばん盛り上がる場面です。</p><p>設定の「絞り」を「自分の側」にすると、多く賭けた側のカードが伏せたまま配られます。カードを<b>下から上へゆっくりドラッグ</b>してください（横向きの 3 枚目は右から左へ）。途中で止めれば、そこで止まります。ダブルクリックか「全部めくる」で一気に開けます。</p>
+      <h4>罫線（けいせん）</h4><p>これまでの結果の記録です。本場のテーブルには必ず電光掲示板があり、多くのプレイヤーがこれを見ながら賭けます。</p>
+      <ul><li><b>珠盤路（ビーズプレート）：</b>1 回ごとに上から下、左から右へ並べます。<span class="ex" style="background:var(--pl)"></span>プレイヤー、<span class="ex" style="background:var(--bk)"></span>バンカー、<span class="ex" style="background:var(--tie)"></span>タイ。</li><li><b>大路（ビッグロード）：</b>同じ側が続く限り下へ、変わったら右の列へ。タイは直前の丸に緑の斜線で付けます。下に入りきらないときは右へ曲がります（「ドラゴンの尻尾」）。</li><li>小さな点は、左下の青がプレイヤーペア、右上の赤がバンカーペアです。</li></ul>
+      <p>⚠️ 罫線は記録で、次の結果の予想には使えません。毎回の勝ち負けは、それまでの流れとは関係なく決まります。</p>`],
+    ['本場の豆知識', `<ul><li><b>どこで人気？：</b>マカオ、シンガポール、韓国などアジアのカジノでは、売り上げのほとんどがバカラという場所もあります。ラスベガスでも、高額を賭ける部屋の主役です。</li>
+      <li><b>数字で見ると：</b>8 デッキの場合、ハウスの取り分はおよそ<b>バンカー 1.06%・プレイヤー 1.24%・タイ 14.4%</b>です。バンカーのほうがわずかに勝ちやすいので手数料が引かれます。タイやペアは配当が大きい分、取り分も大きい賭けです。</li>
+      <li><b>カードに触れる？：</b>小さな賭けのテーブルでは、ディーラーがすべてめくります。絞りができるのは主に高額のテーブルで、いちばん多く賭けた人がカードを受け取ります。</li>
+      <li><b>マナー：</b>ディーラーが「No more bets」と言ったら、チップには触れないようにします。罫線を書き込むための紙と鉛筆が用意されていることもあります。</li>
+      <li><b>カットカード：</b>シューの終わり近くにカットカードが入っていて、それが出た勝負でシューが終わり、新しく切り直します。</li></ul><p>※ MeridiPlay のチップは遊び用で、本物のお金とは関係ありません。</p>`]
+  ],
+  en:[
+    ['How to play', `<p>Bet on which hand — <b>Player</b> or <b>Banker</b> — ends closer to 9. You may bet on either. Drawing is fully automatic.</p><ol><li>Place chips on PLAYER, BANKER or TIE (pairs are side bets).</li><li>Deal: two cards each.</li><li>A third card may be drawn by fixed rules.</li><li>Closest to 9 wins.</li></ol><h4>Counting</h4>A = 1, 2–9 face value, 10/J/Q/K = 0. Only the last digit counts (7+8 = 5).<h4>Payouts</h4>Player 1:1 · Banker 0.95:1 (5% commission) · Tie 8:1 (Player/Banker bets push) · Pairs 11:1. No-commission: Banker pays 1:1 but a Banker win on 6 pays 1:2.`],
+    ['Third card', `<h4>Natural</h4>If either side has 8 or 9 with two cards, the hand ends.<h4>Player</h4>Draws on 0–5, stands on 6–7.<h4>Banker</h4>If Player stood: draws on 0–5. Otherwise by Player's third card:<table><tr><th>Banker</th><th>Draws when Player's 3rd is</th></tr><tr><td>0–2</td><td>always</td></tr><tr><td>3</td><td>not 8</td></tr><tr><td>4</td><td>2–7</td></tr><tr><td>5</td><td>4–7</td></tr><tr><td>6</td><td>6–7</td></tr><tr><td>7</td><td>never</td></tr></table>`],
+    ['Squeeze & roads', `<h4>Squeeze</h4><p>Drag a face-down card upward slowly to peel it (sideways cards: right to left). Double-click or "Reveal all" to open at once.</p><h4>Scoreboards</h4><ul><li><b>Bead Plate:</b> every hand in order.</li><li><b>Big Road:</b> streaks go down; a change starts a new column. Ties are green slashes; overflow turns right ("dragon tail").</li></ul><p>Roads are records only — past results don't predict the next hand.</p>`],
+    ['Casino tips', `<ul><li>Baccarat dominates casinos in Macau and Singapore.</li><li>House edge (8 decks): Banker ~1.06%, Player ~1.24%, Tie ~14.4%.</li><li>At low-limit tables the dealer flips all cards; squeezing is a high-limit tradition.</li><li>Don't touch chips after "No more bets".</li></ul><p>MeridiPlay chips are for fun only.</p>`]
+  ]
+};
+let hp = 0;
+function renderHelp(){ const H = HELP[D.lang], tb = $('htabs'); tb.replaceChildren(); H.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p[0]; b.className = i === hp ? 'on' : ''; b.onclick = () => { hp = i; renderHelp(); }; tb.append(b); }); $('hc').innerHTML = H[hp][1]; $('hClose').textContent = T('close'); }
+const openHelp = () => { renderHelp(); $('help').classList.add('show'); };
+const closeHelp = () => { $('help').classList.remove('show'); if (!D.seenHelp){ D.seenHelp = true; save(); } };
+
+/* ================= 共通 ================= */
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2700); }
+function btnL(id, a){ $(id).innerHTML = a[0] + `<small>${a[1]}</small>`; }
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.classList.toggle('light', D.theme === 'light');
+  document.body.classList.toggle('cat', !!D.cat);
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇';
+  $('tTheme').textContent = D.theme === 'light' ? '🌙 ' + (J() ? 'ダーク' : 'Dark') : '☀️ ' + (J() ? 'ノーマル' : 'Normal');
+  $('hRoad').textContent = T('road'); $('lBig').textContent = T('big'); $('lBead').textContent = T('bead'); $('hSet').textContent = T('set'); $('hSt').textContent = T('st');
+  $('lComm').textContent = T('comm'); $('lSq').textContent = T('sq'); $('lSpd').textContent = T('spd'); $('lExp').textContent = T('exp');
+  $('lBank').textContent = T('bankL'); $('lBet').textContent = T('betL'); $('rule').textContent = T('rule')(D.comm);
+  btnL('bClear', T('clear')); btnL('bRebet', T('rebet')); btnL('bOpen', T('open')); btnL('bDeal', T('deal'));
+  $('bRefill').textContent = T('refill'); $('kb').textContent = T('kb');
+  renderSettings(); renderBets(); renderChips(); renderRoads(); renderStats(); updBank(); updShoe();
+  if (phase === 'bet' && !$('log').textContent) setLog(T('placeBets'));
+  if ($('help').classList.contains('show')) renderHelp();
+}
+$('bDeal').onclick = deal;
+$('bClear').onclick = () => { if (phase !== 'bet') return; bets = {}; sfx('chip'); renderBets(); updBank(); };
+$('bRebet').onclick = () => { if (phase !== 'bet') return; bets = Object.assign({}, D.last); sfx('chip'); renderBets(); updBank(); };
+$('bOpen').onclick = () => openAll && openAll();
+$('bRefill').onclick = () => { ac(); D.bank += 10000; D.refills++; save(); sfx('win'); updBank(true); };
+$('tHelp').onclick = openHelp; $('hClose').onclick = closeHelp;
+$('help').onclick = e => { if (e.target === $('help')) closeHelp(); };
+$('tLang').onclick = () => { D.lang = J() ? 'en' : 'ja'; save(); apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; ac(); save(); apply(); };
+$('tTheme').onclick = () => { D.theme = D.theme === 'light' ? 'dark' : 'light'; save(); apply(); };
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase(); kb.push(k); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; document.body.classList.toggle('neo'); toast(document.body.classList.contains('neo') ? '🟩 Wake up, Neo…' : '🃏 Classic backs'); return; }
+  if (kb.slice(-6).join('') === 'meridi'){ D.cat = !D.cat; save(); apply(); toast(D.cat ? '🐾 三匹の柄の裏面に' : '🃏 いつもの裏面に'); return; }
+  if ($('help').classList.contains('show')){ if (k === 'escape' || k === '?') closeHelp(); return; }
+  if (e.repeat) return;
+  if (k === 'enter'){ e.preventDefault(); deal(); }
+  else if (k === ' '){ e.preventDefault(); if (openAll) openAll(); }
+  else if (k === 'p' && kb.slice(-2).join('') !== 'bp'){ addBet('P'); }
+  else if (k === 'b' && kb[kb.length - 2] !== 'arrowright'){ addBet('B'); }
+  else if (k === 't'){ addBet('T'); }
+  else if (k === '1'){ addBet('pp'); }
+  else if (k === '2'){ addBet('bp'); }
+  else if (k === 'r'){ $('bRebet').click(); }
+  else if (k === 'backspace'){ e.preventDefault(); $('bClear').click(); }
+  else if (k === '?'){ openHelp(); }
+});
+
+newShoe(); apply(); setLog(T('placeBets'));
+if (!D.seenHelp) setTimeout(openHelp, 500);
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

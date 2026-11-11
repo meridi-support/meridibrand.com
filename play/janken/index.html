@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — 猫じゃんけん（駄菓子屋レトロ）</title>
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--g:#39ff14}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:#1a120b;color:#f1e3c4;font-family:'Hiragino Maru Gothic ProN','Yu Gothic','Meiryo',sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,#5a3a1e 0%,#2a1a0e 45%,#120b06 100%)}
+header{position:relative;z-index:3;display:flex;align-items:center;gap:7px;padding:12px 18px;border-bottom:1px solid #39ff1422;background:#0007;flex-wrap:wrap}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:10px}
+.brand b{font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+.brand span{font-size:13px;letter-spacing:3px;color:#e8cf9a}
+.tg{background:#000a;color:#e9dcc0;border:1px solid #c9a46e66;border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:#e8c26a;color:#ffe9b5}
+.tg.on{background:#c9a46e22;border-color:#e8c26a;color:#ffe9b5}
+.wrap{position:relative;z-index:2;display:flex;justify-content:center;gap:22px;padding:18px 14px 30px;flex-wrap:wrap;align-items:flex-start}
+
+/* ===== machine ===== */
+.mac{position:relative;width:min(440px,94vw);border-radius:30px 30px 18px 18px;padding:18px 18px 22px;
+  background:linear-gradient(180deg,#e2342a,#b8221a 50%,#8a160f);box-shadow:0 30px 60px #000c,inset 0 2px 0 #ff8a7a,inset 0 -6px 0 #5a0a06,0 0 0 4px #3a0a06}
+body.aged .mac{background:linear-gradient(180deg,#b84a38,#93301f 50%,#6a2014);box-shadow:0 30px 60px #000c,inset 0 2px 0 #d88a70,inset 0 -6px 0 #3a0a06,0 0 0 4px #2a0a06}
+.mac::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .6s}
+body.aged .mac::after{opacity:1;background:
+  radial-gradient(circle at 14% 22%,#00000030 0 6px,transparent 7px),radial-gradient(circle at 86% 64%,#00000028 0 9px,transparent 10px),
+  radial-gradient(circle at 70% 12%,#e8d0a033 0 3px,transparent 4px),radial-gradient(circle at 20% 80%,#e8d0a02a 0 4px,transparent 5px),
+  repeating-linear-gradient(115deg,transparent 0 40px,#ffffff08 40px 41px),linear-gradient(180deg,#ffe6a010,#00000030)}
+.title{text-align:center;font:900 26px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;letter-spacing:6px;color:#fff4c8;text-shadow:0 3px 0 #7a1208,0 0 14px #ffd27a66;margin-bottom:4px}
+.sub{text-align:center;font:bold 11px 'Courier New',monospace;letter-spacing:3px;color:#ffe08a;opacity:.85;margin-bottom:12px}
+.board{position:relative;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#2a1206,#140803);box-shadow:inset 0 0 30px #000,0 0 0 6px #e8c26a,0 0 0 9px #6a4a10}
+body.aged .board{box-shadow:inset 0 0 30px #000,0 0 0 6px #a8884a,0 0 0 9px #4a3410}
+.lamp{position:absolute;width:15%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;
+  font:900 clamp(14px,4.4vw,22px) 'Courier New',monospace;color:#5a3a20;background:radial-gradient(circle at 40% 35%,#6a4a2a,#2a1a0c);box-shadow:inset 0 0 0 2px #00000088,0 2px 4px #000a;transition:color .25s}
+.lamp i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff6c0,#ffb82a 55%,#c86a00);opacity:0;box-shadow:0 0 18px #ffb82a;transition:opacity .12s linear}
+.lamp b{position:relative;z-index:1}
+.lamp.big i{background:radial-gradient(circle at 40% 35%,#fff,#ff7a5a 55%,#c8261e);box-shadow:0 0 22px #ff5a3a}
+.lamp.big{color:#7a2a20}
+.center{position:absolute;left:50%;top:50%;width:56%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 45% 35%,#fff8e0,#f2dcae 60%,#c8a46a);box-shadow:inset 0 -6px 14px #0004,0 0 0 4px #6a4a10;overflow:hidden}
+body.aged .center{background:radial-gradient(circle at 45% 35%,#efe2c0,#d8c08e 60%,#a8884a)}
+.center svg{width:100%;height:100%;display:block}
+.bubble{position:absolute;left:50%;top:9%;transform:translateX(-50%);font:900 clamp(14px,4vw,20px) 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;color:#7a1208;white-space:nowrap;opacity:0;transition:opacity .3s,transform .4s var(--E)}
+.bubble.on{opacity:1;transform:translateX(-50%) translateY(-2px)}
+.hands{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.hl{position:relative;aspect-ratio:1.2;border-radius:12px;background:#140803;box-shadow:inset 0 0 0 2px #000,0 0 0 3px #e8c26a55;display:flex;align-items:center;justify-content:center;font-size:clamp(26px,8vw,40px);filter:grayscale(1) brightness(.35);transition:filter .15s linear,box-shadow .3s}
+.hl.on{filter:none;box-shadow:inset 0 0 18px #ffb82a88,0 0 0 3px #ffe08a,0 0 18px #ffb82a77}
+.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.hb{border:none;border-radius:50%;aspect-ratio:1;cursor:pointer;font-size:clamp(28px,8vw,40px);background:radial-gradient(circle at 40% 30%,#fff,#ffd84a 45%,#c89a10);box-shadow:0 7px 0 #6a5008,0 10px 14px #000a,inset 0 2px 0 #fff;transition:transform .08s,box-shadow .08s,filter .3s;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hb small{font:bold 11px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;color:#5a3a00;margin-top:-2px}
+.hb:active:not(:disabled),.hb.press{transform:translateY(5px);box-shadow:0 2px 0 #6a5008,0 4px 8px #000a,inset 0 2px 0 #fff}
+.hb:disabled{filter:grayscale(.8) brightness(.55);cursor:default}
+.hb.ready{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 7px 0 #6a5008,0 10px 14px #000a,inset 0 2px 0 #fff}50%{box-shadow:0 7px 0 #6a5008,0 0 22px #ffe08a,inset 0 2px 0 #fff}}
+.slot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:10px}
+.coinBtn{flex:1;border:2px solid #6a4a10;border-radius:12px;padding:12px;background:linear-gradient(#3a2a10,#1a1006);color:#ffe08a;font:bold 15px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;letter-spacing:2px;cursor:pointer;box-shadow:inset 0 2px 0 #ffffff18,0 4px 0 #000}
+.coinBtn:active:not(:disabled){transform:translateY(3px);box-shadow:inset 0 2px 0 #ffffff18,0 1px 0 #000}
+.coinBtn:disabled{opacity:.45;cursor:default}
+.coinBtn small{display:block;font-size:10px;font-weight:normal;opacity:.7;letter-spacing:1px}
+.tray{position:relative;width:120px;height:52px;border-radius:0 0 20px 20px;background:linear-gradient(#0a0402,#2a1a0c);box-shadow:inset 0 6px 10px #000;overflow:hidden}
+.medal{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c0,#d8a82a 60%,#8a6410);box-shadow:0 1px 2px #000;font:bold 8px Georgia,serif;color:#6a4a10;display:flex;align-items:center;justify-content:center}
+
+/* ===== side ===== */
+.side{width:300px;max-width:94vw;display:flex;flex-direction:column;gap:12px}
+.panel{background:#0008;border:1px solid #c9a46e44;border-radius:14px;padding:14px}
+.panel h3{font-size:13px;letter-spacing:3px;color:#e8c26a;margin-bottom:8px}
+.wallet{display:flex;align-items:baseline;gap:10px}
+.wallet b{font:bold 34px 'Courier New',monospace;color:#ffd98a;text-shadow:0 0 10px #ffb34755}
+.wallet small{font-size:12px;opacity:.7}
+.stats{font:12px 'Courier New',monospace;line-height:1.8;opacity:.85}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;background:#00000066;color:#f1e3c4;border:1px solid #c9a46e44;border-radius:9px;padding:8px 4px;font:12px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;cursor:pointer;transition:all .3s var(--E)}
+.seg button.on{background:#e8c26a22;border-color:#e8c26a}
+.seg button small{display:block;font-size:10px;opacity:.7}
+.mini{width:100%;margin-top:8px;padding:9px;border-radius:10px;border:1px solid #e8c26a;background:#e8c26a1a;color:#ffe9b5;font:bold 13px 'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;cursor:pointer}
+.hist{display:flex;gap:4px;flex-wrap:wrap;min-height:24px}
+.hist span{font-size:16px;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:#00000066;border:1px solid #c9a46e33}
+.hist span.w{border-color:#ffe08a;background:#e8c26a22}
+.hint{font:11px 'Courier New',monospace;opacity:.55;line-height:1.7}
+.toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-10px);background:#1a120bee;border:1px solid #e8c26a;color:#ffe9b5;padding:10px 22px;border-radius:22px;font-size:14px;letter-spacing:1px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:50;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body class="aged">
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span id="bT"></span></div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tVoice">🗣</button>
+  <button class="tg on" id="tAge"></button>
+</header>
+<div class="wrap">
+  <div class="mac">
+    <div class="title" id="mTitle"></div>
+    <div class="sub">🐾 MERIDI · JAN-KEN · 1 MEDAL</div>
+    <div class="board" id="board">
+      <div class="center"><svg id="cat" viewBox="0 0 200 200"></svg><div class="bubble" id="bubble"></div></div>
+    </div>
+    <div class="hands" id="hands"></div>
+    <div class="btns" id="btns"></div>
+    <div class="slot">
+      <button class="coinBtn" id="bCoin"></button>
+      <div class="tray" id="tray"></div>
+    </div>
+  </div>
+  <div class="side">
+    <div class="panel"><h3 id="hWallet"></h3><div class="wallet"><b id="wallet">0</b><small id="wUnit"></small></div><div class="stats" id="stats"></div><button class="mini" id="bBuy" style="display:none"></button></div>
+    <div class="panel"><h3 id="hCat"></h3><div class="seg" id="sCat"></div></div>
+    <div class="panel"><h3 id="hHist"></h3><div class="hist" id="hist"></div></div>
+    <div class="hint" id="hint"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const pick = a => a[Math.floor(rnd() * a.length)];
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ===== 保存 ===== */
+const LS = 'meridiplay_janken_v1';
+let D = { lang:'ja', sound:true, voice:true, aged:true, medals:20, cat:0, plays:0, wins:0, draws:0, loses:0, out:0, best:0, streak:0, bestStreak:0, hist:[], buys:0, hands:[0,0,0] };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+if (!Array.isArray(D.hist)) D.hist = []; if (!Array.isArray(D.hands)) D.hands = [0,0,0];
+const save = () => lsSet(LS, JSON.stringify(D));
+
+/* ===== 猫 ===== */
+const CATS = [
+  { id:'black', ja:'クロ', en:'Kuro', body:'#1a1a1a', ear:'#2a2a2a', eye:'#9cff5a', stripe:null, nose:'#f2a0b0', trait:{ ja:'パーが好き', en:'Loves paper' }, bias:[.28,.28,.44] },
+  { id:'tabby', ja:'トラ', en:'Tora', body:'#d08a3a', ear:'#a8662a', eye:'#ffe08a', stripe:'#7a4a18', nose:'#e88a8a', trait:{ ja:'負けると同じ手を出しがち', en:'Repeats after losing' }, bias:[.34,.33,.33], sticky:true },
+  { id:'grey', ja:'ハイ', en:'Hai', body:'#8c9198', ear:'#6d7178', eye:'#9fd8ff', stripe:null, nose:'#f2a0b0', trait:{ ja:'あなたの癖を読む', en:'Reads your habits' }, bias:[.33,.33,.34], reader:true }
+];
+const HANDS = ['✊','✌️','🖐'];
+function catSVG(c, mood){
+  const eyes = {
+    idle:`<ellipse cx="72" cy="104" rx="11" ry="13" fill="${c.eye}"/><ellipse cx="128" cy="104" rx="11" ry="13" fill="${c.eye}"/><rect x="70" y="93" width="4" height="22" rx="2" fill="#000"/><rect x="126" y="93" width="4" height="22" rx="2" fill="#000"/>`,
+    win:`<path d="M60 106 Q72 92 84 106" stroke="#000" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M116 106 Q128 92 140 106" stroke="#000" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+    lose:`<path d="M60 98 L84 110 M60 110 L84 98" stroke="#000" stroke-width="5" stroke-linecap="round"/><path d="M116 98 L140 110 M116 110 L140 98" stroke="#000" stroke-width="5" stroke-linecap="round"/>`,
+    think:`<path d="M60 104 L84 104" stroke="#000" stroke-width="5" stroke-linecap="round"/><path d="M116 104 L140 104" stroke="#000" stroke-width="5" stroke-linecap="round"/>`
+  }[mood] || '';
+  const mouth = mood === 'win' ? `<path d="M88 134 Q100 150 112 134" stroke="#000" stroke-width="4" fill="#c8384a"/>` : mood === 'lose' ? `<path d="M88 144 Q100 132 112 144" stroke="#000" stroke-width="4" fill="none"/>` : `<path d="M90 136 Q95 142 100 136 Q105 142 110 136" stroke="#000" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  const st = c.stripe ? `<path d="M86 58 L90 78 M100 54 L100 76 M114 58 L110 78" stroke="${c.stripe}" stroke-width="6" stroke-linecap="round"/><path d="M38 110 L56 112 M38 124 L56 122 M162 110 L144 112 M162 124 L144 122" stroke="${c.stripe}" stroke-width="5" stroke-linecap="round"/>` : '';
+  const w = c.id === 'black' ? '#777' : '#3a2a20';
+  return `<g class="bob">
+    <path d="M40 92 L46 30 L86 62 Z" fill="${c.body}"/><path d="M160 92 L154 30 L114 62 Z" fill="${c.body}"/>
+    <path d="M50 78 L53 44 L76 62 Z" fill="${c.ear}" opacity=".8"/><path d="M150 78 L147 44 L124 62 Z" fill="${c.ear}" opacity=".8"/>
+    <ellipse cx="100" cy="112" rx="66" ry="58" fill="${c.body}"/>${st}${eyes}
+    <path d="M94 124 L106 124 L100 131 Z" fill="${c.nose}"/>${mouth}
+    <path d="M70 128 L30 120 M70 134 L30 136 M130 128 L170 120 M130 134 L170 136" stroke="${w}" stroke-width="2" stroke-linecap="round"/>
+  </g>`;
+}
+let mood = 'idle';
+function drawCat(m){ mood = m || mood; $('cat').innerHTML = catSVG(CATS[D.cat], mood); }
+
+/* ===== 言葉 ===== */
+const UI = {
+  ja:{ title:'猫じゃんけん', mTitle:'ジャンケン ニャン', wallet:'メダル', unit:'枚', cat:'相手の猫', hist:'これまでの勝負', coin:['メダルを入れる','Enter'], buy:'メダルを買う（10円で…というつもりで 20 枚）',
+    hands:['グー','チョキ','パー'], age:a => a ? '🕰 年季入り' : '✨ 新品',
+    stats:() => `遊んだ回数 ${D.plays} ／ 勝ち ${D.wins} あいこ ${D.draws} 負け ${D.loses}<br>出てきたメダル ${D.out} 枚 ／ 一度の最高 ${D.best} 枚<br>連勝の記録 ${D.bestStreak}`,
+    hint:'メダルを 1 枚入れて、グー・チョキ・パーのどれかを押します。勝つと周りのランプが回って、止まった数字の枚数のメダルが出てきます。あいこならもう一回。三匹の猫には、それぞれ癖があります。',
+    ins:'メダルを入れてニャ', jan:'じゃん…けん…', pon:'ぽん！', aiko:'あいこで…', sho:'しょ！', win:'まけたニャ〜', lose:'ボクの勝ちニャ！', fever:'フィーバー！',
+    got:n => `メダル ${n} 枚！`, noM:'メダルがありません', say:{ hello:['いらっしゃいニャ','勝負するニャ？'], streak:n => `${n} 連勝！`} },
+  en:{ title:'Cat Jan-Ken', mTitle:'JAN-KEN NYAN', wallet:'MEDALS', unit:'', cat:'OPPONENT', hist:'HISTORY', coin:['Insert a medal','Enter'], buy:'Buy medals (20)',
+    hands:['Rock','Scissors','Paper'], age:a => a ? '🕰 Well-worn' : '✨ Brand new',
+    stats:() => `Plays ${D.plays} / W ${D.wins} D ${D.draws} L ${D.loses}<br>Medals paid ${D.out} / Best ${D.best}<br>Best streak ${D.bestStreak}`,
+    hint:'Insert a medal, then press Rock, Scissors or Paper. Win and the lamps spin around the ring — you get as many medals as the number it stops on. A draw means play again for free. Each cat has its own habit.',
+    ins:'Insert a medal, nya', jan:'Jan… ken…', pon:'PON!', aiko:'Aiko de…', sho:'SHO!', win:'You got me, nya~', lose:'I win, nya!', fever:'FEVER!',
+    got:n => `${n} medal${n > 1 ? 's' : ''}!`, noM:'No medals left', say:{ hello:['Welcome, nya','Ready to play?'], streak:n => `${n} wins in a row!` } }
+};
+const T = k => UI[D.lang][k];
+const L = () => D.lang === 'ja';
+
+/* ===== 音 ===== */
+let AC = null, master = null;
+function ac(){ try { if (!AC){ AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .8; master.connect(AC.destination); } if (AC.state === 'suspended') AC.resume(); } catch(e){} return AC; }
+function tone(f, t, d, v, type = 'square', f2){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .03); }
+function sfx(k, x = 0){
+  if (!D.sound || !AC) return;
+  try { const t = AC.currentTime;
+    if (k === 'coin'){ tone(2600, t, .08, .03, 'triangle'); tone(3900, t + .02, .2, .02, 'sine'); tone(140, t + .12, .2, .05, 'sine', 70); }
+    else if (k === 'btn'){ tone(500, t, .05, .04, 'square'); }
+    else if (k === 'jan'){ tone(660, t, .12, .035); }
+    else if (k === 'ken'){ tone(784, t, .12, .035); }
+    else if (k === 'pon'){ tone(1047, t, .22, .045); }
+    else if (k === 'tick'){ tone(1200 + x * 30, t, .03, .025, 'square'); }
+    else if (k === 'stop'){ tone(1568, t, .3, .04, 'triangle'); tone(2093, t + .08, .4, .03, 'triangle'); }
+    else if (k === 'win'){ [784, 988, 1175, 1568].forEach((f, i) => tone(f, t + i * .08, .16, .035)); }
+    else if (k === 'big'){ [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, t + i * .08, .2, .035)); }
+    else if (k === 'lose'){ [392, 330, 262].forEach((f, i) => tone(f, t + i * .14, .2, .035, 'triangle')); }
+    else if (k === 'medal'){ tone(2400 + Math.random() * 600, t, .05, .02, 'triangle'); tone(180, t, .05, .03, 'sine'); }
+    else if (k === 'meow'){ tone(720, t, .35, .05, 'sawtooth', 430); tone(1080, t + .03, .3, .015, 'triangle', 640); }
+  } catch(e){}
+}
+function speak(s){ if (!D.voice || !D.sound || !window.speechSynthesis) return; try { const u = new SpeechSynthesisUtterance(s.replace(/[…！!]/g, ' ')); u.lang = L() ? 'ja-JP' : 'en-US'; u.rate = 1.15; u.pitch = 1.5; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+
+/* ===== ランプの輪 ===== */
+const RING = [1,2,1,4,1,2,1,7,1,2,1,20,1,2,1,4];
+const W8 = RING.map(v => ({ 1:10, 2:6, 4:3, 7:1.6, 20:.45 })[v]);
+const lamps = [];
+function buildRing(){
+  const b = $('board'); b.querySelectorAll('.lamp').forEach(e => e.remove()); lamps.length = 0;
+  RING.forEach((v, i) => {
+    const a = i / RING.length * Math.PI * 2 - Math.PI / 2, r = 41.5;
+    const el = document.createElement('div'); el.className = 'lamp' + (v >= 7 ? ' big' : '');
+    el.style.left = (50 + Math.cos(a) * r) + '%'; el.style.top = (50 + Math.sin(a) * r) + '%';
+    el.innerHTML = `<i></i><b>${v}</b>`; b.append(el); lamps.push(el);
+  });
+}
+// 光は点滅ではなく、ふわっと移っていく（残像付き）
+let glowT = null;
+function light(idx, trail = 3){
+  lamps.forEach((l, i) => { const d = (idx - i + RING.length) % RING.length; l.firstChild.style.opacity = d === 0 ? 1 : d <= trail ? (1 - d / (trail + 1)) * .45 : 0; l.style.color = d === 0 ? '#3a1a00' : ''; });
+}
+function idleGlow(){
+  clearInterval(glowT); let k = 0;
+  glowT = setInterval(() => { k = (k + 1) % RING.length; lamps.forEach((l, i) => { const d = (k - i + RING.length) % RING.length; l.firstChild.style.opacity = d < 4 ? (1 - d / 4) * .35 : 0; l.style.color = ''; }); }, 260);
+}
+function weighted(){ const s = W8.reduce((a, b) => a + b, 0); let r = rnd() * s; for (let i = 0; i < W8.length; i++){ r -= W8[i]; if (r < 0) return i; } return 0; }
+async function spinRing(){
+  clearInterval(glowT);
+  const target = weighted(), laps = 3 + Math.floor(rnd() * 2);
+  let pos = Math.floor(rnd() * RING.length);
+  const steps = laps * RING.length + ((target - pos + RING.length) % RING.length);
+  for (let s = 0; s < steps; s++){
+    pos = (pos + 1) % RING.length; light(pos); sfx('tick', RING[pos]);
+    const k = s / steps, rest = steps - s;
+    let ms = 38 + Math.pow(k, 3) * 220;
+    if (rest <= 4) ms += (5 - rest) * 70; // 最後の数個は、じわっと
+    await sleep(ms);
+  }
+  // 最後に 1 つ戻るか進むかの「ためらい」（ときどき）
+  return target;
+}
+
+/* ===== 手の表示 ===== */
+function buildHands(){
+  const h = $('hands'); h.replaceChildren();
+  HANDS.forEach((e, i) => { const d = document.createElement('div'); d.className = 'hl'; d.textContent = e; h.append(d); });
+  const b = $('btns'); b.replaceChildren();
+  HANDS.forEach((e, i) => { const bt = document.createElement('button'); bt.className = 'hb'; bt.id = 'h' + i; bt.innerHTML = `${e}<small>${T('hands')[i]}</small>`; bt.onclick = () => play(i); b.append(bt); });
+}
+function showCatHand(i){ document.querySelectorAll('.hl').forEach((e, k) => e.classList.toggle('on', k === i)); }
+let shuffleT = null;
+function shuffleHands(on){ clearInterval(shuffleT); if (!on) return; let k = 0; shuffleT = setInterval(() => { k = (k + 1) % 3; showCatHand(k); }, 110); }
+
+/* ===== 進行 ===== */
+let phase = 'idle', credit = 0, aikoRound = false, myHist = [], lastCat = -1, lastRes = '';
+function bubble(s){ const b = $('bubble'); b.textContent = s; b.classList.toggle('on', !!s); }
+function setBtns(){
+  const ready = phase === 'ready';
+  for (let i = 0; i < 3; i++){ const b = $('h' + i); b.disabled = !ready; b.classList.toggle('ready', ready); }
+  $('bCoin').disabled = phase !== 'idle' || D.medals < 1;
+  $('bBuy').style.display = phase === 'idle' && D.medals < 1 ? '' : 'none';
+  document.querySelectorAll('#sCat button').forEach(b => b.disabled = phase !== 'idle');
+}
+function insert(){
+  if (phase !== 'idle') return; ac();
+  if (D.medals < 1){ toast(T('noM')); return; }
+  D.medals--; D.plays++; save(); updWallet(); sfx('coin');
+  phase = 'ready'; aikoRound = false; drawCat('idle'); bubble(T('jan')); speak(T('jan')); shuffleHands(true); setBtns();
+}
+function catChoice(me){
+  const c = CATS[D.cat]; let p = c.bias.slice();
+  if (c.sticky && lastRes === 'catLose' && lastCat >= 0){ p = [0, 0, 0]; p[lastCat] = .6; p[(lastCat + 1) % 3] = .2; p[(lastCat + 2) % 3] = .2; }
+  if (c.reader && myHist.length >= 4){
+    // あなたが最近よく出す手に勝つ手を、少しだけ多めに
+    const f = [0, 0, 0]; myHist.slice(-8).forEach(h => f[h]++);
+    const fav = f.indexOf(Math.max(...f)), counter = (fav + 2) % 3;
+    p = [.27, .27, .27]; p[counter] += .19;
+  }
+  const s = p[0] + p[1] + p[2]; let r = rnd() * s;
+  for (let i = 0; i < 3; i++){ r -= p[i]; if (r < 0) return i; } return 2;
+}
+// 0:グー 1:チョキ 2:パー  (a が b に勝つ: (a+1)%3 === b)
+async function play(me){
+  if (phase !== 'ready') return; ac();
+  phase = 'busy'; setBtns(); sfx('btn');
+  const b = $('h' + me); b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 140);
+  myHist.push(me); if (myHist.length > 20) myHist.shift(); D.hands[me]++;
+  const cat = catChoice(me);
+  bubble(aikoRound ? T('sho') : T('pon')); speak(aikoRound ? T('sho') : T('pon')); sfx('pon');
+  shuffleHands(false); showCatHand(cat); drawCat('think');
+  await sleep(650);
+  lastCat = cat;
+  if (me === cat){
+    D.draws++; save(); aikoRound = true; drawCat('idle');
+    bubble(T('aiko')); speak(T('aiko')); sfx('jan');
+    await sleep(500); shuffleHands(true); phase = 'ready'; setBtns(); pushHist('🤝', false); updWallet(); return;
+  }
+  const win = (me + 1) % 3 === cat;
+  if (!win){
+    D.loses++; D.streak = 0; lastRes = 'catWin'; save();
+    drawCat('win'); bubble(T('lose')); speak(T('lose')); sfx('lose'); pushHist('😿', false);
+    await sleep(1300); end(); return;
+  }
+  D.wins++; D.streak++; D.bestStreak = Math.max(D.bestStreak, D.streak); lastRes = 'catLose'; save();
+  drawCat('lose'); bubble(T('win')); speak(T('win')); sfx('win'); sfx('meow');
+  await sleep(700); bubble('');
+  const idx = await spinRing(), n = RING[idx];
+  sfx(n >= 7 ? 'big' : 'stop'); light(idx, 0);
+  if (n >= 7){ bubble(T('fever')); speak(T('fever')); }
+  toast('🪙 ' + T('got')(n) + (D.streak >= 3 ? '  ' + T('say').streak(D.streak) : ''));
+  await payout(n);
+  D.out += n; D.best = Math.max(D.best, n); save(); pushHist(HANDS[me], true, n);
+  await sleep(600); end();
+}
+function end(){ phase = 'idle'; bubble(''); drawCat('idle'); showCatHand(-1); idleGlow(); setBtns(); updWallet(); if (D.medals < 1) setTimeout(() => toast(T('noM')), 400); else bubble(T('ins')); }
+async function payout(n){
+  const tray = $('tray');
+  for (let i = 0; i < n; i++){
+    const m = document.createElement('div'); m.className = 'medal'; m.textContent = 'M';
+    const x = 10 + rnd() * 90, y = 26 + rnd() * 20;
+    m.style.left = x + 'px'; m.style.top = '-24px'; tray.append(m);
+    m.animate([{ transform:'translateY(0)' }, { transform:`translateY(${y + 24}px)` }, { transform:`translateY(${y + 18}px)` }, { transform:`translateY(${y + 24}px)` }], { duration:420, easing:'ease-in', fill:'forwards' });
+    while (tray.children.length > 30) tray.firstChild.remove();
+    D.medals++; updWallet(); sfx('medal');
+    await sleep(n > 7 ? 70 : 140);
+  }
+}
+
+/* ===== 画面 ===== */
+let shown = D.medals;
+function updWallet(){ $('wallet').textContent = D.medals; $('stats').innerHTML = T('stats')(); setBtns(); }
+function pushHist(icon, w, n){ D.hist.push((w ? 'w' : '') + '|' + icon + '|' + (n || '')); if (D.hist.length > 24) D.hist = D.hist.slice(-24); save(); renderHist(); }
+function renderHist(){ const h = $('hist'); h.replaceChildren(); D.hist.slice(-24).reverse().forEach(s => { const [w, ic, n] = s.split('|'); const e = document.createElement('span'); if (w) e.className = 'w'; e.textContent = ic; if (n) e.title = n; h.append(e); }); }
+function renderCats(){
+  const box = $('sCat'); box.replaceChildren();
+  CATS.forEach((c, i) => { const b = document.createElement('button'); b.className = D.cat === i ? 'on' : ''; b.innerHTML = `${['🐈‍⬛','🐈','🐱'][i]} ${L() ? c.ja : c.en}<small>${c.trait[D.lang]}</small>`; b.onclick = () => { if (phase !== 'idle') return; ac(); D.cat = i; myHist = []; lastRes = ''; save(); renderCats(); drawCat('idle'); sfx('meow'); }; box.append(b); });
+}
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.classList.toggle('aged', !!D.aged);
+  $('bT').textContent = T('title'); $('mTitle').textContent = T('mTitle');
+  $('tLang').textContent = L() ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇';
+  $('tVoice').textContent = D.voice ? '🗣 ON' : '🗣 OFF';
+  $('tAge').textContent = T('age')(D.aged); $('tAge').classList.toggle('on', !!D.aged);
+  $('hWallet').textContent = T('wallet'); $('wUnit').textContent = T('unit'); $('hCat').textContent = T('cat'); $('hHist').textContent = T('hist'); $('hint').textContent = T('hint');
+  $('bCoin').innerHTML = T('coin')[0] + `<small>${T('coin')[1]}</small>`; $('bBuy').textContent = T('buy');
+  buildHands(); renderCats(); renderHist(); updWallet(); drawCat();
+  if (phase === 'idle') bubble(T('ins'));
+}
+$('bCoin').onclick = insert;
+$('bBuy').onclick = () => { ac(); D.medals += 20; D.buys++; save(); sfx('coin'); updWallet(); bubble(T('ins')); };
+$('tLang').onclick = () => { D.lang = L() ? 'en' : 'ja'; save(); apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; ac(); save(); apply(); };
+$('tVoice').onclick = () => { D.voice = !D.voice; save(); apply(); };
+$('tAge').onclick = () => { D.aged = !D.aged; save(); apply(); };
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase(); kb.push(k); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; D.medals += 30; save(); updWallet(); sfx('big'); toast(L() ? '🐾 三匹から、こっそり 30 枚の差し入れ' : '🐾 The cats slipped you 30 medals'); return; }
+  if (kb.slice(-3).join('') === 'neo'){ document.querySelectorAll('.lamp i').forEach(i => i.style.background = 'radial-gradient(circle at 40% 35%,#eaffe0,#39ff14 55%,#0a7a00)'); toast('🟩 Wake up, Neo…'); return; }
+  if (e.repeat) return;
+  if (k === 'enter'){ e.preventDefault(); insert(); }
+  else if (k === '1' || k === 'g'){ play(0); }
+  else if (k === '2' || k === 'c'){ play(1); }
+  else if (k === '3' || k === 'p'){ play(2); }
+});
+
+buildRing(); apply(); idleGlow(); setBtns();
+setTimeout(() => { if (phase === 'idle') { bubble(pick(T('say').hello)); setTimeout(() => { if (phase === 'idle') bubble(T('ins')); }, 1800); } }, 500);
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — HIGH & LOW v4</title>
+<style>
+:root{--g:#39ff14;--c:#00d4ff;--gold:#ffd25a;--hi:#ffd25a;--lo:#4a9aff;--red:#ff4d5e;--bg:#0a0a1e;--E:cubic-bezier(.22,1,.36,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:#dfe8ef;font-family:'Segoe UI',system-ui,sans-serif;min-height:100%;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,#14224a 0%,#0a0a1e 55%,#05050f 100%)}
+header{position:relative;z-index:5;display:flex;align-items:center;gap:7px;padding:12px 20px;border-bottom:1px solid #39ff1422;flex-wrap:wrap;background:#0006}
+.brand{margin-right:auto;display:flex;align-items:baseline;gap:10px}
+.brand b{font:bold 19px 'Courier New',monospace;letter-spacing:5px;color:var(--g);text-shadow:0 0 10px #39ff1488}
+.brand span{font:11px 'Courier New',monospace;letter-spacing:3px;opacity:.6}
+.tg{background:#000a;color:#bfe9c4;border:1px solid #39ff1440;border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--g);color:var(--g)}
+.tg.on{background:#39ff141c;border-color:var(--g);color:var(--g);box-shadow:0 0 8px #39ff1440}
+.wrap{position:relative;z-index:2;max-width:1000px;margin:0 auto;padding:14px 16px 30px}
+
+/* table */
+.felt{position:relative;border-radius:26px;border:12px solid #3d2614;padding:22px 24px 18px;min-height:470px;
+  background:radial-gradient(ellipse at 50% 45%,#1a6b3c 0%,#11502b 55%,#0a3119 100%);box-shadow:0 0 60px #000c,inset 0 0 50px #0007}
+.felt::before{content:'';position:absolute;inset:10px;border:1px solid #ffd25a22;border-radius:16px;pointer-events:none}
+.flabel{position:absolute;top:12px;left:50%;transform:translateX(-50%);font:11px Georgia,serif;letter-spacing:7px;color:#ffd25a55;white-space:nowrap}
+.deckBox{position:absolute;top:30px;left:28px;width:96px}
+.deck{position:relative;width:84px;height:118px}
+.deck i{position:absolute;inset:0;border-radius:8px;background:var(--back);border:2px solid #ffffff30;box-shadow:0 2px 3px #0007}
+.deckN{font:bold 12px 'Courier New',monospace;color:#fff;margin-top:8px;letter-spacing:1px}
+.meter{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;background:#0005;width:84px}
+.meter b{display:block;height:100%;transition:width .6s var(--E)}
+.meter .mh{background:var(--hi)}.meter .mt{background:#ffffff66}.meter .ml{background:var(--lo)}
+.mlab{font:10px 'Courier New',monospace;opacity:.6;margin-top:3px}
+.potBox{position:absolute;top:30px;right:28px;text-align:right}
+.potBox small{font:10px 'Courier New',monospace;letter-spacing:3px;opacity:.65;display:block}
+.pot{font:bold 30px 'Courier New',monospace;color:var(--gold);text-shadow:0 0 14px #ffd25a55;transition:transform .5s var(--E)}
+.pot.bump{animation:bump .6s var(--E)}
+@keyframes bump{30%{transform:scale(1.18)}100%{transform:none}}
+.chainTxt{font:bold 13px 'Courier New',monospace;color:var(--c);min-height:18px;margin-top:4px;letter-spacing:1px}
+.ladder{display:flex;gap:4px;justify-content:flex-end;margin-top:6px}
+.ladder i{width:12px;height:12px;border-radius:3px;border:1px solid #00d4ff55;transition:all .5s var(--E)}
+.ladder i.on{background:var(--c);box-shadow:0 0 8px #00d4ff88}
+
+.cardsRow{display:flex;justify-content:center;align-items:center;gap:40px;margin-top:62px}
+.slot{position:relative;width:128px;height:180px;border-radius:12px;border:2px dashed #ffffff22}
+.slotL{position:absolute;bottom:-24px;left:0;right:0;text-align:center;font:11px 'Courier New',monospace;letter-spacing:3px;opacity:.6}
+.vs{font:bold 26px 'Courier New',monospace;color:var(--g);text-shadow:0 0 12px #39ff1477;width:60px;text-align:center}
+.trail{display:flex;justify-content:center;gap:0;min-height:62px;margin-top:40px}
+.tc{width:42px;height:58px;border-radius:5px;background:#fbfaf5;border:1px solid #ccc;margin-left:-14px;box-shadow:-2px 2px 5px #0007;display:flex;align-items:center;justify-content:center;font:bold 14px Georgia,serif;animation:tcIn .6s var(--E)}
+.tc:first-child{margin-left:0}
+.tc.red{color:#c41e3a}.tc.black{color:#1a1a1a}
+.tc em{font-style:normal;font-size:10px;margin-left:1px}
+@keyframes tcIn{from{opacity:0;transform:translateY(-20px) scale(.8)}to{opacity:1;transform:none}}
+
+/* card */
+.card{position:absolute;inset:0;perspective:900px}
+.ci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,.2,.2,1)}
+.card.down .ci{transform:rotateY(180deg)}
+.card.slow .ci{transition-duration:1.25s}
+.cf,.cb{position:absolute;inset:0;border-radius:11px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cf{background:linear-gradient(135deg,#fff,#f3f1ea);border:1px solid #ddd;box-shadow:-3px 5px 14px #0008;display:flex;align-items:center;justify-content:center}
+.cb{transform:rotateY(180deg);background:var(--back);border:2px solid #ffffff40;box-shadow:-3px 5px 14px #0008;display:flex;align-items:center;justify-content:center;font-size:26px}
+.cb::before{content:'';position:absolute;inset:8px;border:1px solid #ffffff30;border-radius:6px}
+.card.red .cf{color:#c41e3a}.card.black .cf{color:#1a1a1a}
+.tl,.br{position:absolute;font:bold 19px Georgia,serif;line-height:1;text-align:center}
+.tl{top:8px;left:9px}.br{bottom:8px;right:9px;transform:rotate(180deg)}
+.pip{font-size:54px}
+.face{font:bold 50px Georgia,serif;display:flex;flex-direction:column;align-items:center;line-height:.95;border:1.5px solid currentColor;border-radius:6px;padding:10px 14px}
+.face i{font-style:normal;font-size:24px}
+.card.win .cf{box-shadow:0 0 0 3px var(--gold),0 0 26px #ffd25a88}
+.card.lose .cf{box-shadow:0 0 0 3px var(--red),0 0 20px #ff4d5e66}
+.card.push .cf{box-shadow:0 0 0 3px var(--c),0 0 20px #00d4ff66}
+
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-30%) scale(.9);opacity:0;padding:10px 30px;border-radius:14px;background:#000d;border:1px solid;text-align:center;pointer-events:none;transition:opacity .5s,transform .7s var(--E);z-index:10;min-width:240px}
+.banner.show{opacity:1;transform:translate(-50%,-30%) scale(1)}
+.banner b{display:block;font:bold 30px Georgia,serif;letter-spacing:3px}
+.banner span{display:block;font:bold 15px 'Courier New',monospace;margin-top:2px}
+.banner.win{color:var(--gold);border-color:#ffd25aaa}.banner.lose{color:var(--red);border-color:#ff4d5e88}.banner.push{color:var(--c);border-color:#00d4ff88}
+
+/* controls */
+.controls{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-top:16px}
+@media(max-width:820px){.controls{grid-template-columns:1fr}.cardsRow{gap:16px}.vs{width:30px}}
+.rack{display:flex;gap:8px;align-items:center}
+.chip{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 12px 'Segoe UI',sans-serif;color:#fff;border:4px dashed #ffffff88;box-shadow:0 3px 10px #0009;cursor:pointer;transition:transform .2s var(--E),opacity .3s;user-select:none;text-shadow:0 1px 2px #000}
+.chip:hover{transform:translateY(-4px)}
+.chip.off{opacity:.25;pointer-events:none}
+.c10{background:radial-gradient(circle,#2c8be0 55%,#1a5d9c 56%)}
+.c50{background:radial-gradient(circle,#e74c3c 55%,#a5281b 56%)}
+.c100{background:radial-gradient(circle,#2c2c2c 55%,#0d0d0d 56%)}
+.c500{background:radial-gradient(circle,#8e44ad 55%,#5b2c6f 56%)}
+.bank{display:flex;flex-direction:column;margin-left:6px}
+.bank small{font:9px 'Courier New',monospace;letter-spacing:3px;opacity:.6}
+.bank b{font:bold 20px 'Courier New',monospace;color:var(--gold)}
+.bank em{font:12px 'Courier New',monospace;font-style:normal;color:#fff;opacity:.8}
+.acts{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;min-height:62px;align-items:center}
+.btn{border:2px solid;background:#000;border-radius:26px;padding:10px 20px;font:bold 15px 'Courier New',monospace;letter-spacing:2px;cursor:pointer;color:#fff;transition:all .3s var(--E);display:flex;flex-direction:column;align-items:center;line-height:1.15;min-width:118px}
+.btn small{font:11px 'Courier New',monospace;letter-spacing:0;opacity:.85;margin-top:3px}
+.btn:hover:not(:disabled){transform:translateY(-3px)}
+.btn:disabled{opacity:.25;cursor:not-allowed}
+.btn.hide{display:none}
+.b-hi{border-color:var(--hi);color:var(--hi)}.b-hi:hover:not(:disabled){box-shadow:0 0 18px #ffd25a55}
+.b-lo{border-color:var(--lo);color:var(--lo)}.b-lo:hover:not(:disabled){box-shadow:0 0 18px #4a9aff55}
+.b-g{border-color:var(--g);color:var(--g)}.b-g:hover:not(:disabled){box-shadow:0 0 18px #39ff1455}
+.b-c{border-color:var(--c);color:var(--c)}
+.b-x{border-color:#666;color:#bbb;min-width:auto;padding:8px 14px;font-size:12px}
+.btn.rec{box-shadow:0 0 0 2px #fff4,0 0 16px currentColor}
+.side{font:12px 'Courier New',monospace;line-height:1.8;text-align:right;color:#cfd8df}
+#msg{min-height:20px}
+.hint{text-align:center;font:11px 'Courier New',monospace;opacity:.5;margin-top:14px;letter-spacing:1px}
+
+/* modal / toast */
+.modal{position:fixed;inset:0;z-index:40;background:#000c;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal.show{opacity:1;pointer-events:auto}
+.mbox{width:min(620px,94vw);max-height:90vh;overflow:auto;background:#060d14;border:1px solid var(--g);border-radius:14px;padding:22px 24px;box-shadow:0 0 40px #39ff1433;transform:translateY(12px);transition:transform .6s var(--E)}
+.modal.show .mbox{transform:none}
+.mbox h2{font:bold 15px 'Courier New',monospace;letter-spacing:5px;color:var(--g);margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{border:1px solid #39ff1430;border-radius:10px;padding:10px 6px;text-align:center}
+.kpi b{display:block;font:bold 19px 'Courier New',monospace;color:#fff}
+.kpi span{font-size:10px;letter-spacing:1px;opacity:.65}
+#graph{width:100%;height:170px;display:block;margin-top:14px}
+#graph .ln{fill:none;stroke:var(--g);stroke-width:1.8;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#graph text{fill:#ffffff77;font:10px 'Courier New',monospace}
+.achs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}
+.ach{font-size:12px;border:1px solid #39ff1422;border-radius:8px;padding:6px 9px;opacity:.35;filter:grayscale(1)}
+.ach.got{opacity:1;filter:none;border-color:#39ff1477}
+.note{font-size:11px;opacity:.6;line-height:1.7;margin-top:10px}
+.mrow{display:flex;justify-content:space-between;margin-top:18px}
+.toasts{position:fixed;right:16px;top:64px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#050c18ee;border:1px solid var(--g);border-radius:12px;padding:9px 14px;font:13px 'Courier New',monospace;box-shadow:0 0 16px #39ff1433;animation:tin .6s var(--E) both;max-width:320px}
+.toast.out{animation:tout .5s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateX(30px)}}
+.fchip{position:fixed;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:3px dashed #fff9;z-index:30;pointer-events:none;box-shadow:0 3px 8px #000a}
+</style>
+</head>
+<body style="--back:linear-gradient(135deg,#1a1a6e,#0d0d3d 50%,#1a1a6e)">
+<header>
+  <div class="brand"><b>MERIDIPLAY</b><span>HIGH &amp; LOW · v4</span></div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tOdds"></button>
+  <button class="tg" id="tStats">📊</button>
+</header>
+
+<div class="wrap">
+  <div class="felt" id="felt">
+    <div class="flabel">MERIDIPLAY · HIGH &amp; LOW</div>
+    <div class="deckBox">
+      <div class="deck" id="deck"><i style="top:4px;left:4px"></i><i style="top:2px;left:2px"></i><i></i></div>
+      <div class="deckN" id="deckN"></div>
+      <div class="meter" id="meter"><b class="mh" id="mh"></b><b class="mt" id="mt"></b><b class="ml" id="ml"></b></div>
+      <div class="mlab" id="mlab"></div>
+    </div>
+    <div class="potBox"><small id="potL">POT</small><div class="pot" id="pot">0</div><div class="chainTxt" id="chainTxt"></div><div class="ladder" id="ladder"></div></div>
+    <div class="cardsRow">
+      <div class="slot" id="slotB"><div class="slotL" id="lB"></div></div>
+      <div class="vs" id="vs">VS</div>
+      <div class="slot" id="slotN"><div class="slotL" id="lN"></div></div>
+    </div>
+    <div class="trail" id="trail"></div>
+    <div class="banner" id="banner"><b></b><span></span></div>
+  </div>
+
+  <div class="controls">
+    <div class="rack">
+      <div class="chip c10" data-v="10">10</div><div class="chip c50" data-v="50">50</div>
+      <div class="chip c100" data-v="100">100</div><div class="chip c500" data-v="500">500</div>
+      <div class="bank"><small>BANK</small><b id="bank">1,000</b><em id="betE"></em></div>
+    </div>
+    <div class="acts">
+      <button class="btn b-x" id="bClear"></button>
+      <button class="btn b-g" id="bDeal"></button>
+      <button class="btn b-hi" id="bHi"></button>
+      <button class="btn b-lo" id="bLo"></button>
+      <button class="btn b-g" id="bCont"></button>
+      <button class="btn b-c" id="bTake"></button>
+      <button class="btn b-c" id="bNew"></button>
+    </div>
+    <div class="side"><div id="msg"></div><div id="sub"></div></div>
+  </div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox">
+  <h2 id="mT"></h2>
+  <div class="kpis" id="kpis"></div>
+  <svg id="graph" viewBox="0 0 560 170"></svg>
+  <div class="note" id="note"></div>
+  <div class="achs" id="achs"></div>
+  <div class="mrow"><button class="tg" id="mReset"></button><button class="tg on" id="mClose">OK</button></div>
+</div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const H = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+function rnd(){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+const ri = n => Math.floor(rnd() * n);
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const fmt = n => Math.floor(n).toLocaleString();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const EASE = 'cubic-bezier(.22,1,.36,1)';
+
+/* ================= SAVE ================= */
+const LS = 'meridiplay_hilo_v4', START = 1000, EDGE = .95, MAXCHAIN = 10;
+const freshStats = () => ({ rounds: 0, guesses: 0, right: 0, wrong: 0, push: 0, bestChain: 0, bestPot: 0, collected: 0, busts: 0 });
+let D = { lang: 'ja', sound: true, odds: true, bank: START, lastBet: 50, stats: freshStats(), hist: [START], ach: {}, back: 'navy' };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s){ D = Object.assign(D, s); D.stats = Object.assign(freshStats(), s.stats || {}); } } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+
+/* ================= I18N ================= */
+const UI = {
+  ja: {
+    deal:['DEAL','配る'], hi:'▲ HIGH', lo:'▼ LOW', cont:['NEXT ▶','続ける'], take:['COLLECT','受け取る'], clear:'クリア', newG:['NEW GAME','1,000 から再開'],
+    odds:v=>'🎯 確率表示 '+(v?'ON':'OFF'), deckN:n=>`山札 残り ${n} 枚`, mlab:'高 · 同 · 低', pot:'POT（賭け金）', base:'あなたのカード', next:'次のカード',
+    chain:n=>`🔗 ${n} 連続正解`, bet:n=>`BET ${fmt(n)}`,
+    mBet:'チップでベット → DEAL（Space）', mGuess:'次のカードは高い？低い？（H / L）', mWon:'続けて倍率を重ねるか、受け取るか（Space / C）', mBroke:'チップがなくなりました',
+    win:'WIN', lose:'LOSE', push:'SAME', winS:m=>`×${m} → POT ${fmt(cur.pot)}`, pushS:'同じ数字：POT はそのまま', loseS:n=>`−${fmt(n)}`, took:n=>`+${fmt(n)} 受け取り`,
+    shuffle:'🔀 山札をシャッフルしました', maxC:'🏁 10 連続達成！自動で受け取ります', noP:'可能性 0%',
+    hint:'Space＝配る／続ける ・ H＝HIGH ・ L＝LOW ・ C＝受け取る ・ 1〜4＝チップ ・ X＝クリア ・ S＝記録',
+    mT:'📊 HIGH & LOW 記録', k:['ラウンド','予想回数','正解率','引き分け','最長連続','最大 POT','受け取り','バースト'],
+    note:'倍率は「山札に残っているカード」から計算した本当の確率（に 5% の手数料）で決まります。山札の残りを読むほど有利な判断ができます。',
+    reset:'⟲ 記録とチップをリセット', confirm:'記録とチップをリセットしますか？', achGot:'実績解除：',
+    ach:{first:'🃏 初めての正解',c3:'🔗 3 連続',c5:'🔥 5 連続',c10:'🌋 10 連続（最大）',pot1k:'💰 POT 1,000',pot10k:'💎 POT 10,000',edge:'🧠 確率 30% 未満を的中',bigbet:'🎲 500 ベット',bank5k:'👑 手持ち 5,000',gold:'✨ 黄金のカード',neo:'🟩 There is no card'},
+    gold:'✨ カードの裏が黄金になりました', neo:'🟩 There is no card.'
+  },
+  en: {
+    deal:['DEAL'], hi:'▲ HIGH', lo:'▼ LOW', cont:['NEXT ▶','keep going'], take:['COLLECT','cash out'], clear:'Clear', newG:['NEW GAME','restart at 1,000'],
+    odds:v=>'🎯 Odds '+(v?'ON':'OFF'), deckN:n=>`${n} cards left`, mlab:'high · same · low', pot:'POT', base:'YOUR CARD', next:'NEXT CARD',
+    chain:n=>`🔗 ${n} in a row`, bet:n=>`BET ${fmt(n)}`,
+    mBet:'Place chips, then DEAL (Space)', mGuess:'Will the next card be higher or lower? (H / L)', mWon:'Keep going for a bigger pot, or collect (Space / C)', mBroke:'Out of chips',
+    win:'WIN', lose:'LOSE', push:'SAME', winS:m=>`×${m} → POT ${fmt(cur.pot)}`, pushS:'Same rank: pot stays', loseS:n=>`−${fmt(n)}`, took:n=>`+${fmt(n)} collected`,
+    shuffle:'🔀 Deck reshuffled', maxC:'🏁 10 in a row! Auto-collected', noP:'0% chance',
+    hint:'Space = deal / next · H = high · L = low · C = collect · 1-4 = chips · X = clear · S = records',
+    mT:'📊 HIGH & LOW RECORDS', k:['Rounds','Guesses','Accuracy','Same rank','Best chain','Best pot','Collected','Busts'],
+    note:'Payouts come from the real odds of the cards left in the deck (minus a 5% house edge). Reading the deck gives you the edge.',
+    reset:'⟲ Reset records & chips', confirm:'Reset records and chips?', achGot:'Achievement: ',
+    ach:{first:'🃏 First correct guess',c3:'🔗 3 in a row',c5:'🔥 5 in a row',c10:'🌋 10 in a row (max)',pot1k:'💰 Pot 1,000',pot10k:'💎 Pot 10,000',edge:'🧠 Hit a <30% guess',bigbet:'🎲 Bet 500',bank5k:'👑 Bank 5,000',gold:'✨ Golden cards',neo:'🟩 There is no card'},
+    gold:'✨ The card backs turned golden', neo:'🟩 There is no card.'
+  }
+};
+const T = (k, ...a) => { const v = UI[D.lang][k]; return typeof v === 'function' ? v(...a) : v; };
+
+/* ================= SOUND ================= */
+let AC = null, master = null;
+function ac(){
+  if (!AC){ AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .85; master.connect(AC.destination); }
+  if (AC.state === 'suspended') AC.resume(); return AC;
+}
+function tone(f, t, d, v, type = 'sine'){ const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05); }
+function noise(t, d, v, type, f){ const len = Math.max(1, Math.floor(AC.sampleRate * d)), b = AC.createBuffer(1, len, AC.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len); const s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = b; fl.type = type; fl.frequency.value = f; g.gain.value = v; s.connect(fl); fl.connect(g); g.connect(master); s.start(t); }
+function sfx(k, n = 0){
+  if (!D.sound) return;
+  try {
+    const t = ac().currentTime;
+    if (k === 'card') noise(t, .07, .14, 'highpass', 2200);
+    else if (k === 'flip') noise(t, .05, .1, 'highpass', 3800);
+    else if (k === 'chip'){ tone(2500, t, .07, .035); tone(3300, t + .025, .08, .025); }
+    else if (k === 'win'){ const base = 523.25 * Math.pow(2, Math.min(n, 9) / 12); [1, 1.25, 1.5].forEach((m, i) => tone(base * m, t + i * .08, .35, .045, 'triangle')); }
+    else if (k === 'lose'){ tone(262, t, .3, .04); tone(196, t + .14, .4, .04); }
+    else if (k === 'push') tone(440, t, .3, .035);
+    else if (k === 'cash') [784, 988, 1175, 1568].forEach((f, i) => tone(f, t + i * .07, .45, .04, 'triangle'));
+    else if (k === 'beat'){ tone(70, t, .18, .25); tone(70, t + .22, .18, .18); }
+    else if (k === 'shuffle') for (let i = 0; i < 12; i++) noise(t + i * .06, .045, .07, 'highpass', 1800 + Math.random() * 1500);
+  } catch(e){}
+}
+
+/* ================= DECK ================= */
+const SUITS = [['♠', 0], ['♥', 1], ['♦', 1], ['♣', 0]], RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let deck = [];
+function buildDeck(){
+  deck = [];
+  for (const [s, red] of SUITS) RANKS.forEach((r, i) => deck.push({ r, s, red: !!red, v: i + 1 }));
+  for (let i = deck.length - 1; i > 0; i--){ const j = ri(i + 1); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+}
+function probs(base){
+  const n = deck.length; if (!n) return { hi: 0, lo: 0, eq: 0 };
+  let hi = 0, lo = 0, eq = 0; deck.forEach(c => c.v > base ? hi++ : c.v < base ? lo++ : eq++);
+  return { hi: hi / n, lo: lo / n, eq: eq / n };
+}
+// 引き分け（同じ数字）は POT 据え置き → 公正倍率は (1 - eq) / p
+const mult = (p, eq) => p <= 0 ? 0 : Math.max(1.01, Math.floor(EDGE * (1 - eq) / p * 100) / 100);
+
+/* ================= CARD DOM ================= */
+function cardEl(c){
+  const d = H('div', 'card down ' + (c.red ? 'red' : 'black'));
+  const face = 'JQK'.includes(c.r) ? `<span class="face">${c.r}<i>${c.s}</i></span>` : `<span class="pip"${c.r === 'A' ? ' style="font-size:70px"' : ''}>${c.s}</span>`;
+  d.innerHTML = `<div class="ci"><div class="cf"><span class="tl">${c.r}<br>${c.s}</span>${face}<span class="br">${c.r}<br>${c.s}</span></div><div class="cb">🐾</div></div>`;
+  return d;
+}
+function centerOf(el){ const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+async function dealTo(slot, c){
+  const el = cardEl(c); el._card = c;
+  [...slot.querySelectorAll('.card')].forEach(x => x.remove());
+  slot.append(el);
+  const [ax, ay] = centerOf($('deck')), [bx, by] = centerOf(el);
+  sfx('card');
+  await el.animate([{ transform: `translate(${ax - bx}px,${ay - by}px) rotate(-14deg) scale(.66)` }, { transform: 'none' }], { duration: 560, easing: EASE }).finished;
+  updDeck();
+  return el;
+}
+async function flip(el, slow){
+  if (slow){ el.classList.add('slow'); sfx('beat'); await sleep(450); }
+  el.classList.remove('down'); sfx('flip');
+  await sleep(slow ? 1300 : 680);
+}
+
+/* ================= STATE ================= */
+let phase = 'bet', bet = 0, busy = false;
+const cur = { base: null, baseEl: null, nextEl: null, pot: 0, chain: 0, start: 0 };
+
+function updDeck(){
+  $('deckN').textContent = T('deckN', deck.length);
+  const p = cur.base ? probs(cur.base.v) : { hi: 0, eq: 0, lo: 0 };
+  const show = D.odds && cur.base && phase === 'guess';
+  $('meter').style.opacity = show ? 1 : .25;
+  $('mh').style.width = (show ? p.hi * 100 : 33) + '%'; $('mt').style.width = (show ? p.eq * 100 : 34) + '%'; $('ml').style.width = (show ? p.lo * 100 : 33) + '%';
+  $('mlab').textContent = T('mlab');
+}
+function updPot(bump){
+  $('pot').textContent = fmt(cur.pot);
+  if (bump){ $('pot').classList.remove('bump'); void $('pot').offsetWidth; $('pot').classList.add('bump'); }
+  $('chainTxt').textContent = cur.chain ? T('chain', cur.chain) : '';
+  const l = $('ladder'); l.replaceChildren();
+  for (let i = 0; i < MAXCHAIN; i++) l.append(H('i', i < cur.chain ? 'on' : ''));
+}
+let shownBank = D.bank, bAnim = null;
+function updBank(){
+  const from = shownBank, to = D.bank, t0 = performance.now();
+  cancelAnimationFrame(bAnim);
+  const st = now => { const k = Math.min(1, (now - t0) / 600); shownBank = from + (to - from) * (1 - Math.pow(1 - k, 3)); $('bank').textContent = fmt(shownBank); if (k < 1) bAnim = requestAnimationFrame(st); };
+  bAnim = requestAnimationFrame(st);
+  $('betE').textContent = phase === 'bet' && bet ? T('bet', bet) : '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('off', phase !== 'bet' || busy || +c.dataset.v > D.bank));
+}
+function btnHTML(el, l, sub){ el.innerHTML = l + (sub ? `<small>${sub}</small>` : ''); }
+function ui(){
+  const show = (id, v) => $(id).classList.toggle('hide', !v);
+  show('bClear', phase === 'bet'); show('bDeal', phase === 'bet' && D.bank + bet >= 10);
+  show('bHi', phase === 'guess'); show('bLo', phase === 'guess');
+  show('bCont', phase === 'won'); show('bTake', phase === 'won');
+  show('bNew', phase === 'bet' && D.bank + bet < 10);
+  btnHTML($('bDeal'), T('deal')[0], T('deal')[1]); btnHTML($('bCont'), T('cont')[0], T('cont')[1]);
+  btnHTML($('bTake'), T('take')[0], phase === 'won' ? '+' + fmt(cur.pot) : T('take')[1]); btnHTML($('bNew'), T('newG')[0], T('newG')[1]);
+  $('bClear').textContent = T('clear');
+  $('bDeal').disabled = busy || (bet < 10 && !(D.lastBet && D.bank >= D.lastBet)); $('bClear').disabled = busy || !bet;
+  $('bCont').disabled = busy || deck.length === 0; $('bTake').disabled = busy;
+  if (phase === 'guess' && cur.base){
+    const p = probs(cur.base.v), mh = mult(p.hi, p.eq), ml = mult(p.lo, p.eq);
+    btnHTML($('bHi'), T('hi'), mh ? `×${mh.toFixed(2)}${D.odds ? ' · ' + Math.round(p.hi * 100) + '%' : ''}` : T('noP'));
+    btnHTML($('bLo'), T('lo'), ml ? `×${ml.toFixed(2)}${D.odds ? ' · ' + Math.round(p.lo * 100) + '%' : ''}` : T('noP'));
+    $('bHi').disabled = busy || !mh; $('bLo').disabled = busy || !ml;
+    $('bHi').classList.toggle('rec', D.odds && p.hi > p.lo); $('bLo').classList.toggle('rec', D.odds && p.lo > p.hi);
+  }
+  $('msg').textContent = phase === 'bet' ? (D.bank + bet < 10 ? T('mBroke') : T('mBet')) : phase === 'guess' ? T('mGuess') : phase === 'won' ? T('mWon') : '';
+  $('potL').textContent = T('pot'); $('lB').textContent = T('base'); $('lN').textContent = T('next');
+  updBank(); updDeck();
+}
+
+/* ================= BET ================= */
+function flyChip(from, to, v, delay = 0){
+  const [ax, ay] = centerOf(from), [bx, by] = centerOf(to), c = H('div', 'fchip c' + v);
+  c.style.left = ax + 'px'; c.style.top = ay + 'px'; document.body.append(c);
+  c.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${(bx - ax) / 2}px,${(by - ay) / 2 - 50}px)`, opacity: 1 }, { transform: `translate(${bx - ax}px,${by - ay}px) scale(.8)`, opacity: .8 }],
+    { duration: 520, delay, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'both' }).finished.then(() => { c.remove(); sfx('chip'); });
+}
+function decomp(n){ const out = []; for (const d of [500, 100, 50, 10]) while (n >= d && out.length < 8){ out.push(d); n -= d; } return out.length ? out : [10]; }
+function addChip(v, el){
+  if (phase !== 'bet' || busy || D.bank < v) return;
+  D.bank -= v; bet += v; if (bet >= 500) unlock('bigbet');
+  flyChip(el, $('pot'), v); cur.pot = bet; updPot(false); ui();
+}
+function clearBet(){ if (phase !== 'bet' || busy || !bet) return; D.bank += bet; bet = 0; cur.pot = 0; updPot(false); ui(); }
+
+/* ================= FLOW ================= */
+function banner(t, s, cls){ const b = $('banner'); b.className = 'banner ' + cls; b.querySelector('b').textContent = t; b.querySelector('span').textContent = s; requestAnimationFrame(() => b.classList.add('show')); }
+function hideBanner(){ $('banner').classList.remove('show'); }
+async function startRound(){
+  if (phase !== 'bet' || busy) return;
+  if (bet < 10){ if (D.lastBet && D.bank >= D.lastBet){ D.bank -= D.lastBet; bet = D.lastBet; decomp(bet).forEach((v, i) => flyChip($('bank'), $('pot'), v, i * 60)); } else return; }
+  try { ac(); } catch(e){}
+  busy = true; hideBanner(); D.lastBet = bet;
+  cur.pot = bet; cur.start = bet; cur.chain = 0; bet = 0; D.stats.rounds++;
+  $('trail').replaceChildren(); [...document.querySelectorAll('.slot .card')].forEach(x => x.remove());
+  phase = 'deal'; ui(); updPot(false);
+  if (deck.length < 6){ buildDeck(); toast(T('shuffle')); sfx('shuffle'); await sleep(600); }
+  cur.base = deck.pop(); cur.baseEl = await dealTo($('slotB'), cur.base);
+  await flip(cur.baseEl);
+  phase = 'guess'; busy = false; ui(); save();
+}
+async function guess(dir){
+  if (phase !== 'guess' || busy) return;
+  const p = probs(cur.base.v), pr = dir === 'hi' ? p.hi : p.lo, m = mult(pr, p.eq);
+  if (!m) return;
+  busy = true; phase = 'reveal'; ui();
+  const nx = deck.pop(); D.stats.guesses++;
+  cur.nextEl = await dealTo($('slotN'), nx);
+  await flip(cur.nextEl, cur.pot >= cur.start * 4 || cur.chain >= 4);
+  const ok = dir === 'hi' ? nx.v > cur.base.v : nx.v < cur.base.v, same = nx.v === cur.base.v;
+  if (same){
+    D.stats.push++; cur.nextEl.classList.add('push'); sfx('push');
+    banner(T('push'), T('pushS'), 'push');
+    cur.base = nx; phase = 'won';
+  } else if (ok){
+    D.stats.right++; cur.chain++; cur.pot = Math.floor(cur.pot * m);
+    cur.nextEl.classList.add('win'); sfx('win', cur.chain);
+    banner(T('win'), T('winS', m.toFixed(2)), 'win'); updPot(true);
+    unlock('first'); if (cur.chain >= 3) unlock('c3'); if (cur.chain >= 5) unlock('c5'); if (cur.chain >= 10) unlock('c10');
+    if (pr < .3) unlock('edge'); if (cur.pot >= 1000) unlock('pot1k'); if (cur.pot >= 10000) unlock('pot10k');
+    D.stats.bestChain = Math.max(D.stats.bestChain, cur.chain); D.stats.bestPot = Math.max(D.stats.bestPot, cur.pot);
+    cur.base = nx; phase = 'won';
+    if (cur.chain >= MAXCHAIN || deck.length === 0){ busy = false; toast(T('maxC')); await sleep(900); return collect(); }
+  } else {
+    D.stats.wrong++; D.stats.busts++; cur.nextEl.classList.add('lose'); sfx('lose');
+    banner(T('lose'), T('loseS', cur.pot), 'lose');
+    cur.pot = 0; cur.chain = 0; updPot(false);
+    D.hist.push(D.bank); if (D.hist.length > 400) D.hist.shift();
+    phase = 'bet'; bet = 0;
+  }
+  busy = false; ui(); save();
+}
+async function next(){
+  if (phase !== 'won' || busy) return;
+  busy = true; hideBanner(); ui();
+  const old = cur.baseEl;
+  addTrail(old._card);
+  old.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(90px) scale(.4)', opacity: 0 }], { duration: 420, easing: EASE, fill: 'forwards' });
+  await sleep(300); old.remove();
+  // 次のカードをベース位置へスライド
+  const el = cur.nextEl, [ax, ay] = centerOf(el);
+  el.classList.remove('win', 'push');
+  $('slotB').append(el);
+  const [bx, by] = centerOf(el);
+  sfx('card');
+  await el.animate([{ transform: `translate(${ax - bx}px,${ay - by}px)` }, { transform: 'none' }], { duration: 520, easing: EASE }).finished;
+  cur.baseEl = el; cur.nextEl = null;
+  phase = 'guess'; busy = false; ui();
+}
+function addTrail(c){ if (!c) return; const t = H('div', 'tc ' + (c.red ? 'red' : 'black')); t.innerHTML = `${c.r}<em>${c.s}</em>`; $('trail').append(t); }
+async function collect(){
+  if (phase !== 'won' || busy) return;
+  busy = true; hideBanner();
+  const amt = cur.pot; D.bank += amt; D.stats.collected++;
+  decomp(amt).forEach((v, i) => flyChip($('pot'), $('bank'), v, i * 70));
+  sfx('cash'); banner(T('take')[0], T('took', amt), 'win');
+  if (D.bank >= 5000) unlock('bank5k');
+  cur.pot = 0; cur.chain = 0; updPot(false);
+  D.hist.push(D.bank); if (D.hist.length > 400) D.hist.shift();
+  phase = 'bet'; bet = 0; busy = false; ui(); save();
+}
+
+
+/* ================= TOAST / ACH ================= */
+function toast(m){ const t = H('div', 'toast', m); $('toasts').append(t); setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 550); }, 3200); }
+function unlock(k){ if (D.ach[k]) return; D.ach[k] = Date.now(); save(); toast(T('achGot') + T('ach')[k]); }
+
+/* ================= STATS ================= */
+function openStats(){
+  const s = D.stats, acc = s.right + s.wrong ? (s.right / (s.right + s.wrong) * 100).toFixed(1) + '%' : '—';
+  $('mT').textContent = T('mT'); const k = T('k');
+  $('kpis').innerHTML = [[k[0], s.rounds], [k[1], s.guesses], [k[2], acc], [k[3], s.push], [k[4], s.bestChain], [k[5], fmt(s.bestPot)], [k[6], s.collected], [k[7], s.busts]]
+    .map(([a, b]) => `<div class="kpi"><b>${b}</b><span>${a}</span></div>`).join('');
+  const svg = $('graph'), NS = 'http://www.w3.org/2000/svg', E = (t, a, x) => { const e = document.createElementNS(NS, t); for (const q in a) e.setAttribute(q, a[q]); if (x != null) e.textContent = x; return e; };
+  svg.replaceChildren(); const h = D.hist;
+  if (h.length > 1){
+    const mn = Math.min(...h, 0), mx = Math.max(...h, START) * 1.05, X = i => 44 + 506 * i / (h.length - 1), Y = v => 156 - 146 * (v - mn) / (mx - mn || 1);
+    [mn, (mn + mx) / 2, mx].forEach(v => { svg.append(E('line', { x1: 44, x2: 550, y1: Y(v), y2: Y(v), stroke: '#39ff1418' })); svg.append(E('text', { x: 40, y: Y(v) + 3, 'text-anchor': 'end' }, fmt(v))); });
+    svg.append(E('line', { x1: 44, x2: 550, y1: Y(START), y2: Y(START), stroke: '#ffd25a66', 'stroke-dasharray': '4 4' }));
+    svg.append(E('polyline', { points: h.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' '), class: 'ln', pathLength: 1 }));
+  } else svg.append(E('text', { x: 280, y: 85, 'text-anchor': 'middle' }, '—'));
+  $('note').textContent = T('note');
+  const a = $('achs'); a.replaceChildren();
+  Object.entries(T('ach')).forEach(([key, nm]) => a.append(H('div', 'ach' + (D.ach[key] ? ' got' : ''), D.ach[key] || !['gold', 'neo'].includes(key) ? nm : '❔ ???')));
+  $('mReset').textContent = T('reset');
+  $('modal').classList.add('show');
+}
+
+/* ================= SETTINGS ================= */
+const BACKS = { navy: 'linear-gradient(135deg,#1a1a6e,#0d0d3d 50%,#1a1a6e)', gold: 'linear-gradient(135deg,#f6d77a,#b8860b 50%,#f3cf6a)', neo: 'repeating-linear-gradient(0deg,#062006 0 3px,#0b3a0b 3px 4px)' };
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.style.setProperty('--back', BACKS[D.back] || BACKS.navy);
+  $('tLang').textContent = D.lang === 'ja' ? '🌐 EN' : '🌐 日本語';
+  $('tSound').textContent = D.sound ? '🔊' : '🔇'; $('tSound').classList.toggle('on', D.sound);
+  $('tOdds').textContent = T('odds', D.odds); $('tOdds').classList.toggle('on', D.odds);
+  $('hint').textContent = T('hint');
+  ui(); updPot(false); save();
+}
+
+/* ================= EVENTS ================= */
+document.querySelectorAll('.chip').forEach(c => c.onclick = () => addChip(+c.dataset.v, c));
+$('bDeal').onclick = startRound; $('bClear').onclick = clearBet;
+$('bHi').onclick = () => guess('hi'); $('bLo').onclick = () => guess('lo');
+$('bCont').onclick = next; $('bTake').onclick = collect;
+$('bNew').onclick = () => { D.bank = START; D.hist.push(START); save(); ui(); };
+$('tLang').onclick = () => { D.lang = D.lang === 'ja' ? 'en' : 'ja'; apply(); };
+$('tSound').onclick = () => { D.sound = !D.sound; apply(); if (D.sound) sfx('chip'); };
+$('tOdds').onclick = () => { D.odds = !D.odds; apply(); };
+$('tStats').onclick = openStats;
+$('mClose').onclick = () => $('modal').classList.remove('show');
+$('modal').onclick = e => { if (e.target.id === 'modal') $('modal').classList.remove('show'); };
+$('mReset').onclick = () => { if (busy || phase !== 'bet' || !confirm(T('confirm'))) return; D.bank = START; D.stats = freshStats(); D.hist = [START]; D.ach = {}; bet = 0; cur.pot = 0; save(); apply(); openStats(); };
+const KONAMI = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'];
+let buf = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ($('modal').classList.contains('show')){ if (k === 'escape') $('modal').classList.remove('show'); return; }
+  if (e.repeat) return;
+  buf.push(k); if (buf.length > 12) buf.shift();
+  const word = buf.filter(x => x.length === 1).join('');
+  if (buf.slice(-10).join() === KONAMI.join()){ buf = []; D.back = D.back === 'gold' ? 'navy' : 'gold'; apply(); if (D.back === 'gold'){ unlock('gold'); toast(T('gold')); } return; }
+  if (word.endsWith('neo')){ buf = []; D.back = D.back === 'neo' ? 'navy' : 'neo'; apply(); if (D.back === 'neo'){ unlock('neo'); toast(T('neo')); } return; }
+  if (k === ' ' || k === 'enter'){ e.preventDefault(); if (phase === 'bet') startRound(); else if (phase === 'won') next(); }
+  else if (k === 'h' || k === 'arrowup') guess('hi');
+  else if (k === 'l' || k === 'arrowdown') guess('lo');
+  else if (k === 'c') collect();
+  else if (k === 'x') clearBet();
+  else if (k === 's') openStats();
+  else if ('1234'.includes(k) && k.length === 1){ const v = [10, 50, 100, 500][+k - 1]; addChip(v, document.querySelector(`.chip[data-v="${v}"]`)); }
+});
+
+/* ================= INIT ================= */
+buildDeck(); apply();
+})();
+</script>
+<a href="../" id="mpBack" style="position:fixed;left:10px;bottom:10px;z-index:9999;font:12px 'Courier New',monospace;color:#39ff14;background:#000c;border:1px solid #39ff1455;border-radius:14px;padding:5px 11px;text-decoration:none;opacity:.75">← MeridiPlay</a>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

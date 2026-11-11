@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiPlay — 無料ブラウザゲーム集 | Free Browser Games</title>
+<meta name="description" content="ブラックジャック、バカラ、ビデオポーカー、御神籤、猫タロット、駄菓子屋の10円ゲームなど。広告なし・登録なしの無料ブラウザゲーム集。Free browser games — no ads, no sign-up.">
+<link rel="canonical" href="https://meridibrand.com/play/">
+<meta property="og:title" content="MeridiPlay — Free Browser Games">
+<meta property="og:description" content="No Ads. No Subscriptions. Just Play.">
+<meta property="og:url" content="https://meridibrand.com/play/">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--card2:#0a1f10;--acc:#39ff14;--glow:#39ff1455}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--card2:#f4faf2;--acc:#1f7a3a;--glow:#1f7a3a22}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;transition:background .6s var(--E),color .6s}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% -20%,var(--glow),transparent 60%)}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:12px 18px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7;margin-right:6px}
+.home:hover{opacity:1;color:var(--acc)}
+.brand{margin-right:auto;font:bold 18px 'Courier New',monospace;letter-spacing:5px;color:var(--acc);text-shadow:0 0 10px var(--glow)}
+.tg{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.hero{position:relative;text-align:center;padding:46px 16px 18px}
+.hero h1{font:bold clamp(34px,7vw,60px) 'Courier New',monospace;letter-spacing:8px;color:var(--acc);text-shadow:0 0 18px var(--glow)}
+.hero p{margin-top:10px;font-size:14px;color:var(--sub);line-height:1.8}
+.hero .tag{display:inline-block;margin-top:12px;font:12px 'Courier New',monospace;letter-spacing:2px;border:1px solid var(--line);border-radius:20px;padding:5px 14px}
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:6px 16px 4px}
+.tools input{width:min(320px,90vw);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:9px 16px;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none;transition:border-color .3s}
+.tools input:focus{border-color:var(--acc)}
+.chipsel{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:10px 16px 0}
+.chipsel button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 12px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;transition:all .3s var(--E)}
+.chipsel button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+main{max-width:1180px;margin:0 auto;padding:10px 16px 40px}
+section{margin-top:30px;transition:opacity .4s}
+section.hide{display:none}
+section h2{font-size:17px;letter-spacing:2px;margin-bottom:4px}
+section h2 small{font:11px 'Courier New',monospace;color:var(--sub);margin-left:8px;letter-spacing:1px}
+section .lead{font-size:12px;color:var(--sub);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card{position:relative;display:flex;flex-direction:column;gap:6px;padding:16px 16px 14px;border-radius:14px;background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);
+  transition:transform .45s var(--E),border-color .35s,box-shadow .45s var(--E);opacity:0;transform:translateY(12px);animation:in .7s var(--E) forwards}
+@keyframes in{to{opacity:1;transform:none}}
+.card:hover,.card:focus-visible{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 10px 26px #0006,0 0 0 1px var(--acc),0 0 22px var(--glow);outline:none}
+.card .ic{font-size:30px;line-height:1}
+.card b{font-size:15px;letter-spacing:1px}
+.card p{font-size:12px;color:var(--sub);line-height:1.65;flex:1}
+.card .meta{display:flex;gap:6px;flex-wrap:wrap}
+.card .meta span{font:10px 'Courier New',monospace;border:1px solid var(--line);border-radius:9px;padding:2px 7px;color:var(--sub)}
+.card .new{position:absolute;right:12px;top:12px;font:bold 10px 'Courier New',monospace;color:var(--acc);border:1px solid var(--acc);border-radius:8px;padding:1px 6px}
+.card .go{font:bold 11px 'Courier New',monospace;color:var(--acc);letter-spacing:2px}
+.card.soon{pointer-events:none;opacity:.5}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;display:none}
+.coffee{max-width:620px;margin:46px auto 0;text-align:center;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.coffee p{font-size:13px;color:var(--sub);line-height:1.8}
+.coffee a{display:inline-block;margin-top:12px;padding:10px 22px;border-radius:22px;border:1px solid var(--acc);color:var(--acc);font:bold 13px 'Courier New',monospace;letter-spacing:1px;transition:all .3s var(--E)}
+.coffee a:hover{background:color-mix(in srgb,var(--acc) 15%,transparent);box-shadow:0 0 18px var(--glow)}
+footer{text-align:center;padding:26px 16px 34px;font:11px 'Courier New',monospace;color:var(--sub);line-height:2}
+footer a:hover{color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);color:var(--ink);padding:10px 22px;border-radius:22px;font-size:13px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:20;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.card{animation:none;opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/">← Meridi Brand</a>
+  <div class="brand">MERIDIPLAY</div>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+
+<div class="hero">
+  <h1>MERIDIPLAY</h1>
+  <p id="heroP"></p>
+  <span class="tag">No Ads. No Subscriptions. Just Play.</span>
+</div>
+<div class="tools"><input id="q" type="search" autocomplete="off"></div>
+<div class="chipsel" id="cats"></div>
+<main id="main"></main>
+<div class="empty" id="empty"></div>
+
+<div class="coffee">
+  <p id="coffeeP"></p>
+  <a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a>
+</div>
+
+<footer>
+  <div><a href="https://meridibrand.com/">🏠 Meridi Brand</a> · <a href="https://meridibrand.com/meet/">🗓 Meet</a> · <a href="https://meridibrand.com/lingo/">🔤 Lingo</a> · <a href="https://meridibrand.com/stars/">🌌 Stars</a> · <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a></div>
+  <div><a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a> · <a href="https://meridistore.booth.pm/" target="_blank" rel="noopener">🛒 BOOTH</a> · <a href="https://meridius4.gumroad.com/" target="_blank" rel="noopener">🛒 Gumroad</a> · <a href="mailto:meridisupport@gmail.com">✉️ Contact</a></div>
+  <div id="footP"></div>
+  <div>MeridiPlay v1.0.0 · © 2026 Meridi Brand</div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+
+let lang = lsGet('meridiplay_lang') || ((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+let cat = 'all', q = '';
+
+/* ===== ゲームの一覧（足すときはここに 1 行） ===== */
+const CATS = [
+  { id:'decide', ic:'🎲', ja:'決める・分ける', en:'Decide & Split', lj:'チーム分け、順番決め、くじ引きに', le:'Teams, turns and draws' },
+  { id:'casino', ic:'🃏', ja:'カジノ', en:'Casino', lj:'本場のルールで。海外に行く前の予習にも', le:'Real casino rules — practice before your trip' },
+  { id:'fortune', ic:'🔮', ja:'占い', en:'Fortune', lj:'今日の運勢を、ゆっくりと', le:'Take a quiet moment for your fortune' },
+  { id:'dagashi', ic:'🍬', ja:'駄菓子屋レトロ', en:'Retro Candy Shop', lj:'昭和の駄菓子屋の、あの機械', le:'Coin games from Showa-era Japanese candy shops' },
+  { id:'table', ic:'🎴', ja:'日本と世界の遊び', en:'Table Games', lj:'家でもパブでも遊ばれてきた定番', le:'Classics from homes and pubs' }
+];
+const GAMES = [
+  { id:'tournament', c:'decide', ic:'🏆', ja:'チーム分け＆トーナメント', en:'Teams & Tournament', dj:'チーム分け、予選リーグ、トーナメント表まで。名前を入れるだけ。', de:'Shuffle teams, run a league, build a bracket.', t:['1〜','JA/EN'] },
+  { id:'roulette', c:'decide', ic:'🎡', ja:'ルーレット', en:'Roulette Wheel', dj:'項目を入れて回すだけ。重み付けや、当たったら消すモードも。', de:'Spin a custom wheel with weights and elimination.', t:['1〜'] },
+  { id:'cointoss', c:'decide', ic:'🪙', ja:'コイントス', en:'Coin Toss', dj:'力をためて弾く、物理のコイン。猫のメリディと 5 番勝負も。', de:'Physics coin flip — or best of five vs the cat.', t:['1〜'] },
+  { id:'bingo', c:'decide', ic:'🎱', ja:'ビンゴ', en:'Bingo', dj:'75 球のガラガラと読み上げ。カードは 6 枚まで。', de:'75-ball cage, caller voice, up to 6 cards.', t:['1〜','🗣'] },
+  { id:'casino21', c:'casino', ic:'🂡', ja:'Casino 21', en:'Casino 21', dj:'6 デッキの本格ブラックジャック。戦略トレーナー付き。', de:'Six-deck blackjack with a strategy trainer.', t:['1','🎓'] },
+  { id:'baccarat', c:'casino', ic:'🎴', ja:'バカラ', en:'Baccarat', dj:'カードを指で絞る。3 枚目のルールも毎回説明。', de:'Squeeze the cards. Third-card rules explained.', t:['1','🎓'], n:1 },
+  { id:'videopoker', c:'casino', ic:'📺', ja:'ビデオポーカー', en:'Video Poker', dj:'4 台・最大 10 手。32 通りの期待値を計算するトレーナー。', de:'4 machines, up to 10 hands, exact EV trainer.', t:['1','🎓'], n:1 },
+  { id:'bigsix', c:'casino', ic:'🎰', ja:'Big Six', en:'Big Six Wheel', dj:'カタカタ鳴るラスベガスのマネーホイール。', de:'The clacking Vegas money wheel.', t:['1','🗣'], n:1 },
+  { id:'sicbo', c:'casino', ic:'🎲', ja:'シックボー（大小）', en:'Sic Bo', dj:'マカオで人気の 3 つのサイコロ。大か小か、ゾロ目か。', de:'Three dice, Macau style. Big, Small or a triple?', t:['1','🎓'], n:1 },
+  { id:'chohan', c:'casino', ic:'🏮', ja:'丁半', en:'Cho-Han', dj:'壺を振って、丁か半か。江戸の賭場の雰囲気で。', de:'Odd or even — an Edo-period dice house.', t:['1'] },
+  { id:'highlow', c:'casino', ic:'⬆️', ja:'HIGH & LOW', en:'High & Low', dj:'次のカードは上か下か。倍々で積み上げる。', de:'Higher or lower? Double up the pot.', t:['1'] },
+  { id:'omikuji', c:'fortune', ic:'⛩️', ja:'御神籤', en:'Omikuji', dj:'夜の千本鳥居。二礼二拍手一礼から、和歌の籤まで。', de:'A night shrine, the bow-and-clap rite, a waka fortune.', t:['1','JA/EN'] },
+  { id:'tarot', c:'fortune', ic:'🐈', ja:'猫タロット', en:'Cat Tarot', dj:'浮世絵の猫 22 枚の大アルカナ。ケルト十字まで。', de:'22 ukiyo-e cat Major Arcana, up to Celtic Cross.', t:['1'] },
+  { id:'mahjong', c:'fortune', ic:'🀄', ja:'麻雀牌占い', en:'Mahjong Oracle', dj:'牌を洗って、3 枚を引く。役ができたら大吉。', de:'Wash the tiles, draw three, read the yaku.', t:['1'] },
+  { id:'10yen', c:'dagashi', ic:'🪙', ja:'10円ゲーム', en:'10-Yen Game', dj:'レバーで 10 円玉をはじいてゴールへ。台は 4 種類。', de:'Flick a 10-yen coin across the rails. 4 machines.', t:['1'], n:1 },
+  { id:'janken', c:'dagashi', ic:'✊', ja:'猫じゃんけん', en:'Cat Jan-Ken', dj:'勝ったらランプが回ってメダル。三匹の猫には癖がある。', de:'Win and the lamps spin for medals. Each cat has a habit.', t:['1','🗣'], n:1 },
+  { id:'concentration', c:'table', ic:'🃏', ja:'神経衰弱', en:'Concentration', dj:'トランプか猫タロットで。CPU の猫ミャオと記憶勝負。', de:'Playing cards or Cat Tarot, vs Miao the cat.', t:['1〜2'], n:1 },
+  { id:'shutthebox', c:'table', ic:'📦', ja:'Shut the Box', en:'Shut the Box', dj:'イギリスのパブの定番。最善手を計算するトレーナー付き。', de:'A British pub classic with an exact-solve trainer.', t:['1〜4','🎓'], n:1 }
+];
+
+const UI = {
+  ja:{ hero:`ブラウザで遊べる、${GAMES.length} 種類の無料ゲーム。<br>インストールも登録もいりません。`, q:'さがす（例：カード、サイコロ、猫）', all:'すべて', none:'見つかりませんでした', play:'PLAY →',
+    coffee:'MeridiPlay は広告なし・登録なしで、ひとりで作っています。<br>気に入っていただけたら、コーヒー 1 杯分の応援をいただけるとうれしいです。',
+    foot:'ゲーム内のチップやメダルは遊び用で、本物のお金とは関係ありません。データはこの端末の中だけに保存されます。', theme:t => t === 'light' ? '🌙 ダーク' : '☀️ ノーマル' },
+  en:{ hero:`${GAMES.length} free games that run in your browser.<br>No install. No sign-up.`, q:'Search (e.g. cards, dice, cat)', all:'All', none:'Nothing found', play:'PLAY →',
+    coffee:'MeridiPlay is ad-free and made by one person.<br>If you enjoy it, a coffee would mean a lot.',
+    foot:'Chips and medals are for fun only — no real money. Your data stays on this device.', theme:t => t === 'light' ? '🌙 Dark' : '☀️ Normal' }
+};
+const T = k => UI[lang][k];
+
+function render(){
+  document.documentElement.lang = lang;
+  document.body.classList.toggle('light', theme === 'light');
+  $('tLang').textContent = lang === 'ja' ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = T('theme')(theme);
+  $('heroP').innerHTML = T('hero'); $('q').placeholder = T('q'); $('coffeeP').innerHTML = T('coffee'); $('footP').textContent = T('foot'); $('empty').textContent = T('none');
+  const cs = $('cats'); cs.replaceChildren();
+  [{ id:'all', ic:'✨', ja:T('all'), en:T('all') }, ...CATS].forEach(c => { const b = document.createElement('button'); b.textContent = `${c.ic} ${c[lang]}`; b.className = cat === c.id ? 'on' : ''; b.onclick = () => { cat = c.id; render(); }; cs.append(b); });
+  const main = $('main'); main.replaceChildren(); let shown = 0, k = 0;
+  const qq = q.trim().toLowerCase();
+  CATS.forEach(c => {
+    if (cat !== 'all' && cat !== c.id) return;
+    const list = GAMES.filter(g => g.c === c.id && (!qq || [g.ja, g.en, g.dj, g.de, g.id].join(' ').toLowerCase().includes(qq)));
+    if (!list.length) return;
+    const s = document.createElement('section');
+    s.innerHTML = `<h2>${c.ic} ${c[lang]}<small>${list.length}</small></h2><div class="lead">${lang === 'ja' ? c.lj : c.le}</div><div class="grid"></div>`;
+    const grid = s.querySelector('.grid');
+    list.forEach(g => {
+      const a = document.createElement('a'); a.className = 'card'; a.href = `./${g.id}/`; a.style.animationDelay = (k++ * 35) + 'ms';
+      a.innerHTML = `${g.n ? '<span class="new">NEW</span>' : ''}<span class="ic">${g.ic}</span><b>${g[lang]}</b><p>${lang === 'ja' ? g.dj : g.de}</p><div class="meta">${(g.t || []).map(x => `<span>${x === '1' ? '👤 1' : x.includes('〜') ? '👥 ' + x : x}</span>`).join('')}</div><span class="go">${T('play')}</span>`;
+      grid.append(a); shown++;
+    });
+    main.append(s);
+  });
+  $('empty').style.display = shown ? 'none' : 'block';
+}
+$('tLang').onclick = () => { lang = lang === 'ja' ? 'en' : 'ja'; lsSet('meridiplay_lang', lang); render(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); render(); };
+$('q').addEventListener('input', e => { q = e.target.value; render(); });
+
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+document.addEventListener('keydown', e => {
+  if (e.target === $('q')) return;
+  kb.push(e.key.toLowerCase()); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; const g = GAMES[Math.floor(Math.random() * GAMES.length)]; toast(`🐾 ${lang === 'ja' ? '猫のおすすめ' : 'The cats suggest'}: ${g.ic} ${g[lang]}`); setTimeout(() => location.href = `./${g.id}/`, 1600); }
+  if (kb.slice(-3).join('') === 'neo'){ theme = 'dark'; lsSet('meridiplay_theme', theme); render(); toast('🟩 Wake up, Neo… follow the white cat.'); }
+});
+render();
+})();
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
