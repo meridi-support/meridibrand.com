@@ -1,4 +1,3 @@
-
 <h1 align="center">🐾 Meridi Brand</h1>
 <h3 align="center">Indie Tools for People Tired of Subscriptions.</h3>
 <p align="center"><em>No Ads. No Subscriptions. Just Tools.</em></p>
@@ -26,8 +25,8 @@ Every tool is a vessel. What you fill it with is up to you.
 | 🐾🪄 **MeridiLingo** | 560 expressions — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
 | 💻 **MeridiSync** | High-speed snippet manager for Windows | \$8 / ¥1,000 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
-| 🎮 **MeridiPlay** | Fun & Games Collection | Coming Soon | — |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
 
@@ -50,6 +49,8 @@ Every tool is a vessel. What you fill it with is up to you.
 | [meridibrand.com](https://github.com/meridi-support/meridibrand.com) | 🌐 Official website — you are here |
 | [meridilingo](https://github.com/meridi-support/meridilingo) | 🐾🪄 MeridiLingo — Language Evolution Explorer |
 | [meridimeet](https://github.com/meridi-support/meridimeet) | 📅 MeridiMeet — Multi-Timezone Scheduler |
+| [meridistars](https://github.com/meridi-support/meridistars) | 🌌 MeridiStars — Browser Planetarium |
+| [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
 | [meridi-square](https://github.com/meridi-support/meridi-square) | 💬 Community hub & discussions |
 | [meridisync-demo](https://github.com/meridi-support/meridisync-demo) | 💻 MeridiSync — Free demo |
 
@@ -59,7 +60,7 @@ Every tool is a vessel. What you fill it with is up to you.
 
 Every Meridi product is watched over by three cats:
 
-- 🐈‍⬛ **Black Cat** — The curious explorer (youngest sister)
+- 🐈⬛ **Black Cat** — The curious explorer (youngest sister)
 - 🐈 **Tabby Cat** — The playful troublemaker (youngest sister's twin)
 - 😺 **Grey Cat** — The wise overseer (big sister, 1 year older)
 
@@ -98,4 +99,3 @@ MIT License — Use it, modify it, share it. 🐟 Keep swimming.
 
 <p align="center"><strong>Meridi Brand © 2026 — Since November 1st, 2026</strong></p>
 <p align="center"><em>🐾 Built with love by one developer and three cats.</em></p>
-
