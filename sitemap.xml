@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://meridibrand.com/</loc>
-    <lastmod>2026-11-11</lastmod>
+    <lastmod>2026-11-12</lastmod>
   </url>
   <url>
     <loc>https://meridibrand.com/meet/</loc>
@@ -19,5 +19,9 @@
   <url>
     <loc>https://meridibrand.com/play/</loc>
     <lastmod>2026-11-11</lastmod>
+  </url>
+  <url>
+    <loc>https://meridibrand.com/depths/</loc>
+    <lastmod>2026-11-12</lastmod>
   </url>
 </urlset>
