@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiDepths — 海面から海溝の底まで潜る無料の深海図鑑 | Dive to the Deepest Ocean</title>
+<meta name="description" content="海面からマリアナ海溝のチャレンジャー海淵（約10,900m）まで、スクロールで潜る深海図鑑。生き物、沈没船、潜水の記録、水圧と水温をブラウザで。広告なし・登録なし。Scroll from the surface to the Challenger Deep — a free deep-sea field guide, no ads.">
+<link rel="canonical" href="https://meridibrand.com/depths/">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--ink:#eaf7ff;--sub:#a9d4f0;--acc:#5ff0ff;--g:#39ff14;--panel:#04163acc;--line:#7fe8ff40;--card:#06204ad9}
+body.light{--ink:#08223a;--sub:#2a5a7a;--acc:#0a7aa8;--panel:#ffffffd9;--line:#0a7aa840;--card:#ffffffe6}
+body.neo{--acc:#39ff14;--line:#39ff1440;--sub:#9fe8a0}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:#0a1f52;color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;overflow-x:hidden}
+#sea{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:7px;padding:10px 16px;background:linear-gradient(#0008,#0000);flex-wrap:wrap}
+body.light header{background:linear-gradient(#fff9,#fff0)}
+.home{font:12px 'Courier New',monospace;color:var(--ink);opacity:.8;text-decoration:none}
+.home:hover{opacity:1;color:var(--acc)}
+.brand{margin-right:auto;font:bold 17px 'Courier New',monospace;letter-spacing:5px;color:var(--acc);text-shadow:0 0 10px #5ff0ff66}
+.tg{background:#0006;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap;backdrop-filter:blur(6px)}
+body.light .tg{background:#fff8}
+.tg:hover{border-color:var(--acc)}
+#doc{position:relative;z-index:1}
+.sky{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 16px}
+.sky h1{font:bold clamp(34px,8vw,72px) 'Courier New',monospace;letter-spacing:10px;color:#fff;text-shadow:0 0 24px #5ff0ffaa,0 4px 0 #0a3a6a}
+.sky p{margin-top:12px;font-size:14px;line-height:1.9;color:#eaf7ff;text-shadow:0 1px 4px #0a3a6a}
+.trs{margin-top:18px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:760px}
+.trs button{background:#ffffff1c;color:#fff;border:1px solid #ffffff66;border-radius:14px;padding:6px 11px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;backdrop-filter:blur(6px);transition:all .35s var(--E)}
+.trs button small{display:block;font:10px 'Courier New',monospace;opacity:.8}
+.trs button:hover{background:#ffffff33}
+.trs button.on{background:#ffffff44;border-color:#fff;box-shadow:0 0 14px #ffffff55}
+.trsel{width:100%;margin:0 0 8px;background:#0004;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:11.5px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none}
+body.light .trsel{background:#fff8}
+.trsel option{color:#111}
+.sky .go{margin-top:22px;padding:12px 28px;border-radius:26px;border:1px solid #fff;background:#ffffff22;color:#fff;font:bold 15px 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:3px;cursor:pointer;backdrop-filter:blur(6px);transition:all .4s var(--E)}
+.sky .go:hover{background:#ffffff44;transform:translateY(-2px)}
+.sky .hint{position:absolute;bottom:26px;font:12px 'Courier New',monospace;letter-spacing:3px;color:#fff;opacity:.85;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+#track{position:relative}
+.card{position:absolute;width:min(380px,42vw);padding:14px 16px 13px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 10px 30px #0006;backdrop-filter:blur(8px);
+  opacity:0;transform:translateY(24px) scale(.97);transition:opacity .9s var(--E),transform 1.1s var(--E),border-color .4s;cursor:default}
+.card.on{opacity:1;transform:none}
+.card.L{left:max(58px,4vw)}
+.card.R{right:calc(max(250px,22vw) + 2vw)}
+.card .top{display:flex;align-items:center;gap:10px}
+.card .ic{font-size:30px;line-height:1;filter:drop-shadow(0 0 8px #5ff0ff55)}
+.card b{font-size:15.5px;letter-spacing:.5px;line-height:1.35}
+.card .dp{margin-left:auto;font:bold 12px 'Courier New',monospace;color:var(--acc);white-space:nowrap}
+.card .cat{display:inline-block;margin-top:7px;font:10px 'Courier New',monospace;letter-spacing:1px;border:1px solid var(--line);border-radius:9px;padding:1px 8px;color:var(--sub)}
+.card p{margin-top:7px;font-size:13px;line-height:1.75;color:var(--ink);opacity:.92}
+.card .art{float:right;width:92px;height:55px;margin:6px 0 2px 10px;filter:drop-shadow(0 0 6px #5ff0ff33)}
+.card .art svg{width:100%;height:100%;display:block}
+.card .catc{clear:both;margin-top:8px;padding:5px 10px;border-left:2px solid #ffc88a;border-radius:0 8px 8px 0;background:#ffc88a14;font-size:12px;color:#ffe2c0;line-height:1.6}
+body.light .card .catc{color:#7a4a10;background:#ffc88a2a}
+.card .meta{clear:both;margin-top:7px;font:11px 'Courier New',monospace;color:var(--sub);line-height:1.6}
+.card::before{content:'';position:absolute;top:22px;width:28px;height:1px;background:var(--acc);opacity:.6}
+.card.L::before{right:-28px}.card.R::before{left:-28px}
+.card.flash{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 10px 30px #0006,0 0 26px #5ff0ff44}
+.zoneH{position:absolute;left:0;right:0;text-align:center;pointer-events:none;opacity:0;transition:opacity 1.2s var(--E)}
+.zoneH.on{opacity:1}
+.zoneH div{display:inline-block;font:bold clamp(20px,4vw,34px) 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:4px;color:#fff;text-shadow:0 0 20px #5ff0ff88,0 2px 8px #000a;padding-right:min(250px,22vw)}
+body.light .zoneH div{color:#062a4a;text-shadow:0 0 16px #ffffffcc}
+.zoneH small{display:block;font:12px 'Courier New',monospace;letter-spacing:3px;opacity:.85;margin-top:4px}
+.hud{position:fixed;right:14px;top:62px;z-index:15;width:min(236px,22vw);min-width:206px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;backdrop-filter:blur(10px);box-shadow:0 10px 30px #0007}
+.dep{display:flex;align-items:baseline;gap:6px;justify-content:flex-end}
+.dep b{font:bold 38px 'Courier New',monospace;color:var(--acc);text-shadow:0 0 14px #5ff0ff66;letter-spacing:-1px}
+.dep span{font:13px 'Courier New',monospace;color:var(--sub)}
+.zn{text-align:right;font-size:12px;color:var(--sub);margin:2px 0 8px;min-height:16px}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;padding:5px 0;border-top:1px solid var(--line)}
+.row span{color:var(--sub)}
+.row b{font:bold 13px 'Courier New',monospace;text-align:right}
+.mini{position:relative;height:150px;margin:10px 0 8px;border-radius:8px;overflow:hidden;background:linear-gradient(#3fb6e8,#11549a 8%,#0a1f52 30%,#0b1846 60%,#100a33);border:1px solid var(--line);cursor:pointer}
+.mini i{position:absolute;left:0;right:0;height:2px;background:#fff;box-shadow:0 0 8px #fff;transition:top .2s}
+.mini em{position:absolute;right:4px;font:9px 'Courier New',monospace;font-style:normal;color:#fff;opacity:.75;transform:translateY(-50%)}
+.mini u{position:absolute;left:0;width:9px;height:1px;background:#fff;opacity:.6}
+.jumps{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.jumps button,.hb{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 2px;font:10.5px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E)}
+.jumps button:hover,.hb:hover{border-color:var(--acc);color:var(--acc)}
+.hbs{display:flex;gap:4px;margin-top:6px}
+.hbs .hb{flex:1}
+.hb.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.drawer{position:fixed;top:0;bottom:0;left:0;z-index:40;width:min(400px,92vw);background:var(--panel);border-right:1px solid var(--line);backdrop-filter:blur(14px);transform:translateX(-102%);transition:transform .6s var(--E);display:flex;flex-direction:column}
+.drawer.show{transform:none}
+.dh{padding:16px 16px 10px;display:flex;align-items:center;gap:8px}
+.dh h3{font:bold 14px 'Courier New',monospace;letter-spacing:3px;color:var(--acc);margin-right:auto}
+.chips{display:flex;gap:5px;flex-wrap:wrap;padding:0 16px 8px}
+.chips button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:4px 10px;font:11.5px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.chips button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.dq{margin:0 16px 8px;background:#0004;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none}
+body.light .dq{background:#fff8}
+.list{flex:1;overflow:auto;padding:0 10px 20px}
+.it{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;transition:background .25s}
+.it:hover{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.it .ic{font-size:20px;width:36px;text-align:center}
+.it .ic svg{width:100%;height:100%}
+.it span{flex:1;font-size:13px;line-height:1.4}
+.it em{font:11px 'Courier New',monospace;font-style:normal;color:var(--acc);white-space:nowrap}
+.cnt{padding:0 16px 6px;font:11px 'Courier New',monospace;color:var(--sub)}
+.bottom{position:relative;min-height:110vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 16px 30px}
+.bottom h2{font:bold clamp(26px,6vw,46px) 'Courier New',monospace;letter-spacing:6px;color:var(--acc);text-shadow:0 0 20px #5ff0ff77}
+.bottom .stats{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:min(720px,94vw)}
+.bottom .stats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.bottom .stats b{display:block;font:bold 22px 'Courier New',monospace;color:var(--acc)}
+.bottom .stats small{font-size:11.5px;color:var(--sub)}
+.bottom p{margin-top:16px;font-size:13.5px;line-height:1.9;max-width:640px}
+.bottom .btn{margin-top:18px;padding:11px 24px;border-radius:24px;border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--ink);font:bold 13px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.coffee{margin-top:26px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--card);max-width:600px}
+.coffee p{margin:0;font-size:13px;color:var(--sub)}
+.coffee a{display:inline-block;margin-top:12px;padding:10px 22px;border-radius:22px;border:1px solid var(--acc);color:var(--acc);font:bold 13px 'Courier New',monospace;text-decoration:none}
+footer{position:relative;z-index:1;text-align:center;padding:20px 16px 34px;font:11px 'Courier New',monospace;color:var(--sub);line-height:2}
+footer a{color:inherit;text-decoration:none}footer a:hover{color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,10px);background:var(--panel);border:1px solid var(--acc);color:var(--ink);padding:10px 22px;border-radius:22px;font-size:13px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:50;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-width:760px){
+  .hud{top:auto;bottom:10px;right:10px;left:10px;width:auto;min-width:0;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:0 12px}
+  .dep{grid-row:span 2;justify-content:flex-start}.dep b{font-size:30px}
+  .zn{text-align:left;margin:0;grid-column:2}
+  .rows{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .row{flex-direction:column;border:none;padding:2px 0}.row b{text-align:left;font-size:11.5px}
+  .trsel{grid-column:1/-1;margin:6px 0 0}
+  .mini{display:none}.jumps{grid-column:1/-1;grid-template-columns:repeat(6,1fr);margin-top:6px}.hbs{grid-column:1/-1}
+  .card{width:auto;left:46px!important;right:12px!important}
+  .card::before{display:none}
+  .zoneH div{padding-right:0}
+}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="sea"></canvas>
+<header>
+  <a class="home" href="https://meridibrand.com/">← Meridi Brand</a>
+  <div class="brand">MERIDIDEPTHS</div>
+  <button class="tg" id="tBook">📖</button>
+  <button class="tg" id="tUnit">m</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+
+<div id="doc">
+  <section class="sky" id="sky">
+    <h1>MERIDIDEPTHS</h1>
+    <p id="skyP"></p>
+    <div class="trs" id="trs"></div>
+    <button class="go" id="bGo"></button>
+    <div class="hint" id="hint"></div>
+  </section>
+  <div id="track"></div>
+  <section class="bottom" id="bottom">
+    <h2 id="bT"></h2>
+    <div class="stats" id="bStats"></div>
+    <p id="bP"></p>
+    <button class="btn" id="bUp"></button>
+    <a class="btn" id="bMap" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;margin-left:6px"></a>
+    <div class="coffee"><p id="coffeeP"></p><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  </section>
+  <footer>
+    <div><a href="https://meridibrand.com/">🏠 Meridi Brand</a> · <a href="https://meridibrand.com/meet/">🗓 Meet</a> · <a href="https://meridibrand.com/lingo/">🔤 Lingo</a> · <a href="https://meridibrand.com/stars/">🌌 Stars</a> · <a href="https://meridibrand.com/play/">🎮 Play</a> · <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a></div>
+    <div><a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a> · <a href="https://meridistore.booth.pm/" target="_blank" rel="noopener">🛒 BOOTH</a> · <a href="https://meridius4.gumroad.com/" target="_blank" rel="noopener">🛒 Gumroad</a> · <a href="mailto:meridisupport@gmail.com">✉️ Contact</a></div>
+    <div id="footP"></div>
+    <div>MeridiDepths v1.0.0 · © 2026 Meridi Brand · No Ads. No Subscriptions. Just Depths. 🐾</div>
+  </footer>
+</div>
+
+<div class="hud" id="hud">
+  <div class="dep"><b id="hD">0</b><span id="hU">m</span></div>
+  <div class="zn" id="hZ"></div>
+  <div class="rows">
+    <div class="row"><span id="lP"></span><b id="hP"></b></div>
+    <div class="row"><span id="lK"></span><b id="hK"></b></div>
+    <div class="row"><span id="lT"></span><b id="hT"></b></div>
+    <div class="row"><span id="lL"></span><b id="hL"></b></div>
+  </div>
+  <div class="mini" id="mini"><i id="miniI"></i></div>
+  <select class="trsel" id="trSel"></select>
+  <div class="jumps" id="jumps"></div>
+  <div class="hbs" id="todB"></div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="dh"><h3 id="dT"></h3><button class="tg" id="dClose">✕</button></div>
+  <div class="chips" id="dChips"></div>
+  <input class="dq" id="dq" type="search" autocomplete="off">
+  <div class="cnt" id="dCnt"></div>
+  <div class="list" id="dList"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+const LS = 'merididepths_v1';
+let D = { lang:((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en'), theme:'dark', unit:'m', max:0, tod:'noon' };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+try { const th = lsGet('meridiplay_theme'); if (th === 'light' || th === 'dark') D.theme = th; } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+const J = () => D.lang === 'ja';
+
+/* ================= 深さ ================= */
+let DMAX = 10935;
+const ZONES = [
+  [0, '光の届く層', 'Sunlight Zone', '表層 · Epipelagic', 'EPIPELAGIC'],
+  [200, '薄明かりの層', 'Twilight Zone', '中深層 · Mesopelagic', 'MESOPELAGIC'],
+  [1000, '真っ暗な層', 'Midnight Zone', '漸深層 · Bathypelagic', 'BATHYPELAGIC'],
+  [4000, '深海層', 'Abyssal Zone', '深海層 · Abyssopelagic', 'ABYSSOPELAGIC'],
+  [6000, '超深海層（海溝）', 'Hadal Zone', '超深海層 · Hadal', 'HADAL']
+];
+const CATS = { life:['🐟 生き物','🐟 Life'], human:['🤿 人の記録','🤿 Human records'], wreck:['⚓ 沈没船','⚓ Shipwrecks'], cmp:['📏 くらべる','📏 Compare'], sci:['🔬 海のしくみ','🔬 Ocean science'], rec:['🏆 海の記録','🏆 Ocean records'], hist:['📜 歴史と探検','📜 History & exploration'], why:['🔎 なぜ？','🔎 Why?'] };
+
+/* [深さ, 分類, アイコン, 名前JA, 名前EN, 説明JA, 説明EN] — 数字はだいたいの値です */
+const E = [
+ [0,'sci','🌊','海面','Sea surface','地球の表面の約 7 割は海です。ここから、海でいちばん深い場所まで、約 11km 潜っていきます。','About 70% of Earth\'s surface is ocean. From here we descend roughly 11 km to the deepest point.'],
+ [2,'life','🪼','ミズクラゲ','Moon jellyfish','海面近くを漂うクラゲ。体の 95% 以上が水でできています。','Drifts near the surface; its body is over 95% water.'],
+ [6,'sci','🔴','赤い色が消えはじめる','Red fades first','水は赤い光から先に吸い込みます。数 m でくすみ、10m を過ぎるころには赤がほとんど見えなくなります。','Water absorbs red light first — by about 10 m, red has almost vanished.'],
+ [8,'life','🐠','カクレクマノミ','Clownfish','イソギンチャクの中で暮らす魚。サンゴ礁の浅い海にすみます。','Lives among sea anemones in shallow coral reefs.'],
+ [10,'sci','🫧','2 気圧','2 atmospheres','10m 潜るごとに約 1 気圧ずつ増えます。ここでは地上の 2 倍。海面でふくらませた風船は、半分の大きさになります。','Pressure rises about 1 atm every 10 m. Here it is double — a balloon shrinks to half its size.'],
+ [15,'life','🐢','アオウミガメ','Green sea turtle','海草や海藻を食べるウミガメ。浅い海で、数十分潜っていられます。','A grazing turtle of shallow seas that can stay under for tens of minutes.'],
+ [18,'human','🤿','入門ダイバーの目安','Beginner diver limit','初めてのダイビング講習では、18m までを目安にすることが多いです。','Entry-level scuba courses usually set 18 m as the limit.'],
+ [22,'life','🪸','サンゴ礁','Coral reef','サンゴは体の中の藻に光合成をしてもらうため、多くは光の多い浅い海に広がります。','Corals rely on algae that need sunlight, so most reefs grow in shallow water.'],
+ [30,'human','🧭','中級ダイバーの目安','Advanced diver limit','経験を積んだダイバーの講習では、30m までを目安にすることが多いです。','Advanced recreational training typically goes to 30 m.'],
+ [32,'sci','🍸','窒素酔い','Nitrogen narcosis','30m を超えると、空気の中の窒素のせいで、お酒に酔ったような状態になることがあります。','Below about 30 m, nitrogen in breathing air can cause a drunk-like state.'],
+ [35,'life','🌿','ジャイアントケルプ','Giant kelp','海底から海面まで伸びる大きな海藻。1 日に数十 cm 伸びることもあり、海の森をつくります。','A seaweed that grows from seabed to surface, sometimes tens of cm a day, forming kelp forests.'],
+ [40,'human','🚫','レジャーダイビングの限界','Recreational limit','趣味のダイビングでは、40m が一般的な限界とされます。','40 m is the usual maximum for recreational diving.'],
+ [56,'sci','🫁','空気で潜れる深さの目安','Air\'s oxygen limit','空気をそのまま吸って潜ると、約 56m あたりから酸素が体に害になりはじめるとされます。','Breathing plain air, oxygen becomes harmful at around 56 m.'],
+ [90,'sci','🟠','オレンジと黄色も消える','Orange and yellow fade','100m 前後になると、ほぼ青と緑だけの世界になります。','Around 100 m the world turns almost entirely blue-green.'],
+ [100,'human','🐬','ジャック・マイヨール 100m','Jacques Mayol, 100 m','1976 年、素潜りで初めて 100m に到達した人。映画『グラン・ブルー』のモデルになりました。','In 1976 he became the first to freedive to 100 m — the inspiration for "Le Grand Bleu".'],
+ [120,'life','🐋','シロナガスクジラ','Blue whale','地球でいちばん大きな動物。ふだんはこのくらいまでの深さで、オキアミを食べています。','The largest animal ever. It usually feeds on krill in these upper waters.'],
+ [130,'human','🏊','フィンをつけた素潜り','Freediving with fins','おもりを使わず、自分の泳ぎだけで潜る種目の世界記録は、130m 台です。','The world record for diving under your own power with fins is in the 130 m range.'],
+ [180,'life','🐟','シーラカンス','Coelacanth','「生きた化石」と呼ばれる魚。アフリカ沖などの、100〜200m ほどの岩場にすみます。','A "living fossil" found in rocky slopes around 100–200 m off Africa and Indonesia.'],
+ [200,'sci','🌗','光の届く層の終わり','End of the sunlight zone','植物プランクトンが光合成できるのは、ここまでとされます。ここから「薄明かりの層」です。','Photosynthesis is possible only down to about here. The twilight zone begins.'],
+ [214,'human','🥇','素潜りの最深記録 214m','Deepest freedive, 214 m','2007 年、ヘルベルト・ニッチが、おもりで潜りバルーンで浮かぶ「ノーリミット」で記録しました。','Set by Herbert Nitsch in 2007 in the "No Limits" discipline, sled down and balloon up.'],
+ [250,'life','🦑','ホタルイカ','Firefly squid','富山湾で有名なイカ。昼は 200〜600m の深さにいて、夜になると浅い所へ上がってきます。','Famous in Toyama Bay; hides at 200–600 m by day and rises at night.'],
+ [300,'life','🐬','バンドウイルカ','Bottlenose dolphin','300m ほどまで潜れるとされます。','Can dive to around 300 m.'],
+ [332,'human','🤿','スキューバの最深記録 332m','Deepest scuba dive, 332 m','2014 年、アハメド・ガブルが紅海で記録しました。潜るのは約 15 分、上がるのに約 13 時間かかりました。','Ahmed Gabr, Red Sea, 2014 — about 15 minutes down and about 13 hours back up.'],
+ [333,'cmp','🗼','東京タワー 333m','Tokyo Tower, 333 m','東京タワーを海に立てると、てっぺんがちょうどこの深さです。','Stand Tokyo Tower on the seabed and its tip reaches exactly here.'],
+ [350,'life','🦀','タカアシガニ','Japanese spider crab','脚を広げると 3m を超える、世界でいちばん大きなカニ。日本の近くの海にすみます。','The world\'s largest crab, over 3 m leg span, found around Japan.'],
+ [400,'life','🐟','ハダカイワシ','Lanternfish','体に光る点がある小さな魚。夜になると浅い所へ上がってくる、地球でいちばん数が多い魚の仲間のひとつです。','Small glowing fish that rise at night — among the most numerous fish on Earth.'],
+ [530,'life','🐧','コウテイペンギン','Emperor penguin','鳥なのに、500m を超えて潜った記録があります。','A bird that has been recorded diving beyond 500 m.'],
+ [634,'cmp','🗼','東京スカイツリー 634m','Tokyo Skytree, 634 m','日本でいちばん高い建物が、まるごと沈む深さです。','Japan\'s tallest structure would sit fully submerged here.'],
+ [650,'life','🐟','デメニギス','Barreleye','頭が透明で、中の目が上を向いています。上から落ちてくる影を探して暮らします。','Its head is transparent, with tube eyes looking upward for silhouettes.'],
+ [700,'life','🦑','ダイオウイカ','Giant squid','長さ 10m を超えることもある巨大なイカ。2012 年、日本の調査チームが深海で生きた姿の撮影に成功しました。','Can exceed 10 m. A Japanese team first filmed one alive in its deep habitat in 2012.'],
+ [760,'life','🦈','ラブカ','Frilled shark','古い時代の姿を残す、「生きた化石」と呼ばれるサメ。','A shark with ancient features, often called a living fossil.'],
+ [828,'cmp','🏙','ブルジュ・ハリファ 828m','Burj Khalifa, 828 m','世界でいちばん高いビルも、ここで海に沈みます。','Even the world\'s tallest building disappears at this depth.'],
+ [850,'life','🧛','コウモリダコ','Vampire squid','酸素がとても少ない深さで暮らす、イカとタコの中間のような生き物です。','Lives in oxygen-poor water — neither squid nor octopus, but in between.'],
+ [950,'life','🪲','ダイオウグソクムシ','Giant isopod','ダンゴムシの仲間で、40cm を超えることも。何年も食べずに生きた例が知られています。','A pill-bug relative over 40 cm long, known to survive years without eating.'],
+ [1000,'sci','🌑','光がまったく届かない','No sunlight at all','ここから先は、太陽の光が届かない「真っ暗な層」です。水温は 4°C 前後まで下がります。','Below here no sunlight reaches. Water is about 4 °C.'],
+ [1100,'sci','✨','生物発光','Bioluminescence','深海の生き物の約 4 分の 3 が、自分で光を出すとされます。光で獲物を誘い、仲間を見つけ、身を隠します。','About three quarters of deep-sea creatures make their own light — to lure, signal and hide.'],
+ [1280,'life','🐢','オサガメ','Leatherback turtle','いちばん大きなウミガメ。1,000m を超えて潜った記録があります。','The largest sea turtle, recorded diving beyond 1,000 m.'],
+ [1300,'life','🎣','チョウチンアンコウ','Anglerfish','頭の光るさおで獲物をおびき寄せます。小さなオスが大きなメスにくっついて暮らす種類もいます。','Lures prey with a glowing rod; in some species tiny males fuse to females.'],
+ [1500,'life','🦭','キタゾウアザラシ','Elephant seal','1,500m 前後まで潜り、記録は 2,000m を超えます。','Dives to around 1,500 m, with records beyond 2,000 m.'],
+ [1700,'life','🐍','フクロウナギ','Gulper eel','体より大きな口を袋のように広げて、獲物を飲み込みます。','Opens a mouth bigger than its body like a pouch to swallow prey.'],
+ [2000,'life','🐋','マッコウクジラ','Sperm whale','大きなイカを追って、2,000m 前後まで潜ります。1 時間以上潜っていることもあります。','Hunts giant squid down to about 2,000 m, staying under for over an hour.'],
+ [2200,'life','🦈','ニシオンデンザメ','Greenland shark','寿命が数百年と推定される、とても長生きのサメ。冷たい深い海をゆっくり泳ぎます。','Estimated to live for centuries, cruising slowly through cold deep water.'],
+ [2500,'sci','🌋','熱水噴出孔','Hydrothermal vents','海底から 300°C を超える熱水が噴き出す場所。太陽の光にたよらない生き物たちが集まります。','Vents pour out water above 300 °C, supporting life that doesn\'t depend on sunlight.'],
+ [2600,'life','🪱','ジャイアントチューブワーム','Giant tube worm','熱水噴出孔のまわりで暮らします。口がなく、体の中の細菌から栄養をもらいます。','Lives at vents with no mouth, fed by bacteria inside its body.'],
+ [2992,'life','🐳','アカボウクジラ','Cuvier\'s beaked whale','哺乳類の潜水記録 2,992m。2 時間以上潜っていることもあります。','Holds the mammal dive record, 2,992 m, and can stay down over two hours.'],
+ [3700,'cmp','📏','海の平均の深さ','Average ocean depth','海の深さを平均すると、およそ 3,700m です。','The average depth of the ocean is about 3,700 m.'],
+ [3776,'cmp','🗻','富士山 3,776m','Mt. Fuji, 3,776 m','富士山を沈めると、頂上がちょうどこの深さです。','Sink Mt. Fuji and its summit would be right here.'],
+ [3800,'wreck','🚢','タイタニック号','RMS Titanic','1912 年に沈んだ豪華客船。約 3,800m の海底で、1985 年に見つかりました。','Sank in 1912; found in 1985 at about 3,800 m.'],
+ [4000,'sci','❄️','400 気圧・2°C','400 atm, 2 °C','水温は 2°C 前後。1cm² あたり約 400kg の重さがかかっています。','About 2 °C, with roughly 400 kg pressing on every square centimetre.'],
+ [4200,'life','🐟','ナガヅエエソ','Tripod fish','長いひれを三脚のように立てて海底に立ち、流れてくるエサを待ちます。','Stands on stilt-like fins on the seabed, waiting for food to drift by.'],
+ [4700,'wreck','⚓','戦艦ビスマルク','Battleship Bismarck','1941 年に沈んだドイツの戦艦。約 4,700m の海底で、1989 年に見つかりました。','German battleship sunk in 1941, found in 1989 at about 4,700 m.'],
+ [4800,'life','🐷','センジュナマコ','Sea pig','深海の泥の上を歩く、ブタのような姿のナマコ。泥の中の栄養を食べます。','A pig-like sea cucumber that walks on the muddy abyssal floor.'],
+ [5000,'sci','🟤','深海平原','Abyssal plain','海底の大部分は、4,000〜6,000m の平らな泥の平原です。上から「マリンスノー」が降り積もります。','Most of the seafloor is flat mud plain at 4,000–6,000 m, dusted by falling "marine snow".'],
+ [6000,'sci','🕳','超深海（海溝）の入口','Into the trenches','6,000m より深い場所は、海溝などの、海のごく一部だけです。','Only trenches and a tiny fraction of the ocean go deeper than 6,000 m.'],
+ [6500,'human','🇯🇵','しんかい6500','Shinkai 6500','日本の有人潜水調査船。名前のとおり 6,500m まで潜れます。','Japan\'s crewed research submersible, rated — as its name says — to 6,500 m.'],
+ [6865,'wreck','⚓','サミュエル・B・ロバーツ','USS Samuel B. Roberts','2022 年に約 6,865m で見つかった、世界でいちばん深い所にある沈没船です。','Found in 2022 at about 6,865 m — the deepest shipwreck ever located.'],
+ [6957,'life','🐙','ダンボ・オクトパス','Dumbo octopus','耳のようなひれで泳ぐタコ。約 7,000m で撮影された記録があります。','Swims with ear-like fins; filmed at nearly 7,000 m.'],
+ [7900,'life','🐟','マリアナスネイルフィッシュ','Mariana snailfish','8,000m 前後にすむ、半透明でやわらかい魚です。','A soft, translucent fish living around 8,000 m.'],
+ [8020,'sci','🇯🇵','日本海溝','Japan Trench','日本の東の沖にある海溝。深さは 8,000m を超えます。','Off Japan\'s east coast, plunging beyond 8,000 m.'],
+ [8336,'life','📸','いちばん深い所で撮影された魚','Deepest fish ever filmed','2022 年、伊豆・小笠原海溝の約 8,336m で、スネイルフィッシュの仲間が撮影されました。','A snailfish filmed at about 8,336 m in the Izu–Ogasawara Trench, 2022.'],
+ [8849,'cmp','🏔','エベレスト 8,849m','Mt. Everest, 8,849 m','世界でいちばん高い山を沈めても、頂上の上にまだ 2,000m 以上の水が残ります。','Sink the highest mountain and over 2,000 m of water would still cover its peak.'],
+ [9780,'sci','🌊','伊豆・小笠原海溝','Izu–Ogasawara Trench','日本の南の海溝。いちばん深い所は 9,700m を超えます。','South of Japan, reaching more than 9,700 m.'],
+ [10000,'sci','🧱','1,000 気圧','1,000 atmospheres','1cm² あたり約 1 トン。指先に乗用車が乗っているくらいの重さです。','About a tonne on each square centimetre — like a car balanced on your fingertip.'],
+ [10500,'life','🦐','カイコウオオソコエビ','Hirondellea gigas','海溝の底で暮らす、小さなエビのような生き物。沈んできた木などを食べるとされます。','A shrimp-like amphipod of the trench floor, thought to feed on sunken wood.'],
+ [10880,'human','🎈','トリエステ号（1960 年）','Trieste (1960)','ジャック・ピカールとドン・ウォルシュが、人類で初めて海のいちばん深い所にたどり着きました。','Jacques Piccard and Don Walsh became the first to reach the deepest point.'],
+ [10895,'human','🎬','ジェームズ・キャメロン（2012 年）','James Cameron (2012)','映画監督が、1 人乗りの潜水艇「ディープシー・チャレンジャー」で到達しました。','The film director reached it solo in the Deepsea Challenger.'],
+ [10910,'human','🧭','ヴィクター・ヴェスコヴォ（2019 年）','Victor Vescovo (2019)','潜水艇「リミティング・ファクター」で、何度も底まで潜りました。','Made repeated dives to the bottom in the sub Limiting Factor.'],
+ [10935,'sci','🏁','チャレンジャー海淵','Challenger Deep','マリアナ海溝の、地球の海でいちばん深い場所。深さは測り方によって、約 10,900〜10,935m とされます。','The deepest point in Earth\'s oceans, in the Mariana Trench — measured at roughly 10,900–10,935 m.']
+];
+
+/* ================= 図鑑 1 回目：浅い海の生き物（数字はだいたいの値） ================= */
+const E2 = [
+ [0.5,'life','🪼','カツオノエボシ','Portuguese man o\'war','青い浮き袋で海面を漂う、クラゲに似た生き物。実は小さな個体が集まった「群体」です。触手の毒はとても強いです。','A floating colony rather than a single animal, with a blue sail and powerfully venomous tentacles.',{a:['jelly','#6aa8ff'],s:30,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [1,'life','🦈','ジンベエザメ','Whale shark','世界でいちばん大きな魚。大きな口でプランクトンを吸い込んで食べる、おとなしいサメです。','The largest fish on Earth, a gentle filter-feeder of plankton.',{a:['shark','#5a7a9a'],s:1200,w:['熱帯・亜熱帯の海','Tropical and subtropical seas']}],
+ [3,'life','🦦','ラッコ','Sea otter','あお向けに浮かんで、おなかの上で貝を石で割って食べます。','Floats on its back and cracks shellfish on a stone resting on its belly.',{s:130,w:['北太平洋の沿岸','North Pacific coasts']}],
+ [4,'life','🐟','カタクチイワシ','Japanese anchovy','大きな群れで泳ぐ小さな魚。煮干しやしらすになり、海の多くの生き物の食べ物にもなります。','A small schooling fish, dried as niboshi in Japan and food for countless sea animals.',{a:['fish','#9fb8c8',.3],s:15,w:['日本近海','Around Japan']}],
+ [5,'life','🦞','イセエビ','Japanese spiny lobster','岩のすき間にかくれて暮らすエビ。はさみはなく、長い触角が目印です。','Hides in rocky crevices; no claws, but long antennae.',{s:35,w:['日本の太平洋沿岸','Pacific coast of Japan']}],
+ [5,'life','🐠','ナンヨウハギ','Blue tang','鮮やかな青い体に黄色い尾。サンゴ礁で群れて泳ぎます。','Vivid blue with a yellow tail, darting around coral reefs.',{a:['fish','#2a62d8',.6],s:30,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']}],
+ [6,'life','🐢','アカウミガメ','Loggerhead turtle','大きな頭が特徴のウミガメ。日本の砂浜は、北太平洋でとても大切な産卵場所です。','A big-headed sea turtle; Japanese beaches are key nesting sites in the North Pacific.',{a:['turtle','#b07a3a'],s:100,w:['世界の暖かい海','Warm seas worldwide']}],
+ [7,'life','🐚','サザエ','Turban shell','とげのある巻き貝。岩場で海藻を食べて暮らします。','A spiny sea snail that grazes seaweed on rocky shores.',{s:10,w:['日本の沿岸','Coasts of Japan']}],
+ [8,'life','🌿','アマモ場','Eelgrass meadow','海の中に生える「草」の原っぱ。たくさんの小さな魚のゆりかごになります。','Underwater seagrass meadows, nurseries for many small fish.',{w:['日本各地の浅い湾','Shallow bays around Japan']}],
+ [9,'life','⭐','オニヒトデ','Crown-of-thorns starfish','とげだらけのヒトデ。サンゴを食べるので、増えすぎるとサンゴ礁が傷みます。','A thorny starfish that eats coral; outbreaks can damage reefs.',{s:35,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']}],
+ [10,'life','🦭','ジュゴン','Dugong','海草を食べる海の哺乳類。人魚の伝説のもとになったともいわれます。','A seagrass-grazing marine mammal, said to have inspired mermaid legends.',{a:['whale','#9a8a86',.6],s:300,w:['インド太平洋の浅い海','Shallow Indo-Pacific waters']}],
+ [12,'life','🐴','タツノオトシゴ','Seahorse','オスがおなかの袋で卵を育てて、子どもを産みます。','The male carries the eggs in a pouch and gives birth.',{s:10,w:['世界の浅い海','Shallow seas worldwide']}],
+ [12,'life','🐟','ミノカサゴ','Lionfish','扇のような長いひれが美しい魚。ひれのとげには毒があります。','Beautiful fan-like fins with venomous spines.',{a:['fish','#d8583a',.55],s:35,w:['インド太平洋','Indo-Pacific']}],
+ [18,'life','🐍','チンアナゴ','Spotted garden eel','砂から体を半分出して、流れてくるプランクトンを食べます。危ないとすぐに砂にもぐります。','Pokes half its body out of the sand to catch drifting plankton, ducking down when startled.',{a:['eel','#e8e0c8'],s:40,w:['インド太平洋の砂地','Indo-Pacific sand flats']}],
+ [20,'life','🐟','マンボウ','Ocean sunfish','平たくて丸い、とても重くなる魚。一度にとても多くの卵を産むといわれます。','A flat, round and very heavy fish, said to release enormous numbers of eggs.',{a:['fish','#8a9aaa',1],s:300,w:['熱帯〜温帯の海','Tropical to temperate oceans']}],
+ [21,'life','🐟','ナポレオンフィッシュ','Humphead wrasse','おでこが大きくふくらんだ、サンゴ礁の大きな魚。','A huge reef fish with a bulging forehead.',{a:['fish','#3a9a8a',.55],s:200,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']}],
+ [22,'life','🦈','ネムリブカ','Whitetip reef shark','昼は岩の下で休み、夜に狩りをするサンゴ礁のサメ。ひれの先が白いのが目印です。','Rests under ledges by day and hunts at night; white-tipped fins.',{a:['shark','#7a8a98'],s:160,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']}],
+ [24,'life','🪁','マンタ（オニイトマキエイ）','Manta ray','翼のようなひれで、空を飛ぶように泳ぐ大きなエイ。プランクトンを食べます。','A giant ray that flies through the water on wing-like fins, feeding on plankton.',{a:['ray','#3a4a5a'],s:700,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [25,'life','🦑','アオリイカ','Bigfin reef squid','大きなひれで泳ぐイカ。体の色を一瞬で変えられます。','Swims with broad fins and changes colour in an instant.',{a:['squid','#d8a8a0'],s:45,w:['日本〜インド太平洋','Japan to the Indo-Pacific']}],
+ [27,'life','🐙','マダコ','Common octopus','とても賢いタコ。体の色や手ざわりを変えて、岩にまぎれます。','A clever octopus that changes colour and texture to blend into rocks.',{a:['octo','#c86a4a'],s:60,w:['世界の温かい浅い海','Warm shallow seas']}],
+ [33,'life','🐟','クエ','Longtooth grouper','岩場にすむ大きなハタの仲間です。','A large rock-dwelling grouper.',{a:['fish','#7a6a5a',.5],s:130,w:['日本〜東シナ海','Japan to the East China Sea']}],
+ [38,'life','🐌','ウミウシ','Sea slug (nudibranch)','貝がらを持たない巻き貝の仲間。色や形がとても多彩で、「海の宝石」と呼ばれます。','Shell-less sea snails in dazzling colours, nicknamed jewels of the sea.',{s:5,w:['世界の海','Oceans worldwide']}],
+ [42,'life','🦈','シュモクザメ','Hammerhead shark','頭がかなづちの形。左右に離れた目で、広い範囲を見渡します。','A hammer-shaped head with widely spaced eyes for a broad view.',{a:['shark','#8a98a8'],s:400,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [50,'life','🐟','クロマグロ','Pacific bluefin tuna','とても速く泳ぐ、海のスプリンター。数百 m まで潜ることもあります。','A very fast ocean sprinter that also dives hundreds of metres.',{a:['fish','#2a3a6a',.42],s:300,w:['北太平洋','North Pacific']}],
+ [55,'life','🐟','カツオ','Skipjack tuna','群れで泳ぎ回る魚。おなかのしま模様が目印で、かつお節になります。','A schooling fish with a striped belly, the source of katsuobushi.',{a:['fish','#3a5a8a',.42],s:100,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [60,'life','🦈','ホホジロザメ','Great white shark','大きな肉食のサメ。体温を周りの水より高く保てます。','A large predatory shark that keeps its body warmer than the water.',{a:['shark','#6a7a8a'],s:600,w:['世界の温帯の海','Temperate oceans worldwide']}],
+ [65,'life','🐬','シャチ','Orca','家族の群れで暮らし、群れごとに違う「方言」で鳴き合います。','Lives in family pods, each with its own call dialect.',{a:['whale','#1a1a22',.8],s:800,w:['世界中の海','All oceans']}],
+ [70,'life','🐟','マダイ','Red seabream','お祝いの魚としておなじみ。赤い体に青い点が散らばります。','Japan\'s celebration fish, red with blue speckles.',{a:['fish','#e86a7a',.5],s:100,w:['日本近海','Around Japan']}],
+ [75,'life','🐟','ヒラメ','Olive flounder','砂の上に平たく寝そべる魚。育つと、両目が体の片側に寄ります。','Lies flat on sand; as it grows, both eyes move to one side.',{a:['ray','#b09a7a'],s:100,w:['日本近海','Around Japan']}],
+ [85,'life','🐋','ザトウクジラ','Humpback whale','長い胸びれと、オスの「歌」で知られるクジラ。冬は沖縄や小笠原の暖かい海にやって来ます。','Known for long flippers and male song; winters in warm waters off Okinawa and Ogasawara.',{a:['whale','#3a4a5a',1],s:1500,w:['世界中の海','All oceans']}],
+ [95,'life','🐟','ブリ','Japanese amberjack','大きくなるにつれて名前が変わる「出世魚」です。','A promotion fish in Japan whose name changes as it grows.',{a:['fish','#5a7a9a',.38],s:100,w:['日本近海','Around Japan']}],
+ [100,'life','🐙','ミズダコ','Giant Pacific octopus','世界でいちばん大きくなるタコ。腕を広げると数 m になります。','The largest octopus species, spanning several metres.',{a:['octo','#b85a4a'],s:500,w:['北太平洋','North Pacific']}],
+ [150,'life','🦈','メガマウスザメ','Megamouth shark','大きな口を持つ、めったに見つからないサメ。昼は深く、夜は浅い所へ上がるとされます。','A rarely seen big-mouthed shark, thought to rise shallower at night.',{a:['shark','#4a4a5a'],s:550,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [160,'life','🐟','タチウオ','Largehead hairtail','銀色の刀のような細長い魚。頭を上にして、立ったまま泳ぐことがあります。','A silver, sword-like fish that sometimes hovers head-up.',{a:['eel','#c8d4e0'],s:150,w:['日本近海','Around Japan']}],
+ [180,'life','🐟','キアンコウ','Goosefish','海底でじっと待ち、頭の「さお」でエサをおびき寄せます。冬の鍋の魚としておなじみです。','Waits on the seabed and lures prey with a rod on its head; a winter hot-pot favourite in Japan.',{a:['fish','#8a6a4a',.7],s:150,w:['北西太平洋','Northwest Pacific']}],
+ [220,'life','🦐','サクラエビ','Sakura shrimp','透きとおった桜色の小さなエビ。昼は深く、夜は浅い所に上がってきます。日本では駿河湾が有名です。','A tiny translucent pink shrimp that rises at night; famous in Japan\'s Suruga Bay.',{s:4,w:['駿河湾、台湾近海','Suruga Bay, off Taiwan']}]
+];
+const EXTRA = {
+ 'Moon jellyfish':{a:['jelly','#cfe0ff'],s:30,w:['世界の沿岸','Coasts worldwide']},
+ 'Clownfish':{a:['fish','#ff7a2a',.55],s:10,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']},
+ 'Green sea turtle':{a:['turtle','#5a8a5a'],s:120,w:['世界の暖かい海','Warm seas worldwide']},
+ 'Blue whale':{a:['whale','#4a6a8a',1],s:3000,w:['世界中の海','All oceans']},
+ 'Coelacanth':{a:['fish','#4a5a8a',.5],s:200,w:['南アフリカ〜インドネシア近海','Off southern Africa and Indonesia']},
+ 'Firefly squid':{a:['squid','#6a8ac8'],s:7,w:['日本海（富山湾など）','Sea of Japan, e.g. Toyama Bay']},
+ 'Bottlenose dolphin':{a:['whale','#7a8a9a',.5],s:350,w:['世界の暖かい海〜温帯の海','Tropical to temperate seas']},
+ 'Japanese spider crab':{s:370,w:['日本の太平洋側','Pacific side of Japan']},
+ 'Lanternfish':{a:['fish','#4a6a9a',.35],s:10,w:['世界中の海','All oceans']},
+ 'Barreleye':{a:['fish','#6a7a8a',.4],s:15,w:['北太平洋','North Pacific']},
+ 'Giant squid':{a:['squid','#c8584a'],s:1200,w:['世界中の深い海','Deep oceans worldwide']},
+ 'Frilled shark':{a:['eel','#6a5a4a'],s:200,w:['世界の深い海（駿河湾など）','Deep seas, incl. Suruga Bay']},
+ 'Vampire squid':{a:['octo','#7a2a3a'],s:30,w:['世界の暖かい深い海','Warm deep seas']},
+ 'Giant isopod':{s:40,w:['大西洋西部、メキシコ湾など','Western Atlantic, Gulf of Mexico']},
+ 'Leatherback turtle':{a:['turtle','#3a3a44'],s:200,w:['世界中の海','All oceans']},
+ 'Anglerfish':{a:['fish','#3a2a2a',.75],s:20,w:['世界の深い海','Deep oceans worldwide']},
+ 'Gulper eel':{a:['eel','#2a2a3a'],s:100,w:['世界の深い海','Deep oceans worldwide']},
+ 'Sperm whale':{a:['whale','#4a4a52',1],s:1800,w:['世界中の深い海','Deep oceans worldwide']},
+ 'Greenland shark':{a:['shark','#5a5a62'],s:550,w:['北大西洋・北極海','North Atlantic and Arctic']},
+ 'Hydrothermal vents':{w:['沖縄トラフ、東太平洋海膨、大西洋中央海嶺など（見られるのは潜水艇や無人探査機だけです）','Okinawa Trough, East Pacific Rise, Mid-Atlantic Ridge (reachable only by submersible or ROV)']},
+ 'Giant tube worm':{s:200,w:['東太平洋海膨、ガラパゴスリフト','East Pacific Rise, Galápagos Rift']},
+ 'RMS Titanic':{w:['北大西洋（カナダ・ニューファンドランド島の沖）','North Atlantic, off Newfoundland']},
+ 'Battleship Bismarck':{w:['北大西洋（フランス・ブレストの沖）','North Atlantic, west of Brest']},
+ 'Dumbo octopus':{a:['octo','#e8a8b8'],s:30,w:['世界の深い海','Deep oceans worldwide']},
+ 'Mariana snailfish':{a:['fish','#e8d8e0',.35],s:30,w:['マリアナ海溝','Mariana Trench']}
+};
+
+/* ================= 図鑑 2 回目：薄明かりの層〜真っ暗な層（数字はだいたいの値） ================= */
+const E3 = [
+ [150,'sci','🌡','水温躍層','Thermocline','海面の温かい水と、下の冷たい水の境目。ここを過ぎると、水温が急に下がります。','The boundary where warm surface water gives way to cold deep water; temperature drops quickly.',{w:['世界中の海','All oceans']}],
+ [260,'life','🐟','ムネエソの仲間','Hatchetfish','手斧のような形の、銀色の薄い魚。おなかの光で、下から見たときの自分の影を消します。','A thin silver fish shaped like a hatchet; belly lights erase its silhouette from below.',{a:['fish','#b8c8d8',.9],s:6,w:['世界中の海','All oceans']}],
+ [280,'life','🫧','クシクラゲ','Comb jelly','体の「くし板」が光を受けて、虹色に輝きながら泳ぎます。自分で光る種類もいます。','Rows of beating combs scatter light into rainbows as it swims; some species also glow.',{a:['jelly','#c8f0ff'],s:10,w:['世界中の海','All oceans']}],
+ [300,'life','🐟','リュウグウノツカイ','Giant oarfish','長さ 5m を超えることもある、帯のような魚。「竜宮の使い」と呼ばれ、まれに海岸に打ち上げられます。','A ribbon-like fish that can exceed 5 m; occasionally washes ashore.',{a:['eel','#d8dde8'],s:500,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [320,'life','🐟','メカジキ','Swordfish','剣のような長い上あごを持つ魚。目と脳を温める特別な仕組みで、冷たい深い海でも狩りができます。','A sword-billed fish that warms its eyes and brain to hunt in cold deep water.',{a:['fish','#4a5a7a',.35],s:300,w:['世界の暖かい海〜温帯の海','Tropical to temperate oceans']}],
+ [350,'life','🐟','アカマンボウ','Opah','円盤のような赤い魚。体全体の温度を、周りの水より高く保てるめずらしい魚です。','A disc-shaped red fish — one of the few fish that keep the whole body warmer than the water.',{a:['fish','#d8504a',1],s:150,w:['世界の暖かい海〜温帯の海','Tropical to temperate oceans']}],
+ [400,'sci','📡','深海散乱層','Deep scattering layer','昼の間、たくさんの小さな生き物が集まっている層。船の音波でまるで「偽の海底」のように映ります。夜になると浅い所へ上がり、朝にまた沈みます。','A daytime layer so crowded with small animals that sonar mistakes it for a false seafloor; it rises at night and sinks at dawn.',{w:['世界中の海','All oceans']}],
+ [420,'life','🐚','オウムガイ','Chambered nautilus','うずまきの殻を持つ、イカやタコの仲間。殻の中の空気の量を変えて、浮き沈みします。','A shelled relative of squid and octopus that adjusts gas in its shell to rise and sink.',{s:20,w:['西太平洋のサンゴ礁の深い斜面','Deep slopes of Western Pacific reefs']}],
+ [450,'life','🪼','クダクラゲの仲間','Siphonophore','たくさんの小さな個体がつながって、1 匹のように暮らす生き物。長さ 40m を超える例も見つかっています。','A chain of tiny individuals living as one; specimens over 40 m long have been seen.',{a:['jelly','#f0d0ff'],s:4000,w:['世界中の海','All oceans']}],
+ [480,'life','🦈','フジクジラ','Lanternshark','「クジラ」と呼ばれますが、小さなサメです。おなかが光り、下から見たときに姿を隠します。','Despite its Japanese name ("whale"), a small shark with a glowing belly for camouflage.',{a:['shark','#3a3a4a'],s:45,w:['日本近海の深い所','Deep waters around Japan']}],
+ [500,'life','🦈','ダルマザメ','Cookiecutter shark','クジラなどの大きな動物の体を、丸くかじり取って食べる小さなサメ。かじった跡がクッキーの型抜きのように見えます。','A small shark that bites round plugs from larger animals, leaving cookie-cutter wounds.',{a:['shark','#6a5a4a'],s:50,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [550,'life','🦈','ミツクリザメ','Goblin shark','長く突き出た鼻と、獲物に飛び出すあごを持つ深海のサメ。日本の東京湾や駿河湾でも見つかっています。','A deep-sea shark with a long snout and jaws that shoot forward; found off Tokyo Bay and Suruga Bay.',{a:['shark','#e0a8a8'],s:380,w:['日本近海など世界の深い海','Deep seas, incl. Japan']}],
+ [600,'sci','🫁','酸素の少ない層','Oxygen minimum zone','500〜1,000m ほどの深さには、水に溶けた酸素がとても少ない層があります。ここに適応した生き物だけが暮らせます。','Around 500–1,000 m, dissolved oxygen is very low; only adapted animals live here.',{w:['特に東太平洋・インド洋','Especially the eastern Pacific and Indian Ocean']}],
+ [620,'life','🐟','キンメダイ','Splendid alfonsino','大きな金色の目の赤い魚。暗い深い海で、わずかな光を集めます。','A red fish with large golden eyes that gather what little light there is.',{a:['fish','#e8484a',.55],s:50,w:['世界の暖かい海の深い所','Deep warm seas']}],
+ [650,'life','🦀','ズワイガニ','Snow crab','冬の味覚としておなじみのカニ。冷たい深い海の泥の上で暮らします。','A winter delicacy in Japan, living on cold, deep muddy bottoms.',{s:70,w:['日本海、オホーツク海、北太平洋','Sea of Japan, Okhotsk, North Pacific']}],
+ [720,'life','🐟','オニハダカの仲間','Bristlemouth','指ほどの大きさの小さな魚。数兆匹以上いると考えられ、地球でいちばん数が多い背骨のある動物とされます。','Finger-sized fish thought to number in the trillions — likely the most abundant vertebrate on Earth.',{a:['fish','#3a3a48',.3],s:7,w:['世界中の海','All oceans']}],
+ [760,'life','🦈','カグラザメ','Bluntnose sixgill shark','えらの穴が 6 つある、古い姿を残すサメ。夜になると浅い所へ上がってきます。','An ancient-looking shark with six gill slits that rises at night.',{a:['shark','#5a5a52'],s:480,w:['世界の深い海','Deep seas worldwide']}],
+ [800,'life','🐍','ホウライエソ','Viperfish','口に入りきらないほど長い牙を持つ魚。体の光る点で獲物をおびき寄せます。','Its fangs are too long to fit in its mouth; glowing spots lure prey.',{a:['eel','#2a3a4a'],s:30,w:['世界の暖かい海〜温帯の深い所','Tropical to temperate deep seas']}],
+ [850,'life','🦐','ヒオドシエビ','Deep-sea red shrimp','真っ赤なエビ。深い海には赤い光が届かないので、赤い体は「見えない色」になります。','A crimson shrimp — red is invisible in the deep, where red light never reaches.',{s:15,w:['世界の深い海','Deep seas worldwide']}],
+ [900,'life','🐍','ワニトカゲギスの仲間','Dragonfish','あごのひげの先が光る、細長い深海魚。赤い光を出して、獲物に気づかれずに見ることができる種類もいます。','A slender fish with a glowing chin barbel; some species see with red light their prey cannot detect.',{a:['eel','#1a1a2a'],s:40,w:['世界中の深い海','Deep oceans worldwide']}],
+ [980,'life','🪼','ムラサキカムリクラゲ','Atolla jellyfish','おそわれると、光の輪をぐるぐると回して見せます。「深海の防犯ベル」とも呼ばれます。','When attacked, it flashes a spinning ring of light — the "burglar alarm" jellyfish.',{a:['jelly','#b0283a'],s:15,w:['世界中の深い海','Deep oceans worldwide']}],
+ [1050,'life','🦑','ガラスイカの仲間','Glass squid','体がほとんど透明なイカ。目と内臓だけが見えて、光る器官で影を消します。','A nearly transparent squid; only its eyes and gut show, and light organs hide even those.',{a:['squid','#d8ecf8'],s:20,w:['世界中の海','All oceans']}],
+ [1200,'life','🧽','カイロウドウケツ','Venus\'s flower basket','ガラスの成分でできた、筒のような海綿。中にエビのつがいが閉じこめられて一生を過ごすので、結婚のお祝いの品にされました。','A glass sponge tube; a pair of shrimp often lives sealed inside for life, so it became a wedding gift in Japan.',{s:30,w:['西太平洋の深い所（日本近海など）','Deep Western Pacific, incl. Japan']}],
+ [1500,'life','🐟','オニキンメ','Fangtooth','体に比べてとても大きな牙を持つ魚。5,000m 近くまで見つかっています。','Proportionally huge teeth for its size; found down to nearly 5,000 m.',{a:['fish','#3a2a2a',.75],s:16,w:['世界中の深い海','Deep oceans worldwide']}],
+ [1600,'life','🦑','ダイオウホウズキイカ','Colossal squid','いちばん重くなるイカ。腕の吸盤には回るかぎ爪があります。南極の冷たい海にすみます。','The heaviest squid, with rotating hooks on its suckers; lives around Antarctica.',{a:['squid','#c8504a'],s:1000,w:['南極海','Southern Ocean']}],
+ [1700,'life','🐟','オニボウズギス','Black swallower','自分の体より大きな獲物も、おなかを大きく広げて丸のみにします。','Swallows prey larger than itself, its stomach stretching to fit.',{a:['fish','#2a2a32',.55],s:25,w:['世界の暖かい海の深い所','Deep tropical and subtropical seas']}],
+ [2100,'life','🦀','ゴエモンコシオリエビ','Yeti crab','白い毛におおわれた、熱水噴出孔のまわりのカニの仲間。毛に細菌を育てて食べると考えられています。','A hairy white crab of vents, thought to farm bacteria on its bristles; a relative lives near Okinawa.',{s:15,w:['沖縄トラフ、南太平洋の熱水域','Okinawa Trough, South Pacific vents']}],
+ [2400,'life','🐌','ウロコフネタマガイ','Scaly-foot snail','足が鉄のうろこでおおわれた、世界でめずらしい巻き貝。インド洋の熱水噴出孔だけで見つかっています。','A snail with a foot armoured in iron scales, found only at Indian Ocean vents.',{s:4,w:['インド洋の熱水噴出孔','Indian Ocean vents']}],
+ [2700,'sci','🦴','鯨骨生物群集','Whale fall','沈んだクジラの体は、何十年もかけて深海の生き物たちの「ごちそう」と「すみか」になります。','A sunken whale feeds and shelters deep-sea life for decades.',{w:['世界中の深い海（日本近海でも見つかっています）','Deep seas worldwide, incl. off Japan']}],
+ [2750,'life','🪱','ホネクイハナムシ','Bone-eating worm','口も胃もなく、クジラの骨に根を張って、骨の中の栄養を体の中の細菌に分解してもらいます。','Mouthless worms that root into whale bones and rely on bacteria to digest them.',{s:3,w:['鯨骨のある深い海','Whale falls worldwide']}],
+ [3000,'life','🕷','ウミグモの仲間','Sea spider','体はとても小さいのに、脚を広げると 70cm 近くになる種類もいます。','Tiny-bodied, yet some species span nearly 70 cm across their legs.',{s:70,w:['世界中の海（特に極地の海）','Oceans worldwide, esp. polar seas']}],
+ [3300,'life','🐟','ソコダラの仲間','Grenadier','大きな頭と、細くとがったしっぽの魚。深海の海底でいちばんよく見かける魚の仲間のひとつです。','Big head, long tapering tail — among the most common fish on the deep seafloor.',{a:['eel','#8a7a6a'],s:80,w:['世界中の深い海','Deep oceans worldwide']}],
+ [3500,'life','⭐','クモヒトデの仲間','Brittle star','細長い腕をくねらせて動く、ヒトデの仲間。深海の海底に、たくさん並んでいることがあります。','Starfish relatives with whip-like arms, sometimes carpeting the deep seafloor.',{s:20,w:['世界中の深い海','Deep oceans worldwide']}],
+ [3900,'life','🦑','ミズヒキイカの仲間','Bigfin squid','腕の先が糸のように細長く、長さ 7m ほどになるとされる、めったに見られないイカです。','A rarely seen squid with elbowed, thread-like arms, thought to reach about 7 m.',{a:['squid','#e8d8d0'],s:700,w:['世界の深い海','Deep oceans worldwide']}]
+];
+E3.forEach(e => E.push(e));
+/* ================= 図鑑 3 回目：深海層〜海溝（数字はだいたいの値） ================= */
+const E4 = [
+ [4050,'sci','🧊','炭酸塩補償深度','Carbonate compensation depth','この深さより下では、冷たさと水圧で、貝がらなどの炭酸カルシウムが水に溶けてしまいます。','Below roughly here, cold and pressure dissolve calcium-carbonate shells.',{w:['世界中の海（深さは海によって違います）','All oceans (depth varies by ocean)']}],
+ [4300,'life','🪸','深海のサンゴ（ツノサンゴの仲間）','Deep-sea black coral','光のない深い海にも、ゆっくり育つサンゴがいます。数千年生きる群体も見つかっています。','Corals grow slowly even in the dark deep; some colonies are thousands of years old.',{s:200,w:['世界の深い海','Deep seas worldwide']}],
+ [4400,'life','🐟','ソコオクメウオの仲間','Cusk-eel','深海の海底をはうように泳ぐ、細長い魚の仲間。とても深い所まで見つかっています。','Slender bottom-hugging fish; one relative holds a record from over 8,000 m.',{a:['eel','#c8b8a8'],s:30,w:['世界中の深い海','Deep oceans worldwide']}],
+ [4500,'life','⭐','深海のヒトデ','Deep-sea starfish','泥の上をゆっくり動き、上から降ってくるマリンスノーや、小さな生き物を食べます。','Creeps over the mud, feeding on falling marine snow and small animals.',{s:25,w:['世界中の深海平原','Abyssal plains worldwide']}],
+ [4600,'life','🌸','ウミユリの仲間','Sea lily','茎で海底に立つ、花のような姿の生き物。ヒトデやウニの仲間で、何億年も前からいるとされます。','A flower-like relative of starfish, standing on a stalk — around for hundreds of millions of years.',{s:50,w:['世界の深い海','Deep seas worldwide']}],
+ [4900,'life','🫧','深海平原の泥の生き物','Abyssal mud life','深海平原の泥の中には、ゴカイや小さな貝の仲間がたくさん暮らしています。目に見えないほど小さな生き物まで含めると、種類はとても多いと考えられています。','The abyssal mud teems with worms, tiny clams and microscopic life — likely enormously diverse.',{w:['世界中の深海平原','Abyssal plains worldwide']}],
+ [5000,'life','🌵','オオグチボヤ','Predatory tunicate','大きな口を開けて、流れてくる小さな生き物を待ちかまえるホヤの仲間。日本の富山湾などでも見つかっています。','A sea squirt that waits with a wide open "mouth" for drifting prey; found in Japan\'s Toyama Bay.',{s:20,w:['日本近海、南極海など','Around Japan, Southern Ocean']}],
+ [5100,'sci','⚫','マンガン団塊','Manganese nodules','深海平原に転がる、黒いじゃがいものような石。何百万年もかけて、とてもゆっくり大きくなります。','Potato-sized black nodules on the abyssal plain, growing a few millimetres per million years.',{w:['太平洋のクラリオン・クリッパートン海域など','e.g. Clarion–Clipperton Zone, Pacific']}],
+ [5200,'life','🦐','深海のヨコエビ','Abyssal amphipod','落ちてきたエサにすぐ集まる、深海の「掃除屋」です。','Deep-sea scavengers that swarm any food that falls to the floor.',{s:5,w:['世界中の深い海','Deep oceans worldwide']}],
+ [5400,'life','🦀','シンカイコシオリエビの仲間','Squat lobster','はさみの長い、エビとカニの中間のような姿。深海の岩場や熱水域でよく見られます。','Long-clawed, between shrimp and crab — common on deep rocks and near vents.',{s:10,w:['世界の深い海','Deep seas worldwide']}],
+ [5600,'life','🐟','クサウオの仲間','Snailfish','体がやわらかく、うろこがない魚。浅い海から海溝の底まで、いろいろな深さに仲間がいます。','Soft, scaleless fish with relatives from tidepools to the deepest trenches.',{a:['fish','#e8d8e0',.35],s:25,w:['世界中の海','Oceans worldwide']}],
+ [5800,'life','🧽','ガラス海綿','Glass sponge','ガラスの成分の骨組みでできた海綿。深海で 1 万年以上生きると推定される例もあります。','Sponges built of glassy silica; some deep-sea individuals are estimated at over 10,000 years old.',{s:100,w:['世界の深い海','Deep seas worldwide']}],
+ [6100,'life','🪱','深海のナマコ（ユメナマコ）','Swimming sea cucumber','透きとおった赤い体で、ふわりと泳ぐナマコ。「首なしチキンモンスター」というあだ名もあります。','A translucent red sea cucumber that swims — nicknamed the "headless chicken monster".',{s:25,w:['世界の深い海','Deep seas worldwide']}],
+ [6300,'sci','🧲','プレートの沈み込み','Subduction','海溝は、海のプレートが別のプレートの下へ沈み込んでいく場所です。大きな地震と津波が起きやすいところでもあります。','Trenches mark where one tectonic plate sinks beneath another — places prone to great earthquakes and tsunamis.',{w:['太平洋をかこむ海溝など','Trenches around the Pacific']}],
+ [6400,'sci','🌊','津波の速さ','Tsunami speed','津波の速さは海の深さで決まります。深さ 6,000m ほどの海では、時速 800km ほどとジェット機並みの速さになります。浅い岸に近づくと速さが落ちて、波が高くなります。','Tsunami speed depends on depth: over ~6,000 m it can reach about 800 km/h, like a jet. Nearing shallow shores it slows and grows taller.',{w:['太平洋など','The Pacific and other oceans']}],
+ [6700,'life','🐟','アシロの仲間','Abyssal brotula','深い海溝の斜面で見つかる、細長い魚の仲間です。','Slender fish found on deep trench slopes.',{a:['eel','#d8c8b8'],s:40,w:['世界の海溝','Trenches worldwide']}],
+ [7000,'human','🤖','無人探査機の調査','Robotic explorers','人が乗れない深さは、カメラを積んだ無人の探査機や、エサで生き物を呼び寄せるカメラで調べます。','Where people can\'t go, cameras on robotic landers and baited traps reveal hadal life.',{w:['世界の海溝','Trenches worldwide']}],
+ [7300,'life','🦐','カイコウオオソコエビの仲間','Hadal amphipods','海溝の底に多い、ヨコエビの大きな仲間。数 cm〜十数 cm になります。','Large amphipods abundant at trench bottoms, several to over ten centimetres long.',{s:10,w:['マリアナ海溝、ケルマデック海溝など','Mariana, Kermadec trenches']}],
+ [7600,'life','🪼','海溝のクラゲ','Hadal jellyfish','海溝の深い所でも、ふわふわ漂うクラゲが撮影されています。','Jellyfish have been filmed drifting even in the deep trenches.',{a:['jelly','#e8c8e8'],s:15,w:['マリアナ海溝など','e.g. Mariana Trench']}],
+ [8200,'sci','🐟','魚がすめる限界','The fish depth limit','魚は、およそ 8,200〜8,400m より深くではすめないと考えられています。体の中の水圧のバランスを保てなくなるためだとされます。','Fish are thought to be unable to live much below about 8,200–8,400 m, as their bodies can no longer balance the pressure.',{w:['世界の海溝','Trenches worldwide']}],
+ [8400,'sci','🌊','ケルマデック海溝','Kermadec Trench','ニュージーランドの北にある海溝。深さは 10,000m を超えます。','North of New Zealand, plunging beyond 10,000 m.',{w:['南太平洋','South Pacific']}],
+ [9200,'life','🪱','海溝のナマコ','Hadal sea cucumbers','海溝の底では、ナマコの仲間がとても多い生き物のひとつです。','Sea cucumbers are among the most abundant animals on trench floors.',{s:20,w:['世界の海溝','Trenches worldwide']}],
+ [9700,'life','🦠','有孔虫','Foraminifera','殻を持つ、目に見えないほど小さな生き物。チャレンジャー海淵の泥の中にも、たくさん暮らしています。','Tiny single-celled organisms with shells, abundant even in Challenger Deep mud.',{w:['チャレンジャー海淵など','Including Challenger Deep']}],
+ [10000,'sci','🌊','トンガ海溝','Tonga Trench','南太平洋の海溝で、世界で 2 番目に深いとされます（約 10,800m）。','In the South Pacific, often ranked the second deepest (about 10,800 m).',{w:['南太平洋','South Pacific']}],
+ [10050,'sci','🌊','フィリピン海溝','Philippine Trench','フィリピンの東にある海溝。深さは 10,000m を超えます。','East of the Philippines, deeper than 10,000 m.',{w:['西太平洋','Western Pacific']}],
+ [10700,'sci','🧴','海溝の底のごみ','Plastic at the bottom','チャレンジャー海淵の近くでも、プラスチックの袋が見つかっています。人の暮らしは、海のいちばん深い所までとどいています。','A plastic bag has been found near Challenger Deep — human traces reach even the deepest sea.',{w:['マリアナ海溝','Mariana Trench']}],
+ [10800,'life','🦠','底の微生物','Microbes of the deep','チャレンジャー海淵の泥の中にも、たくさんの微生物が暮らしています。地球の生き物がすめる場所の広さを教えてくれます。','Microbes thrive even in Challenger Deep mud, showing how far life reaches.',{w:['マリアナ海溝','Mariana Trench']}]
+];
+E4.forEach(e => E.push(e));
+
+
+/* ================= 図鑑 4 回目：歴史と探検・なぜ？・生き物の追加（数字はだいたいの値） ================= */
+const E5 = [
+ // 📜 歴史と探検
+ [0.8,'hist','🏴','海賊は今もいる','Pirates still exist','海賊は昔話ではありません。今もギニア湾、マラッカ・シンガポール海峡、ソマリア沖などで、船がおそわれる事件が起きています。各国の海軍や国際的な協力で、見張りが続けられています。','Piracy is not just history: ships are still attacked in the Gulf of Guinea, the Malacca and Singapore Straits and off Somalia, and navies patrol together to prevent it.',{w:['ギニア湾、マラッカ海峡、ソマリア沖など','Gulf of Guinea, Malacca Strait, off Somalia']}],
+ [11,'hist','⛵','メアリー・ローズ号','Mary Rose','1545 年に沈んだイギリス王ヘンリー 8 世の軍艦。約 11m の海底から、1982 年に引き上げられました。','Henry VIII\'s warship, sunk in 1545 and raised from about 11 m in 1982.',{w:['イギリス・ポーツマス沖','Off Portsmouth, England']}],
+ [32,'hist','🚢','ヴァーサ号','Vasa','1628 年、初めての航海で港を出てすぐに沈んだスウェーデンの軍艦。冷たい海で傷みにくく、1961 年にほぼそのままの姿で引き上げられました。','A Swedish warship that sank on its maiden voyage in 1628 and was raised almost intact in 1961.',{w:['スウェーデン・ストックホルム','Stockholm, Sweden']}],
+ [45,'hist','⚙️','アンティキティラ島の機械','Antikythera mechanism','1901 年、ギリシャの沈没船から見つかった、2,000 年以上前の歯車の機械。天体の動きを計算したと考えられています。','A 2,000-year-old geared device found in a Greek shipwreck in 1901, thought to model the heavens.',{w:['ギリシャ・アンティキティラ島沖','Off Antikythera, Greece']}],
+ [60,'hist','📡','音で海の深さを測る','Echo sounding','1920 年代から、船から音を出して、はね返ってくるまでの時間で深さを測るようになりました。今の海底の地図のもとになっています。','From the 1920s ships measured depth by timing echoes — the basis of today\'s seafloor maps.',{w:['世界中の海','All oceans']}],
+ [340,'hist','⚓','戦艦大和','Battleship Yamato','1945 年に沈んだ日本の巨大な戦艦。鹿児島の沖、約 340m の海底に眠っています。','Japan\'s giant battleship, sunk in 1945, rests about 340 m deep off Kagoshima.',{w:['東シナ海（鹿児島県の沖）','East China Sea, off Kagoshima']}],
+ [600,'hist','💰','サン・ホセ号','San José galleon','1708 年に沈んだスペインの帆船。たくさんの金銀を積んでいたとされ、2015 年に約 600m の海底で見つかりました。','A Spanish galleon sunk in 1708, said to carry vast treasure; found at about 600 m in 2015.',{w:['カリブ海（コロンビアの沖）','Caribbean, off Colombia']}],
+ [923,'hist','🔵','潜水球の 923m','The bathysphere, 923 m','1934 年、ビービとバートンが鉄の球に乗って、ケーブルでつるされたまま約 923m まで潜りました。人が初めて深海を自分の目で見た瞬間です。','In 1934 Beebe and Barton descended to about 923 m in a steel sphere on a cable — the first human eyes on the deep.',{w:['大西洋（バミューダ沖）','Atlantic, off Bermuda']}],
+ [2500,'hist','🔦','熱水噴出孔の発見（1977 年）','Vents discovered (1977)','有人潜水艇アルビンが、ガラパゴス諸島の近くで熱水噴出孔と、そこに暮らす生き物を初めて見つけました。太陽にたよらない生き物の世界の発見でした。','The submersible Alvin found vents and their life near the Galápagos — life that doesn\'t depend on the sun.',{w:['ガラパゴス諸島の近く','Near the Galápagos Islands']}],
+ [3000,'hist','🔌','海底ケーブル','Undersea cables','国と国をつなぐインターネットの通信の、ほとんどは海底のケーブルを通っています。最初の大西洋横断の電信ケーブルは 1858 年に引かれました。','Most intercontinental internet traffic travels through undersea cables; the first transatlantic telegraph cable was laid in 1858.',{w:['世界中の海','All oceans']}],
+ [3008,'hist','🧭','エンデュランス号','Endurance','1915 年、南極の氷に閉じこめられて沈んだシャクルトンの探検船。2022 年、約 3,000m の海底で見つかりました。','Shackleton\'s ship, crushed by Antarctic ice in 1915, was found at about 3,000 m in 2022.',{w:['南極・ウェッデル海','Weddell Sea, Antarctica']}],
+ [4500,'hist','🛸','アルビン号','Alvin','1964 年からアメリカで活躍している有人潜水艇。何千回も深海に潜り、タイタニック号の調査にも使われました。','A US crewed submersible in service since 1964, with thousands of dives including Titanic surveys.',{w:['アメリカ・ウッズホール海洋研究所','Woods Hole Oceanographic Institution, USA']}],
+ [8184,'hist','📏','チャレンジャー号の探検','HMS Challenger expedition','1872〜1876 年、イギリスの船が世界の海をめぐって深さを測り、深海の生き物を集めました。マリアナ海溝で約 8,184m を測り、「チャレンジャー海淵」の名前のもとになりました。','In 1872–76 this British ship surveyed the world\'s oceans; its sounding of about 8,184 m in the Mariana Trench gave Challenger Deep its name.',{w:['世界一周の航海','Round-the-world voyage']}],
+ [10911,'hist','🇯🇵','無人探査機「かいこう」','ROV Kaikō','1995 年、日本の無人探査機「かいこう」が、チャレンジャー海淵の底に到達しました。','In 1995 Japan\'s robotic Kaikō reached the bottom of Challenger Deep.',{w:['マリアナ海溝','Mariana Trench']}],
+ // 🔎 なぜ？
+ [1,'why','🧂','なぜ海はしょっぱい？','Why is the sea salty?','雨が長い時間をかけて岩の中の塩分を溶かし、川が海に運んできたからです。海水 1L には、約 35g の塩が溶けています。','Rain slowly dissolves minerals from rock and rivers carry them to the sea; each litre holds about 35 g of salt.',{}],
+ [3,'why','💙','なぜ海は青い？','Why is the sea blue?','水は赤い光を吸い込みやすく、青い光ははね返しやすいからです。空の色を映しているだけではありません。','Water absorbs red light and scatters blue — it isn\'t just reflecting the sky.',{}],
+ [40,'why','🫧','急に浮き上がるとどうなる？','What if you surface too fast?','深い所で体に溶けた窒素が、急に上がると泡になり、体を傷めることがあります（減圧症）。ダイバーはゆっくり上がり、途中で止まって休みます。','Nitrogen dissolved under pressure can form bubbles if you rise too fast (decompression sickness), so divers ascend slowly with stops.',{}],
+ [900,'why','🔴','なぜ深海の生き物は赤や黒？','Why are deep animals red or black?','深い海には赤い光が届かないので、赤い体は見えない色になります。黒も、暗い海にとけこむ色です。','Red light never reaches the deep, so red bodies are invisible there; black blends into the dark as well.',{}],
+ [1200,'why','🐋','なぜクジラは深く潜れる？','How do whales dive so deep?','潜るときに肺をつぶして空気を減らし、筋肉にたくさんの酸素をためておけるからです。','They let their lungs collapse and store huge amounts of oxygen in their muscles.',{}],
+ [1500,'why','❄️','深海に雪が降る？','Does it snow in the deep?','上の海で死んだプランクトンのかけらなどが、雪のようにゆっくり降ってきます。「マリンスノー」と呼ばれ、深海の生き物の大切な食べ物です。','Bits of dead plankton drift down like snow — "marine snow", a key food source for deep life.',{}],
+ [2000,'why','🦑','なぜ深海には大きな生き物がいる？','Why are some deep animals giant?','冷たい海では成長がゆっくりで長生きになり、体が大きくなりやすいと考えられています。「深海巨大症」と呼ばれます。','Cold slows growth and extends life, which may lead to larger bodies — "deep-sea gigantism".',{}],
+ [3200,'why','💪','なぜ水圧でつぶれない？','Why don\'t they get crushed?','体のほとんどが水で、空気のすき間がないからです。水はほとんど縮まないので、中と外の圧力がつり合います。体の中のたんぱく質を守る、特別な物質を持つ魚もいます。','Their bodies are mostly water with no air spaces, and water barely compresses; some fish also carry molecules that protect their proteins.',{}],
+ [6200,'why','🌡','海溝の底はなぜ少し温かい？','Why is the trench floor a bit warmer?','とても深い所では、水が水圧で押し縮められて、少しだけ温度が上がります。','At extreme depth, water is compressed by pressure and warms slightly.',{}],
+ // 🐟 生き物の追加
+ [0.3,'life','🐉','アオミノウミウシ','Blue dragon','海面にさかさまに浮かぶ、青いウミウシ。カツオノエボシを食べて、その毒を自分の体にためこみます。','A blue sea slug floating upside down, eating man o\' war and storing their venom.',{s:3,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [3,'life','🟣','ムラサキウニ','Purple sea urchin','岩場でとげを動かしながら、海藻を食べます。','Grazes seaweed on rocky shores, moving on its spines.',{s:6,w:['日本の沿岸','Coasts of Japan']}],
+ [5,'life','🥒','マナマコ','Japanese sea cucumber','砂や泥を食べて、中の栄養をとります。海底の「掃除屋」です。','Eats sand and mud for nutrients — a cleaner of the seabed.',{s:25,w:['日本の沿岸','Coasts of Japan']}],
+ [6,'life','🎈','ハリセンボン','Porcupinefish','おどろくと水を吸って、とげだらけの風船のようにふくらみます。','Puffs up into a spiky ball when frightened.',{a:['fish','#c8b080',.95],s:40,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [10,'life','🐍','ウツボ','Moray eel','岩のすき間から顔を出す、するどい歯の魚。口の中にあるもう一つのあごで、獲物を引き込みます。','Peers from crevices and uses a second set of jaws in its throat to pull prey in.',{a:['eel','#8a7a3a'],s:80,w:['日本〜世界の暖かい海','Japan and warm seas']}],
+ [12,'life','🐍','エラブウミヘビ','Sea krait','海で暮らすヘビ。強い毒を持ちますが、おとなしい性格です。陸に上がって卵を産みます。','A venomous but docile sea snake that comes ashore to lay eggs.',{a:['eel','#4a6a9a'],s:120,w:['沖縄などの暖かい海','Warm seas such as Okinawa']}],
+ [15,'life','🐟','イシダイ','Striped beakfish','黒いしまの魚。かたい歯で、サザエやウニの殻もかみ砕きます。','A striped fish whose hard beak crushes turban shells and urchins.',{a:['fish','#d8d8c8',.6],s:50,w:['日本近海','Around Japan']}],
+ [15,'life','🦑','コブシメ','Broadclub cuttlefish','体の色や模様を、目まぐるしく変えるコウイカの仲間です。','A cuttlefish that flickers through colours and patterns.',{a:['squid','#c8a888'],s:50,w:['インド太平洋のサンゴ礁','Indo-Pacific reefs']}],
+ [20,'life','🐈','ネコザメ','Japanese bullhead shark','名前に「猫」が入るサメ。顔が猫に似ているから、という説があります。サザエをかみ砕いて食べます。','A shark with "cat" in its Japanese name — some say for its cat-like face. Crushes turban shells.',{a:['shark','#a8906a'],s:120,w:['日本近海','Around Japan']}],
+ [20,'life','🐟','カワハギ','Thread-sail filefish','口先が小さく、エサを上手にかすめとる魚。かたい皮をはいで料理するので、この名前があります。','A small-mouthed fish expert at stealing bait; its tough skin is peeled before cooking.',{a:['fish','#b8a888',.75],s:25,w:['日本近海','Around Japan']}],
+ [25,'life','🦈','シロワニ','Sand tiger shark','こわい顔に見えますが、おとなしいサメ。空気を飲みこんで、水中で浮いていられます。','Fearsome-looking but docile; gulps air to hover in the water.',{a:['shark','#a8988a'],s:300,w:['世界の暖かい海〜温帯の海','Warm and temperate seas']}],
+ [30,'life','🦈','イタチザメ','Tiger shark','体に虎のようなしま模様があるサメ。なんでも食べることで知られます。','Named for tiger-like stripes, and known for eating almost anything.',{a:['shark','#7a7a6a'],s:450,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [30,'life','🐟','バショウカジキ','Sailfish','帆のような大きな背びれを持つ、とても速く泳ぐ魚です。','A very fast fish with a huge sail-like dorsal fin.',{a:['fish','#3a5a9a',.4],s:300,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [50,'life','🦐','ナンキョクオキアミ','Antarctic krill','小さなエビのような生き物ですが、南極の海では、とてつもない数が群れています。クジラやペンギンの大切な食べ物です。','Tiny shrimp-like animals swarming in vast numbers — the food of whales and penguins.',{s:6,w:['南極海','Southern Ocean']}],
+ [200,'life','🐋','ナガスクジラ','Fin whale','シロナガスクジラに次いで大きなクジラ。とても速く泳げます。','The second-largest whale, and a very fast swimmer.',{a:['whale','#5a6a7a',1],s:2200,w:['世界中の海','All oceans']}],
+ [300,'life','🐳','シロイルカ（ベルーガ）','Beluga','真っ白なイルカの仲間。いろいろな鳴き声を出すので「海のカナリア」と呼ばれます。','A white whale called the "canary of the sea" for its many calls.',{a:['whale','#e8eef2',.6],s:450,w:['北極海とその周り','Arctic and sub-Arctic seas']}],
+ [500,'life','🐙','メンダコ','Japanese flapjack octopus','耳のようなひれで、ふわふわ泳ぐ小さなタコ。日本の深い海にすみます。','A small, flat octopus that flaps ear-like fins; lives off Japan.',{a:['octo','#e88a6a'],s:20,w:['日本近海の深い所','Deep waters off Japan']}],
+ [600,'life','🐟','ミズウオ','Longnose lancetfish','大きな口と高い背びれを持つ深海魚。おなかから、いろいろなものが見つかることで知られます。','A big-mouthed deep fish with a tall sail, famous for odd stomach contents.',{a:['eel','#c8c8d8'],s:200,w:['世界中の海','All oceans']}],
+ [800,'life','🦄','イッカク','Narwhal','長い 1 本の角のように見えるのは、実は歯です。冬には 1,000m を超えて潜ることもあります。','Its long "horn" is actually a tooth; it can dive beyond 1,000 m in winter.',{a:['whale','#8a8a92',.6],s:500,w:['北極海','Arctic Ocean']}],
+ [1000,'life','😐','ニュウドウカジカ（ブロブフィッシュ）','Blobfish','「世界一みにくい」と言われることがありますが、それは引き上げられて形が崩れた姿です。深海では、ふつうの魚の形をしています。','Called the world\'s ugliest — but only after being hauled up; at depth it looks like an ordinary fish.',{a:['fish','#d8a8a0',.7],s:30,w:['オーストラリア近海の深い所','Deep waters off Australia']}],
+ [1200,'life','🐚','シロウリガイ','Calyptogena clam','冷たい湧き水や熱水のそばで暮らす白い貝。体の中の細菌から栄養をもらいます。日本の相模湾でも見つかっています。','A white clam at seeps and vents, fed by bacteria in its gills; found in Japan\'s Sagami Bay.',{s:15,w:['相模湾など','e.g. Sagami Bay, Japan']}],
+ [2200,'life','🐟','ヨコヅナイワシ','Yokozuna slickhead','2016 年に日本の駿河湾で見つかった、大きな深海魚。深い海の「横綱」と名付けられました。','A large deep-sea fish found in Japan\'s Suruga Bay in 2016 and named after a sumo grand champion.',{a:['fish','#3a3a4a',.4],s:140,w:['駿河湾など','e.g. Suruga Bay, Japan']}]
+];
+E5.forEach(e => E.push(e));
+
+/* ================= 図鑑 5 回目：海の記録とくらべもの（数字はだいたいの値） ================= */
+const E6 = [
+ // 🏆 海の記録（いちばん◯◯）
+ [0.2,'rec','🐟','空を飛ぶ魚：トビウオ','Flying fish','胸びれを翼のように広げて、海面の上をすべるように飛びます。一度に 400m ほど飛んだ記録もあるとされます。','Spreads wing-like fins to glide over the waves — flights of around 400 m have been reported.',{a:['fish','#6a8ac8',.4],s:30,w:['世界の暖かい海','Warm oceans worldwide']}],
+ [0.4,'rec','🔬','いちばん小さな魚の仲間','Among the smallest fish','インドネシアの沼で見つかったコイの仲間など、大人でも 1cm に満たない魚がいます。海の魚でも、ハゼの仲間に 1cm ほどの種類がいます。','Some fish are under 1 cm long as adults, like a tiny carp relative from Indonesian swamps and certain marine gobies.',{s:1}],
+ [1.5,'rec','🦈','いちばん大きな魚','Largest fish','ジンベエザメ。長さ 12m を超えることもあるとされます。クジラは魚ではなく哺乳類なので、魚の 1 位はジンベエザメです。','The whale shark, which may exceed 12 m. Whales are mammals, so the fish record goes to the whale shark.',{a:['shark','#5a7a9a'],s:1200}],
+ [4,'rec','🐬','いちばん小さなクジラの仲間','Smallest whale relative','メキシコのカリフォルニア湾だけにすむコガシラネズミイルカ（バキータ）。1.5m ほどで、とても数が少なく、絶滅が心配されています。','The vaquita porpoise of Mexico\'s Gulf of California — about 1.5 m and critically endangered.',{a:['whale','#8a9aa8',.5],s:150,w:['カリフォルニア湾北部','Northern Gulf of California']}],
+ [28,'rec','⚡','いちばん速く泳ぐ魚','Fastest fish','バショウカジキやマカジキの仲間は、とても速く泳ぐ魚として知られます。時速 100km を超えるという話もありますが、実際に測った研究では、もっと遅いという結果もあります。','Sailfish and marlin are famed as the fastest fish; claims exceed 100 km/h, though measured speeds are often lower.',{a:['fish','#3a5a9a',.4],s:300}],
+ [80,'rec','🐋','いちばん大きな動物','Largest animal ever','シロナガスクジラ。長さ 30m 近く、重さは 150 トンを超えることもあります。恐竜を含めても、地球の歴史でいちばん大きな動物と考えられています。','The blue whale — nearly 30 m and over 150 tonnes, probably the largest animal in Earth\'s history.',{a:['whale','#4a6a8a',1],s:3000}],
+ [140,'rec','⏳','いちばん長生きの背骨のある動物','Longest-lived vertebrate','ニシオンデンザメ。数百年生きると推定されています。','The Greenland shark, estimated to live for centuries.',{a:['shark','#5a5a62'],s:550}],
+ [2992,'rec','🫁','いちばん深く潜る哺乳類','Deepest-diving mammal','アカボウクジラ。約 2,992m の潜水と、2 時間以上の潜水の記録があります。','Cuvier\'s beaked whale, with dives of about 2,992 m and over two hours.',{a:['whale','#7a6a5a',.6],s:650}],
+ // 📏 世界の建物とくらべる
+ [184,'cmp','🗼','スペースニードル 184m','Space Needle, 184 m','アメリカ・シアトルの展望タワー。海に立てると、てっぺんは光の届く層のすぐ下です。','Seattle\'s observation tower — its tip would sit just below the sunlit zone.',{w:['アメリカ・シアトル','Seattle, USA']}],
+ [200,'cmp','🏨','マリーナベイ・サンズ 約 200m','Marina Bay Sands, ~200 m','屋上に船のようなプールがある、シンガポールのホテル。ちょうど光の届く層の終わりあたりです。','Singapore\'s hotel with a ship-shaped rooftop pool — right at the end of the sunlit zone.',{w:['シンガポール','Singapore']}],
+ [330,'cmp','🗼','エッフェル塔 約 330m','Eiffel Tower, ~330 m','フランス・パリの塔。東京タワーとほぼ同じ高さです。','Paris\'s iron tower, almost the same height as Tokyo Tower.',{w:['フランス・パリ','Paris, France']}],
+ [350,'cmp','🎢','ストラトスフィア 約 350m','The STRAT, ~350 m','ラスベガスの高いタワー（今は「ザ・ストラット」）。てっぺんには、空中に飛び出す絶叫マシンがあります。','Las Vegas\'s tall tower (now The STRAT), with thrill rides hanging over the edge at the top.',{w:['アメリカ・ラスベガス','Las Vegas, USA']}],
+ [443,'cmp','🏙','エンパイア・ステート・ビル 約 443m','Empire State Building, ~443 m','ニューヨークの有名なビル。アンテナの先までで約 443m です。薄明かりの層の中まで届きます。','New York\'s landmark, about 443 m to its tip — reaching into the twilight zone.',{w:['アメリカ・ニューヨーク','New York, USA']}]
+];
+E6.forEach(e => E.push(e));
+
+/* ================= 図鑑 6 回目：もう少しだけ（数字はだいたいの値） ================= */
+const E7 = [
+ [2,'life','🦭','ゴマフアザラシ','Spotted seal','冬になると、北海道のオホーツク海の流氷の上で子育てをします。','Raises its pups on the drift ice of the Sea of Okhotsk off Hokkaido in winter.',{a:['whale','#a8a8b0',.5],s:170,w:['北海道〜ベーリング海','Hokkaido to the Bering Sea']}],
+ [14,'life','📦','ハコフグ','Boxfish','かたい箱のような体の魚。小さなひれを細かく動かして、ちょこちょこ泳ぎます。','A fish encased in a hard box, paddling along with tiny fins.',{a:['fish','#e8c84a',.85],s:30,w:['インド太平洋の浅い海','Shallow Indo-Pacific seas']}],
+ [26,'life','🐡','トラフグ','Tiger puffer','ふぐ料理でおなじみの魚。体の一部に強い毒があります。','The prized fugu, with powerful toxin in parts of its body.',{a:['fish','#6a6a5a',.7],s:70,w:['日本近海','Around Japan']}],
+ [100,'life','🦭','トド','Steller sea lion','いちばん大きなアシカの仲間。オスは 1 トンを超えることもあります。','The largest sea lion; males can exceed a tonne.',{a:['whale','#9a7a5a',.6],s:300,w:['北太平洋','North Pacific']}],
+ [300,'life','🐧','キングペンギン','King penguin','コウテイペンギンに次いで大きなペンギン。300m ほどまで潜ります。','The second-largest penguin, diving to around 300 m.',{s:95,w:['南極に近い島々','Sub-Antarctic islands']}],
+ [380,'life','🦈','アオザメ','Shortfin mako','いちばん速く泳ぐサメの仲間とされます。海面から高くジャンプすることもあります。','Considered the fastest shark, and a spectacular leaper.',{a:['shark','#3a5a9a'],s:350,w:['世界の暖かい海〜温帯の海','Tropical to temperate oceans']}],
+ [450,'life','🐟','アカムツ（のどぐろ）','Rosy seabass (nodoguro)','口の中が黒いことから「のどぐろ」と呼ばれる、日本で人気の高級魚です。','Called "nodoguro" (black throat) for its dark mouth lining — a prized fish in Japan.',{a:['fish','#e8686a',.45],s:40,w:['日本海、東シナ海など','Sea of Japan, East China Sea']}],
+ [1800,'life','🦀','ベニズワイガニ','Red snow crab','ズワイガニより深い所にすむ、赤いカニ。日本海の深い所で多くとれます。','A redder relative of the snow crab living deeper, common in the Sea of Japan.',{s:60,w:['日本海','Sea of Japan']}],
+ [3100,'sci','🌋','海底火山','Submarine volcanoes','海の底には、陸よりずっと多くの火山があります。海底の火山が噴火して、新しい島が生まれることもあります。','There are far more volcanoes under the sea than on land; eruptions can even create new islands.',{w:['世界中の海（小笠原の西之島など）','Worldwide, e.g. Nishinoshima, Japan']}],
+ [5300,'why','🔊','深海は静か？','Is the deep silent?','いいえ。水は空気より音をよく伝えるので、クジラの声や船の音、地震の音などが遠くまで届きます。','No — water carries sound far better than air, so whale calls, ships and quakes travel great distances.',{}]
+];
+E7.forEach(e => E.push(e));
+// 沈没船など、海に関係する場所には地図リンク（だいたいの位置）
+const PLACE = { 'RMS Titanic':[41.73,-49.95], 'Battleship Bismarck':[48.17,-16.2], 'Battleship Yamato':[30.72,128.07], 'Vasa':[59.328,18.091], 'Mary Rose':[50.802,-1.109], 'Endurance':[-68.73,-52.33], 'Antikythera mechanism':[35.87,23.31] };
+E2.forEach(e => E.push(e));
+E.forEach(e => { if (!e[7] && EXTRA[e[4]]) e[7] = EXTRA[e[4]]; });
+/* ---- 三匹の猫のひとこと ---- */
+const CATN = { k:['🐈⬛','クロ','Kuro'], t:['🐈','トラ','Tora'], h:['🐱','ハイ','Hai'] };
+const CATC = {
+ 'Sea surface':['h','猫は泳げますが、たいていは濡れるのが苦手です。','Cats can swim, but most would rather stay dry.'],
+ 'Japanese anchovy':['h','煮干しは毎日少しずつ。食べすぎは禁物です。','A few dried sardines a day. No more.'],
+ 'Sea otter':['k','貝を石で割るなんて、ちょっと真似できません。','Cracking shells with a stone? I can\'t do that.'],
+ 'Ocean sunfish':['h','海面でひなたぼっこ。仲間だと思います。','It basks at the surface. A kindred spirit.'],
+ 'Japanese bullhead shark':['t','名前に「猫」…親戚かもしれません。','"Cat" in its name… a relative, maybe?'],
+ 'Nitrogen narcosis':['t','またたびみたいなものでしょうか。','Like catnip, perhaps?'],
+ 'Pacific bluefin tuna':['t','マグロは大好物です。','Tuna is my favourite.'],
+ 'Skipjack tuna':['k','かつお節の香りで飛んできました。','I came running at the smell of bonito flakes.'],
+ 'Japanese spider crab':['t','脚がたくさん。追いかけたくなります。','So many legs. I want to chase them.'],
+ 'Lanternfish':['k','光るおもちゃみたいです。','Like a glowing toy.'],
+ 'Giant squid':['h','生のイカは猫の体によくないとされます。見るだけにしましょう。','Raw squid isn\'t good for cats. Look, don\'t eat.'],
+ 'Giant isopod':['h','何年も食べないなんて、猫には無理です。','Years without food? Not for a cat.'],
+ 'Anglerfish':['t','あのさお、猫じゃらしにしか見えません。','That lure looks exactly like a cat toy.'],
+ 'Blobfish':['k','水の中では、ふつうの顔なんですよ。','It looks perfectly normal underwater.'],
+ 'Sperm whale':['k','1 時間も息を止められるなんて。','Holding its breath for an hour…'],
+ 'Why are deep animals red or black?':['k','黒い体なら、わたしも深海でかくれんぼできます。','With black fur, I\'d win hide-and-seek down here.'],
+ 'Flying fish':['t','飛ぶ魚…ジャンプなら負けません。','A flying fish… I can out-jump it.'],
+ 'Largest animal ever':['k','こんなに大きいのに、食べるのは小さなオキアミなんです。','So huge, yet it eats tiny krill.'],
+ 'Tiger puffer':['h','ふぐの毒は猫にも危険です。見るだけにしましょう。','Fugu toxin is dangerous for cats too. Look only.'],
+ 'Spotted seal':['k','ひげと丸い目…ちょっと親近感があります。','Whiskers and round eyes… I feel a connection.'],
+ 'Pirates still exist':['h','船の上の猫は、昔からネズミ番をしていたそうです。','Ship\'s cats have guarded against rats for centuries.']
+};
+E.forEach(e => { const c = CATC[e[4]]; if (c){ e[7] = e[7] || {}; e[7].c = c; } });
+
+E.sort((a, b) => a[0] - b[0]);
+
+/* ================= 世界の海溝（深さはだいたいの値） ================= */
+const FIVE_J = 'ヴィクター・ヴェスコヴォは 2018〜2019 年の「ファイブ・ディープス」遠征で、5 つの大洋のいちばん深い所すべてに潜りました。';
+const FIVE_E = 'In 2018–2019 Victor Vescovo\'s Five Deeps Expedition dived to the deepest point of all five oceans.';
+const TRENCHES = [
+ { id:'mariana', d:10935, sj:'マリアナ', se:'Mariana', j:'マリアナ海溝（チャレンジャー海淵）', e:'Mariana Trench (Challenger Deep)', wj:'西太平洋（グアムの南西）', we:'Western Pacific, southwest of Guam',
+   dj:'地球の海でいちばん深い場所。深さは測り方によって、約 10,900〜10,935m とされます。' + FIVE_J, de:'The deepest point in Earth\'s oceans — measured at roughly 10,900–10,935 m. ' + FIVE_E },
+ { id:'tonga', d:10800, sj:'トンガ', se:'Tonga', j:'トンガ海溝（ホライズン海淵）', e:'Tonga Trench (Horizon Deep)', wj:'南太平洋（トンガの東）', we:'South Pacific, east of Tonga',
+   dj:'世界で 2 番目に深いとされる海溝。プレートが沈み込む速さが、世界でもとくに速い場所のひとつとされます。', de:'Often ranked second deepest, and among the fastest-moving subduction zones on Earth.' },
+ { id:'kuril', d:10500, sj:'千島・カムチャツカ', se:'Kuril–Kamchatka', j:'千島・カムチャツカ海溝', e:'Kuril–Kamchatka Trench', wj:'北西太平洋（千島列島の東）', we:'Northwest Pacific, east of the Kuril Islands',
+   dj:'日本の北東に続く海溝。とても深い所でも、エビやヨコエビの仲間がたくさん見つかっています。', de:'Running northeast of Japan; amphipods and other crustaceans thrive even in its deepest parts.' },
+ { id:'philippine', d:10050, sj:'フィリピン', se:'Philippine', j:'フィリピン海溝', e:'Philippine Trench', wj:'西太平洋（フィリピンの東）', we:'Western Pacific, east of the Philippines',
+   dj:'フィリピン諸島の東に沿って延びる、とても深い海溝です。', de:'A deep trench running along the east of the Philippine islands.' },
+ { id:'kermadec', d:10047, sj:'ケルマデック', se:'Kermadec', j:'ケルマデック海溝', e:'Kermadec Trench', wj:'南太平洋（ニュージーランドの北）', we:'South Pacific, north of New Zealand',
+   dj:'トンガ海溝の南に続く海溝。深海の生き物の調査が盛んに行われてきた場所です。', de:'Continuing south from the Tonga Trench; a well-studied site for hadal life.' },
+ { id:'izu', d:9780, sj:'伊豆・小笠原', se:'Izu–Ogasawara', j:'伊豆・小笠原海溝', e:'Izu–Ogasawara Trench', wj:'北西太平洋（日本の南）', we:'Northwest Pacific, south of Japan',
+   dj:'日本の南に延びる海溝。2022 年、この海溝の約 8,336m で、いちばん深い所で泳ぐ魚が撮影されました。', de:'South of Japan; in 2022 the deepest fish ever filmed was recorded here at about 8,336 m.' },
+ { id:'puerto', d:8400, sj:'プエルトリコ', se:'Puerto Rico', j:'プエルトリコ海溝', e:'Puerto Rico Trench', wj:'大西洋（カリブ海の北）', we:'Atlantic, north of the Caribbean',
+   dj:'大西洋でいちばん深い場所。' + FIVE_J, de:'The deepest point in the Atlantic. ' + FIVE_E },
+ { id:'sandwich', d:8265, sj:'南サンドイッチ', se:'South Sandwich', j:'南サンドイッチ海溝', e:'South Sandwich Trench', wj:'南大西洋〜南極海', we:'South Atlantic / Southern Ocean',
+   dj:'南極の近くの、とても冷たい海溝。南極海でいちばん深い場所です。' + FIVE_J, de:'A frigid trench near Antarctica, holding the Southern Ocean\'s deepest point. ' + FIVE_E },
+ { id:'japan', d:8020, sj:'日本', se:'Japan', j:'日本海溝', e:'Japan Trench', wj:'北西太平洋（日本の東の沖）', we:'Northwest Pacific, off eastern Japan',
+   dj:'太平洋プレートが日本の下へ沈み込む場所。大きな地震と津波の研究でも、とても大切な海溝です。', de:'Where the Pacific Plate sinks beneath Japan — vital for earthquake and tsunami research.' },
+ { id:'java', d:7290, sj:'ジャワ', se:'Java', j:'ジャワ海溝（スンダ海溝）', e:'Java (Sunda) Trench', wj:'インド洋（インドネシアの南）', we:'Indian Ocean, south of Indonesia',
+   dj:'インド洋でいちばん深い場所。' + FIVE_J, de:'The deepest point in the Indian Ocean. ' + FIVE_E },
+ { id:'molloy', d:5550, sj:'モロイ（北極海）', se:'Molloy (Arctic)', j:'モロイ海淵', e:'Molloy Deep', wj:'北極海（グリーンランドとスヴァールバルの間）', we:'Arctic Ocean, between Greenland and Svalbard',
+   dj:'北極海でいちばん深い場所。海溝ではありませんが、5 つの大洋の「いちばん深い所」のひとつです。' + FIVE_J, de:'The Arctic\'s deepest point — not a trench, but one of the five ocean deeps. ' + FIVE_E }
+];
+const LL = { mariana:[11.35,142.2], tonga:[-23.25,-174.73], kuril:[44.1,150.5], philippine:[10.4,126.7], kermadec:[-31.9,-177.3], izu:[29.2,142.8], puerto:[19.7,-67.3], sandwich:[-60.5,-25.5], japan:[38.0,144.0], java:[-11.1,118.5], molloy:[79.1,2.8] };
+const mapURL = t => `https://www.google.com/maps/search/?api=1&query=${LL[t.id][0]},${LL[t.id][1]}`;
+const MARIANA_ONLY = new Set(['Trieste (1960)','James Cameron (2012)','Victor Vescovo (2019)','Plastic at the bottom','Microbes of the deep','Foraminifera']);
+const TRENCH_INFO = { 'Japan Trench':'japan', 'Izu–Ogasawara Trench':'izu', 'Kermadec Trench':'kermadec', 'Tonga Trench':'tonga', 'Philippine Trench':'philippine' };
+const ALL = E.filter(e => e[4] !== 'Challenger Deep');
+let TR = TRENCHES[0];
+function setTrench(id){
+  TR = TRENCHES.find(t => t.id === id) || TRENCHES[0]; DMAX = TR.d;
+  E.length = 0;
+  ALL.forEach(e => { if (e[0] > DMAX) return; if (MARIANA_ONLY.has(e[4]) && TR.id !== 'mariana') return; if (TRENCH_INFO[e[4]] === TR.id) return; E.push(e); });
+  E.push([DMAX, 'sci', '🏁', TR.j, TR.e, TR.dj, TR.de, { w:[TR.wj, TR.we] }]);
+  E.sort((a, b) => a[0] - b[0]);
+}
+setTrench(D.trench || 'mariana');
+
+/* ---- 生き物のイラスト（コードで描く、シンプルな絵） ---- */
+function shade(hex, k){ const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255; const f = v => Math.max(0, Math.min(255, Math.round(k > 0 ? v + (255 - v) * k : v * (1 + k)))); return `rgb(${f(r)},${f(g)},${f(b)})`; }
+function art(kind, c, h){
+  const d = shade(c, -.35), l = shade(c, .45), eye = '<circle cx="16" cy="21" r="2.4" fill="#fff"/><circle cx="15.6" cy="21" r="1.2" fill="#111"/>';
+  let g = '';
+  if (kind === 'fish'){ const ry = 5 + 15 * (h ?? .5);
+    g = `<path d="M60 24 L76 ${24 - ry * .8} L72 24 L76 ${24 + ry * .8} Z" fill="${d}"/><ellipse cx="36" cy="24" rx="27" ry="${ry}" fill="${c}"/><ellipse cx="34" cy="${24 + ry * .35}" rx="20" ry="${ry * .45}" fill="${l}" opacity=".45"/><path d="M34 ${24 - ry} q6 -6 12 0" fill="${d}"/>${eye}`; }
+  else if (kind === 'shark') g = `<path d="M4 25 Q18 14 46 16 L54 6 L58 17 Q68 18 72 12 L70 24 L76 36 Q66 29 58 30 Q30 36 4 25 Z" fill="${c}"/><path d="M8 26 Q30 33 58 29 Q34 30 8 26 Z" fill="${l}" opacity=".7"/><path d="M34 28 l6 8 l2 -7 Z" fill="${d}"/><circle cx="14" cy="22" r="1.4" fill="#111"/>`;
+  else if (kind === 'ray') g = `<path d="M40 8 Q58 16 76 24 Q58 30 40 38 Q22 30 4 24 Q22 16 40 8 Z" fill="${c}"/><path d="M40 36 Q46 42 60 46" stroke="${d}" stroke-width="2" fill="none"/><ellipse cx="40" cy="22" rx="10" ry="6" fill="${l}" opacity=".35"/><circle cx="35" cy="17" r="1.3" fill="#111"/><circle cx="45" cy="17" r="1.3" fill="#111"/>`;
+  else if (kind === 'jelly'){ g = `<path d="M22 22 Q22 6 40 6 Q58 6 58 22 Q49 25 40 22 Q31 25 22 22 Z" fill="${c}" opacity=".85"/><path d="M28 14 Q40 8 52 14" stroke="#fff" stroke-width="1.2" fill="none" opacity=".6"/>`; for (let i = 0; i < 6; i++){ const x = 26 + i * 5.6; g += `<path d="M${x} 23 q3 6 0 12 q-3 6 0 12" stroke="${l}" stroke-width="1.4" fill="none" opacity=".8"/>`; } }
+  else if (kind === 'whale'){ const k = h ?? .8; g = `<path d="M4 26 Q8 ${12 - 4 * k} 34 ${13 - 2 * k} Q56 14 64 22 L74 14 L72 25 L78 33 L64 28 Q52 ${38 + 2 * k} 30 37 Q8 36 4 26 Z" fill="${c}"/><path d="M8 30 Q28 37 56 31 Q30 34 8 30 Z" fill="${l}" opacity=".6"/><circle cx="14" cy="24" r="1.4" fill="#111"/><path d="M30 32 l-4 8 l8 -5 Z" fill="${d}"/>`; }
+  else if (kind === 'turtle') g = `<path d="M24 16 L12 6 L18 18 Z M24 32 L12 42 L18 30 Z M54 16 L64 8 L60 18 Z M54 32 L64 40 L60 30 Z" fill="${d}"/><ellipse cx="40" cy="24" rx="20" ry="13" fill="${c}"/><path d="M28 24 h24 M40 13 v22 M32 16 l16 16 M48 16 l-16 16" stroke="${d}" stroke-width="1" opacity=".55"/><ellipse cx="66" cy="24" rx="7" ry="5" fill="${d}"/><circle cx="69" cy="22.5" r="1.1" fill="#111"/>`;
+  else if (kind === 'squid'){ g = `<path d="M8 24 Q10 14 20 13 Q40 12 54 18 L58 24 L54 30 Q40 36 20 35 Q10 34 8 24 Z" fill="${c}"/><path d="M4 18 L12 24 L4 30 Z" fill="${d}"/><circle cx="52" cy="22" r="2.4" fill="#fff"/><circle cx="52.6" cy="22" r="1.2" fill="#111"/>`; for (let i = 0; i < 5; i++) g += `<path d="M58 ${20 + i * 2} q8 ${-4 + i * 2} 18 ${-2 + i}" stroke="${c}" stroke-width="1.6" fill="none"/>`; }
+  else if (kind === 'octo'){ for (let i = 0; i < 8; i++){ const x = 22 + i * 5; g += `<path d="M${x} 22 q${i % 2 ? 6 : -6} 10 ${i < 4 ? -4 : 4} 20" stroke="${c}" stroke-width="3" fill="none" stroke-linecap="round"/>`; } g += `<ellipse cx="40" cy="15" rx="15" ry="12" fill="${c}"/><ellipse cx="36" cy="10" rx="5" ry="3" fill="${l}" opacity=".5"/><circle cx="34" cy="18" r="1.6" fill="#111"/><circle cx="46" cy="18" r="1.6" fill="#111"/>`; }
+  else if (kind === 'eel') g = `<path d="M4 30 Q14 14 26 24 T48 24 T70 18 Q76 16 77 20 Q74 24 70 23 Q60 30 48 30 T26 30 T6 32 Z" fill="${c}"/><circle cx="72" cy="19" r="1.2" fill="#111"/>`;
+  return `<svg viewBox="0 0 80 48" aria-hidden="true">${g}</svg>`;
+}
+function sizeTxt(cm){ const n = J() ? 'ja-JP' : 'en-US'; if (cm < 100) return (J() ? '約 ' : '~') + cm + ' cm'; const m = cm / 100; return (J() ? '約 ' : '~') + m.toLocaleString(n, { maximumFractionDigits:1 }) + ' m'; }
+
+/* ================= 言葉 ================= */
+const UI = {
+  ja:{ sky:'海面から、海溝の底まで。潜る海溝を下から選べます。<br>生き物、沈没船、人の記録をたどりながら、ゆっくり潜っていきます。', go:'潜る', hint:'↓ スクロールして潜る', p:'水圧', k:'1cm² あたり', t:'水温（目安）', l:'光（海面比）', jumps:['海面','200m','1,000m','4,000m','6,000m','底'],
+    book:'深海図鑑', all:'すべて', q:'さがす（例：クジラ、タイタニック）', cnt:n => `${n} 件`, bt:'CHALLENGER DEEP',
+    stats:() => [[`${fmtD(DMAX)}`, '潜った深さ'], [`約 ${Math.round(press(DMAX)).toLocaleString('ja-JP')} 気圧`, '底の水圧'], ['約 1〜4°C', '底の水温'], [`${E.length}`, '出会ったもの']],
+    bp:() => (TR.id === 'mariana' ? '海のいちばん深い場所にたどり着きました。' : TR.j + 'の底にたどり着きました。') + 'ちなみに、人が陸地を掘った一番深い穴は約 12,262m（ロシアのコラ半島）。地球の中心までは、さらに約 6,370km あります。<br>次は、海底の下へ。「地面を掘る」は v2.0.0 で。',
+    up:'↑ 海面へもどる', coffee:'MeridiDepths は広告なし・登録なしで、ひとりで作っています。<br>気に入っていただけたら、コーヒー 1 杯分の応援をいただけるとうれしいです。',
+    foot:'数字はだいたいの目安です。生き物のすむ深さや記録は、資料や調査によって幅があります。', dark:'🌙 ダーク', normal:'☀️ ノーマル', dark2:'☀️ ノーマル', unitT:{ m:'m', ft:'ft', fm:'尋' }, light0:'0%（完全な闇）', light1:'ほぼ 0%（かすかな青）', look:['⬆ 上','👁 正面','⬇ 下'], tod:{ noon:'☀️ 昼', morn:'🌅 朝', dusk:'🌇 夕' }, todT:{ noon:'昼：光がまっすぐ深く届きます', morn:'朝：日が低く、光が斜めに入るので、届く深さが浅くなります', dusk:'夕暮れ：赤い光が海面で弾かれ、海の中は早く暗くなります' }, lookHelp:'視線：ボタン、マウスで画面を上下にドラッグ、またはキーの 8・5・2', newMax:d => `🤿 最深記録を更新：${d}` },
+  en:{ sky:'From the surface to the bottom of a deep-sea trench — choose one below.<br>Descend slowly past sea life, shipwrecks and human records.', go:'Dive', hint:'↓ Scroll to dive', p:'Pressure', k:'Per cm²', t:'Water temp (approx.)', l:'Light (vs surface)', jumps:['Surface','200 m','1,000 m','4,000 m','6,000 m','Bottom'],
+    book:'DEEP-SEA GUIDE', all:'All', q:'Search (e.g. whale, Titanic)', cnt:n => `${n} entries`, bt:'CHALLENGER DEEP',
+    stats:() => [[`${fmtD(DMAX)}`, 'Depth reached'], [`~${Math.round(press(DMAX)).toLocaleString('en-US')} atm`, 'Pressure'], ['~1–4 °C', 'Water'], [`${E.length}`, 'Encounters']],
+    bp:() => (TR.id === 'mariana' ? 'You have reached the deepest place in the ocean. ' : 'You have reached the bottom of the ' + TR.e + '. ') + 'For comparison, the deepest hole ever drilled on land is about 12,262 m (Kola, Russia), and Earth\'s centre is still about 6,370 km below.<br>Next: beneath the seafloor — "Dig into the Earth" comes in v2.0.0.',
+    up:'↑ Back to the surface', coffee:'MeridiDepths is ad-free and made by one person.<br>If you enjoy it, a coffee would mean a lot.',
+    foot:'Numbers are approximate; habitat depths and records vary between sources.', unitT:{ m:'m', ft:'ft', fm:'fathoms' }, light0:'0% (total darkness)', light1:'≈0% (faint blue)', look:['⬆ Up','👁 Ahead','⬇ Down'], tod:{ noon:'☀️ Noon', morn:'🌅 Morning', dusk:'🌇 Dusk' }, todT:{ noon:'Noon: sunlight reaches straight and deep', morn:'Morning: low sun enters at an angle, so light fades sooner', dusk:'Dusk: red light glances off the surface; the sea darkens early' }, lookHelp:'Look: buttons, drag the screen up/down with a mouse, or keys 8·5·2', newMax:d => `🤿 New personal depth: ${d}` }
+};
+const T = k => UI[D.lang][k];
+
+/* ================= 単位・数字 ================= */
+function fmtD(d){
+  const n = J() ? 'ja-JP' : 'en-US';
+  if (D.unit === 'ft') return Math.round(d * 3.28084).toLocaleString(n) + ' ft';
+  if (D.unit === 'fm') return Math.round(d / 1.8288).toLocaleString(n) + (J() ? ' 尋' : ' fathoms');
+  return Math.round(d).toLocaleString(n) + ' m';
+}
+const press = d => 1 + d / 10.06;
+const TEMP = [[0, 20], [50, 18], [100, 16], [200, 12], [500, 7], [1000, 4.5], [2000, 3], [4000, 2], [6000, 1.6], [9000, 1.8], [10935, 2.4]];
+function interp(arr, x){ if (x <= arr[0][0]) return arr[0][1]; for (let i = 1; i < arr.length; i++) if (x <= arr[i][0]){ const [a, va] = arr[i - 1], [b, vb] = arr[i]; return va + (vb - va) * (x - a) / (b - a); } return arr[arr.length - 1][1]; }
+const TF = { noon:1, morn:.62, dusk:.55 };
+const TINT = { morn:[255,196,130], dusk:[255,128,96] };
+const lightFrac = d => d <= 0 ? 1 : Math.exp(-d / (32.6 * (TF[D.tod] || 1)));
+function lightTxt(d){
+  if (d <= 0) return '100%';
+  const p = 100 * lightFrac(d);
+  if (p >= 10) return p.toFixed(0) + '%';
+  if (p >= 1) return p.toFixed(1) + '%';
+  if (p >= .001) return p.toFixed(3) + '%';
+  return d < 1000 ? T('light1') : T('light0');
+}
+const zoneOf = d => { let z = ZONES[0]; ZONES.forEach(x => { if (d >= x[0]) z = x; }); return z; };
+
+/* ================= 位置（浅いところほど広く） ================= */
+let TOP = innerHeight, H = 56000;
+const P = 2;
+const yOf = d => TOP + H * Math.pow(Math.max(0, d) / DMAX, 1 / P);
+const dOf = y => y <= TOP ? (y - TOP) : DMAX * Math.pow(Math.min(1, (y - TOP) / H), P);
+const EYE = () => innerHeight * .42;
+const ppm = d => { const dd = Math.max(1, d); return H / (P * DMAX) * Math.pow(dd / DMAX, 1 / P - 1); };
+
+/* ================= カードを並べる ================= */
+const track = $('track'), cards = [], zoneEls = [];
+function buildCards(){
+  track.replaceChildren(); cards.length = 0; zoneEls.length = 0;
+  ZONES.forEach(z => { const el = document.createElement('div'); el.className = 'zoneH'; el.innerHTML = `<div>${J() ? z[1] : z[2]}<small>${z[3]}</small></div>`; el._d = z[0]; track.append(el); zoneEls.push(el); });
+  E.forEach((e, i) => {
+    const el = document.createElement('div');
+    el.className = 'card ' + (i % 2 ? 'R' : 'L'); el._d = e[0]; el._i = i;
+    const x = e[7] || {};
+    const meta = [x.s ? `${J() ? '大きさ' : 'Size'} ${sizeTxt(x.s)}` : '', x.w ? `${J() ? '主な海' : 'Where'}：${x.w[J() ? 0 : 1]}` : ''].filter(Boolean).join('　·　');
+    const pl = PLACE[e[4]];
+    const ml = pl ? `　·　<a href="https://www.google.com/maps/search/?api=1&query=${pl[0]},${pl[1]}" target="_blank" rel="noopener" style="color:var(--acc)">📍 ${J() ? '地図' : 'Map'}</a>` : (e[0] === DMAX && typeof TR !== 'undefined') ? `　·　<a href="${mapURL(TR)}" target="_blank" rel="noopener" style="color:var(--acc)">📍 ${J() ? '地図' : 'Map'}</a>` : '';
+    el.innerHTML = `<div class="top"><span class="ic">${e[2]}</span><b>${J() ? e[3] : e[4]}</b><span class="dp">${fmtD(e[0])}</span></div><span class="cat">${CATS[e[1]][J() ? 0 : 1]}</span>${x.a ? `<div class="art">${art(...x.a)}</div>` : ''}<p>${J() ? e[5] : e[6]}</p>${meta || ml ? `<div class="meta">${meta}${ml}</div>` : ''}${x.c ? `<div class="catc">${CATN[x.c[0]][0]} ${CATN[x.c[0]][J() ? 1 : 2]}${J() ? '「' : ': "'}${x.c[J() ? 1 : 2]}${J() ? '」' : '"'}</div>` : ''}`;
+    track.append(el); cards.push(el);
+  });
+  layout();
+}
+function layout(){
+  TOP = innerHeight;
+  const mob = innerWidth <= 760, gap = 18;
+  let last = { L:-1e9, R:-1e9, A:-1e9 };
+  cards.forEach(el => {
+    const side = mob ? 'A' : (el.classList.contains('R') ? 'R' : 'L');
+    let y = yOf(el._d) - 22;
+    const h = el.offsetHeight || 160;
+    if (y < last[side] + gap) y = last[side] + gap;
+    el.style.top = y + 'px'; last[side] = y + h;
+  });
+  zoneEls.forEach(el => { el.style.top = (yOf(el._d) - 90) + 'px'; });
+  const end = Math.max(yOf(DMAX) + innerHeight * .6, last.L, last.R, last.A) + 40;
+  track.style.height = (end - TOP) + 'px';
+  track.style.marginTop = '0px';
+  cards.forEach(el => el.style.top = (parseFloat(el.style.top) - TOP) + 'px');
+  zoneEls.forEach(el => el.style.top = (parseFloat(el.style.top) - TOP) + 'px');
+}
+const io = new IntersectionObserver(es => es.forEach(x => x.target.classList.toggle('on', x.isIntersecting)), { rootMargin:'-6% 0px -6% 0px' });
+function observe(){ cards.forEach(c => io.observe(c)); zoneEls.forEach(z => io.observe(z)); }
+
+/* ================= 海の絵 ================= */
+const cv = $('sea'), cx = cv.getContext('2d');
+let W = 0, Hh = 0, DPR = 1;
+function size(){ DPR = Math.min(2, devicePixelRatio || 1); W = innerWidth; Hh = innerHeight; cv.width = W * DPR; cv.height = Hh * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+const STOPS = [[0,[63,182,232]],[40,[30,136,200]],[200,[17,84,154]],[600,[12,52,118]],[1000,[10,34,90]],[2000,[11,28,80]],[4000,[12,22,72]],[6000,[16,18,66]],[10935,[22,14,62]]];
+const NEO = [[0,[20,120,60]],[200,[8,70,30]],[1000,[4,40,18]],[10935,[2,22,10]]];
+function colAt(d){
+  const S = D.neo ? NEO : STOPS;
+  let c;
+  if (d <= 0) c = S[0][1];
+  else { c = S[S.length - 1][1]; for (let i = 1; i < S.length; i++) if (d <= S[i][0]){ const [a, ca] = S[i - 1], [b, cb] = S[i], k = (d - a) / (b - a); c = ca.map((v, j) => v + (cb[j] - v) * k); break; } }
+  if (D.tod !== 'noon' && !D.neo && d >= 0){ const tn = TINT[D.tod], k = lightFrac(d) * .38, f = .84 + .16 * Math.min(1, d / 1000); c = c.map((v, j) => (v + (tn[j] - v) * k) * f); }
+  if (D.theme === 'light') c = c.map(v => v + (255 - v) * .28);
+  return c;
+}
+const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+let parts = [];
+function seed(){ parts = Array.from({ length:150 }, () => ({ x:Math.random() * W, y:Math.random() * Hh, r:.6 + Math.random() * 1.8, s:.3 + Math.random() * .9, ph:Math.random() * 6.28, glow:Math.random() < .25 })); }
+let lastSY = scrollY, shown = 0, t0 = performance.now();
+function draw(now){
+  const t = (now - t0) / 1000, sy = scrollY, dy = sy - lastSY; lastSY = sy;
+  const dTop = dOf(sy), dBot = dOf(sy + Hh), eye = dOf(sy + EYE());
+  // 背景（空 → 海）
+  const g = cx.createLinearGradient(0, 0, 0, Hh);
+  const steps = 8;
+  for (let i = 0; i <= steps; i++){
+    const yy = sy + Hh * i / steps, d0 = dOf(yy), d = d0 < 0 ? d0 : d0;
+    let c;
+    if (d0 < 0){ const k = Math.min(1, -d / TOP); c = D.theme === 'light' ? [200 + 40 * (1 - k), 232, 255] : [120 - 70 * k, 190 - 90 * k, 240 - 80 * k]; if (D.neo) c = [10, 40 + 30 * (1 - k), 20]; else if (D.tod !== 'noon'){ const tn = TINT[D.tod]; c = c.map((v, j) => v + (tn[j] - v) * .55); } }
+    else c = colAt(d);
+    g.addColorStop(i / steps, rgb(c));
+  }
+  cx.fillStyle = g; cx.fillRect(0, 0, W, Hh);
+  // 海面の波
+  const sYscr = TOP - sy;
+  if (sYscr > -40 && sYscr < Hh + 40){
+    cx.fillStyle = rgb(colAt(0), 1); cx.beginPath(); cx.moveTo(0, Hh);
+    for (let x = 0; x <= W; x += 12) cx.lineTo(x, sYscr + Math.sin(x * .018 + t * 1.4) * 5 + Math.sin(x * .007 - t) * 4);
+    cx.lineTo(W, Hh); cx.closePath(); cx.fill();
+    cx.strokeStyle = 'rgba(255,255,255,.55)'; cx.lineWidth = 1.5; cx.beginPath();
+    for (let x = 0; x <= W; x += 12) { const yy = sYscr + Math.sin(x * .018 + t * 1.4) * 5 + Math.sin(x * .007 - t) * 4; x ? cx.lineTo(x, yy) : cx.moveTo(x, yy); }
+    cx.stroke();
+  }
+  // 光の筋（浅いところだけ、ゆっくり揺れる）
+  const reach = 160 * (TF[D.tod] || 1), slant = D.tod === 'morn' ? -.55 : D.tod === 'dusk' ? .55 : 0, rc = D.tod === 'noon' ? '255,255,255' : D.tod === 'morn' ? '255,226,170' : '255,190,150';
+  if (eye < reach){
+    const a = Math.max(0, 1 - Math.max(0, eye) / reach) * .2, top = Math.max(0, sYscr);
+    for (let i = 0; i < 7; i++){
+      const x = W * (i + .5) / 7 + Math.sin(t * .3 + i * 1.7) * 40, w = 30 + 25 * Math.sin(t * .2 + i);
+      const lg = cx.createLinearGradient(0, top, 0, Hh); lg.addColorStop(0, `rgba(${rc},${a})`); lg.addColorStop(1, `rgba(${rc},0)`);
+      cx.fillStyle = lg; cx.beginPath(); cx.moveTo(x - w * .3, top); cx.lineTo(x + w * .3, top); cx.lineTo(x + w * 1.6 + slant * Hh, Hh); cx.lineTo(x - w * 1.6 + slant * Hh, Hh); cx.closePath(); cx.fill();
+    }
+  }
+  // つぶ（浅い所は泡、深い所はマリンスノーと発光）
+  const deep = Math.min(1, Math.max(0, eye) / 1200);
+  parts.forEach(p => {
+    p.y -= dy * (.35 + p.s * .5) + (eye < 60 ? p.s * .6 : -p.s * .12);
+    p.x += Math.sin(t * .5 + p.ph) * .15;
+    if (p.y < -10) p.y += Hh + 20; if (p.y > Hh + 10) p.y -= Hh + 20;
+    if (p.y < sYscr) return;
+    if (p.glow && eye > 500){
+      const k = (Math.sin(t * .6 + p.ph) + 1) / 2 * deep;  // ゆっくり明るくなって消える（点滅はしない）
+      const gc = D.neo ? '57,255,20' : (p.ph > 3 ? '95,240,255' : '140,255,200');
+      const rg = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 10 * p.r);
+      rg.addColorStop(0, `rgba(${gc},${.75 * k})`); rg.addColorStop(1, `rgba(${gc},0)`);
+      cx.fillStyle = rg; cx.fillRect(p.x - 12 * p.r, p.y - 12 * p.r, 24 * p.r, 24 * p.r);
+    } else {
+      cx.fillStyle = `rgba(255,255,255,${eye < 60 ? .45 : .18 + .12 * deep})`;
+      cx.beginPath(); cx.arc(p.x, p.y, eye < 60 ? p.r * 1.3 : p.r * .8, 0, 6.28); cx.fill();
+      if (eye < 60){ cx.strokeStyle = 'rgba(255,255,255,.35)'; cx.lineWidth = .6; cx.stroke(); }
+    }
+  });
+  // 左の目盛り
+  if (dBot > 0){
+    const step = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000].find(s => s * ppm(Math.max(1, eye)) >= 42) || 1000;
+    cx.font = '10px "Courier New",monospace'; cx.textAlign = 'left';
+    for (let d = Math.max(0, Math.floor(dTop / step) * step); d <= Math.min(DMAX, dBot); d += step){
+      const y = yOf(d) - sy; const big = d % (step * 5) === 0;
+      cx.fillStyle = D.theme === 'light' ? 'rgba(8,34,58,.6)' : 'rgba(234,247,255,.55)';
+      cx.fillRect(0, y, big ? 16 : 9, 1);
+      if (big || step >= 100) cx.fillText(fmtD(d).replace(' ', ''), 19, y + 3.5);
+    }
+  }
+  // 目の高さの線
+  if (eye > 0){
+    const y = EYE();
+    cx.strokeStyle = D.neo ? 'rgba(57,255,20,.35)' : 'rgba(95,240,255,.28)'; cx.setLineDash([3, 7]); cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); cx.setLineDash([]);
+  }
+  hud(Math.max(0, eye));
+  requestAnimationFrame(draw);
+}
+
+/* ================= HUD ================= */
+let lastZone = '';
+function hud(d){
+  shown += (d - shown) * .18; if (Math.abs(d - shown) < .5) shown = d;
+  const s = shown, n = J() ? 'ja-JP' : 'en-US';
+  const v = D.unit === 'ft' ? s * 3.28084 : D.unit === 'fm' ? s / 1.8288 : s;
+  $('hD').textContent = Math.round(v).toLocaleString(n);
+  $('hP').textContent = (J() ? '約 ' : '~') + press(s).toLocaleString(n, { maximumFractionDigits:1 }) + (J() ? ' 気圧' : ' atm');
+  const kg = press(s) * 1.033;
+  $('hK').textContent = kg >= 1000 ? (J() ? `約 ${(kg / 1000).toFixed(2)} トン` : `~${(kg / 1000).toFixed(2)} t`) : (J() ? `約 ${kg.toFixed(kg < 10 ? 1 : 0)} kg` : `~${kg.toFixed(kg < 10 ? 1 : 0)} kg`);
+  $('hT').textContent = (J() ? '約 ' : '~') + interp(TEMP, s).toFixed(1) + ' °C';
+  $('hL').textContent = lightTxt(s);
+  const z = zoneOf(s), zn = (J() ? z[1] : z[2]) + ' · ' + z[4];
+  if (zn !== lastZone){ $('hZ').textContent = zn; lastZone = zn; }
+  $('miniI').style.top = (Math.pow(s / DMAX, 1 / P) * 100) + '%';
+  if (d > D.max + 50){ const old = D.max; D.max = Math.min(DMAX, d); save(); if (Math.floor(old / 1000) !== Math.floor(D.max / 1000) && D.max >= 1000) toast(T('newMax')(fmtD(Math.floor(D.max / 1000) * 1000))); }
+}
+function buildMini(){
+  const m = $('mini'); m.querySelectorAll('em,u').forEach(e => e.remove());
+  [200, 1000, 4000, 6000, DMAX].filter(d => d <= DMAX).filter((d, i, a) => a.indexOf(d) === i).forEach(d => { const top = Math.pow(d / DMAX, 1 / P) * 100; const u = document.createElement('u'); u.style.top = top + '%'; const em = document.createElement('em'); em.style.top = Math.min(96, top) + '%'; em.textContent = d === DMAX ? fmtD(d).replace(' ', '') : fmtD(d).replace(' ', ''); m.append(u, em); });
+}
+$('mini').addEventListener('click', e => { const r = $('mini').getBoundingClientRect(), k = (e.clientY - r.top) / r.height; goTo(DMAX * Math.pow(Math.min(1, Math.max(0, k)), P)); });
+function buildJumps(){
+  const box = $('jumps'); box.replaceChildren();
+  [0, 200, 1000, 4000, 6000, DMAX].forEach((d, i) => { if (i < 5 && d >= DMAX) return; const b = document.createElement('button'); b.textContent = T('jumps')[i]; b.onclick = () => goTo(d); box.append(b); });
+}
+
+function buildLook(){
+  const tb = $('todB'); tb.replaceChildren();
+  ['morn', 'noon', 'dusk'].forEach(k => { const b = document.createElement('button'); b.className = 'hb' + (D.tod === k ? ' on' : ''); b.textContent = T('tod')[k]; b.title = T('todT')[k]; b.onclick = () => { D.tod = k; save(); buildLook(); toast(T('todT')[k]); }; tb.append(b); });
+}
+function buildTr(){
+  const sel = $('trSel'); sel.replaceChildren();
+  TRENCHES.forEach(t => { const o = document.createElement('option'); o.value = t.id; o.textContent = `${J() ? t.sj : t.se} · ${fmtD(t.d)}`; sel.append(o); });
+  sel.value = TR.id;
+  const box = $('trs'); box.replaceChildren();
+  TRENCHES.forEach(t => { const b = document.createElement('button'); b.className = t.id === TR.id ? 'on' : ''; b.innerHTML = `${J() ? t.sj : t.se}<small>${fmtD(t.d)}</small>`; b.onclick = () => chooseTr(t.id); box.append(b); });
+}
+function chooseTr(id){ if (id === TR.id) return; setTrench(id); D.trench = id; save(); apply(); toast(`🌊 ${J() ? TR.j : TR.e} · ${fmtD(DMAX)}`); }
+$('trSel').addEventListener('change', e => chooseTr(e.target.value));
+
+/* ================= ヌルヌル移動 ================= */
+let anim = null;
+function goTo(d, flash){
+  const target = Math.max(0, yOf(d) - EYE() + (d === 0 ? 2 : 0)), from = scrollY, dist = target - from;
+  const dur = Math.min(4200, 700 + Math.sqrt(Math.abs(dist)) * 14), st = performance.now();
+  cancelAnimationFrame(anim);
+  const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const step = now => { const k = Math.min(1, (now - st) / dur); scrollTo(0, from + dist * ease(k)); if (k < 1) anim = requestAnimationFrame(step); else if (flash){ flash.classList.add('flash'); setTimeout(() => flash.classList.remove('flash'), 1800); } };
+  anim = requestAnimationFrame(step);
+}
+['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, () => cancelAnimationFrame(anim), { passive:true }));
+
+/* ================= 図鑑 ================= */
+let dcat = 'all';
+function renderBook(){
+  $('dT').textContent = T('book'); $('dq').placeholder = T('q');
+  const ch = $('dChips'); ch.replaceChildren();
+  [['all', T('all')], ...Object.entries(CATS).map(([k, v]) => [k, v[J() ? 0 : 1]])].forEach(([k, l]) => { const b = document.createElement('button'); b.textContent = l; b.className = dcat === k ? 'on' : ''; b.onclick = () => { dcat = k; renderBook(); }; ch.append(b); });
+  const q = $('dq').value.trim().toLowerCase(), list = $('dList'); list.replaceChildren();
+  const hit = E.map((e, i) => [e, i]).filter(([e]) => (dcat === 'all' || e[1] === dcat) && (!q || (e[3] + e[4] + e[5] + e[6]).toLowerCase().includes(q)));
+  $('dCnt').textContent = T('cnt')(hit.length);
+  hit.forEach(([e, i]) => { const d = document.createElement('div'); d.className = 'it'; d.innerHTML = `<span class="ic">${e[7] && e[7].a ? `<span style="display:inline-block;width:34px;height:21px">${art(...e[7].a)}</span>` : e[2]}</span><span>${J() ? e[3] : e[4]}</span><em>${fmtD(e[0])}</em>`; d.onclick = () => { if (innerWidth <= 760) $('drawer').classList.remove('show'); goTo(e[0], cards[i]); }; list.append(d); });
+}
+$('dq').addEventListener('input', renderBook);
+$('tBook').onclick = () => { $('drawer').classList.toggle('show'); renderBook(); };
+$('dClose').onclick = () => $('drawer').classList.remove('show');
+
+/* ================= そのほか ================= */
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.classList.toggle('light', D.theme === 'light');
+  document.body.classList.toggle('neo', !!D.neo);
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = D.theme === 'light' ? (J() ? '🌙 ダーク' : '🌙 Dark') : (J() ? '☀️ ノーマル' : '☀️ Normal');
+  $('tUnit').textContent = T('unitT')[D.unit]; $('hU').textContent = T('unitT')[D.unit];
+  $('skyP').innerHTML = T('sky'); $('bGo').textContent = T('go'); $('hint').textContent = T('hint');
+  $('lP').textContent = T('p'); $('lK').textContent = T('k'); $('lT').textContent = T('t'); $('lL').textContent = T('l');
+  $('bT').textContent = (J() ? TR.j : TR.e).toUpperCase(); $('bMap').href = mapURL(TR); $('bMap').textContent = J() ? '📍 Google マップで場所を見る（だいたいの位置）' : '📍 See it on Google Maps (approx.)'; $('bP').innerHTML = T('bp')(); $('bUp').textContent = T('up'); $('coffeeP').innerHTML = T('coffee'); $('footP').textContent = T('foot');
+  $('bStats').innerHTML = T('stats')().map(([a, b]) => `<div><b>${a}</b><small>${b}</small></div>`).join('');
+  const keep = dOf(scrollY + EYE());
+  buildCards(); observe(); buildMini(); buildJumps(); buildLook(); buildTr(); lastZone = '';
+  if ($('drawer').classList.contains('show')) renderBook();
+  if (keep > 0) scrollTo(0, yOf(Math.min(keep, DMAX)) - EYE());
+}
+$('tLang').onclick = () => { D.lang = J() ? 'en' : 'ja'; save(); apply(); };
+$('tTheme').onclick = () => { D.theme = D.theme === 'light' ? 'dark' : 'light'; save(); lsSet('meridiplay_theme', D.theme); apply(); };
+$('tUnit').onclick = () => { D.unit = D.unit === 'm' ? 'ft' : D.unit === 'ft' ? 'fm' : 'm'; save(); apply(); };
+$('bGo').onclick = () => goTo(2);
+$('bUp').onclick = () => goTo(0);
+let rT = null;
+addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { const keep = dOf(scrollY + EYE()); size(); seed(); layout(); if (keep > 0) scrollTo(0, yOf(keep) - EYE()); }, 150); });
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+addEventListener('keydown', e => {
+  if (e.target === $('dq')) return;
+  const k = e.key.toLowerCase(); kb.push(k); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; toast(J() ? '🐾 三匹の猫が、潜水艇の窓からあなたを見送っています' : '🐾 Three cats wave from a submarine porthole'); return; }
+  if (kb.slice(-3).join('') === 'neo'){ D.neo = !D.neo; save(); apply(); toast(D.neo ? '🟩 Wake up, Neo… the ocean is code.' : '🌊 Back to the blue.'); return; }
+  if (k === 'b' && !e.ctrlKey && !e.metaKey){ $('tBook').click(); }
+  else if (k === 'home'){ e.preventDefault(); goTo(0); }
+  else if (k === 'end'){ e.preventDefault(); goTo(DMAX); }
+  else if (k === 'escape'){ $('drawer').classList.remove('show'); }
+});
+
+size(); seed(); apply(); requestAnimationFrame(draw);
+setTimeout(layout, 400);
+})();
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
