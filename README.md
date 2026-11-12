@@ -25,6 +25,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | 🐾🪄 **MeridiLingo** | 560 expressions — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | Free | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
 | 💻 **MeridiSync** | High-speed snippet manager for Windows | \$8 / ¥1,000 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
@@ -50,6 +51,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | [meridilingo](https://github.com/meridi-support/meridilingo) | 🐾🪄 MeridiLingo — Language Evolution Explorer |
 | [meridimeet](https://github.com/meridi-support/meridimeet) | 📅 MeridiMeet — Multi-Timezone Scheduler |
 | [meridistars](https://github.com/meridi-support/meridistars) | 🌌 MeridiStars — Browser Planetarium |
+| [merididepths](https://github.com/meridi-support/merididepths) | 🌊 MeridiDepths — Deep-Sea Explorer |
 | [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
 | [meridi-square](https://github.com/meridi-support/meridi-square) | 💬 Community hub & discussions |
 | [meridisync-demo](https://github.com/meridi-support/meridisync-demo) | 💻 MeridiSync — Free demo |
