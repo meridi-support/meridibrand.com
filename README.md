@@ -24,9 +24,9 @@ Every tool is a vessel. What you fill it with is up to you.
 |------|-------------|-------|-----------|
 | 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🐾🪄 **MeridiLingo** | 760+ expressions & AI prompts — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
-| 💻 **MeridiSync** | High-speed snippet manager for Windows | ¥1,000 / \$8 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
+| 💻 **MeridiSync** | High-speed snippet manager for Windows | ¥1,000 / &#36;8 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
 | 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
-| 🪨 **MeridiGround** | From the sky to Earth's core — rock strata, fossils & the mantle | Coming Soon | — |
+| 🪨 **MeridiGround** | From the sky to Earth's core — rock layers, volcanoes, plate tectonics & 11 world stages | **Free** | [meridibrand.com/ground](https://meridibrand.com/ground) |
 | 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | **Free** | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
 | 🧮 **MeridiConvert** | Unit converter, graph-paper drafting & handy calculators | **Free** | [meridibrand.com/convert](https://meridibrand.com/convert) |
@@ -54,6 +54,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | [meridilingo](https://github.com/meridi-support/meridilingo) | 🐾🪄 MeridiLingo — Language Evolution Explorer |
 | [meridisync-demo](https://github.com/meridi-support/meridisync-demo) | 💻 MeridiSync — Free demo |
 | [meridistars](https://github.com/meridi-support/meridistars) | 🌌 MeridiStars — Browser Planetarium |
+| [meridiground](https://github.com/meridi-support/meridiground) | 🪨 MeridiGround — From the Sky to Earth's Core |
 | [merididepths](https://github.com/meridi-support/merididepths) | 🌊 MeridiDepths — Deep-Sea Explorer |
 | [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
 | [meridiconvert](https://github.com/meridi-support/meridiconvert) | 🧮 MeridiConvert — Unit Converter & Calculators |
