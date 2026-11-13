@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiConvert — 尺・坪・合も使える無料の単位変換 | Unit Converter</title>
+<meta name="description" content="尺・寸・坪・畳・合・升など日本の伝統単位から、世界の単位、光年や気圧まで。計算式の入力や、方眼紙に点を打つだけで面積がわかる作図もできる、広告なし・登録なしの無料単位変換。A free unit converter with traditional Japanese and world units — no ads, no sign-up.">
+<link rel="canonical" href="https://meridibrand.com/convert/">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--card2:#0a1f10;--acc:#39ff14;--glow:#39ff1455;--tip:#e8c26a}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--card2:#f4faf2;--acc:#1f7a3a;--glow:#1f7a3a22;--tip:#9a6a10}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;transition:background .6s var(--E),color .6s}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% -20%,var(--glow),transparent 60%)}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:12px 18px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7}
+.home:hover{opacity:1;color:var(--acc)}
+.brand{margin-right:auto;font:bold 18px 'Courier New',monospace;letter-spacing:4px;color:var(--acc);text-shadow:0 0 10px var(--glow)}
+.tg{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 12px;font:12px 'Courier New',monospace;cursor:pointer;transition:all .3s var(--E);white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.hero{text-align:center;padding:30px 16px 10px}
+.hero h1{font:bold clamp(28px,6vw,46px) 'Courier New',monospace;letter-spacing:6px;color:var(--acc);text-shadow:0 0 16px var(--glow)}
+.hero p{margin-top:8px;font-size:13px;color:var(--sub);line-height:1.8}
+.cats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px 14px 4px;max-width:980px;margin:0 auto}
+.cats button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:7px 13px;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;transition:all .35s var(--E)}
+.cats button:hover{border-color:var(--acc);transform:translateY(-1px)}
+.cats button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:0 0 14px var(--glow)}
+.wrap{display:flex;gap:16px;justify-content:center;padding:14px 12px 30px;flex-wrap:wrap;align-items:flex-start;max-width:1180px;margin:0 auto}
+.mainc{flex:1 1 560px;max-width:720px;display:flex;flex-direction:column;gap:14px}
+.side{flex:0 1 300px;min-width:260px;display:flex;flex-direction:column;gap:14px}
+.card{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h3{font:bold 12px 'Courier New',monospace;letter-spacing:3px;color:var(--acc);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.lbl{font:11px 'Courier New',monospace;letter-spacing:2px;color:var(--sub);margin-bottom:6px}
+.io{display:flex;gap:8px;flex-wrap:wrap}
+.io input,.io .out{flex:1 1 220px;min-width:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:bold 22px 'Courier New',monospace;outline:none;transition:border-color .3s,box-shadow .3s}
+.io input:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
+.io input.bad{border-color:#ff6a5a}
+.io .out{display:flex;align-items:center;overflow-x:auto;white-space:nowrap;color:var(--acc);cursor:copy}
+.io select{flex:1 1 220px;min-width:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 10px;font:14px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none;cursor:pointer}
+.io select:focus{border-color:var(--acc)}
+.mid{display:flex;justify-content:center;gap:10px;margin:12px 0}
+.rbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc);font-size:18px;cursor:pointer;transition:transform .5s var(--E),box-shadow .3s}
+.rbtn:hover{box-shadow:0 0 16px var(--glow)}
+.rbtn.spin{transform:rotate(180deg)}
+.rbtn.on{background:var(--acc);color:var(--bg)}
+.sent{margin-top:14px;font-size:14px;line-height:1.7;min-height:24px}
+.sent b{color:var(--acc)}
+.sent.pop{animation:pop .5s var(--E)}
+@keyframes pop{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:none}}
+.ref{margin-top:4px;font-size:12.5px;color:var(--sub);min-height:18px}
+.tip{margin-top:12px;border-left:3px solid var(--tip);padding:8px 12px;border-radius:0 10px 10px 0;background:color-mix(in srgb,var(--tip) 10%,transparent);font-size:12.5px;line-height:1.75;display:none}
+.tip.on{display:block;animation:pop .6s var(--E)}
+.tip b{color:var(--tip)}
+.flt{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none;margin-bottom:8px}
+.flt:focus{border-color:var(--acc)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl td{padding:7px 6px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .25s}
+.tbl td:last-child{text-align:right;font:bold 13px 'Courier New',monospace;white-space:nowrap}
+.tbl tr:hover td{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.tbl tr.me td{color:var(--acc)}
+.tbl tr.gh td{cursor:default;font:10px 'Courier New',monospace;letter-spacing:2px;color:var(--sub);padding-top:12px;background:none}
+.list{display:flex;flex-direction:column;gap:5px}
+.it{display:flex;align-items:center;gap:6px;font-size:12px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:border-color .3s,transform .3s var(--E)}
+.it:hover{border-color:var(--acc);transform:translateX(2px)}
+.it span{flex:1;line-height:1.5}
+.it i{font-style:normal;opacity:.5;padding:0 4px}
+.it i:hover{opacity:1;color:#ff6a5a}
+.none{font-size:12px;color:var(--sub)}
+.seg{display:flex;gap:5px}
+.seg button{flex:1;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 4px;font:12px 'Courier New',monospace;cursor:pointer}
+.seg button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.kb{font:10.5px 'Courier New',monospace;color:var(--sub);line-height:1.7}
+
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:4px 14px 2px}
+.tabs button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:9px 20px;font:bold 14px 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:1px;cursor:pointer;transition:all .35s var(--E)}
+.tabs button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:0 0 16px var(--glow)}
+.draw{max-width:1180px;margin:0 auto;padding:12px 12px 24px}
+.dbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:12.5px}
+.dbar label{display:flex;align-items:center;gap:6px}
+.dbar select,.dbar input[type=text],.dbar input:not([type]){background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font:13px 'Hiragino Sans','Yu Gothic',sans-serif;outline:none}
+.dbar .seg button{min-width:86px}
+.dwrap{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.dcw{flex:1 1 560px;min-width:0}
+#dcv{display:block;width:100%;border-radius:14px;border:1px solid var(--line);touch-action:none;cursor:crosshair}
+.dres{flex:0 1 300px;min-width:260px}
+.dres .rr{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.dres .rr span{color:var(--sub)}
+.dres .rr b{font:bold 14px 'Courier New',monospace;text-align:right}
+.dres .big b{font-size:20px;color:var(--acc)}
+.dres h4{font:bold 11px 'Courier New',monospace;letter-spacing:2px;color:var(--acc);margin:12px 0 4px}
+.dres .none{font-size:12.5px;color:var(--sub);line-height:1.8}
+
+.pane .rr{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.pane .rr span{color:var(--sub)}
+.pane .rr b{font:bold 14px 'Courier New',monospace;text-align:right}
+.pane .big b{font-size:19px;color:var(--acc)}
+.pane .none{font-size:12.5px;color:var(--sub);line-height:1.8}
+.shl{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.shl button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:5px 11px;font:12px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer;transition:all .3s var(--E)}
+.shl button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent)}
+.shb{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:12px 0 8px}
+.shv{flex:0 0 150px;color:var(--acc)}
+.shv svg{width:150px;height:112px;display:block}
+.shi{flex:1 1 220px}
+.ir{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px}
+.ir span{flex:0 0 46%;color:var(--sub)}
+.ir input,.ir select{flex:1;min-width:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 9px;font:bold 14px 'Courier New',monospace;outline:none}
+.ir input:focus,.ir select:focus{border-color:var(--acc)}
+.ir input.bad{border-color:#ff6a5a}
+.ir em{font:11px 'Courier New',monospace;font-style:normal;color:var(--sub);min-width:26px}
+.fx{font:12.5px 'Courier New',monospace;color:var(--acc);padding:6px 10px;border:1px dashed var(--line);border-radius:9px;margin-bottom:6px}
+.tg3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px}
+.tg3 .ir{min-width:0}
+.tg3 .ir span{flex:0 0 auto;min-width:3.6em}
+.tg3 .ir input{width:100%}
+.tsv{margin:8px 0}
+
+.cdisp{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.cdisp input{width:100%;background:transparent;border:none;outline:none;color:var(--ink);font:bold 20px 'Courier New',monospace;text-align:right}
+.cdisp .cres{text-align:right;font:bold 26px 'Courier New',monospace;color:var(--acc);min-height:32px;overflow-x:auto;white-space:nowrap}
+.cdisp .cres.bad{color:#ff6a5a;font-size:14px}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.keys button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 2px;font:bold 14px 'Courier New',monospace;cursor:pointer;transition:all .2s var(--E)}
+.keys button:hover{border-color:var(--acc);color:var(--acc)}
+.keys button.op{color:var(--acc)}
+.keys button.eq{background:color-mix(in srgb,var(--acc) 22%,transparent);border-color:var(--acc)}
+.chist{margin-top:10px;max-height:150px;overflow:auto;font:12px 'Courier New',monospace}
+.chist div{display:flex;justify-content:space-between;gap:8px;padding:4px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.chist div:hover{color:var(--acc)}
+.chist span{color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.ptbl td{padding:5px 4px;border-bottom:1px solid var(--line)}
+.ptbl td:last-child{text-align:right;font:bold 12.5px 'Courier New',monospace}
+.ptbl tr.me td{color:var(--acc)}
+.exb{font-size:11px!important;padding:3px 10px!important;letter-spacing:0!important}
+@media print{
+  body{--bg:#fff;--ink:#111;--sub:#444;--line:#999;--card:#fff;--card2:#fff;--acc:#1f5a2a;--glow:transparent;background:#fff!important;color:#111!important}
+  body::before,header,.tabs,.cats,.coffee,footer,.kb,.dbar,.toast,.hero,.exb,.mid,#triClr{display:none!important}
+  .card{background:#fff!important;box-shadow:none!important;break-inside:avoid}
+  .wrap,.draw{padding:0!important}
+}
+.coffee{max-width:620px;margin:20px auto 0;text-align:center;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.coffee p{font-size:13px;color:var(--sub);line-height:1.8}
+.coffee a{display:inline-block;margin-top:12px;padding:10px 22px;border-radius:22px;border:1px solid var(--acc);color:var(--acc);font:bold 13px 'Courier New',monospace;transition:all .3s var(--E)}
+.coffee a:hover{background:color-mix(in srgb,var(--acc) 15%,transparent);box-shadow:0 0 18px var(--glow)}
+footer{text-align:center;padding:26px 16px 34px;font:11px 'Courier New',monospace;color:var(--sub);line-height:2}
+footer a:hover{color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);color:var(--ink);padding:10px 22px;border-radius:22px;font-size:13px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:20;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/">← Meridi Brand</a>
+  <div class="brand">MERIDICONVERT</div>
+  <button class="tg" id="tShare">🔗</button>
+  <button class="tg" id="tPrint">🖨</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<div class="hero"><h1>📐 MERIDICONVERT</h1><p id="heroP"></p></div>
+<div class="tabs" id="tabs"><button data-p="conv"></button><button data-p="draw"></button><button data-p="shape"></button><button data-p="num"></button><button data-p="site"></button></div>
+<div class="cats" id="cats"></div>
+<div class="wrap">
+  <div class="mainc">
+    <div class="card">
+      <div class="lbl" id="lFrom"></div>
+      <div class="io"><input id="val" inputmode="decimal" autocomplete="off" spellcheck="false" value="1"><select id="from"></select></div>
+      <div class="mid"><button class="rbtn" id="bSwap" title="Swap (S)">⇅</button><button class="rbtn" id="bCopy" title="Copy (C)">⧉</button><button class="rbtn" id="bFav" title="Favorite (F)">☆</button></div>
+      <div class="lbl" id="lTo"></div>
+      <div class="io"><div class="out" id="out">—</div><select id="to"></select></div>
+      <div class="sent" id="sent"></div>
+      <div class="ref" id="ref"></div>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="card"><h3 id="hAll"></h3><input class="flt" id="flt" type="search" autocomplete="off"><table class="tbl" id="tbl"></table></div>
+  </div>
+  <div class="side">
+    <div class="card"><h3 id="hFav"></h3><div class="list" id="fav"></div></div>
+    <div class="card"><h3 id="hHist"></h3><div class="list" id="hist"></div></div>
+    <div class="card"><h3 id="hSig"></h3><div class="seg" id="sig"></div></div>
+    <div class="kb" id="kb"></div>
+  </div>
+</div>
+<div id="pDraw" class="draw" hidden>
+  <div class="dbar">
+    <div class="seg" id="dMode"></div>
+    <label><span id="lCell"></span> <select id="dCell"></select></label>
+    <label><input type="checkbox" id="dSnap"> <span id="lSnap"></span></label>
+    <label><span id="lThick"></span> <input id="dThick" inputmode="decimal" autocomplete="off" style="width:84px"> m</label>
+    <button class="tg" id="dUndo">↶</button>
+    <button class="tg" id="dClear"></button>
+    <button class="tg" id="dZo" title="−">－</button><button class="tg" id="dZi" title="+">＋</button><button class="tg" id="dFit"></button>
+    <button class="tg" id="dEx"></button>
+    <button class="tg" id="dPng">💾 PNG</button>
+  </div>
+  <div class="dwrap"><div class="dcw"><canvas id="dcv"></canvas></div><div class="card dres" id="dres"></div></div>
+  <div class="kb" id="dkb" style="margin-top:10px"></div>
+</div>
+<div id="pShape" class="draw pane" hidden>
+  <div class="dwrap">
+    <div class="card" style="flex:1 1 560px;min-width:0" id="shCard"></div>
+    <div style="flex:0 1 360px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" id="triCard"></div>
+      <div class="card" id="slCard"></div>
+    </div>
+  </div>
+</div>
+<div id="pNum" class="draw pane" hidden>
+  <div class="dwrap" style="align-items:stretch">
+    <div style="flex:1 1 380px;min-width:280px;display:flex;flex-direction:column;gap:14px"><div class="card" id="calcCard"></div><div class="card" id="dateCard"></div></div>
+    <div style="flex:1 1 360px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" id="baseCard"></div>
+      <div class="card" id="ratioCard"></div>
+      <div class="card" id="scaleCard"></div>
+    </div>
+  </div>
+</div>
+<div id="pSite" class="draw pane" hidden>
+  <div class="dwrap" style="align-items:stretch">
+    <div style="flex:1 1 380px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" id="paperCard"></div>
+      <div class="card" id="priceCard"></div>
+      <div class="card" id="stairCard"></div>
+      <div class="card" id="elecCard"></div>
+    </div>
+    <div style="flex:1 1 380px;min-width:280px;display:flex;flex-direction:column;gap:14px">
+      <div class="card" id="woodCard"></div>
+      <div class="card" id="concCard"></div>
+      <div class="card" id="tileCard"></div>
+      <div class="card" id="paintCard"></div>
+    </div>
+  </div>
+</div>
+<div class="coffee"><p id="coffeeP"></p><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+<footer>
+  <div><a href="https://meridibrand.com/">🏠 Meridi Brand</a> · <a href="https://meridibrand.com/meet/">🗓 Meet</a> · <a href="https://meridibrand.com/lingo/">🔤 Lingo</a> · <a href="https://meridibrand.com/stars/">🌌 Stars</a> · <a href="https://meridibrand.com/play/">🎮 Play</a> · <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a></div>
+  <div><a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a> · <a href="https://meridistore.booth.pm/" target="_blank" rel="noopener">🛒 BOOTH</a> · <a href="https://meridius4.gumroad.com/" target="_blank" rel="noopener">🛒 Gumroad</a> · <a href="mailto:meridisupport@gmail.com">✉️ Contact</a></div>
+  <div id="footP"></div>
+  <div>MeridiConvert v1.0.0 · © 2026 Meridi Brand · No Ads. No Subscriptions. Just Units. 🐾</div>
+</footer>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return window.localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { window.localStorage.setItem(k, v); } catch(e){} };
+
+/* ================= 保存 ================= */
+const LS = 'meridiconvert_v1';
+let D = { lang:((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en'), theme:'dark', cat:'len', sel:{}, v:'1', sig:8, fav:[], hist:[], cats:false };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s) D = Object.assign(D, s); } catch(e){}
+['fav','hist'].forEach(k => { if (!Array.isArray(D[k])) D[k] = []; }); if (!D.sel || typeof D.sel !== 'object') D.sel = {};
+const save = () => lsSet(LS, JSON.stringify(D));
+const J = () => D.lang === 'ja';
+
+/* ================= 単位 [id, 分類, 日本語, English, 係数 or {to,from}, 豆知識JA, 豆知識EN] ================= */
+const SHO = 2401 / 1331; // 1 升（L）
+const GRP = { si:['メートル法','Metric'], us:['ヤード・ポンド法','Imperial / US'], jp:['日本の伝統単位','Traditional Japanese'], world:['世界の単位','World'], sci:['科学・天文','Science'], fun:['🐾 猫','🐾 Cats'] };
+const CATS = [
+ { id:'len', ic:'📐', j:'長さ', e:'Length', def:['m','shaku'], u:[
+  ['m','si','メートル (m)','Meter (m)',1],['km','si','キロメートル (km)','Kilometer (km)',1000],['cm','si','センチメートル (cm)','Centimeter (cm)',.01],['mm','si','ミリメートル (mm)','Millimeter (mm)',.001],['um','si','マイクロメートル (µm)','Micrometer (µm)',1e-6],
+  ['mi','us','マイル (mi)','Mile (mi)',1609.344],['yd','us','ヤード (yd)','Yard (yd)',.9144],['ft','us','フィート (ft)','Foot (ft)',.3048],['in','us','インチ (in)','Inch (in)',.0254],
+  ['nmi','us','海里','Nautical mile',1852,'緯度 1 分ぶんの長さがもとになった、船と飛行機の距離の単位です。','Based on one minute of latitude — used at sea and in the air.'],
+  ['ftm','us','ファゾム（尋）','Fathom',1.8288,'6 フィート（約 1.83m）。水深を測る単位で、両腕を広げた長さが由来です。MeridiDepths の名前のきっかけになりました。','6 feet — a depth unit from the span of outstretched arms.'],
+  ['shaku','jp','尺（しゃく）','Shaku 尺',10/33,'1 尺 ＝ 10/33 m（約 30.3cm）。大工仕事や着物の寸法で今も使われます。','10/33 m (~30.3 cm). Still used in carpentry and kimono making.'],
+  ['sun','jp','寸（すん）','Sun 寸',1/33,'1 尺の 10 分の 1（約 3.03cm）。「一寸法師」は身長 3cm ほどです。','1/10 shaku (~3.03 cm). The folk hero Issun-bōshi was one sun tall.'],
+  ['bu','jp','分（ぶ）','Bu 分',1/330,'1 寸の 10 分の 1（約 3mm）。「一寸の虫にも五分の魂」の五分は約 1.5cm です。','1/10 sun (~3 mm).'],
+  ['ken','jp','間（けん）','Ken 間',6/3.3,'1 間 ＝ 6 尺（約 1.82m）。柱と柱の間の長さで、和室の大きさの基本です。','6 shaku (~1.82 m) — the spacing of pillars in Japanese houses.'],
+  ['jo','jp','丈（じょう）','Jō 丈',10/3.3,'1 丈 ＝ 10 尺（約 3.03m）。','10 shaku (~3.03 m).'],
+  ['cho','jp','町（ちょう）','Chō 町',360/3.3,'1 町 ＝ 60 間（約 109m）。','60 ken (~109 m).'],
+  ['ri','jp','里（り）','Ri 里',12960/3.3,'1 里 ＝ 36 町（約 3.93km）。人がおよそ 1 時間で歩ける距離です。','36 chō (~3.93 km) — about an hour on foot.'],
+  ['li','world','里（中国）','Li 里 (China)',500,'今の中国の 1 里は 500m です。','The modern Chinese li is 500 m.'],
+  ['wa','world','ワー（タイ）','Wa วา (Thailand)',2,'タイの長さの単位で、1 ワー ＝ 2m。土地の測量で使われます。','Thai unit = 2 m, used for land.'],
+  ['arshin','world','アルシン（ロシア）','Arshin (Russia)',.7112,'メートル法の前のロシアの単位（約 71cm）。','Pre-metric Russian unit (~71 cm).'],
+  ['vara','world','バーラ（スペイン）','Vara (Spain)',.8359,'スペインの昔の単位（約 84cm）。中南米の土地の記録に残っています。','Old Spanish unit (~84 cm), still in Latin American land records.'],
+  ['cubit','world','キュビット（古代エジプト）','Royal cubit (Egypt)',.5236,'古代エジプトの「王のキュビット」（約 52cm）。ピラミッドの設計に使われたとされます。','~52 cm — said to be used in building the pyramids.'],
+  ['au','sci','天文単位 (au)','Astronomical unit (au)',149597870700,'地球と太陽の平均の距離（約 1 億 5000 万 km）。','Average Earth–Sun distance (~150 million km).'],
+  ['ly','sci','光年','Light-year',9460730472580800,'光が 1 年で進む距離（約 9.46 兆 km）。MeridiStars の星までの距離はこの単位です。','How far light travels in a year (~9.46 trillion km).'],
+  ['pc','sci','パーセク','Parsec',3.0856775814913673e16,'約 3.26 光年。天文学者がよく使う距離の単位です。','~3.26 light-years.'],
+  ['catL','fun','猫（体長）','Cat (body length)',.46,'しっぽを除いた、一般的な猫の体長（約 46cm）。','A typical cat, tail not included (~46 cm).']
+ ]},
+ { id:'wt', ic:'⚖️', j:'重さ', e:'Weight', def:['kg','kan'], u:[
+  ['kg','si','キログラム (kg)','Kilogram (kg)',1],['g','si','グラム (g)','Gram (g)',.001],['mg','si','ミリグラム (mg)','Milligram (mg)',1e-6],['t','si','トン (t)','Metric ton (t)',1000],
+  ['lb','us','ポンド (lb)','Pound (lb)',.45359237],['oz','us','オンス (oz)','Ounce (oz)',.028349523125],['st','us','ストーン','Stone',6.35029318,'14 ポンド。イギリスでは今も体重をストーンで言います。','14 pounds — still used for body weight in the UK.'],
+  ['ozt','us','トロイオンス','Troy ounce',.0311034768,'金や銀の取引に使うオンス（約 31.1g）。普通のオンスより約 1 割重いです。','Used for gold and silver (~31.1 g), about 10% heavier than a regular ounce.'],
+  ['gr','us','グレーン','Grain',.00006479891,'麦 1 粒の重さが由来（約 65mg）。弾丸や薬の重さに使われます。','From a grain of barley (~65 mg).'],
+  ['kan','jp','貫（かん）','Kan 貫',3.75,'1 貫 ＝ 1,000 匁 ＝ 3.75kg。','1,000 monme = 3.75 kg.'],
+  ['monme','jp','匁（もんめ）','Monme 匁',.00375,'1 匁 ＝ 3.75g。真珠の重さは今も世界中で「匁（momme）」で取引されています。','3.75 g. Pearls are still traded worldwide in momme.'],
+  ['kin','jp','斤（きん）','Kin 斤',.6,'1 斤 ＝ 600g。食パンの「1 斤」は、今は 340g 以上と決められています。','600 g. A loaf of Japanese bread is still called "one kin".'],
+  ['catty','world','斤（中国）','Jin 斤 (China)',.5,'中国の 1 斤は 500g。市場の量り売りで使われます。','The Chinese jin is 500 g, used in markets.'],
+  ['tael','world','両（香港）','Tael 両 (Hong Kong)',.0377994,'香港の金の取引で使われる単位（約 37.8g）。','Used for gold in Hong Kong (~37.8 g).'],
+  ['baht','world','バーツ（タイの金）','Baht (Thai gold)',.015244,'タイの金の重さの単位（約 15.2g）。お金の単位バーツと同じ名前です。','Thai gold weight (~15.2 g) — same name as the currency.'],
+  ['tola','world','トラ（インド）','Tola (India)',.0116638,'インドの金の単位（約 11.7g）。','Indian gold unit (~11.7 g).'],
+  ['pood','world','プード（ロシア）','Pood (Russia)',16.3805,'約 16.4kg。ケトルベルの 16kg は、この 1 プードが由来です。','~16.4 kg — the origin of the 16 kg kettlebell.'],
+  ['arroba','world','アローバ（スペイン）','Arroba (Spain)',11.502,'スペインの昔の単位（約 11.5kg）。ブラジルでは牛やコーヒーに 15kg のアローバが使われます。','~11.5 kg. Brazil uses a 15 kg arroba for cattle and coffee.'],
+  ['ct','sci','カラット (ct)','Carat (ct)',.0002,'宝石の重さの単位で、1 カラット ＝ 0.2g。イナゴマメの種が由来とされます。','0.2 g — said to come from carob seeds.'],
+  ['catW','fun','猫','Cat',4.5,'一般的な大人の猫の体重（約 4.5kg）。','A typical adult cat (~4.5 kg).']
+ ]},
+ { id:'temp', ic:'🌡️', j:'温度', e:'Temperature', def:['c','f'], u:[
+  ['c','si','摂氏 (°C)','Celsius (°C)',{ to:v => v + 273.15, from:b => b - 273.15 },'水が凍る温度を 0、沸く温度を 100 にした目盛りです。','0 is freezing water, 100 is boiling.'],
+  ['k','sci','ケルビン (K)','Kelvin (K)',{ to:v => v, from:b => b },'これ以上冷えない「絶対零度」を 0 にした目盛りです。','0 K is absolute zero.'],
+  ['f','us','華氏 (°F)','Fahrenheit (°F)',{ to:v => (v - 32) * 5 / 9 + 273.15, from:b => (b - 273.15) * 9 / 5 + 32 },'アメリカで使われます。体温 98.6°F が 37°C です。','Used in the US. 98.6°F is 37°C body temperature.'],
+  ['r','sci','ランキン (°R)','Rankine (°R)',{ to:v => v * 5 / 9, from:b => b * 9 / 5 },'華氏の目盛りで絶対零度から数えたもの。工学で使われます。','Fahrenheit-sized degrees from absolute zero.']
+ ]},
+ { id:'area', ic:'🏠', j:'面積', e:'Area', def:['m2','tsubo'], u:[
+  ['m2','si','平方メートル (m²)','Square meter (m²)',1],['km2','si','平方キロメートル (km²)','Square kilometer (km²)',1e6],['cm2','si','平方センチメートル (cm²)','Square centimeter (cm²)',1e-4],
+  ['ha','si','ヘクタール (ha)','Hectare (ha)',1e4],['a','si','アール (a)','Are (a)',100],
+  ['ac','us','エーカー','Acre',4046.8564224,'牛 2 頭で 1 日に耕せる広さが由来とされます。','Said to be the land a team of oxen could plough in a day.'],
+  ['ft2','us','平方フィート (ft²)','Square foot (ft²)',.09290304,'アメリカの家の広さは、ふつう平方フィートで表します。','US home sizes are listed in square feet.'],['yd2','us','平方ヤード','Square yard',.83612736],['mi2','us','平方マイル','Square mile',2589988.110336],
+  ['tsubo','jp','坪（つぼ）','Tsubo 坪',400/121,'1 坪 ＝ 400/121 m²（約 3.31m²）。畳 2 枚分。日本の土地や家の広告で今も使われます。','~3.31 m², two tatami mats. Still used in Japanese real estate.'],
+  ['jou','jp','畳（じょう）','Jō 畳 (tatami)',200/121,'ここでは 1 坪の半分（約 1.65m²）で計算しています。実際の畳は、京間・江戸間・団地間などで大きさが違います。','Half a tsubo (~1.65 m²). Real tatami sizes vary by region.'],
+  ['se','jp','畝（せ）','Se 畝',12000/121,'1 畝 ＝ 30 坪（約 99m²）。','30 tsubo (~99 m²).'],
+  ['tan','jp','反（たん）','Tan 反',120000/121,'1 反 ＝ 10 畝（約 992m²）。田んぼの広さの単位で、1 反の田から米が約 1 石とれたとされます。','10 se (~992 m²) — a rice paddy said to yield one koku of rice.'],
+  ['chobu','jp','町歩（ちょうぶ）','Chōbu 町歩',1200000/121,'1 町歩 ＝ 10 反（約 0.99ha）。','10 tan (~0.99 ha).'],
+  ['mu','world','畝（中国）','Mu 亩 (China)',2000/3,'中国の農地の単位（約 667m²）。','Chinese farmland unit (~667 m²).'],
+  ['rai','world','ライ（タイ）','Rai ไร่ (Thailand)',1600,'タイの土地の単位で、1 ライ ＝ 1,600m²。','Thai land unit = 1,600 m².'],
+  ['dunam','world','ドゥナム（中東）','Dunam (Middle East)',1000,'トルコや中東の国々で使われる、1,000m² の単位です。','1,000 m², used in Turkey and the Middle East.'],
+  ['bigha','world','ビガ（インド）','Bigha (India)',2508.38,'インドの土地の単位。地域によって大きさがかなり違います（ここでは 1 つの例）。','Varies widely by region — this is one common value.'],
+  ['dome','fun','東京ドーム','Tokyo Dome',46755,'広さを伝えるときの定番「東京ドーム◯個分」。建築面積は約 46,755m² です。','The classic Japanese yardstick for big areas (~46,755 m²).']
+ ]},
+ { id:'vol', ic:'🫗', j:'体積', e:'Volume', def:['l','gou'], u:[
+  ['l','si','リットル (L)','Liter (L)',1],['ml','si','ミリリットル (mL)','Milliliter (mL)',.001],['m3','si','立方メートル (m³)','Cubic meter (m³)',1000],
+  ['tbsp','si','大さじ（15mL）','Tablespoon (15 mL)',.015],['tsp','si','小さじ（5mL）','Teaspoon (5 mL)',.005],['jcup','si','計量カップ（日本・200mL）','Japanese cup (200 mL)',.2,'日本の料理の 1 カップは 200mL。アメリカの 1 カップ（約 237mL）とは違います。','200 mL — smaller than a US cup (~237 mL).'],
+  ['usgal','us','米ガロン','US gallon',3.785411784],['ukgal','us','英ガロン','UK gallon',4.54609,'イギリスのガロンは、アメリカのガロンより約 2 割大きいです。','About 20% larger than the US gallon.'],
+  ['uscup','us','米カップ','US cup',.2365882365],['usfloz','us','米液量オンス','US fl oz',.0295735295625],['ukfloz','us','英液量オンス','UK fl oz',.0284130625],['ustbsp','us','米大さじ','US tablespoon',.01478676478125],
+  ['bbl','us','バレル（石油）','Barrel (oil)',158.987294928,'石油の 1 バレルは 42 米ガロン（約 159L）。','42 US gallons (~159 L).'],
+  ['shakuv','jp','勺（しゃく）','Shaku 勺',SHO / 100,'1 合の 10 分の 1（約 18mL）。','1/10 gō (~18 mL).'],
+  ['gou','jp','合（ごう）','Gō 合',SHO / 10,'1 合 ＝ 約 180mL。お米やお酒の量の単位で、炊飯器のカップも 1 合です。','~180 mL — the standard for rice and sake.'],
+  ['sho','jp','升（しょう）','Shō 升',SHO,'1 升 ＝ 2401/1331 L（約 1.8L）。一升瓶の「升」です。','~1.8 L — the classic big sake bottle.'],
+  ['to','jp','斗（と）','To 斗',SHO * 10,'1 斗 ＝ 10 升（約 18L）。','10 shō (~18 L).'],
+  ['koku','jp','石（こく）','Koku 石',SHO * 100,'1 石 ＝ 約 180L。大人 1 人が 1 年に食べるお米の量とされ、「加賀百万石」のように大名の豊かさを表しました。','~180 L — one person\'s rice for a year; used to rank feudal lords.'],
+  ['dou','world','斗（中国）','Dou 斗 (China)',10,'中国の 1 斗は 10L。','The Chinese dou is 10 L.']
+ ]},
+ { id:'time', ic:'⏱️', j:'時間', e:'Time', def:['h','toki'], u:[
+  ['ms','si','ミリ秒','Millisecond',.001],['s','si','秒','Second',1],['min','si','分','Minute',60],['h','si','時間','Hour',3600],['d','si','日','Day',86400],['wk','si','週','Week',604800],
+  ['mo','si','月（平均）','Month (average)',2629746,'1 年の平均を 12 で割った、約 30.44 日で計算しています。','1/12 of an average year (~30.44 days).'],
+  ['yr','si','年（平均）','Year (average)',31556952,'うるう年を含めた平均（365.2425 日）です。','Gregorian average (365.2425 days).'],
+  ['dec','si','10 年','Decade',315569520],['cent','si','世紀','Century',3155695200],
+  ['toki','jp','刻（とき）','Toki 刻 (Edo)',7200,'江戸時代は 1 日を 12 の刻に分け、十二支の名前を付けていました（約 2 時間）。昼と夜で長さが変わる「不定時法」なので、ここでは平均の 2 時間で計算しています。','Edo Japan split the day into 12 toki named after the zodiac (~2 h on average).']
+ ]},
+ { id:'spd', ic:'🚄', j:'速さ', e:'Speed', def:['kmh','kn'], u:[
+  ['kmh','si','キロメートル毎時 (km/h)','km/h',1],['ms','si','メートル毎秒 (m/s)','m/s',3.6],['mph','us','マイル毎時 (mph)','mph',1.609344],['fts','us','フィート毎秒','ft/s',1.09728],
+  ['kn','us','ノット','Knot',1.852,'1 時間に 1 海里進む速さ。船と飛行機で使われます。','One nautical mile per hour.'],
+  ['mach','sci','マッハ','Mach',1225.044,'音の速さ（気温 15°C の海面で約 340m/s）。高さや気温で変わります。','Speed of sound (~340 m/s at 15°C sea level).'],
+  ['c','sci','光速','Speed of light',1079252848.8,'光は 1 秒で地球を約 7 周半します。','Light circles the Earth about 7.5 times a second.']
+ ]},
+ { id:'pres', ic:'🌊', j:'圧力', e:'Pressure', def:['atm','hpa'], u:[
+  ['pa','si','パスカル (Pa)','Pascal (Pa)',1],['hpa','si','ヘクトパスカル (hPa)','Hectopascal (hPa)',100,'天気予報の気圧の単位。地上の平均は 1013hPa です。','The weather-map unit. Sea level averages 1013 hPa.'],['kpa','si','キロパスカル (kPa)','Kilopascal (kPa)',1000],['mpa','si','メガパスカル (MPa)','Megapascal (MPa)',1e6],
+  ['bar','si','バール','Bar',1e5],['atm','si','気圧 (atm)','Atmosphere (atm)',101325,'海面の空気の重さ。深海では 10m 潜るごとに約 1 気圧ずつ増えていきます。','Air pressure at sea level. Underwater it rises ~1 atm every 10 m.'],
+  ['psi','us','psi','psi',6894.757293168,'アメリカのタイヤの空気圧の単位（1 平方インチあたりのポンド）。','Pounds per square inch — US tire pressure.'],
+  ['mmhg','sci','水銀柱ミリメートル (mmHg)','mmHg',133.322387415,'血圧の単位です。','The unit of blood pressure.'],['inhg','us','水銀柱インチ','inHg',3386.389],
+  ['msw','sci','海水 1m（msw）','Meter of seawater',10000,'ダイビングで使う単位で、海水 1m ぶんの圧力（約 0.1 気圧）。マリアナ海溝の底は約 1,100 気圧です。','Diving unit (~0.1 atm). The Mariana Trench floor is ~1,100 atm.']
+ ]},
+ { id:'eng', ic:'⚡', j:'エネルギー', e:'Energy', def:['kcal','kj'], u:[
+  ['j','si','ジュール (J)','Joule (J)',1],['kj','si','キロジュール (kJ)','Kilojoule (kJ)',1000],['cal','si','カロリー (cal)','Calorie (cal)',4.184],['kcal','si','キロカロリー (kcal)','Kilocalorie (kcal)',4184,'食べ物の「カロリー」はこのキロカロリーです。','Food "Calories" are kilocalories.'],
+  ['wh','si','ワット時 (Wh)','Watt-hour (Wh)',3600],['kwh','si','キロワット時 (kWh)','Kilowatt-hour (kWh)',3.6e6,'電気代の請求書の単位です。','The unit on your electricity bill.'],
+  ['btu','us','BTU','BTU',1055.05585262,'アメリカのエアコンの能力の単位です。','Used for US air conditioners.'],
+  ['ev','sci','電子ボルト (eV)','Electronvolt (eV)',1.602176634e-19,'原子や素粒子の世界のエネルギーの単位です。','The energy unit of atoms and particles.'],
+  ['ttnt','sci','TNT 換算トン','Ton of TNT',4.184e9]
+ ]},
+ { id:'data', ic:'💾', j:'データ', e:'Data', def:['gb','gib'], u:[
+  ['bit','si','ビット','Bit',.125],['b','si','バイト (B)','Byte (B)',1],['kb','si','キロバイト (KB)','Kilobyte (KB)',1e3],['mb','si','メガバイト (MB)','Megabyte (MB)',1e6],['gb','si','ギガバイト (GB)','Gigabyte (GB)',1e9],['tb','si','テラバイト (TB)','Terabyte (TB)',1e12],
+  ['kib','sci','キビバイト (KiB)','Kibibyte (KiB)',1024,'1,024 バイト。パソコンの表示の「KB」は、実はこちらのことが多いです。','1,024 bytes — what many computers mean by "KB".'],
+  ['mib','sci','メビバイト (MiB)','Mebibyte (MiB)',1048576],['gib','sci','ギビバイト (GiB)','Gibibyte (GiB)',1073741824,'「1TB のディスクが 931GB と表示される」のは、この違いのせいです。','Why a "1 TB" drive shows as 931 GB.'],['tib','sci','テビバイト (TiB)','Tebibyte (TiB)',1099511627776],
+  ['fd','fun','フロッピーディスク','Floppy disk',1474560,'3.5 インチの「1.44MB」フロッピー。保存アイコンの形のもとです。','The "1.44 MB" floppy — the original save icon.']
+ ]},
+ { id:'fuel', ic:'⛽', j:'燃費', e:'Fuel economy', def:['kml','mpgus'], u:[
+  ['kml','si','km/L','km/L',1,'日本の燃費の表し方。大きいほど燃費が良いです。','Japan\'s style — higher is better.'],
+  ['l100','si','L/100km','L/100km',{ to:v => 100 / v, from:b => 100 / b },'ヨーロッパの燃費の表し方。小さいほど燃費が良く、ほかと逆向きです。','Europe\'s style — lower is better.'],
+  ['mpgus','us','mpg（米）','mpg (US)',.425143707,'アメリカの燃費。1 米ガロンで何マイル走れるかです。','Miles per US gallon.'],
+  ['mpguk','us','mpg（英）','mpg (UK)',.354006189,'イギリスの燃費。ガロンの大きさが違うので、米の mpg より大きい数字になります。','Miles per UK gallon — bigger numbers than US mpg.']
+ ]}
+];
+CATS.forEach(c => { c.U = c.u.map(a => ({ id:a[0], g:a[1], j:a[2], e:a[3], f:a[4], tj:a[5], te:a[6] })); });
+const REFS = {
+  len:[['猫の体長','a cat',.46],['畳の長い辺','a tatami mat',1.82],['路線バス','a city bus',11],['東京スカイツリー','Tokyo Skytree',634],['富士山','Mt. Fuji',3776],['フルマラソン','a marathon',42195],['マリアナ海溝の深さ','the Mariana Trench',10920],['地球一周','the Earth\'s circumference',40075000],['月までの距離','the Moon\'s distance',384400000]],
+  wt:[['1 円玉','a 1-yen coin',.001],['猫','a cat',4.5],['お相撲さん','a sumo wrestler',160],['乗用車','a car',1300],['アフリカゾウ','an elephant',6000]],
+  area:[['畳','a tatami mat',1.62],['テニスコート','a tennis court',260.76],['東京ドーム','Tokyo Dome',46755]],
+  vol:[['缶ジュース','a soda can',.35],['お風呂','a bathtub',200],['25m プール','a 25 m pool',375000]],
+  time:[['カップ麺の待ち時間','an instant-noodle wait',180],['映画 1 本','a movie',7200],['猫の一生（約 15 年）','a cat\'s life (~15 yrs)',473354280]],
+  spd:[['歩く速さ','walking',4.8],['チーター','a cheetah',110],['新幹線','the Shinkansen',320],['音速','the speed of sound',1225],['国際宇宙ステーション','the ISS',27600]],
+  pres:[['地上の空気','sea-level air',101325],['車のタイヤ','a car tire',230000],['マリアナ海溝の底','the Mariana Trench floor',108600000]],
+  eng:[['おにぎり 1 個','a rice ball (~180 kcal)',753120],['スマホの充電 1 回','a phone charge',54000]],
+  data:[['フロッピー','a floppy disk',1474560],['CD','a CD',734003200],['DVD','a DVD',4.7e9]]
+};
+
+/* ================= 言葉 ================= */
+const UI = {
+  ja:{ hero:'尺・坪・合などの日本の伝統単位から、世界の単位、光年や気圧まで。<br>「3*1.5」のような計算式もそのまま入力できます。', from:'変換する値', to:'変換した値', all:'すべての単位', flt:'単位をしぼりこむ（例：尺、ガロン）', fav:'お気に入り', hist:'履歴', sig:'有効数字',
+    noFav:'☆ を押すと、よく使う組み合わせを保存できます', noHist:'変換した組み合わせがここに残ります', bad:'数字か計算式を入れてください', copied:'コピーしました', favAdd:'お気に入りに追加しました', favDel:'お気に入りから外しました',
+    ref:(l, n) => `≈ ${l}の ${n} 倍`, kb:'⌨ / ：値を入力 ／ S：入れ替え ／ C：コピー ／ F：お気に入り ／ ←→：分類を切り替え', theme:t => t === 'light' ? '🌙 ダーク' : '☀️ ノーマル',
+    coffee:'MeridiConvert は広告なし・登録なしで、ひとりで作っています。<br>気に入っていただけたら、コーヒー 1 杯分の応援をいただけるとうれしいです。', foot:'計算はすべてこの端末の中で行います。伝統単位や世界の単位は、時代や地域で値が違うものがあります。' },
+  en:{ hero:'Traditional Japanese units like shaku, tsubo and gō, world units, light-years and pressure.<br>You can type expressions like "3*1.5".', from:'FROM', to:'TO', all:'ALL UNITS', flt:'Filter units (e.g. shaku, gallon)', fav:'FAVORITES', hist:'HISTORY', sig:'SIGNIFICANT DIGITS',
+    noFav:'Press ☆ to save a pair you use often', noHist:'Your conversions will appear here', bad:'Enter a number or expression', copied:'Copied', favAdd:'Added to favorites', favDel:'Removed from favorites',
+    ref:(l, n) => `≈ ${n} × ${l}`, kb:'⌨ /: input · S: swap · C: copy · F: favorite · ←→: category', theme:t => t === 'light' ? '🌙 Dark' : '☀️ Normal',
+    coffee:'MeridiConvert is ad-free and made by one person.<br>If it helps you, a coffee would mean a lot.', foot:'Everything runs on your device. Traditional and regional units can vary by era and place.' }
+};
+const T = k => UI[D.lang][k];
+
+/* ================= 計算 ================= */
+function calc(src){
+  let s = String(src).normalize('NFKC').replace(/[,\s]/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-'), i = 0;
+  if (!s) return NaN;
+  const num = () => { const m = /^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i.exec(s.slice(i)); if (!m) throw 0; i += m[0].length; return parseFloat(m[0]); };
+  const pow = b => { if (s[i] === '^'){ i++; return Math.pow(b, fac()); } return b; };
+  const fac = () => { if (s[i] === '-'){ i++; return -fac(); } if (s[i] === '+'){ i++; return fac(); } if (s[i] === '('){ i++; const v = expr(); if (s[i] !== ')') throw 0; i++; return pow(v); } return pow(num()); };
+  const term = () => { let v = fac(); while (s[i] === '*' || s[i] === '/'){ const o = s[i++], r = fac(); v = o === '*' ? v * r : v / r; } return v; };
+  const expr = () => { let v = term(); while (s[i] === '+' || s[i] === '-'){ const o = s[i++], r = term(); v = o === '+' ? v + r : v - r; } return v; };
+  try { const v = expr(); if (i !== s.length) return NaN; return v; } catch(e){ return NaN; }
+}
+const toBase = (u, v) => typeof u.f === 'object' ? u.f.to(v) : v * u.f;
+const fromBase = (u, b) => typeof u.f === 'object' ? u.f.from(b) : b / u.f;
+function fmt(x){
+  if (!isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const a = Math.abs(x);
+  if (a >= 1e15 || a < 1e-6) return x.toExponential(Math.max(0, D.sig - 1)).replace(/(\.\d*?)0+e/, '$1e').replace(/\.e/, 'e');
+  return new Intl.NumberFormat(J() ? 'ja-JP' : 'en-US', { maximumSignificantDigits:D.sig }).format(x);
+}
+
+/* ================= 画面 ================= */
+const cat = () => CATS.find(c => c.id === D.cat) || CATS[0];
+const vis = c => c.U.filter(u => u.g !== 'fun' || D.cats);
+const nm = u => J() ? u.j : u.e;
+function sel(){ const c = cat(), s = D.sel[c.id] || {}, U = vis(c); const ok = id => U.some(u => u.id === id); return { f:ok(s.f) ? s.f : c.def[0], t:ok(s.t) ? s.t : c.def[1] }; }
+function fillSelect(el, val){
+  const c = cat(); el.replaceChildren();
+  Object.keys(GRP).forEach(g => { const us = vis(c).filter(u => u.g === g); if (!us.length) return; const og = document.createElement('optgroup'); og.label = GRP[g][J() ? 0 : 1]; us.forEach(u => { const o = document.createElement('option'); o.value = u.id; o.textContent = nm(u); og.append(o); }); el.append(og); });
+  el.value = val;
+}
+function renderCats(){
+  const box = $('cats'); box.replaceChildren();
+  CATS.forEach(c => { const b = document.createElement('button'); b.textContent = `${c.ic} ${J() ? c.j : c.e}`; b.className = c.id === D.cat ? 'on' : ''; b.onclick = () => setCat(c.id); box.append(b); });
+}
+function setCat(id){ D.cat = id; save(); renderCats(); const s = sel(); fillSelect($('from'), s.f); fillSelect($('to'), s.t); $('flt').value = ''; run(); }
+let lastKey = '', histT = null, lastOut = '';
+function run(anim = true){
+  const c = cat(), s = sel(), U = c.U, fu = U.find(u => u.id === s.f), tu = U.find(u => u.id === s.t);
+  D.sel[c.id] = s; D.v = $('val').value; save();
+  const v = calc($('val').value), inp = $('val');
+  inp.classList.toggle('bad', isNaN(v) && $('val').value.trim() !== '');
+  const base = isNaN(v) ? NaN : toBase(fu, v), r = isNaN(base) ? NaN : fromBase(tu, base);
+  const out = isNaN(r) ? '—' : fmt(r); $('out').textContent = out; lastOut = out;
+  const sent = $('sent');
+  sent.innerHTML = isNaN(r) ? (inp.value.trim() ? T('bad') : '') : `${fmt(v)} ${nm(fu)} ＝ <b>${out}</b> ${nm(tu)}`;
+  if (anim){ sent.classList.remove('pop'); void sent.offsetWidth; sent.classList.add('pop'); }
+  // 身近なものとくらべる
+  let refTxt = '';
+  if (!isNaN(base) && REFS[c.id] && base > 0){
+    let best = null, bd = 1e9; REFS[c.id].forEach(rf => { const q = base / rf[2], d = Math.abs(Math.log10(q)); if (q >= .05 && q <= 5000 && d < bd){ bd = d; best = [rf, q]; } });
+    if (best) refTxt = T('ref')(J() ? best[0][0] : best[0][1], new Intl.NumberFormat(J() ? 'ja-JP' : 'en-US', { maximumSignificantDigits:3 }).format(best[1]));
+  }
+  $('ref').textContent = refTxt;
+  const tips = [fu, tu].filter((u, i, a) => (J() ? u.tj : u.te) && a.indexOf(u) === i);
+  const tp = $('tip');
+  if (tips.length){ tp.innerHTML = tips.map(u => `💡 <b>${nm(u)}</b> — ${J() ? u.tj : u.te}`).join('<br>'); tp.classList.remove('on'); void tp.offsetWidth; tp.classList.add('on'); } else tp.classList.remove('on');
+  $('bFav').textContent = isFav() ? '★' : '☆'; $('bFav').classList.toggle('on', isFav());
+  renderTable(base, s.t);
+  const key = `${c.id}|${s.f}|${s.t}|${v}`;
+  clearTimeout(histT); if (!isNaN(r) && key !== lastKey) histT = setTimeout(() => { lastKey = key; addHist({ c:c.id, f:s.f, t:s.t, v:$('val').value.trim() }); }, 1400);
+}
+function renderTable(base, tid){
+  const c = cat(), t = $('tbl'), q = $('flt').value.trim().toLowerCase(); t.replaceChildren();
+  Object.keys(GRP).forEach(g => {
+    const us = vis(c).filter(u => u.g === g && (!q || (u.j + ' ' + u.e + ' ' + u.id).toLowerCase().includes(q))); if (!us.length) return;
+    const gh = document.createElement('tr'); gh.className = 'gh'; gh.innerHTML = `<td colspan="2">${GRP[g][J() ? 0 : 1]}</td>`; t.append(gh);
+    us.forEach(u => { const tr = document.createElement('tr'); if (u.id === tid) tr.className = 'me'; tr.innerHTML = `<td>${nm(u)}</td><td>${isNaN(base) ? '—' : fmt(fromBase(u, base))}</td>`; tr.onclick = () => { $('to').value = u.id; D.sel[c.id] = { f:$('from').value, t:u.id }; run(); window.scrollTo({ top:0, behavior:'smooth' }); }; t.append(tr); });
+  });
+}
+
+/* ================= お気に入り・履歴 ================= */
+const pairOf = () => ({ c:D.cat, f:$('from').value, t:$('to').value });
+const same = (a, b) => a.c === b.c && a.f === b.f && a.t === b.t;
+const isFav = () => D.fav.some(x => same(x, pairOf()));
+function label(x){ const c = CATS.find(k => k.id === x.c); if (!c) return ''; const f = c.U.find(u => u.id === x.f), t = c.U.find(u => u.id === x.t); if (!f || !t) return ''; return `${c.ic} ${x.v ? x.v + ' ' : ''}${nm(f)} → ${nm(t)}`; }
+function toggleFav(){ const p = pairOf(); if (isFav()){ D.fav = D.fav.filter(x => !same(x, p)); toast(T('favDel')); } else { D.fav.unshift(p); D.fav = D.fav.slice(0, 12); toast('★ ' + T('favAdd')); } save(); renderLists(); run(false); }
+function addHist(h){ D.hist = [h, ...D.hist.filter(x => !(same(x, h) && x.v === h.v))].slice(0, 12); save(); renderLists(); }
+function load(x){ D.cat = x.c; D.sel[x.c] = { f:x.f, t:x.t }; if (x.v) $('val').value = x.v; save(); renderCats(); const s = sel(); fillSelect($('from'), s.f); fillSelect($('to'), s.t); run(); }
+function renderLists(){
+  [['fav', D.fav, T('noFav')], ['hist', D.hist, T('noHist')]].forEach(([id, arr, none]) => {
+    const box = $(id); box.replaceChildren();
+    const ok = arr.filter(x => label(x));
+    if (!ok.length){ const d = document.createElement('div'); d.className = 'none'; d.textContent = none; box.append(d); return; }
+    ok.forEach(x => { const d = document.createElement('div'); d.className = 'it'; d.innerHTML = `<span>${label(x)}</span><i title="×">×</i>`; d.onclick = e => { if (e.target.tagName === 'I'){ D[id] = D[id].filter(y => y !== x); save(); renderLists(); run(false); return; } load(x); }; box.append(d); });
+  });
+}
+
+/* ================= そのほか ================= */
+let toastT = null;
+function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
+function copy(){ if (lastOut === '—') return; const txt = lastOut.replace(/,/g, ''); try { navigator.clipboard.writeText(txt).then(() => toast('⧉ ' + T('copied') + '：' + txt), () => toast(txt)); } catch(e){ toast(txt); } }
+function swap(){ const a = $('from').value, b = $('to').value; $('from').value = b; $('to').value = a; const sb = $('bSwap'); sb.classList.toggle('spin'); D.sel[D.cat] = { f:b, t:a }; run(); }
+function renderSig(){ const box = $('sig'); box.replaceChildren(); [4, 6, 8, 12].forEach(n => { const b = document.createElement('button'); b.textContent = n; b.className = D.sig === n ? 'on' : ''; b.onclick = () => { D.sig = n; save(); renderSig(); run(false); }; box.append(b); }); }
+function apply(){
+  document.documentElement.lang = D.lang;
+  document.body.classList.toggle('light', D.theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語'; $('tTheme').textContent = T('theme')(D.theme);
+  $('heroP').innerHTML = T('hero'); $('lFrom').textContent = T('from'); $('lTo').textContent = T('to'); $('hAll').textContent = T('all'); $('flt').placeholder = T('flt');
+  $('hFav').textContent = T('fav'); $('hHist').textContent = T('hist'); $('hSig').textContent = T('sig'); $('kb').textContent = T('kb'); $('coffeeP').innerHTML = T('coffee'); $('footP').textContent = T('foot');
+  renderCats(); const s = sel(); fillSelect($('from'), s.f); fillSelect($('to'), s.t); renderSig(); renderLists(); run(false); dApply();
+}
+$('val').value = D.v || '1';
+$('val').addEventListener('input', () => run(false));
+$('from').onchange = () => { D.sel[D.cat] = { f:$('from').value, t:$('to').value }; run(); };
+$('to').onchange = () => { D.sel[D.cat] = { f:$('from').value, t:$('to').value }; run(); };
+$('bSwap').onclick = swap; $('bCopy').onclick = copy; $('out').onclick = copy; $('bFav').onclick = toggleFav;
+$('flt').addEventListener('input', () => run(false));
+$('tLang').onclick = () => { D.lang = J() ? 'en' : 'ja'; save(); apply(); };
+$('tTheme').onclick = () => { D.theme = D.theme === 'light' ? 'dark' : 'light'; save(); apply(); };
+const KON = ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a']; let kb = [];
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase(); kb.push(k); if (kb.length > 10) kb.shift();
+  if (kb.join() === KON.join()){ kb = []; D.cats = !D.cats; save(); apply(); toast(D.cats ? (J() ? '🐾 「猫」の単位が使えるようになりました' : '🐾 Cat units unlocked') : (J() ? '🐾 猫の単位をしまいました' : '🐾 Cat units hidden')); return; }
+  if (D.tab === 'draw'){ dKey(e); return; }
+  if (D.tab !== 'conv') return;
+  const typing = ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+  if (typing){ if (k === 'escape') document.activeElement.blur(); return; }
+  if (k === '/'){ e.preventDefault(); $('val').focus(); $('val').select(); }
+  else if (k === 's') swap();
+  else if (k === 'c') copy();
+  else if (k === 'f') toggleFav();
+  else if (k === 'arrowright' || k === 'arrowleft'){ const i = CATS.findIndex(c => c.id === D.cat), n = (i + (k === 'arrowright' ? 1 : -1) + CATS.length) % CATS.length; setCat(CATS[n].id); }
+});
+
+/* ================= 方眼紙の作図 ================= */
+const dcv = $('dcv'), dg = dcv.getContext('2d');
+const DCELL = [[.01,'1 cm','1 cm'],[.1,'10 cm','10 cm'],[.5,'50 cm','50 cm'],[.91,'半間（91 cm）','Half-ken (91 cm)'],[1,'1 m','1 m'],[10,'10 m','10 m']];
+if (D.cell == null) D.cell = 1; if (D.snap == null) D.snap = true; if (!D.tab) D.tab = 'conv';
+const DR = { mode:'poly', pts:[], closed:false, circ:null, cur:{ x:4, y:4 }, hover:null, drag:null, kb:false };
+let VZ = 1, VX = 0, VY = 0, PX = 34; const setZ = z => { VZ = Math.max(.08, Math.min(6, z)); PX = 34 * VZ; };
+let dW = 0, dH = 0, dDPR = 1;
+const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const cssv = k => getComputedStyle(document.body).getPropertyValue(k).trim();
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const nf = (v, d = 2) => v.toLocaleString(J() ? 'ja-JP' : 'en-US', { maximumFractionDigits:d });
+function fmtL(m){ const a = Math.abs(m); if (a < 1) return nf(m * 100, 1) + ' cm'; if (a >= 1000) return nf(m / 1000, 3) + ' km'; return nf(m, 2) + ' m'; }
+function hexA(h, a){ h = (h || '#39ff14').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+function sArea(p){ let s = 0; for (let i = 0; i < p.length; i++){ const a = p[i], b = p[(i + 1) % p.length]; s += a.x * b.y - b.x * a.y; } return s / 2; }
+function cen(p){ return { x:p.reduce((a, q) => a + q.x, 0) / p.length, y:p.reduce((a, q) => a + q.y, 0) / p.length }; }
+function angles(p){ const n = p.length, sg = Math.sign(sArea(p)) || 1; return p.map((b, i) => { const a = p[(i - 1 + n) % n], c = p[(i + 1) % n]; const v1x = b.x - a.x, v1y = b.y - a.y, v2x = c.x - b.x, v2y = c.y - b.y; const turn = Math.atan2(v1x * v2y - v1y * v2x, v1x * v2x + v1y * v2y) * 180 / Math.PI; return 180 - turn * sg; }); }
+function dSize(){ const w = dcv.parentElement.clientWidth || 800; dW = w; dH = Math.round(Math.min(600, Math.max(340, w * .62))); dDPR = Math.min(2, devicePixelRatio || 1); dcv.width = dW * dDPR; dcv.height = dH * dDPR; dcv.style.height = dH + 'px'; dDraw(); }
+function gOf(e){ const r = dcv.getBoundingClientRect(); return { x:(e.clientX - r.left) / PX + VX, y:(e.clientY - r.top) / PX + VY }; }
+function snapP(p){
+  const all = DR.pts.slice(); if (DR.circ) all.push(DR.circ.c);
+  for (const q of all) if (dist(q, p) < .35) return { x:q.x, y:q.y };
+  if (!D.snap) return { x:p.x, y:p.y };
+  const n = DR.pts.length, m = DR.closed ? n : n - 1;
+  for (let i = 0; i < m; i++){ const a = DR.pts[i], b = DR.pts[(i + 1) % n], q = { x:(a.x + b.x) / 2, y:(a.y + b.y) / 2 }; if (dist(q, p) < .3) return q; }
+  return { x:Math.round(p.x), y:Math.round(p.y) };
+}
+function place(p){
+  if (DR.mode === 'circle'){
+    if (!DR.circ || DR.circ.done) DR.circ = { c:p, r:0, done:false };
+    else { DR.circ.r = dist(DR.circ.c, p); if (DR.circ.r > 0) DR.circ.done = true; }
+  } else {
+    if (DR.closed){ toast(J() ? '新しく描くときは 🗑 を押してください' : 'Press 🗑 to start a new shape'); return; }
+    if (DR.pts.length >= 3 && dist(p, DR.pts[0]) < .35) DR.closed = true;
+    else if (!DR.pts.length || dist(p, DR.pts[DR.pts.length - 1]) > .01) DR.pts.push(p);
+  }
+  dDraw(); dCalc();
+}
+dcv.addEventListener('pointerdown', e => {
+  e.preventDefault(); DR.kb = false; const raw = gOf(e);
+  if (DR.mode === 'poly'){
+    const i = DR.pts.findIndex(q => dist(q, raw) < .35);
+    if (i >= 0 && !(i === 0 && !DR.closed && DR.pts.length >= 3)){ DR.drag = { i }; dcv.setPointerCapture(e.pointerId); return; }
+  } else if (DR.circ && DR.circ.done && dist(DR.circ.c, raw) < .35){ DR.drag = { c:true }; dcv.setPointerCapture(e.pointerId); return; }
+  DR.pend = { cx:e.clientX, cy:e.clientY, raw, vx:VX, vy:VY, pan:spaceDown, moved:false }; dcv.setPointerCapture(e.pointerId);
+});
+dcv.addEventListener('pointermove', e => {
+  if (DR.pend){ const dx = e.clientX - DR.pend.cx, dy = e.clientY - DR.pend.cy; if (DR.pend.pan || DR.pend.moved || Math.hypot(dx, dy) > 6){ DR.pend.moved = true; VX = DR.pend.vx - dx / PX; VY = DR.pend.vy - dy / PX; dcv.style.cursor = 'grabbing'; dDraw(); return; } }
+  const raw = gOf(e);
+  if (DR.drag){ const q = D.snap ? { x:Math.round(raw.x), y:Math.round(raw.y) } : raw; if (DR.drag.c) DR.circ.c = q; else DR.pts[DR.drag.i] = q; dDraw(); dCalc(); return; }
+  DR.hover = snapP(raw); dDraw(); if (DR.mode === 'circle' && DR.circ && !DR.circ.done) dCalc();
+});
+dcv.addEventListener('pointerup', () => { DR.drag = null; const pd = DR.pend; DR.pend = null; dcv.style.cursor = ''; if (pd && !pd.moved && !pd.pan) place(snapP(pd.raw)); });
+dcv.addEventListener('pointercancel', () => { DR.drag = null; DR.pend = null; dcv.style.cursor = ''; });
+let spaceDown = false;
+addEventListener('keydown', e => { if (e.key === ' ' && D.tab === 'draw' && !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) spaceDown = true; });
+addEventListener('keyup', e => { if (e.key === ' ') spaceDown = false; });
+function zoomAt(sx, sy, f){ const gx = sx / PX + VX, gy = sy / PX + VY; setZ(VZ * f); VX = gx - sx / PX; VY = gy - sy / PX; dDraw(); }
+dcv.addEventListener('wheel', e => { e.preventDefault(); const r = dcv.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive:false });
+function keepCur(){ const m = 1; if (DR.cur.x < VX + m) VX = DR.cur.x - m; if (DR.cur.x > VX + dW / PX - m) VX = DR.cur.x - dW / PX + m; if (DR.cur.y < VY + m) VY = DR.cur.y - m; if (DR.cur.y > VY + dH / PX - m) VY = DR.cur.y - dH / PX + m; }
+function fitView(){
+  const q = DR.pts.slice(); if (DR.circ){ const C = DR.circ; q.push({ x:C.c.x - C.r, y:C.c.y - C.r }, { x:C.c.x + C.r, y:C.c.y + C.r }); }
+  if (!q.length){ setZ(1); VX = 0; VY = 0; dDraw(); return; }
+  const xs = q.map(p => p.x), ys = q.map(p => p.y), mnx = Math.min(...xs), mxx = Math.max(...xs), mny = Math.min(...ys), mxy = Math.max(...ys);
+  const w = Math.max(1, mxx - mnx), h = Math.max(1, mxy - mny); setZ(Math.min(dW * .8 / (w * 34), dH * .78 / (h * 34)));
+  VX = (mnx + mxx) / 2 - dW / 2 / PX; VY = (mny + mxy) / 2 - dH / 2 / PX; dDraw();
+}
+dcv.addEventListener('pointerleave', () => { if (!DR.drag && !DR.kb){ DR.hover = null; dDraw(); } });
+function dUndo(){ if (DR.mode === 'circle'){ DR.circ = null; } else if (DR.closed) DR.closed = false; else DR.pts.pop(); dDraw(); dCalc(); }
+function dClear(){ DR.pts = []; DR.closed = false; DR.circ = null; dDraw(); dCalc(); }
+function setMode(m){ DR.mode = m; DR.hover = null; renderMode(); dDraw(); dCalc(); }
+function dKey(e){
+  const k = e.key; if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  const st = e.shiftKey ? 5 : 1, mv = { ArrowLeft:[-1, 0], ArrowRight:[1, 0], ArrowUp:[0, -1], ArrowDown:[0, 1] }[k];
+  if (mv){ e.preventDefault(); DR.kb = true; DR.cur.x += mv[0] * st; DR.cur.y += mv[1] * st; keepCur(); DR.hover = { x:DR.cur.x, y:DR.cur.y }; dDraw(); if (DR.mode === 'circle') dCalc(); }
+  else if (k === 'Enter'){ e.preventDefault(); DR.kb = true; place({ x:DR.cur.x, y:DR.cur.y }); }
+  else if (k === ' '){ e.preventDefault(); }
+  else if (k === 'Backspace'){ e.preventDefault(); dUndo(); }
+  else if (k === 'Escape') dClear();
+  else if (k.toLowerCase() === 'c') setMode(DR.mode === 'poly' ? 'circle' : 'poly');
+  else if (k === '+' || k === '='){ zoomAt(dW / 2, dH / 2, 1.25); }
+  else if (k === '-' || k === '_'){ zoomAt(dW / 2, dH / 2, .8); }
+  else if (k.toLowerCase() === 'f') fitView();
+}
+function dDraw(){
+  if (D.tab !== 'draw' || !dW) return;
+  const g = dg, acc = cssv('--acc') || '#39ff14', ink = cssv('--ink') || '#d8ffd0', light = D.theme === 'light';
+  g.setTransform(dDPR, 0, 0, dDPR, 0, 0);
+  g.fillStyle = light ? '#fbfdf8' : '#04100a'; g.fillRect(0, 0, dW, dH);
+  { let st = 1; while (st * PX < 9) st = String(st)[0] === '1' ? st * 5 : st * 2;
+    const x0 = Math.floor(VX / st) * st, y0 = Math.floor(VY / st) * st, x1 = VX + dW / PX, y1 = VY + dH / PX;
+    for (let gx = x0; gx <= x1; gx += st){ const X = Math.round((gx - VX) * PX) + .5, mj = Math.round(gx / st) % 5 === 0; g.strokeStyle = mj ? hexA(acc, light ? .3 : .22) : hexA(acc, light ? .12 : .08); g.lineWidth = 1; g.beginPath(); g.moveTo(X, 0); g.lineTo(X, dH); g.stroke(); }
+    for (let gy = y0; gy <= y1; gy += st){ const Y = Math.round((gy - VY) * PX) + .5, mj = Math.round(gy / st) % 5 === 0; g.strokeStyle = mj ? hexA(acc, light ? .3 : .22) : hexA(acc, light ? .12 : .08); g.beginPath(); g.moveTo(0, Y); g.lineTo(dW, Y); g.stroke(); }
+    DR.gst = st; }
+  const P = q => [(q.x - VX) * PX, (q.y - VY) * PX];
+  const pill = (x, y, t, col) => { g.font = 'bold 11px "Courier New",monospace'; const w = g.measureText(t).width + 10; g.fillStyle = light ? 'rgba(255,255,255,.9)' : 'rgba(0,0,0,.72)'; g.beginPath(); if (g.roundRect) g.roundRect(x - w / 2, y - 9, w, 18, 9); else g.rect(x - w / 2, y - 9, w, 18); g.fill(); g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, x, y + .5); };
+  const dot = (q, r, f) => { const [x, y] = P(q); g.fillStyle = f; g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill(); };
+  g.font = '11px "Courier New",monospace'; g.fillStyle = ink; g.globalAlpha = .7; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText((J() ? '1 マス = ' : '1 cell = ') + fmtL(D.cell) + (DR.gst > 1 ? (J() ? `（線は ${DR.gst} マスごと）` : ` (lines every ${DR.gst})`) : '') + `  ×${nf(VZ, 2)}`, 8, dH - 8); g.globalAlpha = 1;
+  if (DR.mode === 'poly'){
+    const pts = DR.pts, n = pts.length;
+    if (n){
+      g.beginPath(); pts.forEach((q, i) => { const [x, y] = P(q); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+      if (DR.closed){ g.closePath(); g.fillStyle = hexA(acc, .16); g.fill(); }
+      g.strokeStyle = acc; g.lineWidth = 2; g.stroke();
+      if (!DR.closed && DR.hover){ const [x1, y1] = P(pts[n - 1]), [x2, y2] = P(DR.hover); g.setLineDash([5, 5]); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]); const L = dist(pts[n - 1], DR.hover); if (L > 0) pill((x1 + x2) / 2, (y1 + y2) / 2 - 12, fmtL(L * D.cell), ink); }
+      const c = cen(pts), m = DR.closed ? n : n - 1;
+      for (let i = 0; i < m; i++){
+        const a = pts[i], b = pts[(i + 1) % n], len = dist(a, b); if (!len) continue;
+        let nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len; const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        if (DR.closed && (nx * (mx - c.x) + ny * (my - c.y)) < 0){ nx = -nx; ny = -ny; }
+        pill(mx * PX + nx * 14, my * PX + ny * 14, fmtL(len * D.cell), acc);
+      }
+      const ang = DR.closed && n >= 3 ? angles(pts) : null;
+      pts.forEach((q, i) => {
+        const [x, y] = P(q); let dx = q.x - c.x, dy = q.y - c.y; const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+        dot(q, i === 0 && !DR.closed && n >= 3 ? 7 : 5, i === 0 && !DR.closed && n >= 3 ? hexA(acc, .6) : acc);
+        g.font = 'bold 12px "Courier New",monospace'; g.fillStyle = ink; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(LET[i % 26], x + dx * 16, y + dy * 16);
+        if (ang) pill(x - dx * 26, y - dy * 26, nf(ang[i], 1) + '°', ink);
+      });
+    }
+  } else if (DR.circ){
+    const C = DR.circ, r = C.done ? C.r : (DR.hover ? dist(C.c, DR.hover) : 0), [x, y] = P(C.c);
+    if (r > 0){
+      g.beginPath(); g.arc(x, y, r * PX, 0, 6.283); g.fillStyle = hexA(acc, .14); g.fill(); g.strokeStyle = acc; g.lineWidth = 2; if (!C.done) g.setLineDash([5, 5]); g.stroke(); g.setLineDash([]);
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + r * PX, y); g.stroke(); pill(x + r * PX / 2, y - 12, 'r = ' + fmtL(r * D.cell), acc);
+    }
+    dot(C.c, 5, acc);
+  }
+  if (DR.hover){ const [x, y] = P(DR.hover); g.strokeStyle = hexA(acc, .7); g.lineWidth = 1; g.beginPath(); g.arc(x, y, 8, 0, 6.283); g.stroke(); }
+  if (DR.kb){ const [x, y] = P(DR.cur); g.strokeStyle = acc; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 12, y); g.lineTo(x + 12, y); g.moveTo(x, y - 12); g.lineTo(x, y + 12); g.stroke(); }
+}
+const row = (l, v, big) => `<div class="rr${big ? ' big' : ''}"><span>${l}</span><b>${v}</b></div>`;
+function dCalc(){
+  const box = $('dres'), c2 = D.cell * D.cell, th = calc($('dThick').value), hasT = isFinite(th) && th > 0;
+  const TS = 400 / 121, JO = 200 / 121; let h = '';
+  const areaRows = A => row(J() ? '面積' : 'Area', nf(A, A < 1 ? 4 : 2) + ' m²', true) + row(J() ? '坪' : 'Tsubo', nf(A / TS, 2) + (J() ? ' 坪' : '')) + row(J() ? '畳（1 坪の半分で計算）' : 'Tatami (½ tsubo)', nf(A / JO, 2) + (J() ? ' 畳' : ''));
+  const volRows = V => hasT ? `<h4>${J() ? '体積（厚み・高さ ' : 'VOLUME (thickness '}${fmtL(th)}${J() ? '）' : ')'}</h4>` + row(J() ? '体積' : 'Volume', nf(V, V < 1 ? 4 : 2) + ' m³', true) + row(J() ? 'リットル' : 'Litres', nf(V * 1000, 1) + ' L') : `<div class="none" style="margin-top:8px">${J() ? '厚みか高さを入れると、体積も出ます（例：床のコンクリート 0.1、部屋の天井 2.4）。' : 'Enter a thickness or height to get the volume (e.g. slab 0.1, ceiling 2.4).'}</div>`;
+  if (DR.mode === 'poly'){
+    const pts = DR.pts, n = pts.length;
+    if (n < 2) h = `<div class="none">${J() ? '方眼紙をクリックして点を打ちます。<br>最初の点（A）にもどると、図形が閉じて面積が出ます。<br>打った点は、あとからドラッグで動かせます。' : 'Click the grid to place points.<br>Click the first point (A) again to close the shape and get its area.<br>Drag any point to adjust it.'}</div>`;
+    else {
+      const m = DR.closed ? n : n - 1, L = []; for (let i = 0; i < m; i++) L.push(dist(pts[i], pts[(i + 1) % n]) * D.cell);
+      const per = L.reduce((a, b) => a + b, 0);
+      if (DR.closed){ const A = Math.abs(sArea(pts)) * c2; h += areaRows(A) + row(J() ? '周りの長さ' : 'Perimeter', fmtL(per)) + volRows(A * (hasT ? th : 0)); }
+      else h += row(J() ? '線の長さの合計' : 'Total length', fmtL(per), true) + `<div class="none" style="margin:6px 0">${J() ? '最初の点 A をクリックすると、図形が閉じます。' : 'Click point A to close the shape.'}</div>`;
+      h += `<h4>${J() ? '辺の長さ' : 'SIDES'}</h4>` + L.map((v, i) => row(LET[i % 26] + LET[(i + 1) % n % 26], fmtL(v))).join('');
+      if (DR.closed && n >= 3){ const an = angles(pts); h += `<h4>${J() ? '角度' : 'ANGLES'}</h4>` + an.map((v, i) => row(LET[i % 26], nf(v, 1) + '°')).join('') + row(J() ? '合計' : 'Sum', nf(an.reduce((a, b) => a + b, 0), 1) + '°'); }
+    }
+  } else {
+    const C = DR.circ, r = C ? (C.done ? C.r : (DR.hover ? dist(C.c, DR.hover) : 0)) * D.cell : 0;
+    if (!C || !r) h = `<div class="none">${J() ? '中心をクリックしてから、半径の位置をクリックすると円が描けます。<br>中心の点は、あとからドラッグで動かせます。' : 'Click the centre, then click again to set the radius.<br>Drag the centre to move the circle.'}</div>`;
+    else { const A = Math.PI * r * r; h += row(J() ? '半径' : 'Radius', fmtL(r)) + row(J() ? '直径' : 'Diameter', fmtL(r * 2)) + row(J() ? '円周' : 'Circumference', fmtL(2 * Math.PI * r)) + areaRows(A) + volRows(A * (hasT ? th : 0)).replace(J() ? '体積（' : 'VOLUME (', J() ? '円柱の体積（' : 'CYLINDER VOLUME ('); }
+  }
+  box.innerHTML = h;
+}
+function renderMode(){
+  const box = $('dMode'); box.replaceChildren();
+  [['poly', J() ? '⬠ 点で図形' : '⬠ Polygon'], ['circle', J() ? '◯ コンパス' : '◯ Compass']].forEach(([m, l]) => { const b = document.createElement('button'); b.textContent = l; b.className = DR.mode === m ? 'on' : ''; b.onclick = () => setMode(m); box.append(b); });
+}
+function dApply(){
+  const tb = $('tabs').children; tb[0].textContent = J() ? '🧮 単位変換' : '🧮 Units'; tb[1].textContent = J() ? '📐 方眼紙の作図' : '📐 Grid drawing'; tb[2].textContent = J() ? '📏 図形の計算' : '📏 Shapes & triangles'; tb[3].textContent = J() ? '🔢 数の道具' : '🔢 Numbers'; tb[4].textContent = J() ? '🛠 現場の計算' : '🛠 Site & DIY';
+  [...tb].forEach(b => b.classList.toggle('on', b.dataset.p === D.tab));
+  const conv = D.tab === 'conv'; $('cats').style.display = conv ? '' : 'none'; document.querySelector('.wrap').style.display = conv ? '' : 'none'; $('pDraw').hidden = D.tab !== 'draw'; $('pShape').hidden = D.tab !== 'shape'; $('pNum').hidden = D.tab !== 'num'; $('pSite').hidden = D.tab !== 'site';
+  $('lCell').textContent = J() ? '1 マス' : '1 cell'; $('lSnap').textContent = J() ? 'マス目に吸い付く' : 'Snap to grid'; $('lThick').textContent = J() ? '厚み・高さ' : 'Thickness/height';
+  $('dThick').placeholder = J() ? '例 0.1' : 'e.g. 0.1'; $('dUndo').title = J() ? '1 つもどす（Backspace）' : 'Undo (Backspace)'; $('dClear').textContent = J() ? '🗑 新しく描く' : '🗑 New'; $('dFit').textContent = J() ? '🎯 全体を表示' : '🎯 Fit';
+  const sel = $('dCell'); sel.replaceChildren(); DCELL.forEach(([v, a, b]) => { const o = document.createElement('option'); o.value = v; o.textContent = J() ? a : b; sel.append(o); }); sel.value = String(D.cell);
+  $('dSnap').checked = !!D.snap;
+  $('dkb').textContent = J() ? '🖱 ホイール：拡大・縮小 ／ 空いている所をドラッグ：方眼紙を動かす ／ 点をドラッグ：点を動かす　⌨ 矢印：カーソル（Shift で 5 マス）／ Enter：点を打つ ／ Space を押しながらドラッグ：方眼紙を動かす ／ ＋ −：拡大・縮小 ／ F：全体を表示 ／ Backspace：1 つもどす ／ Esc：全部消す ／ C：図形とコンパス' : '🖱 Wheel: zoom / drag empty space: pan / drag a point: move it   ⌨ Arrows: cursor (Shift = 5) / Enter: place / Space+drag: pan / + −: zoom / F: fit / Backspace: undo / Esc: clear / C: polygon ↔ compass';
+  renderMode();
+  if (D.tab === 'draw'){ dSize(); dCalc(); }
+  if (D.tab === 'shape') shapeTab();
+  if (D.tab === 'num'){ numTab(); dateRender(); }
+  if (D.tab === 'site'){ siteTab(); stairRender(); elecRender(); paintRender(); }
+  extraApply();
+}
+[...$('tabs').children].forEach(b => b.onclick = () => { D.tab = b.dataset.p; save(); dApply(); });
+$('dCell').onchange = e => { D.cell = +e.target.value; save(); dDraw(); dCalc(); };
+$('dSnap').onchange = e => { D.snap = e.target.checked; save(); };
+$('dThick').addEventListener('input', dCalc);
+$('dUndo').onclick = dUndo; $('dClear').onclick = dClear;
+$('dZi').onclick = () => zoomAt(dW / 2, dH / 2, 1.25); $('dZo').onclick = () => zoomAt(dW / 2, dH / 2, .8); $('dFit').onclick = fitView;
+$('dPng').onclick = () => { const a = document.createElement('a'); a.download = 'meridiconvert-drawing.png'; a.href = dcv.toDataURL('image/png'); a.click(); };
+window.addEventListener('resize', () => { if (D.tab === 'draw') dSize(); });
+
+
+/* ================= 図形の計算・三角形を解く・勾配 ================= */
+if (!D.sh) D.sh = 'rect'; if (!D.su) D.su = 'm'; if (!D.sv || typeof D.sv !== 'object') D.sv = {}; if (!D.tri || typeof D.tri !== 'object') D.tri = {}; if (!D.sl || typeof D.sl !== 'object') D.sl = {};
+const SU = { mm:.001, cm:.01, m:1 };
+const PI = Math.PI;
+const SH = [
+ { id:'square', g:2, j:'正方形', e:'Square', f:[['a','一辺','Side']], r:v => ({ A:v.a * v.a, P:4 * v.a, D:v.a * Math.SQRT2 }), fx:'A = a²  ·  P = 4a' },
+ { id:'rect', g:2, j:'長方形', e:'Rectangle', f:[['a','横','Width'],['b','縦','Height']], r:v => ({ A:v.a * v.b, P:2 * (v.a + v.b), D:Math.hypot(v.a, v.b) }), fx:'A = a × b  ·  P = 2(a + b)' },
+ { id:'tri', g:2, j:'三角形', e:'Triangle', f:[['b','底辺','Base'],['h','高さ','Height']], r:v => ({ A:v.b * v.h / 2 }), fx:'A = b × h ÷ 2' },
+ { id:'trap', g:2, j:'台形', e:'Trapezoid', f:[['a','上底','Top'],['b','下底','Bottom'],['h','高さ','Height']], r:v => ({ A:(v.a + v.b) * v.h / 2 }), fx:'A = (a + b) × h ÷ 2' },
+ { id:'para', g:2, j:'平行四辺形', e:'Parallelogram', f:[['b','底辺','Base'],['h','高さ','Height']], r:v => ({ A:v.b * v.h }), fx:'A = b × h' },
+ { id:'rhom', g:2, j:'ひし形', e:'Rhombus', f:[['p','対角線 1','Diagonal 1'],['q','対角線 2','Diagonal 2']], r:v => ({ A:v.p * v.q / 2, P:2 * Math.hypot(v.p, v.q) }), fx:'A = p × q ÷ 2' },
+ { id:'circle', g:2, j:'円', e:'Circle', f:[['r','半径','Radius']], r:v => ({ A:PI * v.r * v.r, P:2 * PI * v.r }), fx:'A = πr²  ·  C = 2πr' },
+ { id:'sector', g:2, j:'おうぎ形', e:'Sector', f:[['r','半径','Radius'],['t','中心角（°）','Angle (°)',1]], r:v => v.t > 360 ? null : ({ A:PI * v.r * v.r * v.t / 360, L:2 * PI * v.r * v.t / 360, P:2 * v.r + 2 * PI * v.r * v.t / 360 }), fx:'A = πr² × θ ÷ 360' },
+ { id:'ellipse', g:2, j:'だ円', e:'Ellipse', f:[['a','長い半径','Semi-major'],['b','短い半径','Semi-minor']], r:v => ({ A:PI * v.a * v.b, P:PI * (3 * (v.a + v.b) - Math.sqrt((3 * v.a + v.b) * (v.a + 3 * v.b))) }), fx:'A = πab  ·  P ≈ π{3(a+b) − √((3a+b)(a+3b))}' },
+ { id:'ngon', g:2, j:'正多角形', e:'Regular polygon', f:[['n','辺の数','Number of sides',1],['a','一辺','Side']], r:v => { const n = Math.round(v.n); if (n < 3) return null; return { A:n * v.a * v.a / (4 * Math.tan(PI / n)), P:n * v.a }; }, fx:'A = n·a² ÷ (4·tan(π/n))' },
+ { id:'cube', g:3, j:'立方体', e:'Cube', f:[['a','一辺','Side']], r:v => ({ V:v.a ** 3, S:6 * v.a * v.a }), fx:'V = a³  ·  S = 6a²' },
+ { id:'box', g:3, j:'直方体', e:'Box', f:[['a','横','Width'],['b','奥行き','Depth'],['c','高さ','Height']], r:v => ({ V:v.a * v.b * v.c, S:2 * (v.a * v.b + v.b * v.c + v.a * v.c) }), fx:'V = a × b × c' },
+ { id:'cyl', g:3, j:'円柱', e:'Cylinder', f:[['r','半径','Radius'],['h','高さ','Height']], r:v => ({ V:PI * v.r * v.r * v.h, S:2 * PI * v.r * (v.r + v.h) }), fx:'V = πr²h' },
+ { id:'cone', g:3, j:'円すい', e:'Cone', f:[['r','半径','Radius'],['h','高さ','Height']], r:v => ({ V:PI * v.r * v.r * v.h / 3, S:PI * v.r * (v.r + Math.hypot(v.r, v.h)) }), fx:'V = πr²h ÷ 3' },
+ { id:'sphere', g:3, j:'球', e:'Sphere', f:[['r','半径','Radius']], r:v => ({ V:4 / 3 * PI * v.r ** 3, S:4 * PI * v.r * v.r }), fx:'V = 4/3·πr³  ·  S = 4πr²' },
+ { id:'pyr', g:3, j:'四角すい', e:'Square pyramid', f:[['a','底の一辺','Base side'],['h','高さ','Height']], r:v => ({ V:v.a * v.a * v.h / 3, S:v.a * v.a + 2 * v.a * Math.hypot(v.a / 2, v.h) }), fx:'V = a²h ÷ 3' },
+ { id:'pipe', g:3, j:'パイプ', e:'Pipe', f:[['R','外の半径','Outer radius'],['r','内の半径','Inner radius'],['h','長さ','Length']], r:v => v.r >= v.R ? null : ({ V:PI * (v.R * v.R - v.r * v.r) * v.h }), fx:'V = π(R² − r²)h' }
+];
+const SF = 'fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="2" stroke-linejoin="round"', SD = 'fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4"', SL = 'fill="none" stroke="currentColor" stroke-width="2"';
+const SVG = {
+ square:`<rect x="30" y="15" width="60" height="60" ${SF}/><line x1="30" y1="75" x2="90" y2="15" ${SD}/>`,
+ rect:`<rect x="12" y="22" width="96" height="48" ${SF}/><line x1="12" y1="70" x2="108" y2="22" ${SD}/>`,
+ tri:`<polygon points="12,78 108,78 70,14" ${SF}/><line x1="70" y1="14" x2="70" y2="78" ${SD}/>`,
+ trap:`<polygon points="38,18 84,18 108,76 12,76" ${SF}/><line x1="38" y1="18" x2="38" y2="76" ${SD}/>`,
+ para:`<polygon points="36,18 108,18 84,76 12,76" ${SF}/><line x1="36" y1="18" x2="36" y2="76" ${SD}/>`,
+ rhom:`<polygon points="60,8 104,45 60,82 16,45" ${SF}/><line x1="60" y1="8" x2="60" y2="82" ${SD}/><line x1="16" y1="45" x2="104" y2="45" ${SD}/>`,
+ circle:`<circle cx="60" cy="45" r="34" ${SF}/><line x1="60" y1="45" x2="94" y2="45" ${SL}/><circle cx="60" cy="45" r="2.5" fill="currentColor"/>`,
+ sector:`<path d="M30 74 L104 74 A74 74 0 0 0 67 10 Z" ${SF}/><circle cx="30" cy="74" r="2.5" fill="currentColor"/>`,
+ ellipse:`<ellipse cx="60" cy="45" rx="48" ry="28" ${SF}/><line x1="60" y1="45" x2="108" y2="45" ${SD}/><line x1="60" y1="45" x2="60" y2="17" ${SD}/>`,
+ ngon:`<polygon points="60,10 92,28 92,62 60,80 28,62 28,28" ${SF}/>`,
+ cube:`<polygon points="28,30 76,30 76,78 28,78" ${SF}/><polygon points="28,30 46,14 94,14 76,30" ${SF}/><polygon points="76,30 94,14 94,62 76,78" ${SF}/>`,
+ box:`<polygon points="12,40 86,40 86,80 12,80" ${SF}/><polygon points="12,40 32,22 106,22 86,40" ${SF}/><polygon points="86,40 106,22 106,62 86,80" ${SF}/>`,
+ cyl:`<path d="M30 20 L30 72 A30 9 0 0 0 90 72 L90 20" ${SF}/><ellipse cx="60" cy="20" rx="30" ry="9" ${SF}/><path d="M30 72 A30 9 0 0 1 90 72" ${SD}/>`,
+ cone:`<path d="M60 10 L28 72 A32 10 0 0 0 92 72 Z" ${SF}/><path d="M28 72 A32 10 0 0 1 92 72" ${SD}/><line x1="60" y1="10" x2="60" y2="72" ${SD}/>`,
+ sphere:`<circle cx="60" cy="45" r="36" ${SF}/><ellipse cx="60" cy="45" rx="36" ry="11" ${SD}/>`,
+ pyr:`<polygon points="60,10 22,66 66,80" ${SF}/><polygon points="60,10 66,80 100,62" ${SF}/><path d="M22 66 L56 52 L100 62" ${SD}/>`,
+ pipe:`<path d="M24 22 L24 70 A36 11 0 0 0 96 70 L96 22" ${SF}/><ellipse cx="60" cy="22" rx="36" ry="11" ${SF}/><ellipse cx="60" cy="22" rx="18" ry="5.5" fill="var(--bg)" stroke="currentColor" stroke-width="2"/>`
+};
+const shSvg = id => `<svg viewBox="0 0 120 90" aria-hidden="true">${SVG[id] || ''}</svg>`;
+function sRender(){
+  const sh = SH.find(x => x.id === D.sh) || SH[1], v = D.sv[sh.id] || {}, card = $('shCard');
+  let h = `<h3>${J() ? '📏 図形の計算' : '📏 SHAPES'}</h3>`;
+  h += [2, 3].map(g => `<div class="lbl">${g === 2 ? (J() ? '平面の図形（面積）' : '2D shapes (area)') : (J() ? '立体（体積）' : '3D solids (volume)')}</div><div class="shl">` + SH.filter(x => x.g === g).map(x => `<button data-s="${x.id}" class="${x.id === sh.id ? 'on' : ''}">${J() ? x.j : x.e}</button>`).join('') + '</div>').join('');
+  h += `<div class="shb"><div class="shv">${shSvg(sh.id)}</div><div class="shi">`;
+  h += `<label class="ir"><span>${J() ? '長さの単位' : 'Length unit'}</span><select id="shU">${Object.keys(SU).map(k => `<option ${k === D.su ? 'selected' : ''}>${k}</option>`).join('')}</select></label>`;
+  h += sh.f.map(([k, lj, le, nu]) => `<label class="ir"><span>${k} · ${J() ? lj : le}</span><input data-k="${k}" inputmode="decimal" autocomplete="off" value="${(v[k] ?? '').toString().replace(/"/g, '')}"><em>${nu ? '' : D.su}</em></label>`).join('');
+  h += `</div></div><div class="fx">${sh.fx}</div><div id="shR"></div>`;
+  card.innerHTML = h;
+  card.querySelectorAll('.shl button').forEach(b => b.onclick = () => { D.sh = b.dataset.s; save(); sRender(); });
+  $('shU').onchange = e => { D.su = e.target.value; save(); sRender(); };
+  card.querySelectorAll('.shi input').forEach(i => i.addEventListener('input', () => { (D.sv[sh.id] = D.sv[sh.id] || {})[i.dataset.k] = i.value; save(); shCalc(sh); }));
+  shCalc(sh);
+}
+function shCalc(sh){
+  const out = $('shR'), v = {}; let ok = true;
+  sh.f.forEach(([k]) => { const inp = document.querySelector(`#shCard input[data-k="${k}"]`), x = calc(inp.value); inp.classList.toggle('bad', inp.value.trim() !== '' && !(x > 0)); if (!(x > 0)) ok = false; v[k] = x; });
+  if (!ok){ out.innerHTML = `<div class="none">${J() ? '寸法を入れると、答えが出ます。「3*1.5」のような式も使えます。' : 'Enter the dimensions. Expressions like "3*1.5" work too.'}</div>`; return; }
+  const r = sh.r(v);
+  if (!r){ out.innerHTML = `<div class="none">${J() ? 'この寸法では、図形になりません。' : 'These dimensions don\'t form a valid shape.'}</div>`; return; }
+  const u = D.su, f = SU[u]; let h = '';
+  const L = { A:['面積','Area',2], P:['周りの長さ','Perimeter',1], D:['対角線','Diagonal',1], L:['弧の長さ','Arc length',1], V:['体積','Volume',3], S:['表面積','Surface area',2] };
+  Object.entries(r).forEach(([k, val]) => {
+    const [lj, le, pw] = L[k];
+    h += row(J() ? lj : le, nf(val, 4) + ' ' + u + (pw === 2 ? '²' : pw === 3 ? '³' : ''), k === 'A' || k === 'V');
+    if (k === 'A'){ const m2 = val * f * f; if (u !== 'm') h += row('m²', nf(m2, 6) + ' m²'); if (m2 >= 1) h += row(J() ? '坪' : 'Tsubo', nf(m2 * 121 / 400, 3) + (J() ? ' 坪' : '')); }
+    if (k === 'V'){ const m3 = val * f ** 3; if (u !== 'm') h += row('m³', nf(m3, 6) + ' m³'); h += row(J() ? 'リットル' : 'Litres', nf(m3 * 1000, 3) + ' L'); }
+  });
+  out.innerHTML = h;
+}
+/* ---- 三角形を解く ---- */
+function solveTri(s, a){
+  const R = PI / 180; let amb = false;
+  for (let it = 0; it < 6; it++){
+    if (a.filter(isFinite).length === 2){ const i = a.findIndex(x => !isFinite(x)); a[i] = 180 - a.reduce((p, x) => p + (isFinite(x) ? x : 0), 0); }
+    if (s.every(isFinite) && a.some(x => !isFinite(x))) for (let i = 0; i < 3; i++){ const x = s[i], y = s[(i + 1) % 3], z = s[(i + 2) % 3]; a[i] = Math.acos(Math.max(-1, Math.min(1, (y * y + z * z - x * x) / (2 * y * z)))) / R; }
+    for (let i = 0; i < 3; i++){ const j = (i + 1) % 3, k = (i + 2) % 3; if (!isFinite(s[i]) && isFinite(s[j]) && isFinite(s[k]) && isFinite(a[i])) s[i] = Math.sqrt(s[j] ** 2 + s[k] ** 2 - 2 * s[j] * s[k] * Math.cos(a[i] * R)); }
+    const p = [0, 1, 2].find(i => isFinite(s[i]) && isFinite(a[i]));
+    if (p !== undefined){
+      const ratio = s[p] / Math.sin(a[p] * R);
+      for (let i = 0; i < 3; i++){
+        if (isFinite(a[i]) && !isFinite(s[i])) s[i] = ratio * Math.sin(a[i] * R);
+        else if (isFinite(s[i]) && !isFinite(a[i])){ const sv = s[i] / ratio; if (sv > 1 + 1e-9) return null; if (sv < 1 - 1e-9 && s[i] > s[p] && a[p] < 90) amb = true; a[i] = Math.asin(Math.min(1, sv)) / R; }
+      }
+    }
+    if (s.every(isFinite) && a.every(isFinite)) break;
+  }
+  if (!s.every(x => isFinite(x) && x > 0) || !a.every(x => isFinite(x) && x > 0)) return null;
+  if (Math.abs(a[0] + a[1] + a[2] - 180) > .01) return null;
+  for (let i = 0; i < 3; i++) if (s[i] >= s[(i + 1) % 3] + s[(i + 2) % 3] - 1e-9) return null;
+  return { s, a, amb };
+}
+function triRender(){
+  const t = D.tri, card = $('triCard');
+  card.innerHTML = `<h3>${J() ? '📐 三角形を解く' : '📐 TRIANGLE SOLVER'}</h3><div class="none" style="margin-bottom:8px">${J() ? '辺と角のうち、3 つ（辺を 1 つ以上）を入れると、残りが出ます。角 A の向かいが辺 a です。' : 'Enter any 3 values (at least one side). Side a is opposite angle A.'}</div>
+    <div class="tg3">${['a', 'b', 'c'].map(k => `<label class="ir"><span>${J() ? '辺' : 'Side'} ${k}</span><input data-t="${k}" inputmode="decimal" autocomplete="off" value="${t[k] ?? ''}"></label>`).join('')}${['A', 'B', 'C'].map(k => `<label class="ir"><span>${J() ? '角' : 'Angle'} ${k} °</span><input data-t="${k}" inputmode="decimal" autocomplete="off" value="${t[k] ?? ''}"></label>`).join('')}</div>
+    <div class="tsv" id="triV"></div><div id="triR"></div><button class="tg" id="triClr" style="margin-top:8px">${J() ? '🗑 消す' : '🗑 Clear'}</button>`;
+  card.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { t[i.dataset.t] = i.value; save(); triCalc(); }));
+  $('triClr').onclick = () => { D.tri = {}; save(); triRender(); };
+  triCalc();
+}
+function triCalc(){
+  const t = D.tri, gv = k => { const v = calc(t[k] ?? ''); return v > 0 ? v : NaN; };
+  const s = ['a', 'b', 'c'].map(gv), a = ['A', 'B', 'C'].map(gv), n = s.filter(isFinite).length + a.filter(isFinite).length, out = $('triR');
+  const msg = m => { out.innerHTML = `<div class="none">${m}</div>`; $('triV').innerHTML = ''; };
+  if (n < 3) return msg(J() ? `あと ${3 - n} つ入れてください。` : `Enter ${3 - n} more value(s).`);
+  if (!s.some(isFinite)) return msg(J() ? '角だけでは大きさが決まりません。辺を 1 つ以上入れてください。' : 'Angles alone can\'t fix the size — add at least one side.');
+  const r = solveTri(s.slice(), a.slice());
+  if (!r) return msg(J() ? 'この組み合わせでは、三角形になりません。' : 'These values don\'t form a triangle.');
+  const [x, y, z] = r.s, area = .5 * x * y * Math.sin(r.a[2] * PI / 180), mx = Math.max(...r.a), eq = (p, q) => Math.abs(p - q) < 1e-6 * Math.max(p, q);
+  let kind = Math.abs(mx - 90) < .05 ? (J() ? '直角三角形' : 'Right') : mx > 90 ? (J() ? '鈍角三角形' : 'Obtuse') : (J() ? '鋭角三角形' : 'Acute');
+  if (eq(x, y) && eq(y, z)) kind += J() ? '・正三角形' : ' · equilateral'; else if (eq(x, y) || eq(y, z) || eq(x, z)) kind += J() ? '・二等辺三角形' : ' · isosceles';
+  let h = ['a', 'b', 'c'].map((k, i) => row((J() ? '辺 ' : 'Side ') + k, nf(r.s[i], 4))).join('') + ['A', 'B', 'C'].map((k, i) => row((J() ? '角 ' : 'Angle ') + k, nf(r.a[i], 2) + '°')).join('');
+  h += row(J() ? '面積' : 'Area', nf(area, 4), true) + row(J() ? '周りの長さ' : 'Perimeter', nf(x + y + z, 4)) + row(J() ? '種類' : 'Type', kind);
+  if (r.amb) h += `<div class="none" style="margin-top:6px">${J() ? '※ この入れ方では、三角形が 2 通りできることがあります。ここでは角が小さいほうを出しています。' : '※ This input can make two triangles; the one with the smaller angle is shown.'}</div>`;
+  out.innerHTML = h;
+  const Ar = r.a[0] * PI / 180, P = [[0, 0], [z, 0], [y * Math.cos(Ar), y * Math.sin(Ar)]];
+  const xs = P.map(q => q[0]), mnx = Math.min(...xs), mxx = Math.max(...xs), mxy = Math.max(...P.map(q => q[1])), k = Math.min(170 / (mxx - mnx), 92 / mxy);
+  const Q = P.map(q => [15 + (q[0] - mnx) * k, 112 - q[1] * k]);
+  $('triV').innerHTML = `<svg viewBox="0 0 200 128" style="color:var(--acc);width:100%;max-height:150px" aria-hidden="true"><polygon points="${Q.map(q => q.join(',')).join(' ')}" ${SF}/>${['A', 'B', 'C'].map((l, i) => `<text x="${Q[i][0]}" y="${Q[i][1] + (i === 2 ? -7 : 14)}" font-size="11" text-anchor="middle" fill="currentColor" font-family="Courier New">${l}</text>`).join('')}</svg>`;
+}
+/* ---- 勾配 ---- */
+const SLK = [['pct','％（パーセント）','Percent (%)'],['sun','寸勾配（◯寸）','Roof pitch (sun)'],['deg','角度（°）','Angle (°)'],['rat','1 : n（横の長さ n）','1 : n (run n)']];
+function slRender(){
+  const card = $('slCard');
+  card.innerHTML = `<h3>${J() ? '⛰ 勾配（こうばい）' : '⛰ SLOPE'}</h3><div class="none" style="margin-bottom:8px">${J() ? 'どれか 1 つを入れると、ほかの表し方に変わります。屋根の「寸勾配」は、横 10 に対して上がる高さです（4 寸勾配 ＝ 横 10 で高さ 4）。' : 'Enter any one value. Japanese roof pitch "sun" is the rise per 10 of run (4-sun = 4 up over 10).'}</div>` +
+    SLK.map(([k, j, e]) => `<label class="ir"><span>${J() ? j : e}</span><input data-l="${k}" inputmode="decimal" autocomplete="off"></label>`).join('') + '<div id="slR" class="none" style="margin-top:6px"></div>';
+  card.querySelectorAll('input').forEach(i => i.addEventListener('input', () => slCalc(i.dataset.l, i.value)));
+  if (D.sl.k){ const inp = card.querySelector(`input[data-l="${D.sl.k}"]`); if (inp){ inp.value = D.sl.v; slCalc(D.sl.k, D.sl.v); } }
+}
+function slCalc(k, raw){
+  D.sl = { k, v:raw }; save();
+  const x = calc(raw); let t = NaN;
+  if (isFinite(x) && x >= 0){ if (k === 'pct') t = x / 100; else if (k === 'sun') t = x / 10; else if (k === 'deg') t = x < 90 ? Math.tan(x * PI / 180) : NaN; else if (k === 'rat') t = x > 0 ? 1 / x : NaN; }
+  const set = (kk, val) => { if (kk === k) return; const i = document.querySelector(`#slCard input[data-l="${kk}"]`); if (i) i.value = isFinite(val) ? nf(val, 3).replace(/,/g, '') : ''; };
+  set('pct', t * 100); set('sun', t * 10); set('deg', Math.atan(t) * 180 / PI); set('rat', t > 0 ? 1 / t : NaN);
+  $('slR').textContent = isFinite(t) ? (J() ? `横 10 m で、高さ ${nf(t * 10, 2)} m 上がります。` : `Rises ${nf(t * 10, 2)} m over a 10 m run.`) : '';
+}
+function shapeTab(){ sRender(); triRender(); slRender(); }
+
+
+/* ================= 🔢 数の道具 ================= */
+function sci(src, deg){
+  let s = String(src).normalize('NFKC').replace(/\s/g, '').replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/π/g, 'pi').replace(/√/g, 'sqrt').replace(/,/g, ''), i = 0;
+  if (!s) return NaN;
+  const R = deg ? Math.PI / 180 : 1;
+  const F = { sin:x => Math.sin(x * R), cos:x => Math.cos(x * R), tan:x => Math.tan(x * R), asin:x => Math.asin(x) / R, acos:x => Math.acos(x) / R, atan:x => Math.atan(x) / R, sqrt:Math.sqrt, cbrt:Math.cbrt, log:Math.log10, ln:Math.log, abs:Math.abs, exp:Math.exp, round:Math.round, floor:Math.floor, ceil:Math.ceil };
+  const C = { pi:Math.PI, e:Math.E };
+  const num = () => { const m = /^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i.exec(s.slice(i)); if (!m) throw 0; i += m[0].length; return parseFloat(m[0]); };
+  const post = v => { while (s[i] === '!' || s[i] === '%'){ if (s[i] === '!'){ if (v < 0 || v > 170 || v % 1) throw 0; let r = 1; for (let k = 2; k <= v; k++) r *= k; v = r; } else v /= 100; i++; } return v; };
+  const atom = () => {
+    if (s[i] === '('){ i++; const v = expr(); if (s[i] !== ')') throw 0; i++; return post(v); }
+    const m = /^[a-z]+/i.exec(s.slice(i));
+    if (m){ const w = m[0].toLowerCase(); i += m[0].length; if (F[w]){ let a; if (s[i] === '('){ i++; a = expr(); if (s[i] !== ')') throw 0; i++; } else a = unary(); return post(F[w](a)); } if (w in C) return post(C[w]); if (w === 'ans') return post(lastAns); throw 0; }
+    return post(num());
+  };
+  const powr = () => { const b = atom(); if (s[i] === '^'){ i++; return Math.pow(b, unary()); } return b; };
+  const unary = () => { if (s[i] === '-'){ i++; return -unary(); } if (s[i] === '+'){ i++; return unary(); } return powr(); };
+  const term = () => { let v = unary(); for (;;){ if (s[i] === '*' || s[i] === '/'){ const o = s[i++], r = unary(); v = o === '*' ? v * r : v / r; } else if (s[i] === '(' || /[a-z]/i.test(s[i] || '')){ v *= unary(); } else break; } return v; };
+  const expr = () => { let v = term(); while (s[i] === '+' || s[i] === '-'){ const o = s[i++], r = term(); v = o === '+' ? v + r : v - r; } return v; };
+  try { const v = expr(); return i === s.length ? v : NaN; } catch(e){ return NaN; }
+}
+let lastAns = 0;
+if (!Array.isArray(D.ch)) D.ch = []; if (D.deg == null) D.deg = true;
+function calcRender(){
+  const c = $('calcCard');
+  const K = [['sin(','sin'],['cos(','cos'],['tan(','tan'],['√(','√'],['^','xʸ'],['(','('],[')',')'],['π','π'],['ln(','ln'],['log(','log'],['7'],['8'],['9'],['/','÷',1],['!','n!'],['4'],['5'],['6'],['*','×',1],['%'],['1'],['2'],['3'],['-','−',1],['ans','Ans'],['0'],['.'],['BS','⌫'],['+','+',1],['=','=',2]];
+  c.innerHTML = `<h3>${J() ? '🔢 関数電卓' : '🔢 SCIENTIFIC CALCULATOR'}</h3>
+    <div class="cdisp"><input id="cIn" autocomplete="off" spellcheck="false" placeholder="${J() ? '例：sin(30)+2^3' : 'e.g. sin(30)+2^3'}"><div class="cres" id="cOut">0</div></div>
+    <div class="seg" style="margin-bottom:8px" id="cDeg"></div>
+    <div class="keys">${K.map(([v, l, t]) => `<button data-v="${v}" class="${t === 1 ? 'op' : t === 2 ? 'eq' : ''}">${l || v}</button>`).join('')}</div>
+    <div class="chist" id="cHist"></div><div class="none" style="margin-top:6px">${J() ? 'Enter で確定、↑ で前の式。「ans」で直前の答えを使えます。' : 'Enter to evaluate, ↑ for the previous expression. "ans" uses the last answer.'}</div>`;
+  const inp = $('cIn');
+  const upd = () => { const v = sci(inp.value, D.deg), o = $('cOut'); if (!inp.value.trim()){ o.textContent = '0'; o.className = 'cres'; return; } o.className = 'cres' + (isFinite(v) ? '' : ' bad'); o.textContent = isFinite(v) ? '= ' + fmt(v) : (J() ? '式を確かめてください' : 'Check the expression'); };
+  const commit = () => { const v = sci(inp.value, D.deg); if (!isFinite(v)) return; D.ch = [{ q:inp.value, a:v }, ...D.ch].slice(0, 20); lastAns = v; save(); inp.value = String(+v.toPrecision(12)); upd(); renderCH(); };
+  c.querySelectorAll('.keys button').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === '=') commit(); else if (v === 'BS') inp.value = inp.value.slice(0, -1); else inp.value += v; upd(); inp.focus(); });
+  inp.addEventListener('input', upd);
+  let hi = -1; inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); commit(); hi = -1; } else if (e.key === 'ArrowUp' && D.ch.length){ e.preventDefault(); hi = Math.min(D.ch.length - 1, hi + 1); inp.value = D.ch[hi].q; upd(); } else if (e.key === 'ArrowDown'){ e.preventDefault(); hi = Math.max(-1, hi - 1); inp.value = hi < 0 ? '' : D.ch[hi].q; upd(); } else if (e.key === 'Escape'){ inp.value = ''; upd(); } });
+  const dg = $('cDeg'); [[true, J() ? '度（°）' : 'Degrees'], [false, J() ? 'ラジアン' : 'Radians']].forEach(([v, l]) => { const b = document.createElement('button'); b.textContent = l; b.className = D.deg === v ? 'on' : ''; b.onclick = () => { D.deg = v; save(); calcRender(); }; dg.append(b); });
+  renderCH(); upd();
+  function renderCH(){ const h = $('cHist'); h.innerHTML = D.ch.map((x, i) => `<div data-i="${i}"><span>${x.q.replace(/</g, '&lt;')}</span><b>${fmt(x.a)}</b></div>`).join(''); h.querySelectorAll('div').forEach(d => d.onclick = () => { inp.value = D.ch[+d.dataset.i].q; upd(); inp.focus(); }); }
+}
+function baseRender(){
+  const c = $('baseCard'), B = [[10, J() ? '10 進数' : 'Decimal'], [2, J() ? '2 進数' : 'Binary'], [8, J() ? '8 進数' : 'Octal'], [16, J() ? '16 進数' : 'Hex']];
+  c.innerHTML = `<h3>${J() ? '💻 進数の変換' : '💻 NUMBER BASES'}</h3>` + B.map(([b, l]) => `<label class="ir"><span>${l}</span><input data-b="${b}" autocomplete="off" spellcheck="false"></label>`).join('') + `<div class="none" id="bInfo"></div>`;
+  c.querySelectorAll('input').forEach(i => i.addEventListener('input', () => {
+    const b = +i.dataset.b, raw = i.value.trim().replace(/^0[xbo]/i, '').replace(/[\s_]/g, ''), ok = raw && new RegExp(`^-?[${'0123456789abcdef'.slice(0, b)}]+$`, 'i').test(raw);
+    i.classList.toggle('bad', !!raw && !ok);
+    let v = null; if (ok){ try { const neg = raw[0] === '-', body = neg ? raw.slice(1) : raw; v = [...body.toLowerCase()].reduce((a, ch) => a * BigInt(b) + BigInt(parseInt(ch, 16)), 0n); if (neg) v = -v; } catch(e){ v = null; } }
+    c.querySelectorAll('input').forEach(o => { if (o !== i) o.value = v == null ? '' : (v < 0n ? '-' : '') + (v < 0n ? -v : v).toString(+o.dataset.b).toUpperCase(); });
+    $('bInfo').textContent = v == null ? '' : (J() ? `${(v < 0n ? -v : v).toString(2).length} ビット` : `${(v < 0n ? -v : v).toString(2).length} bits`);
+  }));
+}
+function ratioRender(){
+  const c = $('ratioCard');
+  c.innerHTML = `<h3>${J() ? '⚖️ 比と割合' : '⚖️ RATIO & PERCENT'}</h3>
+    <div class="lbl">${J() ? '比の計算　a : b ＝ c : x' : 'Proportion   a : b = c : x'}</div>
+    <div style="display:flex;gap:6px;align-items:center">${['ra', 'rb', 'rc'].map((k, i) => `<input class="flt" style="margin:0;flex:1;min-width:0" data-r="${k}" inputmode="decimal" placeholder="${'abc'[i]}">${i === 0 ? ':' : i === 1 ? '=' : ':'}`).join('')}<b id="rx" style="flex:1;font:bold 15px 'Courier New',monospace;color:var(--acc)">x</b></div>
+    <div class="lbl" style="margin-top:12px">${J() ? '割合' : 'Percentages'}</div>
+    <label class="ir"><span>${J() ? '元の数' : 'Base'}</span><input data-p="b" inputmode="decimal"></label>
+    <label class="ir"><span>${J() ? '割合（%）' : 'Percent (%)'}</span><input data-p="p" inputmode="decimal"></label>
+    <div id="pOut"></div>`;
+  const rr = () => { const g = k => calc(c.querySelector(`[data-r="${k}"]`).value), a = g('ra'), b = g('rb'), cc = g('rc'); $('rx').textContent = isFinite(a) && isFinite(b) && isFinite(cc) && a ? fmt(b * cc / a) : 'x'; };
+  const pp = () => { const b = calc(c.querySelector('[data-p="b"]').value), p = calc(c.querySelector('[data-p="p"]').value); $('pOut').innerHTML = isFinite(b) && isFinite(p) ? row(J() ? `${fmt(b)} の ${fmt(p)}%` : `${fmt(p)}% of ${fmt(b)}`, fmt(b * p / 100), true) + row(J() ? `${fmt(p)}% 増し` : `+${fmt(p)}%`, fmt(b * (1 + p / 100))) + row(J() ? `${fmt(p)}% 引き` : `−${fmt(p)}%`, fmt(b * (1 - p / 100))) + row(J() ? '税込み（10%）' : 'Incl. 10% tax', fmt(b * 1.1)) + row(J() ? '税込み（8%）' : 'Incl. 8% tax', fmt(b * 1.08)) : ''; };
+  c.querySelectorAll('[data-r]').forEach(i => i.addEventListener('input', rr)); c.querySelectorAll('[data-p]').forEach(i => i.addEventListener('input', pp));
+}
+function scaleRender(){
+  const c = $('scaleCard'), SC = [1, 2, 5, 10, 20, 30, 50, 100, 200, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000];
+  c.innerHTML = `<h3>${J() ? '🗺 縮尺' : '🗺 SCALE'}</h3>
+    <label class="ir"><span>${J() ? '縮尺' : 'Scale'}</span><select id="scS">${SC.map(n => `<option value="${n}" ${n === 100 ? 'selected' : ''}>1 : ${n.toLocaleString()}</option>`).join('')}</select></label>
+    <label class="ir"><span>${J() ? '図面の上の長さ' : 'On paper'}</span><input id="scP" inputmode="decimal"><em>mm</em></label>
+    <label class="ir"><span>${J() ? '実際の長さ' : 'Real length'}</span><input id="scR" inputmode="decimal"><em>m</em></label>
+    <div class="none">${J() ? 'どちらか一方を入れると、もう一方が出ます。1/100 の図面の 1cm は、実際の 1m です。' : 'Fill either box. On a 1:100 drawing, 1 cm is 1 m in reality.'}</div>`;
+  const S = () => +$('scS').value;
+  $('scP').addEventListener('input', () => { const v = calc($('scP').value); $('scR').value = isFinite(v) ? +(v * S() / 1000).toPrecision(8) : ''; });
+  $('scR').addEventListener('input', () => { const v = calc($('scR').value); $('scP').value = isFinite(v) ? +(v * 1000 / S()).toPrecision(8) : ''; });
+  $('scS').onchange = () => $('scP').dispatchEvent(new Event('input'));
+}
+function numTab(){ calcRender(); baseRender(); ratioRender(); scaleRender(); }
+
+/* ================= 🛠 現場の計算 ================= */
+const PAPER = [['A0',841,1189],['A1',594,841],['A2',420,594],['A3',297,420],['A4',210,297],['A5',148,210],['A6',105,148],['B4（JIS）',257,364],['B5（JIS）',182,257],['B6（JIS）',128,182],['はがき',100,148],['名刺',55,91],['Letter（US）',215.9,279.4],['Legal（US）',215.9,355.6]];
+function paperRender(){
+  const c = $('paperCard'), q = (D.pq || '');
+  c.innerHTML = `<h3>${J() ? '📄 紙の大きさ' : '📄 PAPER SIZES'}</h3><table class="ptbl"><tr><td style="opacity:.6">${J() ? '名前' : 'Size'}</td><td style="opacity:.6;text-align:right">mm</td><td style="opacity:.6;text-align:right">inch</td><td style="opacity:.6;text-align:right">300dpi px</td></tr>` +
+    PAPER.map(([n, w, h]) => `<tr><td>${J() ? n : n.replace('（JIS）', ' (JIS)').replace('はがき', 'Postcard (JP)').replace('名刺', 'Business card (JP)').replace('（US）', ' (US)')}</td><td>${w} × ${h}</td><td>${nf(w / 25.4, 2)} × ${nf(h / 25.4, 2)}</td><td>${Math.round(w / 25.4 * 300)} × ${Math.round(h / 25.4 * 300)}</td></tr>`).join('') + `</table><div class="none" style="margin-top:6px">${J() ? 'A 判は、半分に折るたびに次の番号になります（A3 を半分にすると A4）。' : 'Fold an A size in half to get the next one (A3 → A4).'}</div>`;
+}
+function priceRender(){
+  const c = $('priceCard');
+  c.innerHTML = `<h3>${J() ? '🏠 坪単価 ⇔ ㎡単価' : '🏠 PRICE PER TSUBO ⇔ m²'}</h3>
+    <label class="ir"><span>${J() ? '坪単価（円 / 坪）' : 'Per tsubo'}</span><input id="prT" inputmode="decimal"></label>
+    <label class="ir"><span>${J() ? '㎡単価（円 / ㎡）' : 'Per m²'}</span><input id="prM" inputmode="decimal"></label>
+    <label class="ir"><span>${J() ? '広さ（㎡）' : 'Area (m²)'}</span><input id="prA" inputmode="decimal"></label>
+    <div id="prO"></div>`;
+  const TS = 400 / 121;
+  const tot = () => { const m = calc($('prM').value), a = calc($('prA').value); $('prO').innerHTML = isFinite(m) && isFinite(a) ? row(J() ? '合計' : 'Total', nf(m * a, 0) + (J() ? ' 円' : ''), true) + row(J() ? '広さ（坪）' : 'Area (tsubo)', nf(a / TS, 2)) : ''; };
+  $('prT').addEventListener('input', () => { const v = calc($('prT').value); $('prM').value = isFinite(v) ? Math.round(v / TS) : ''; tot(); });
+  $('prM').addEventListener('input', () => { const v = calc($('prM').value); $('prT').value = isFinite(v) ? Math.round(v * TS) : ''; tot(); });
+  $('prA').addEventListener('input', tot);
+}
+function woodRender(){
+  const c = $('woodCard');
+  c.innerHTML = `<h3>${J() ? '🪵 木材の量（材積）' : '🪵 TIMBER VOLUME'}</h3>
+    <div class="tg3"><label class="ir"><span>${J() ? '幅' : 'Width'}</span><input data-w="w" inputmode="decimal" value="105"><em>mm</em></label><label class="ir"><span>${J() ? '厚み' : 'Depth'}</span><input data-w="t" inputmode="decimal" value="105"><em>mm</em></label>
+    <label class="ir"><span>${J() ? '長さ' : 'Length'}</span><input data-w="l" inputmode="decimal" value="3000"><em>mm</em></label><label class="ir"><span>${J() ? '本数' : 'Pieces'}</span><input data-w="n" inputmode="decimal" value="1"></label></div><div id="wO"></div>`;
+  const go = () => { const g = k => calc(c.querySelector(`[data-w="${k}"]`).value), w = g('w'), t = g('t'), l = g('l'), n = g('n'); if (![w, t, l, n].every(x => x > 0)){ $('wO').innerHTML = ''; return; } const m3 = w * t * l * n / 1e9; $('wO').innerHTML = row(J() ? '材積' : 'Volume', nf(m3, 4) + ' m³', true) + row(J() ? '1 本あたり' : 'Per piece', nf(m3 / n, 4) + ' m³') + row(J() ? '石（こく）' : 'Koku (lumber)', nf(m3 / .278, 3)) + `<div class="none">${J() ? '木材の 1 石は、約 0.278 m³ です（1 尺 × 1 尺 × 10 尺）。105mm 角は、柱によく使う「3 寸 5 分角」です。' : 'One lumber koku is about 0.278 m³ (1×1×10 shaku).'}</div>`; };
+  c.querySelectorAll('input').forEach(i => i.addEventListener('input', go)); go();
+}
+function concRender(){
+  const c = $('concCard');
+  c.innerHTML = `<h3>${J() ? '🧱 コンクリートの量' : '🧱 CONCRETE'}</h3>
+    <div class="tg3"><label class="ir"><span>${J() ? '縦' : 'Length'}</span><input data-c="a" inputmode="decimal" value="3"><em>m</em></label><label class="ir"><span>${J() ? '横' : 'Width'}</span><input data-c="b" inputmode="decimal" value="4"><em>m</em></label>
+    <label class="ir"><span>${J() ? '厚み' : 'Thickness'}</span><input data-c="t" inputmode="decimal" value="0.1"><em>m</em></label><label class="ir"><span>${J() ? 'ロス' : 'Waste'}</span><input data-c="x" inputmode="decimal" value="5"><em>%</em></label></div><div id="cO"></div>`;
+  const go = () => { const g = k => calc(c.querySelector(`[data-c="${k}"]`).value), a = g('a'), b = g('b'), t = g('t'), x = g('x') || 0; if (![a, b, t].every(v => v > 0)){ $('cO').innerHTML = ''; return; } const v = a * b * t, vv = v * (1 + x / 100); $('cO').innerHTML = row(J() ? '必要な量（ロス込み）' : 'Needed (incl. waste)', nf(vv, 3) + ' m³', true) + row(J() ? 'ロスなし' : 'Net', nf(v, 3) + ' m³') + row(J() ? '重さ（目安）' : 'Weight (approx.)', nf(vv * 2.3, 2) + (J() ? ' トン' : ' t')) + row(J() ? '25kg のインスタントセメント（目安）' : '25 kg premix bags (approx.)', Math.ceil(vv * 2300 / 25) + (J() ? ' 袋' : '')) + `<div class="none">${J() ? '重さは 1 m³ あたり約 2.3 トンで計算しています。袋の数は大まかな目安で、商品によって大きく変わります。方眼紙の作図でも、形を描いて厚みを入れれば量が出ます。' : 'Weight assumes ~2.3 t/m³. Bag counts are a rough guide and vary by product. You can also draw a shape in Grid drawing and add a thickness.'}</div>`; };
+  c.querySelectorAll('input').forEach(i => i.addEventListener('input', go)); go();
+}
+function tileRender(){
+  const c = $('tileCard');
+  c.innerHTML = `<h3>${J() ? '🧩 タイル・床材の枚数' : '🧩 TILES & FLOORING'}</h3>
+    <div class="tg3"><label class="ir"><span>${J() ? '部屋の広さ' : 'Room area'}</span><input data-t="a" inputmode="decimal" value="10"><em>m²</em></label><label class="ir"><span>${J() ? 'ロス' : 'Waste'}</span><input data-t="x" inputmode="decimal" value="10"><em>%</em></label>
+    <label class="ir"><span>${J() ? 'タイルの縦' : 'Tile length'}</span><input data-t="w" inputmode="decimal" value="300"><em>mm</em></label><label class="ir"><span>${J() ? 'タイルの横' : 'Tile width'}</span><input data-t="h" inputmode="decimal" value="300"><em>mm</em></label></div><div id="tO"></div>`;
+  const go = () => { const g = k => calc(c.querySelector(`[data-t="${k}"]`).value), a = g('a'), x = g('x') || 0, w = g('w'), h = g('h'); if (![a, w, h].every(v => v > 0)){ $('tO').innerHTML = ''; return; } const one = w * h / 1e6, n = Math.ceil(a * (1 + x / 100) / one); $('tO').innerHTML = row(J() ? '必要な枚数（ロス込み）' : 'Tiles needed (incl. waste)', n.toLocaleString() + (J() ? ' 枚' : ''), true) + row(J() ? '1 枚の広さ' : 'Per tile', nf(one, 4) + ' m²'); };
+  c.querySelectorAll('input').forEach(i => i.addEventListener('input', go)); go();
+}
+function siteTab(){ paperRender(); priceRender(); woodRender(); concRender(); tileRender(); }
+
+
+/* ================= 追加の道具（日付・階段・電気・ペンキ） ================= */
+function mkCard(id, title, F, comp, note){
+  const c = $(id); if (!c) return;
+  c.innerHTML = `<h3>${title}</h3><div class="tg3">${F.map(f => `<label class="ir"><span>${J() ? f[1] : f[2]}</span><input data-f="${f[0]}" ${f[5] === 'date' ? 'type="date"' : 'inputmode="decimal"'} autocomplete="off" value="${f[4]}">${f[3] ? `<em>${f[3]}</em>` : ''}</label>`).join('')}</div><div class="out"></div>${note ? `<div class="none" style="margin-top:6px">${note}</div>` : ''}`;
+  const go = () => { const v = {}; F.forEach(f => { const i = c.querySelector(`[data-f="${f[0]}"]`); v[f[0]] = f[5] === 'date' ? i.value : calc(i.value); }); c.querySelector('.out').innerHTML = comp(v) || ''; };
+  c.querySelectorAll('input').forEach(i => i.addEventListener('input', go));
+  c._def = () => { F.forEach(f => { c.querySelector(`[data-f="${f[0]}"]`).value = f[4]; }); go(); };
+  go();
+}
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const pd = x => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(x || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+const fd = d => J() ? `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）` : d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', weekday:'short' });
+const ERAS = [[2019,4,1,'令和','Reiwa'],[1989,0,8,'平成','Heisei'],[1926,11,25,'昭和','Shōwa'],[1912,6,30,'大正','Taishō'],[1868,0,25,'明治','Meiji']];
+function wareki(d){ for (const [y, m, dd, j, e] of ERAS) if (d >= new Date(y, m, dd)){ const n = d.getFullYear() - y + 1; return J() ? `${j}${n === 1 ? '元' : n}年${d.getMonth() + 1}月${d.getDate()}日` : `${e} ${n}`; } return '—'; }
+function addBiz(d, n){ const r = new Date(d); let c = 0; const st = n < 0 ? -1 : 1; while (c < Math.abs(n)){ r.setDate(r.getDate() + st); const w = r.getDay(); if (w && w < 6) c++; } return r; }
+function bizBetween(a, b){ let c = 0; const r = new Date(Math.min(a, b)), e = new Date(Math.max(a, b)); while (r < e){ r.setDate(r.getDate() + 1); const w = r.getDay(); if (w && w < 6) c++; } return c; }
+function dateRender(){
+  const t = new Date(), e = new Date(t.getFullYear(), 11, 25);
+  mkCard('dateCard', J() ? '📅 日付と工期' : '📅 DATES & SCHEDULES', [['s','開始日','Start date','',iso(t),'date'],['n','日数','Days','','30'],['e','終わりの日（差を出す）','End date (for the gap)','',iso(e),'date']], v => {
+    const a = pd(v.s); if (!a) return '';
+    let h = '';
+    if (isFinite(v.n)){ const n = Math.round(v.n), x = new Date(a); x.setDate(x.getDate() + n); h += row(J() ? `${n} 日後` : `${n} days later`, fd(x), true) + row(J() ? `${n} 営業日後` : `${n} business days later`, fd(addBiz(a, n))); }
+    h += row(J() ? '開始日の和暦' : 'Japanese era', wareki(a));
+    const b = pd(v.e);
+    if (b){ const dd = Math.round((b - a) / 864e5); h += `<h4>${J() ? '2 つの日付の差' : 'GAP BETWEEN DATES'}</h4>` + row(J() ? '日数' : 'Days', nf(dd, 0) + (J() ? ' 日' : '')) + row(J() ? '週' : 'Weeks', nf(dd / 7, 1)) + row(J() ? '営業日（土日を除く）' : 'Business days (Mon–Fri)', nf(bizBetween(a, b), 0)); }
+    return h;
+  }, J() ? '営業日は土曜と日曜を除いて数えます。祝日は入っていないので、祝日がある場合はその分を足してください。' : 'Business days skip Saturdays and Sundays; public holidays are not included.');
+}
+function stairRender(){
+  mkCard('stairCard', J() ? '🪜 階段の計算' : '🪜 STAIRS', [['H','階の高さ（床から床）','Floor-to-floor height','mm','2800'],['R','1 段の高さの目安','Target riser','mm','200']], v => {
+    if (!(v.H > 0 && v.R > 0)) return '';
+    const n = Math.max(2, Math.round(v.H / v.R)), r = v.H / n, t = Math.max(150, 630 - 2 * r), ok = r <= 230 && t >= 150;
+    return row(J() ? '段の数' : 'Steps', n + (J() ? ' 段' : ''), true) + row(J() ? '蹴上げ（1 段の高さ）' : 'Riser', nf(r, 1) + ' mm') + row(J() ? '踏面（奥行きの目安）' : 'Tread (suggested)', nf(t, 0) + ' mm') + row(J() ? '階段の水平の長さ' : 'Total run', nf(t * (n - 1) / 1000, 2) + ' m') + row(J() ? '角度' : 'Angle', nf(Math.atan(r / t) * 180 / PI, 1) + '°') + row(J() ? '住宅の決まりの目安' : 'JP housing rule (approx.)', ok ? '✓ OK' : (J() ? '⚠ 外れています' : '⚠ Outside'));
+  }, J() ? '「2 × 蹴上げ ＋ 踏面 ≒ 630mm」で、歩きやすい踏面を出しています。日本の住宅の階段は、蹴上げ 23cm 以下・踏面 15cm 以上が目安とされます。' : 'Tread uses the comfort rule 2 × riser + tread ≈ 630 mm. Japanese housing guidance: riser ≤ 23 cm, tread ≥ 15 cm.');
+}
+function elecRender(){
+  mkCard('elecCard', J() ? '⚡ 電気と電気代' : '⚡ POWER & COST', [['W','消費電力','Power','W','1200'],['V','電圧','Voltage','V','100'],['h','1 日に使う時間','Hours per day','h','1'],['d','1 か月に使う日数','Days per month','','30'],['p','電気の単価','Price','円/kWh','31']], v => {
+    if (!(v.W > 0 && v.V > 0)) return '';
+    const A = v.W / v.V, day = v.W * (v.h || 0) / 1000, mon = day * (v.d || 0), cost = mon * (v.p || 0);
+    return row(J() ? '電流' : 'Current', nf(A, 2) + ' A') + row(J() ? '1 日の電力量' : 'Per day', nf(day, 3) + ' kWh') + row(J() ? '1 か月の電力量' : 'Per month', nf(mon, 2) + ' kWh') + row(J() ? '1 か月の電気代' : 'Monthly cost', nf(cost, 0) + (J() ? ' 円' : ''), true) + row(J() ? '1 年の電気代' : 'Yearly cost', nf(cost * 12, 0) + (J() ? ' 円' : ''));
+  }, J() ? '日本の家庭の電圧は 100V です。電気の単価は契約や時期で変わるので、請求書の数字に合わせてください（31 円/kWh は目安です）。' : 'Japanese homes use 100 V. Unit prices vary by contract; 31 yen/kWh is a rough guide.');
+}
+function paintRender(){
+  mkCard('paintCard', J() ? '🎨 ペンキ・壁紙の量' : '🎨 PAINT & WALLPAPER', [['W','部屋の幅','Room width','m','3.6'],['D','部屋の奥行き','Room depth','m','2.7'],['H','天井の高さ','Ceiling height','m','2.4'],['o','窓とドアの広さ','Windows & doors','m²','3.5'],['k','塗る回数','Coats','','2'],['c','1L で塗れる広さ','Coverage','m²/L','10'],['l','1 缶の量','Can size','L','4']], v => {
+    if (!(v.W > 0 && v.D > 0 && v.H > 0)) return '';
+    const wall = Math.max(0, 2 * (v.W + v.D) * v.H - (v.o || 0)), L = v.c > 0 ? wall * (v.k || 1) / v.c : NaN, cans = v.l > 0 ? Math.ceil(L / v.l) : NaN, roll = Math.ceil(wall / .92 * 1.1);
+    return row(J() ? '壁の広さ（窓とドアを引いた分）' : 'Wall area (minus openings)', nf(wall, 2) + ' m²', true) + row(J() ? '天井の広さ' : 'Ceiling', nf(v.W * v.D, 2) + ' m²') + `<h4>${J() ? 'ペンキ' : 'PAINT'}</h4>` + row(J() ? '必要な量' : 'Needed', nf(L, 1) + ' L') + row(J() ? '缶の数' : 'Cans', isFinite(cans) ? cans + (J() ? ' 缶' : '') : '—') + `<h4>${J() ? '壁紙（幅 92cm）' : 'WALLPAPER (92 cm wide)'}</h4>` + row(J() ? '必要な長さ（ロス 10% 込み）' : 'Length (incl. 10% waste)', roll + ' m');
+  }, J() ? 'ペンキの塗れる広さは、商品や下地によって変わります。缶の表示を確かめて入れてください。壁紙は柄合わせがあると、もっと多く必要になります。' : 'Coverage varies by product and surface — check the can. Patterned wallpaper needs extra for matching.');
+}
+
+/* ---- 🔰 例を入れるボタン ---- */
+const setv = (sel, val) => { const i = document.querySelector(sel); if (!i) return; i.value = val; i.dispatchEvent(new Event('input', { bubbles:true })); i.dispatchEvent(new Event('change', { bubbles:true })); };
+function ex(id, fill){ const c = $(id); if (!c) return; const h = c.querySelector('h3'); if (!h || h.querySelector('.exb')) return; const b = document.createElement('button'); b.className = 'tg exb'; b.textContent = J() ? '🔰 例を入れる' : '🔰 Example'; b.onclick = () => { fill(); toast(J() ? '🔰 例を入れました' : '🔰 Example filled'); }; h.append(b); }
+const SHEX = { a:'3', b:'4', c:'2', h:'2.5', r:'1.5', t:'90', p:'4', q:'3', n:'6', R:'1.5' };
+function extraApply(){
+  $('tShare').textContent = J() ? '🔗 共有' : '🔗 Share'; $('tShare').title = J() ? '今の計算を URL にしてコピー' : 'Copy a link to this calculation';
+  $('tPrint').textContent = J() ? '🖨 印刷' : '🖨 Print';
+  $('dEx').textContent = J() ? '🔰 例（L 字の部屋）' : '🔰 Example (L-shaped room)';
+  if (D.tab === 'shape'){
+    ex('shCard', () => { const sh = SH.find(x => x.id === D.sh); sh.f.forEach(([k]) => setv(`#shCard input[data-k="${k}"]`, sh.id === 'pipe' ? { R:'0.05', r:'0.04', h:'2' }[k] : SHEX[k])); });
+    ex('triCard', () => { ['A', 'B', 'C'].forEach(k => setv(`#triCard input[data-t="${k}"]`, '')); setv('#triCard input[data-t="a"]', '3'); setv('#triCard input[data-t="b"]', '4'); setv('#triCard input[data-t="c"]', '5'); });
+    ex('slCard', () => setv('#slCard input[data-l="sun"]', '4'));
+  }
+  if (D.tab === 'num'){
+    ex('calcCard', () => setv('#cIn', 'sin(30)+2^3'));
+    ex('baseCard', () => setv('#baseCard input[data-b="10"]', '255'));
+    ex('ratioCard', () => { setv('#ratioCard [data-r="ra"]', '2'); setv('#ratioCard [data-r="rb"]', '3'); setv('#ratioCard [data-r="rc"]', '10'); setv('#ratioCard [data-p="b"]', '1000'); setv('#ratioCard [data-p="p"]', '15'); });
+    ex('scaleCard', () => setv('#scP', '25'));
+    ex('dateCard', () => $('dateCard')._def());
+  }
+  if (D.tab === 'site'){
+    ex('priceCard', () => { setv('#prT', '1000000'); setv('#prA', '100'); });
+    ex('woodCard', () => { setv('#woodCard [data-w="w"]', '105'); setv('#woodCard [data-w="t"]', '105'); setv('#woodCard [data-w="l"]', '3000'); setv('#woodCard [data-w="n"]', '20'); });
+    ex('concCard', () => { setv('#concCard [data-c="a"]', '3'); setv('#concCard [data-c="b"]', '4'); setv('#concCard [data-c="t"]', '0.1'); setv('#concCard [data-c="x"]', '5'); });
+    ex('tileCard', () => { setv('#tileCard [data-t="a"]', '10'); setv('#tileCard [data-t="w"]', '300'); setv('#tileCard [data-t="h"]', '300'); setv('#tileCard [data-t="x"]', '10'); });
+    ['stairCard', 'elecCard', 'paintCard'].forEach(id => ex(id, () => $(id)._def()));
+  }
+}
+$('dEx').onclick = () => { DR.mode = 'poly'; renderMode(); DR.circ = null; DR.pts = [[2,2],[8,2],[8,6],[5,6],[5,9],[2,9]].map(([x, y]) => ({ x, y })); DR.closed = true; D.cell = 1; save(); $('dCell').value = '1'; $('dThick').value = '2.4'; fitView(); dCalc(); toast(J() ? '🔰 L 字の部屋（天井 2.4m）を描きました' : '🔰 Drew an L-shaped room (2.4 m ceiling)'); };
+
+/* ---- 🔗 共有と 🖨 印刷 ---- */
+const b64e = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const b64d = t => JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/')))));
+$('tShare').onclick = () => {
+  const st = { tab:D.tab };
+  if (D.tab === 'conv'){ st.c = D.cat; st.s = D.sel[D.cat]; st.v = $('val').value; }
+  if (D.tab === 'draw') st.d = { m:DR.mode, p:DR.pts.map(q => [+q.x.toFixed(3), +q.y.toFixed(3)]), k:DR.closed ? 1 : 0, c:DR.circ && DR.circ.done ? [+DR.circ.c.x.toFixed(3), +DR.circ.c.y.toFixed(3), +DR.circ.r.toFixed(4)] : null, cell:D.cell, t:$('dThick').value };
+  if (D.tab === 'shape'){ st.sh = D.sh; st.su = D.su; st.sv = D.sv[D.sh] || {}; st.tri = D.tri; st.sl = D.sl; }
+  const url = location.origin + location.pathname + '#s=' + b64e(st);
+  try { navigator.clipboard.writeText(url).then(() => toast(J() ? '🔗 リンクをコピーしました' : '🔗 Link copied'), () => prompt('URL', url)); } catch(e){ prompt('URL', url); }
+};
+let prTheme = null;
+$('tPrint').onclick = () => window.print();
+addEventListener('beforeprint', () => { prTheme = D.theme; if (D.theme !== 'light'){ D.theme = 'light'; document.body.classList.add('light'); dDraw(); } });
+addEventListener('afterprint', () => { if (prTheme && prTheme !== 'light'){ D.theme = prTheme; document.body.classList.remove('light'); dDraw(); } prTheme = null; });
+let shareThick = null;
+if (location.hash.startsWith('#s=')){
+  try {
+    const st = b64d(location.hash.slice(3));
+    if (st.tab) D.tab = st.tab;
+    if (st.c){ D.cat = st.c; if (st.s) D.sel[st.c] = st.s; if (st.v != null){ D.v = st.v; $('val').value = st.v; } }
+    if (st.d){ DR.mode = st.d.m || 'poly'; DR.pts = (st.d.p || []).map(([x, y]) => ({ x, y })); DR.closed = !!st.d.k; DR.circ = st.d.c ? { c:{ x:st.d.c[0], y:st.d.c[1] }, r:st.d.c[2], done:true } : null; if (st.d.cell) D.cell = st.d.cell; shareThick = st.d.t || ''; }
+    if (st.sh){ D.sh = st.sh; D.su = st.su || D.su; D.sv[st.sh] = st.sv || {}; if (st.tri) D.tri = st.tri; if (st.sl) D.sl = st.sl; }
+  } catch(e){}
+}
+
+apply();
+if (shareThick != null){ $('dThick').value = shareThick; fitView(); dCalc(); }
+})();
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
