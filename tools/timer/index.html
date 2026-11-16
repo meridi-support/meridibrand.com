@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeridiTimer — 広告なしの大きなタイマー・インターバル・スコアボード | Big Timer</title>
+<meta name="description" content="F1・アイスホッケー・バスケットボール・陸上・パタパタ時計・砂時計の 6 つの見た目で使える、広告なしの大きなタイマー。インターバル（タバタ・HIIT・ボクシング）とスコアボード付き。A big ad-free timer with interval training and a scoreboard.">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120acc;--acc:#39ff14;--glow:#39ff1455}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffffdd;--acc:#1f7a3a;--glow:#1f7a3a22}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;overflow:hidden;transition:background .8s var(--E)}
+a{color:inherit;text-decoration:none}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:7px;padding:10px 16px;transition:opacity .6s var(--E);flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7}.home:hover{opacity:1;color:var(--acc)}
+.brand{margin-right:auto;font:bold 16px 'Courier New',monospace;letter-spacing:4px;color:var(--acc)}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+body.run header,body.run .panel{opacity:0;pointer-events:none}
+#stage{position:fixed;inset:0;transform-origin:50% 50%;transition:top .6s var(--E),bottom .6s var(--E),transform .6s var(--E),background 1.2s var(--E);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background 1.2s var(--E)}
+.phase{font:bold clamp(16px,3vw,30px) 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:6px;min-height:1.4em;opacity:.9}
+.sets{font:bold clamp(14px,2.4vw,24px) 'Courier New',monospace;letter-spacing:3px;opacity:.75;min-height:1.3em;margin-top:6px}
+#disp{line-height:1;white-space:nowrap;transition:transform .5s var(--E),color 1s,font-size .4s var(--E);user-select:none}
+.score{display:none;align-items:center;justify-content:center;gap:clamp(16px,5vw,80px);margin-bottom:clamp(10px,3vh,40px);width:min(1100px,94vw)}
+body.sb .score{display:flex}
+.team{flex:1;text-align:center;min-width:0}
+.team input{width:100%;background:transparent;border:none;outline:none;text-align:center;color:inherit;font:bold clamp(14px,2.6vw,28px) 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:2px}
+.team b{display:block;font:bold clamp(48px,11vw,150px) 'Courier New',monospace;line-height:1}
+.team .pm{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.team .pm button{background:transparent;border:1px solid currentColor;color:inherit;border-radius:9px;padding:2px 12px;font:bold 15px 'Courier New',monospace;opacity:.6;cursor:pointer}
+body.run .team .pm{opacity:0}
+.per{font:bold clamp(14px,2vw,22px) 'Courier New',monospace;letter-spacing:2px;opacity:.75}
+.laps{margin-top:12px;max-height:22vh;overflow:auto;font:clamp(12px,1.6vw,16px) 'Courier New',monospace;text-align:right;min-width:240px}
+.laps div{display:flex;justify-content:space-between;gap:20px;padding:2px 6px}
+.laps .best{color:#c46bff;font-weight:bold}
+.panel{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:15;width:min(980px,96vw);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;backdrop-filter:blur(10px);transition:opacity .6s var(--E)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.row:last-child{margin-bottom:0}
+.lbl{font:11px 'Courier New',monospace;letter-spacing:2px;color:var(--sub);min-width:72px}
+.seg{display:flex;flex-wrap:wrap;gap:5px}
+.seg button,.pre button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:6px 11px;font:12.5px 'Hiragino Sans','Yu Gothic',sans-serif;cursor:pointer}
+.seg button.on,.pre button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.in{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--sub)}
+.in input{width:66px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font:bold 14px 'Courier New',monospace;outline:none}
+.in input:focus{border-color:var(--acc)}
+.big{border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--ink);border-radius:14px;padding:9px 22px;font:bold 15px 'Hiragino Sans','Yu Gothic',sans-serif;letter-spacing:2px;cursor:pointer}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px;transform:translateY(12px);transition:transform .5s var(--E)}
+.info.show .ibox{transform:none}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:10px}.ih b{font:bold 16px 'Courier New',monospace;letter-spacing:2px;color:var(--acc)}.ih span{font:12px 'Courier New',monospace;color:var(--sub);margin-right:auto}
+.ibox>p{font-size:13px;line-height:1.8;color:var(--sub);margin-bottom:12px}
+.ifam{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ifam a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;transition:border-color .3s}
+.ifam a:hover{border-color:var(--acc)}
+.icof{text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.icof p{font-size:12.5px;color:var(--sub);line-height:1.7}
+.icof a{display:inline-block;margin-top:8px;padding:8px 18px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 12.5px 'Courier New',monospace}
+.ilinks,.icopy{text-align:center;font:11px 'Courier New',monospace;color:var(--sub);line-height:2}
+.ilinks a:hover{color:var(--acc)}
+.hint{position:fixed;right:14px;bottom:8px;font:10px 'Courier New',monospace;color:var(--sub);opacity:0;transition:opacity .8s;z-index:16}
+body.run .hint{opacity:.55}
+/* ===== 見た目ごと ===== */
+body.s-f1 #stage{background:radial-gradient(ellipse at 50% 40%,#151821,#05060a);color:#f2f2f2}
+body.s-f1 #disp{font:bold clamp(64px,15vw,230px) 'Courier New',monospace;letter-spacing:-2px}
+body.s-f1 #disp em{font-style:normal;color:#ffd84a}
+body.s-hockey #stage{background:linear-gradient(#0b1020,#05070f);color:#ffe9a8}
+body.s-hockey #disp{font:bold clamp(80px,19vw,280px) 'Courier New',monospace;text-shadow:0 0 18px currentColor;letter-spacing:2px}
+body.s-bball #stage{background:radial-gradient(ellipse at 50% 50%,#1a0d05,#000);color:#ff3a2a}
+body.s-bball #disp{font:bold clamp(80px,20vw,300px) 'Courier New',monospace;text-shadow:0 0 22px #ff3a2a99;letter-spacing:4px}
+body.s-bball #disp.late{font-size:clamp(110px,27vw,380px)}
+body.s-track #stage{background:#050505;color:#ffd400}
+body.s-track #disp{font:900 clamp(80px,19vw,280px) 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-3px;font-style:italic}
+body.s-flip #stage{background:radial-gradient(ellipse at 50% 40%,#202226,#0c0d0f);color:#f4f4f4}
+.flipw{display:flex;gap:clamp(4px,1vw,12px);align-items:center}
+.fd{position:relative;width:clamp(48px,11vw,150px);height:clamp(72px,16vw,220px);perspective:600px}
+.fd .h{position:absolute;left:0;right:0;height:50%;overflow:hidden;background:#2c2f34;color:#f4f4f4;display:flex;justify-content:center;font:bold clamp(56px,13vw,180px) 'Courier New',monospace;line-height:clamp(72px,16vw,220px)}
+.fd .t{top:0;border-radius:10px 10px 0 0;border-bottom:1px solid #000}
+.fd .b{bottom:0;border-radius:0 0 10px 10px;line-height:0}
+.fd .fl{transform-origin:50% 100%;backface-visibility:hidden;z-index:2}
+.fd.go .fl{animation:flip .38s var(--E) forwards}
+@keyframes flip{to{transform:rotateX(-90deg)}}
+.fsep{font:bold clamp(40px,9vw,120px) 'Courier New',monospace;opacity:.6}
+body.s-sand #stage{background:radial-gradient(ellipse at 50% 45%,#2a1d10,#0b0704);color:#f3dcae}
+#sand{display:none;width:min(42vh,60vw);height:min(62vh,80vw)}
+body.s-sand #sand{display:block}
+body.s-sand #disp{font:bold clamp(26px,5vw,56px) 'Courier New',monospace;margin-top:8px;opacity:.85}
+/* インターバル中の背景（点滅させずにゆっくり変える） */
+body.iv-work #stage{box-shadow:inset 0 0 0 100vmax #1fbf4a22}
+body.iv-rest #stage{box-shadow:inset 0 0 0 100vmax #2a6aff22}
+body.iv-prep #stage{box-shadow:inset 0 0 0 100vmax #ffb02022}
+body.paused #disp{opacity:.55}
+.toast{position:fixed;left:50%;top:60px;transform:translate(-50%,-10px);background:var(--card);border:1px solid var(--acc);color:var(--ink);padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .5s,transform .7s var(--E);z-index:30;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (max-height:620px){.panel{padding:8px 10px}.row{margin-bottom:5px}}
+</style>
+</head>
+<body class="s-f1">
+<header>
+  <a class="home" href="https://meridibrand.com/tools/">← Meridi Tools</a>
+  <div class="brand">MERIDITIMER</div>
+  <button class="tg" id="tInfo" title="About MeridiTimer">v1.0.0</button>
+  <button class="tg" id="tFull">⛶</button>
+  <button class="tg" id="tSound">🔊</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>⏱ MeridiTimer</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p id="iP"></p>
+  <div class="ifam" id="iFam"></div>
+  <div class="icof"><p id="iCof"></p><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  <div class="ilinks"><a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a> · <a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a> · <a href="https://meridistore.booth.pm/" target="_blank" rel="noopener">🛒 BOOTH</a> · <a href="https://meridius4.gumroad.com/" target="_blank" rel="noopener">🛒 Gumroad</a> · <a href="mailto:meridisupport@gmail.com">✉️ Contact</a></div>
+  <div class="icopy">© 2026 Meridi Brand · No Ads. No Subscriptions. Just Time. 🐾</div>
+</div></div>
+
+<div id="stage">
+  <div class="score">
+    <div class="team"><input id="nA" maxlength="16"><b id="sA">0</b><div class="pm"><button data-t="A" data-d="-1">−</button><button data-t="A" data-d="1">＋</button></div></div>
+    <div class="per" id="per"></div>
+    <div class="team"><input id="nB" maxlength="16"><b id="sB">0</b><div class="pm"><button data-t="B" data-d="-1">−</button><button data-t="B" data-d="1">＋</button></div></div>
+  </div>
+  <div class="phase" id="phase"></div>
+  <svg id="sand" viewBox="0 0 200 300" aria-hidden="true"></svg>
+  <div id="disp"></div>
+  <div class="sets" id="sets"></div>
+  <div class="laps" id="laps"></div>
+</div>
+
+<div class="panel" id="panel">
+  <div class="row"><span class="lbl" id="lStyle"></span><div class="seg" id="sStyle"></div></div>
+  <div class="row"><span class="lbl" id="lMode"></span><div class="seg" id="sMode"></div><label class="in" style="margin-left:auto"><input type="checkbox" id="cSB"> <span id="lSB"></span></label></div>
+  <div class="row" id="rTime"><span class="lbl" id="lTime"></span><label class="in"><input id="iM" inputmode="numeric"> <span id="uM"></span></label><label class="in"><input id="iS" inputmode="numeric"> <span id="uS"></span></label><div class="pre" id="qTime"></div></div>
+  <div class="row" id="rIv"><span class="lbl" id="lIv"></span><label class="in"><span id="lW"></span><input id="iW" inputmode="numeric"></label><label class="in"><span id="lR"></span><input id="iR" inputmode="numeric"></label><label class="in"><span id="lN"></span><input id="iN" inputmode="numeric"></label><label class="in"><span id="lP"></span><input id="iP" inputmode="numeric"></label><div class="pre" id="qIv"></div></div>
+  <div class="row"><button class="big" id="bStart"></button><button class="tg" id="bReset"></button><button class="tg" id="bLap"></button><span class="in" id="kb" style="margin-left:auto;font-size:10.5px"></span></div>
+</div>
+<div class="hint" id="hint"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+const LS = 'meriditimer_v1';
+let D = { lang:((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en'), theme:'dark', sound:true, style:'f1', mode:'down', m:3, s:0, w:40, r:20, n:8, p:10, sb:false, nA:'', nB:'', sA:0, sB:0 };
+try { const x = JSON.parse(lsGet(LS) || 'null'); if (x) D = Object.assign(D, x); } catch(e){}
+try { const th = lsGet('meridiplay_theme'); if (th === 'light' || th === 'dark') D.theme = th; } catch(e){}
+const save = () => lsSet(LS, JSON.stringify(D));
+const J = () => D.lang === 'ja';
+
+const STYLES = [['f1','🏎 F1','🏎 F1'],['hockey','🏒 アイスホッケー','🏒 Ice hockey'],['bball','🏀 バスケットボール','🏀 Basketball'],['track','🏃 陸上競技','🏃 Track'],['flip','🔢 パタパタ時計','🔢 Flip clock'],['sand','⏳ 砂時計','⏳ Hourglass']];
+const MODES = [['down','⏳ カウントダウン','⏳ Countdown'],['up','⏱ ストップウォッチ','⏱ Stopwatch'],['iv','🔁 インターバル','🔁 Interval']];
+const QT = [[1,0],[3,0],[5,0],[10,0],[20,0],[25,0]];
+const QI = [['tabata','タバタ（20/10×8）','Tabata (20/10×8)',20,10,8],['hiit','HIIT（40/20×10）','HIIT (40/20×10)',40,20,10],['box','ボクシング（3分/1分×12）','Boxing (3/1 min ×12)',180,60,12],['emom','EMOM（60/0×10）','EMOM (60/0×10)',60,0,10]];
+const UI = {
+  ja:{ style:'見た目', mode:'使い方', time:'時間', iv:'インターバル', m:'分', s:'秒', w:'運動（秒）', r:'休み（秒）', n:'セット', p:'準備（秒）', sb:'スコアボード', start:'▶ 開始', pause:'⏸ 一時停止', resume:'▶ 再開', reset:'↺ リセット', lap:'🏁 ラップ', home:'ホーム', away:'アウェイ', work:'運動', rest:'休み', prep:'準備', done:'おつかれさまでした', set:(a, b) => `セット ${a} / ${b}`, per:'残り', lapT:'ラップ', kb:'⌨ Space：開始・停止 ／ R：リセット ／ L：ラップ ／ 1・2：得点 ／ Shift+1・2：得点を減らす ／ F：全画面 ／ I：情報 ／ Esc：止めて設定へ', hint:'画面のどこかを押すと一時停止', foot:'広告なし・登録なし・通信なし。設定はこの端末の中だけに保存されます。', theme:t => t === 'light' ? '🌙 ダーク' : '☀️ ノーマル' },
+  en:{ style:'STYLE', mode:'MODE', time:'TIME', iv:'INTERVAL', m:'min', s:'sec', w:'Work (s)', r:'Rest (s)', n:'Sets', p:'Prep (s)', sb:'Scoreboard', start:'▶ Start', pause:'⏸ Pause', resume:'▶ Resume', reset:'↺ Reset', lap:'🏁 Lap', home:'HOME', away:'AWAY', work:'WORK', rest:'REST', prep:'GET READY', done:'WELL DONE', set:(a, b) => `SET ${a} / ${b}`, per:'LEFT', lapT:'Lap', kb:'⌨ Space: start/pause / R: reset / L: lap / 1·2: score / Shift+1·2: minus / F: fullscreen / I: info / Esc: stop', hint:'Tap anywhere to pause', foot:'No ads, no sign-up, no network. Settings stay on this device.', theme:t => t === 'light' ? '🌙 Dark' : '☀️ Normal' }
+};
+const T = k => UI[D.lang][k];
+
+/* ===== 音 ===== */
+let AC = null;
+function ac(){ try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch(e){} return AC; }
+function beep(f, d = .15, v = .12, type = 'square'){ if (!D.sound || !AC) return; try { const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .005); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + .05); } catch(e){} }
+const pip = () => beep(880, .12, .1);
+const go = () => beep(1320, .5, .14);
+const buzzer = () => { beep(220, 1.2, .16, 'sawtooth'); beep(330, 1.2, .08, 'sawtooth'); };
+const chime = () => [784, 988, 1175].forEach((f, i) => setTimeout(() => beep(f, .6, .1, 'triangle'), i * 180));
+
+/* ===== 状態 ===== */
+let st = { run:false, started:false, t0:0, acc:0, laps:[], lastLap:0, ph:'', idx:0, beeped:-1, done:false };
+const dur = () => (Math.max(0, +D.m || 0) * 60 + Math.max(0, +D.s || 0)) * 1000;
+function ivPlan(){ const a = []; if (+D.p > 0) a.push(['prep', +D.p * 1000]); for (let i = 0; i < Math.max(1, +D.n || 1); i++){ a.push(['work', Math.max(1, +D.w || 1) * 1000, i + 1]); if (+D.r > 0 && i < (+D.n || 1) - 1) a.push(['rest', +D.r * 1000, i + 1]); } return a; }
+const elapsed = () => st.acc + (st.run ? performance.now() - st.t0 : 0);
+function start(){ ac(); if (st.done) reset(); st.run = true; st.started = true; st.t0 = performance.now(); document.body.classList.add('run'); document.body.classList.remove('paused'); ui(); fitStage(); requestAnimationFrame(frame); }
+function pause(){ if (!st.run) return; st.acc = elapsed(); st.run = false; document.body.classList.add('paused'); document.body.classList.remove('run'); ui(); fitStage(); frame(); }
+function toggle(){ st.run ? pause() : start(); }
+function reset(){ st = { run:false, started:false, t0:0, acc:0, laps:[], lastLap:0, ph:'', idx:0, beeped:-1, done:false }; document.body.classList.remove('run', 'paused', 'iv-work', 'iv-rest', 'iv-prep'); flipPrev = ''; ui(); renderLaps(); frame(); }
+function lap(){ if (D.mode !== 'up' || !st.started) return; const e = elapsed(); st.laps.unshift(e - st.lastLap); st.lastLap = e; beep(1000, .06, .08); renderLaps(); }
+function finish(){ st.acc = elapsed(); st.run = false; st.done = true; document.body.classList.remove('run'); document.body.classList.remove('iv-work', 'iv-rest', 'iv-prep'); D.mode === 'iv' ? chime() : buzzer(); ui(); }
+
+/* ===== 表示 ===== */
+const pad = (n, w = 2) => String(Math.floor(n)).padStart(w, '0');
+function fmt(ms, up){
+  ms = Math.max(0, ms); const s = ms / 1000, m = Math.floor(s / 60), h = Math.floor(m / 60), sec = s % 60;
+  const style = D.style, mm = h ? `${h}:${pad(m % 60)}` : `${m}`;
+  if (style === 'f1') return `${mm}:${pad(sec)}<em>,${pad(ms % 1000, 3)}</em>`;
+  if ((style === 'hockey' || style === 'bball') && !up && s < 60) return s < 10 && style === 'bball' ? `${sec.toFixed(1)}` : `${pad(sec)}.${Math.floor(ms / 100) % 10}`;
+  if (style === 'track' && up) return `${mm}:${pad(sec)}.${pad(Math.floor(ms / 10) % 100)}`;
+  return `${mm}:${pad(sec)}`;
+}
+let flipPrev = '';
+function flipHTML(txt){
+  const ch = [...txt.replace(/<[^>]+>/g, '')];
+  if (!$('disp').querySelector('.flipw') || flipPrev.length !== ch.length){ $('disp').innerHTML = `<div class="flipw">${ch.map(c => c === ':' || c === '.' ? `<span class="fsep">${c}</span>` : `<div class="fd" data-c="${c}"><div class="h t">${c}</div><div class="h b">${c}</div></div>`).join('')}</div>`; flipPrev = ch.join(''); return; }
+  const nodes = $('disp').querySelectorAll('.flipw > *');
+  ch.forEach((c, i) => { const n = nodes[i]; if (!n || !n.classList.contains('fd') || n.dataset.c === c) return; const old = n.dataset.c; n.dataset.c = c; n.innerHTML = `<div class="h t">${c}</div><div class="h b">${c}</div><div class="h t fl">${old}</div>`; n.classList.remove('go'); void n.offsetWidth; n.classList.add('go'); });
+  flipPrev = ch.join('');
+}
+function sandSVG(k){
+  k = Math.max(0, Math.min(1, k)); const top = 1 - k;
+  const yT = 40 + 100 * (1 - top), yB = 260 - 100 * k;
+  return `<defs><clipPath id="ct"><path d="M30 20 H170 Q170 90 104 148 H96 Q30 90 30 20 Z"/></clipPath><clipPath id="cb"><path d="M96 152 H104 Q170 210 170 280 H30 Q30 210 96 152 Z"/></clipPath></defs>
+  <path d="M30 20 H170 Q170 90 104 150 Q170 210 170 280 H30 Q30 210 96 150 Q30 90 30 20 Z" fill="#ffffff10" stroke="#f3dcae" stroke-width="3"/>
+  <rect x="20" y="8" width="160" height="12" rx="4" fill="#8a5a2a"/><rect x="20" y="280" width="160" height="12" rx="4" fill="#8a5a2a"/>
+  <g clip-path="url(#ct)"><rect x="20" y="${yT}" width="160" height="${150 - yT}" fill="#e8c27a"/></g>
+  <g clip-path="url(#cb)"><path d="M30 280 L30 ${yB + 20} Q100 ${yB - 20} 170 ${yB + 20} L170 280 Z" fill="#e8c27a"/></g>
+  ${k > 0 && k < 1 && st.run ? `<rect x="98.5" y="148" width="3" height="${Math.max(0, yB - 140)}" fill="#e8c27a" opacity=".9"/>` : ''}`;
+}
+let lastSec = -1;
+function frame(){
+  const e = elapsed(), B = document.body; let show = 0, up = false, phase = '', sets = '', k = 0;
+  if (D.mode === 'up'){ show = e; up = true; k = (e % 60000) / 60000; }
+  else if (D.mode === 'down'){ const d = dur(); show = d - e; k = d ? e / d : 1; if (st.run && show <= 0) finish(); const sl = Math.ceil(show / 1000); if (st.run && sl <= 3 && sl > 0 && sl !== st.beeped){ st.beeped = sl; pip(); } }
+  else {
+    const P = ivPlan(); let t = e, i = 0; while (i < P.length && t >= P[i][1]){ t -= P[i][1]; i++; }
+    if (i >= P.length){ if (st.run) finish(); i = P.length - 1; t = P[i][1]; }
+    const [ph, len, n] = P[i]; show = len - t; k = t / len;
+    if (st.run && i !== st.idx){ st.idx = i; st.beeped = -1; ph === 'work' ? go() : beep(660, .4, .12); }
+    const sl = Math.ceil(show / 1000); if (st.run && sl <= 3 && sl > 0 && sl !== st.beeped){ st.beeped = sl; pip(); }
+    phase = st.done ? T('done') : T(ph); sets = n ? T('set')(n, Math.max(1, +D.n || 1)) : '';
+    B.classList.toggle('iv-work', st.started && !st.done && ph === 'work'); B.classList.toggle('iv-rest', st.started && !st.done && ph === 'rest'); B.classList.toggle('iv-prep', st.started && !st.done && ph === 'prep');
+  }
+  $('phase').textContent = phase; $('sets').textContent = sets;
+  const txt = fmt(show, up);
+  if (D.style === 'flip') flipHTML(txt); else $('disp').innerHTML = txt;
+  // 残りが少ないときの見せ方（点滅なし）
+  const late = !up && show < 60000 && st.started;
+  $('disp').classList.toggle('late', late && D.style === 'bball');
+  if (D.style === 'hockey'){ const r = late ? 1 - show / 60000 : 0; $('disp').style.color = `rgb(255,${Math.round(233 - 160 * r)},${Math.round(168 - 140 * r)})`; } else $('disp').style.color = '';
+  if (D.style === 'sand') $('sand').innerHTML = sandSVG(up ? k : Math.min(1, k));
+  $('per').textContent = D.mode === 'down' && D.sb ? T('per') : D.mode === 'iv' && D.sb ? sets : '';
+  if (st.run) requestAnimationFrame(frame);
+}
+function renderLaps(){
+  const box = $('laps'); if (D.mode !== 'up' || !st.laps.length){ box.innerHTML = ''; return; }
+  const best = Math.min(...st.laps), save0 = D.style; 
+  box.innerHTML = st.laps.slice(0, 20).map((l, i) => `<div class="${l === best && st.laps.length > 1 ? 'best' : ''}"><span>${T('lapT')} ${st.laps.length - i}</span><span>${fmtPlain(l)}</span></div>`).join('');
+}
+function fmtPlain(ms){ const s = ms / 1000; return `${Math.floor(s / 60)}:${pad(s % 60)}.${pad(ms % 1000, 3)}`; }
+
+/* ===== スコア ===== */
+function score(t, d){ ac(); const k = 's' + t; D[k] = Math.max(0, (D[k] || 0) + d); save(); $('s' + t).textContent = D[k]; if (d > 0) beep(t === 'A' ? 990 : 1180, .18, .1, 'triangle'); }
+document.querySelectorAll('.pm button').forEach(b => b.onclick = e => { e.stopPropagation(); score(b.dataset.t, +b.dataset.d); });
+
+/* ===== 設定の画面 ===== */
+function seg(id, opts, key, after){ const box = $(id); box.replaceChildren(); opts.forEach(([v, a, b]) => { const el = document.createElement('button'); el.textContent = J() ? a : b; el.className = D[key] === v ? 'on' : ''; el.onclick = () => { D[key] = v; save(); reset(); render(); after && after(); }; box.append(el); }); }
+function render(){
+  document.documentElement.lang = D.lang;
+  const B = document.body; B.className = B.className.replace(/\bs-\w+/g, '').trim(); B.classList.add('s-' + D.style); B.classList.toggle('light', D.theme === 'light'); B.classList.toggle('sb', !!D.sb);
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語'; $('tTheme').textContent = T('theme')(D.theme); $('tSound').textContent = D.sound ? '🔊' : '🔇';
+  ['style','mode','time','iv','sb'].forEach(k => { const el = $('l' + k[0].toUpperCase() + k.slice(1)); if (el) el.textContent = T(k); });
+  $('lStyle').textContent = T('style'); $('lMode').textContent = T('mode'); $('lTime').textContent = T('time'); $('lIv').textContent = T('iv'); $('lSB').textContent = T('sb');
+  $('uM').textContent = T('m'); $('uS').textContent = T('s'); $('lW').textContent = T('w'); $('lR').textContent = T('r'); $('lN').textContent = T('n'); $('lP').textContent = T('p');
+  $('bReset').textContent = T('reset'); $('bLap').textContent = T('lap'); $('kb').textContent = T('kb'); $('hint').textContent = T('hint'); $('iP').textContent = T('foot'); $('iCof').innerHTML = J() ? 'MeridiTimer は広告なし・登録なしで、ひとりで作っています。<br>気に入っていただけたら、コーヒー 1 杯分の応援をいただけるとうれしいです。' : 'MeridiTimer is ad-free and made by one person.<br>If it helps you, a coffee would mean a lot.';
+  $('iFam').innerHTML = [['🏠','Meridi Brand','/'],['🗓','Meet','/meet/'],['🔤','Lingo','/lingo/'],['🌌','Stars','/stars/'],['🌊','Depths','/depths/'],['🎮','Play','/play/']].map(([i, n, u]) => `<a href="https://meridibrand.com${u}">${i} ${n}</a>`).join('');
+  seg('sStyle', STYLES, 'style'); seg('sMode', MODES, 'mode');
+  $('rTime').style.display = D.mode === 'down' ? '' : 'none'; $('rIv').style.display = D.mode === 'iv' ? '' : 'none'; $('bLap').style.display = D.mode === 'up' ? '' : 'none';
+  $('iM').value = D.m; $('iS').value = D.s; $('iW').value = D.w; $('iR').value = D.r; $('iN').value = D.n; $('iP').value = D.p; $('cSB').checked = !!D.sb;
+  $('nA').placeholder = T('home'); $('nB').placeholder = T('away'); $('nA').value = D.nA; $('nB').value = D.nB; $('sA').textContent = D.sA; $('sB').textContent = D.sB;
+  const qt = $('qTime'); qt.replaceChildren(); QT.forEach(([m, s]) => { const b = document.createElement('button'); b.textContent = J() ? `${m} 分` : `${m} min`; b.className = +D.m === m && +D.s === s ? 'on' : ''; b.onclick = () => { D.m = m; D.s = s; save(); reset(); render(); }; qt.append(b); });
+  const qi = $('qIv'); qi.replaceChildren(); QI.forEach(([id, a, b2, w, r, n]) => { const b = document.createElement('button'); b.textContent = J() ? a : b2; b.className = +D.w === w && +D.r === r && +D.n === n ? 'on' : ''; b.onclick = () => { D.w = w; D.r = r; D.n = n; save(); reset(); render(); }; qi.append(b); });
+  ui(); fitStage(); frame();
+}
+// 設定の画面と数字が重ならないように、止まっている間は数字の場所を上に詰める
+function fitStage(){
+  const run = document.body.classList.contains('run'), ph = $('panel').offsetHeight, hh = 46;
+  const sg = $('stage').style; sg.top = run ? '0' : hh + 'px'; sg.bottom = run ? '0' : (ph + 24) + 'px';
+  const avail = innerHeight - (run ? 0 : ph + 24 + hh), need = $('stage').scrollHeight;
+  $('stage').style.transform = !run && need > avail ? `scale(${Math.max(.45, avail / need)})` : '';
+}
+addEventListener('resize', fitStage);
+function ui(){ $('bStart').textContent = st.run ? T('pause') : st.started && !st.done ? T('resume') : T('start'); }
+[['iM','m'],['iS','s'],['iW','w'],['iR','r'],['iN','n'],['iP','p']].forEach(([id, k]) => $(id).addEventListener('input', e => { D[k] = Math.max(0, parseInt(e.target.value.normalize('NFKC')) || 0); save(); reset(); }));
+$('cSB').onchange = e => { D.sb = e.target.checked; save(); render(); };
+$('nA').oninput = e => { D.nA = e.target.value; save(); }; $('nB').oninput = e => { D.nB = e.target.value; save(); };
+$('bStart').onclick = toggle; $('bReset').onclick = reset; $('bLap').onclick = lap;
+$('stage').addEventListener('pointerdown', e => { if (e.target.closest('input,button')) return; if (st.run) pause(); });
+$('tLang').onclick = () => { D.lang = J() ? 'en' : 'ja'; save(); render(); };
+$('tTheme').onclick = () => { D.theme = D.theme === 'light' ? 'dark' : 'light'; save(); lsSet('meridiplay_theme', D.theme); render(); };
+$('tSound').onclick = () => { D.sound = !D.sound; ac(); save(); render(); };
+const full = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch(e){} };
+$('tFull').onclick = full;
+const openInfo = () => { if (st.run) pause(); $('info').classList.add('show'); };
+const closeInfo = () => $('info').classList.remove('show');
+$('tInfo').onclick = openInfo; $('iClose').onclick = closeInfo;
+$('info').addEventListener('pointerdown', e => { if (e.target === $('info')) closeInfo(); });
+let toastT = null; function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.key !== 'Escape') return;
+  const k = e.key.toLowerCase();
+  if (k === ' '){ e.preventDefault(); toggle(); }
+  else if (k === 'r') reset();
+  else if (k === 'l') lap();
+  else if (k === 'f') full();
+  else if (e.code === 'Digit1') score('A', e.shiftKey ? -1 : 1);
+  else if (e.code === 'Digit2') score('B', e.shiftKey ? -1 : 1);
+  else if (k === 'escape'){ if ($('info').classList.contains('show')){ closeInfo(); return; } if (e.target.tagName === 'INPUT') e.target.blur(); pause(); }
+  else if (k === 'i') { $('info').classList.contains('show') ? closeInfo() : openInfo(); }
+});
+document.addEventListener('visibilitychange', () => { if (st.run) requestAnimationFrame(frame); });
+render();
+})();
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

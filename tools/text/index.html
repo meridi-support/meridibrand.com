@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Text — 全角半角・住所・見えない文字をきれいにする無料のテキスト整形 | Text Cleaner</title>
+<meta name="description" content="全角⇔半角、住所のハイフンそろえ、改行や空白の整理、見えない文字（ゼロ幅スペースなど）の発見と削除、文字数カウント。文章は端末の外に出ません。広告なし。A free text cleaner — full/half-width, addresses, invisible characters. No ads, no upload.">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--acc:#39ff14;--warn:#ffb020}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--acc:#1f7a3a;--warn:#b86a00}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E)}
+a{color:inherit}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.home{font:12px 'Courier New',monospace;opacity:.7;text-decoration:none}
+.brand{margin-right:auto;font:bold 16px 'Courier New',monospace;letter-spacing:4px;color:var(--acc)}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+main{max-width:1180px;margin:0 auto;padding:14px}
+.lead{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+textarea{width:100%;min-height:300px;resize:vertical;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font:14px/1.7 'Courier New','Hiragino Sans',monospace;outline:none}
+textarea:focus{border-color:var(--acc)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font:12px 'Courier New',monospace;color:var(--sub);margin:6px 2px}
+.stats b{color:var(--acc);font-size:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.panel h3{font:bold 12px 'Courier New',monospace;letter-spacing:2px;color:var(--acc);margin-bottom:8px}
+.btns{display:flex;flex-direction:column;gap:5px}
+.btns button,.big{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px;text-align:left;cursor:pointer;transition:border-color .2s,background .2s}
+.btns button:hover,.big:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.btns button small{display:block;font-size:10.5px;color:var(--sub);margin-top:2px}
+.big{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,transparent);font-weight:bold}
+.rep{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.rep input[type=text]{flex:1;min-width:90px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:13px 'Courier New',monospace;outline:none}
+.rep label{font-size:11.5px;color:var(--sub)}
+#inspect{white-space:pre-wrap;word-break:break-all;font:13px/1.8 'Courier New','Hiragino Sans',monospace;max-height:260px;overflow:auto;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px}
+.iv{background:color-mix(in srgb,var(--warn) 30%,transparent);border-bottom:2px solid var(--warn);border-radius:3px;padding:0 2px;font-size:10px;color:var(--warn)}
+.found{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.7}
+.guide details{border-top:1px solid var(--line);padding:8px 0}
+.guide summary{cursor:pointer;font-weight:bold;font-size:13px}
+.guide p,.guide li{font-size:12.5px;line-height:1.85;color:var(--sub);margin-top:6px}
+.guide ul{padding-left:18px}
+.guide code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 4px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .4s,transform .6s var(--E);pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:10px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.ibox>p{font-size:13px;line-height:1.8;color:var(--sub);margin-bottom:12px}
+.ifam{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ifam a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;text-decoration:none}
+.icof{text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font-size:12.5px;color:var(--sub);line-height:1.7}
+.icof a{display:inline-block;margin-top:8px;padding:8px 18px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 12.5px 'Courier New',monospace;text-decoration:none}
+.icl{font-size:12px;color:var(--sub);line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/tools/">← Meridi Tools</a>
+  <div class="brand">MERIDI TEXT</div>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tLang"></button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<main>
+  <p class="lead" id="lead"></p>
+  <div class="grid">
+    <div>
+      <textarea id="ta" spellcheck="false"></textarea>
+      <div class="stats" id="stats"></div>
+      <div class="bar">
+        <button class="big" id="bCopy"></button>
+        <button class="tg" id="bUndo"></button>
+        <button class="tg" id="bClear"></button>
+        <button class="tg" id="bEx1"></button>
+        <button class="tg" id="bEx2"></button>
+        <button class="tg" id="bEx3"></button>
+      </div>
+      <div class="panel">
+        <h3 id="hIns"></h3>
+        <div id="inspect"></div>
+        <div class="found" id="found"></div>
+      </div>
+      <div class="panel guide" id="guide"></div>
+    </div>
+    <div>
+      <div class="panel"><h3 id="hQuick"></h3><div class="btns" id="quick"></div></div>
+      <div class="panel"><h3 id="hOps"></h3><div class="btns" id="ops"></div></div>
+      <div class="panel"><h3 id="hRep"></h3>
+        <div class="rep"><input type="text" id="rFrom"><input type="text" id="rTo"></div>
+        <div class="rep"><label><input type="checkbox" id="rRe"> <span id="lRe"></span></label><button class="tg" id="bRep" style="margin-left:auto"></button></div>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>✂️ Meridi Text</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p id="iP"></p>
+  <div class="ifam">
+    <a href="https://meridibrand.com/">🏠 Meridi Brand</a><a href="https://meridibrand.com/tools/">🧰 Meridi Tools</a>
+    <a href="https://meridibrand.com/convert/">🧮 Convert</a><a href="https://meridibrand.com/lingo/">🐾 Lingo</a>
+    <a href="https://meridibrand.com/play/">🎮 Play</a><a href="https://meridistore.booth.pm/items/8790105">💻 Sync</a>
+  </div>
+  <div class="icof"><span id="iCof"></span><br><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+let lang = lsGet('meriditext_lang') || ((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+const J = () => lang === 'ja';
+const t = (ja, en) => J() ? ja : en;
+
+/* ===== 見えない文字・まぎらわしい文字 ===== */
+const INV = {
+  '\u200B':'ZWSP','\u200C':'ZWNJ','\u200D':'ZWJ','\u2060':'WJ','\uFEFF':'BOM','\u00AD':'SHY',
+  '\u00A0':'NBSP','\u3000':'全角SP','\u2028':'LS','\u2029':'PS','\t':'TAB',
+  '\u201C':'“','\u201D':'”','\u2018':'‘','\u2019':'’','\u2013':'–','\u2014':'—'
+};
+const INV_RE = /[\u200B-\u200D\u2060\uFEFF\u00AD\u00A0\u3000\u2028\u2029\t\u201C\u201D\u2018\u2019\u2013\u2014\u0300-\u036F]/g;
+// ZWJ / ZWNJ は、絵文字やほかの国の文字の「のり」として必要なときは残す
+const GLUE = /[\p{L}\p{M}\p{Extended_Pictographic}\uFE0F\u{1F3FB}-\u{1F3FF}]/u;
+const isGlue = (str, i) => { const a = [...str.slice(Math.max(0, i - 2), i)].pop() || '', b = [...str.slice(i + 1, i + 3)][0] || ''; return GLUE.test(a) && GLUE.test(b) && !/[\x00-\x7F]/.test(a) && !/[\x00-\x7F]/.test(b); };
+const DASH = '[\u2212\u2010\u2011\u2012\u2013\u2014\u2015\u30FC\uFF0D\uFF70\u002D]';
+
+/* ===== 整形の部品 ===== */
+const F = {
+  z2hAlnum: s => s.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)),
+  z2hDigits: s => s.replace(/[\uFF10-\uFF19]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)),
+  h2zAlnum: s => s.replace(/[!-~]/g, c => String.fromCharCode(c.charCodeAt(0) + 0xFEE0)),
+  hKana2z: s => s.replace(/[\uFF61-\uFF9F]+/g, m => m.normalize('NFKC')),
+  zSpace2h: s => s.replace(/\u3000/g, ' '),
+  hyphen: s => s.replace(new RegExp(`(?<=[0-9０-９])${DASH}(?=[0-9０-９])`, 'g'), '-'),
+  joinLines: s => s.replace(/\r\n?/g, '\n').split(/\n{2,}/).map(p => p.split('\n').map(l => l.trim()).reduce((a, l) => !a ? l : (/[A-Za-z0-9,.;:!?)]$/.test(a) && /^[A-Za-z0-9(]/.test(l) ? a + ' ' + l : a + l), '')).join('\n\n'),
+  trimLines: s => s.split('\n').map(l => l.replace(/[ \t\u3000]+$/,'').replace(/^[ \t\u3000]+/,'')).join('\n'),
+  collapse: s => s.replace(/[ \t]{2,}/g, ' '),
+  noEmpty: s => s.split('\n').filter(l => l.trim()).join('\n'),
+  upper: s => s.toUpperCase(),
+  lower: s => s.toLowerCase(),
+  title: s => s.toLowerCase().replace(/(^|[^\p{L}\p{M}\p{N}'’])(\p{Ll})/gu, (m, a, c) => a + c.toUpperCase()),
+  sentence: s => s.toLowerCase().replace(/(^\s*|[.!?¿¡。！？]\s*)(\p{Ll})/gu, (m, a, c) => a + c.toUpperCase()),
+  sort: s => s.split('\n').sort((a, b) => a.localeCompare(b, 'ja')).join('\n'),
+  unique: s => [...new Set(s.split('\n'))].join('\n'),
+  invisible: s => s.replace(/[\u200C\u200D]/g, (c, i, str) => isGlue(str, i) ? c : '').replace(/[\u200B\u2060\uFEFF\u00AD]/g, '').replace(/\u00A0/g, ' ').replace(/[\u2028\u2029]/g, '\n'),
+  quotes: s => s.replace(/[\u201C\u201D\u201E\u201F\u2033\u00AB\u00BB]/g, '"').replace(/[\u2018\u2019\u201A\u201B\u2032\u2039\u203A]/g, "'").replace(/[\u2013\u2014]/g, '-'),
+  nfc: s => s.normalize('NFC'),
+  deaccent: s => s.normalize('NFD').replace(/[\u0300-\u036F]/g, '').normalize('NFC').replace(/ß/g, 'ss').replace(/ẞ/g, 'SS').replace(/[øØ]/g, c => c === 'ø' ? 'o' : 'O').replace(/æ/g, 'ae').replace(/Æ/g, 'AE').replace(/œ/g, 'oe').replace(/Œ/g, 'OE').replace(/[đð]/g, 'd').replace(/[ĐÐ]/g, 'D').replace(/ł/g, 'l').replace(/Ł/g, 'L').replace(/þ/g, 'th').replace(/Þ/g, 'Th').replace(/ı/g, 'i'),
+};
+F.address = s => F.hyphen(F.z2hAlnum(F.zSpace2h(s))).replace(/^\s*日本[、,]\s*/gm, '').replace(/〒\s*/g, '').replace(/ {2,}/g, ' ').trim();
+F.code = s => F.quotes(F.invisible(F.zSpace2h(s))).split('\n').map(l => l.replace(/[ \t]+$/, '')).join('\n');
+
+const QUICK = [
+  ['address', '📮 住所をきれいにする', 'Clean up an address', '全角の数字→半角、ハイフンをそろえる、「日本、」「〒」を消す。カタカナはそのまま', 'Full-width digits → half-width, unify hyphens, remove "日本、" and "〒"'],
+  ['code', '🧹 コード用にきれいにする', 'Clean up for code', '見えない文字を消す、“ ” → " "、– — → -、全角スペース→半角、行末の空白を消す', 'Remove invisible chars, smart quotes → straight, dashes → -, trim line ends'],
+  ['pdf', '📄 PDF からのコピーを直す', 'Fix text copied from a PDF', '変なところの改行をつなぎ、空白を整える（段落の区切りは残す）', 'Join broken lines and tidy spaces (keeps paragraph breaks)'],
+];
+F.pdf = s => F.collapse(F.joinLines(F.invisible(s)));
+const OPS = [
+  ['z2hAlnum', '全角英数記号 → 半角', 'Full-width → half-width (A-Z, 0-9, symbols)'],
+  ['z2hDigits', '全角の数字だけ → 半角', 'Full-width digits only → half-width'],
+  ['h2zAlnum', '半角英数記号 → 全角', 'Half-width → full-width'],
+  ['hKana2z', '半角カタカナ → 全角', 'Half-width katakana → full-width'],
+  ['zSpace2h', '全角スペース → 半角', 'Ideographic space → normal space'],
+  ['hyphen', '数字の間のハイフンをそろえる', 'Unify hyphens between digits'],
+  ['invisible', '見えない文字を消す', 'Remove invisible characters'],
+  ['quotes', '“ ” „ « » – — を普通の記号に（コード向け）', 'Smart / „ « » quotes & dashes → plain (for code)'],
+  ['nfc', '🌍 見た目が同じ文字をそろえる（é の 2 つの形）', '🌍 Normalize look-alike characters (NFC)'],
+  ['deaccent', '🌍 アクセントを外す（café → cafe、ß → ss）', '🌍 Remove accents (café → cafe, ß → ss)'],
+  ['joinLines', '改行をつなぐ', 'Join line breaks'],
+  ['trimLines', '行の頭と終わりの空白を消す', 'Trim each line'],
+  ['collapse', '続いた空白を 1 つに', 'Collapse repeated spaces'],
+  ['noEmpty', '空の行を消す', 'Remove empty lines'],
+  ['upper', 'ABC 大文字', 'UPPERCASE'],
+  ['lower', 'abc 小文字', 'lowercase'],
+  ['title', 'Title Case（単語の頭を大文字）', 'Title Case'],
+  ['sentence', 'Sentence case（文の頭を大文字）', 'Sentence case'],
+  ['sort', '行を並べ替える', 'Sort lines'],
+  ['unique', '同じ行を 1 つにする', 'Remove duplicate lines'],
+];
+
+/* ===== 状態 ===== */
+const ta = $('ta'); const undo = [];
+ta.value = lsGet('meriditext_text') || '';
+function apply(key){
+  const before = ta.value; const after = F[key](before);
+  if (after === before){ toast(t('変わるところはありませんでした', 'Nothing to change')); return; }
+  undo.push(before); if (undo.length > 50) undo.shift();
+  ta.value = after; changed(); toast(t('整えました ✓', 'Done ✓'));
+}
+function changed(){ lsSet('meriditext_text', ta.value.length < 200000 ? ta.value : ''); stats(); inspect(); }
+function stats(){
+  const s = ta.value, chars = [...s].length, noSp = [...s.replace(/\s/g, '')].length;
+  const lines = s ? s.split('\n').length : 0, bytes = new TextEncoder().encode(s).length;
+  const pages = Math.ceil(noSp / 400);
+  $('stats').innerHTML = J()
+    ? `文字数 <b>${chars}</b> ／ 空白なし <b>${noSp}</b> ／ 行 <b>${lines}</b> ／ バイト <b>${bytes}</b> ／ 原稿用紙 約 <b>${pages}</b> 枚`
+    : `Chars <b>${chars}</b> / no spaces <b>${noSp}</b> / lines <b>${lines}</b> / bytes <b>${bytes}</b> / words <b>${(s.match(/\S+/g) || []).length}</b>`;
+}
+const esc = s => s.replace(/[&<>]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' })[c]);
+function inspect(){
+  const s = ta.value.slice(0, 20000); const count = {};
+  const html = esc(s).replace(INV_RE, (c, i, str) => {
+    if (c >= '\u0300' && c <= '\u036F'){ count['結合文字'] = (count['結合文字'] || 0) + 1; return c + '<span class="iv">◌' + c + '</span>'; }
+    if ((c === '\u200D' || c === '\u200C') && isGlue(str, i)){ return c + '<span class="iv" style="opacity:.55">' + INV[c] + '🔗</span>'; }
+    count[INV[c]] = (count[INV[c]] || 0) + 1; return '<span class="iv">' + INV[c] + '</span>'; });
+  $('inspect').innerHTML = html || `<span style="opacity:.5">${t('ここに、見えない文字やまぎらわしい文字が色付きで表示されます', 'Invisible and look-alike characters will be highlighted here')}</span>`;
+  const k = Object.keys(count);
+  $('found').innerHTML = k.length ? t('見つかったもの：', 'Found: ') + k.map(x => `<b>${x}</b> × ${count[x]}`).join('、 ') + (count['BOM'] || count['ZWSP'] ? ' 🐾 ' + t('目に見えないゴミが混ざっていました', 'Hidden junk detected') : '') : (s ? '✨ ' + t('見えない文字は見つかりませんでした。きれいだにゃ', 'No invisible characters. Squeaky clean!') : '');
+}
+let tt; function toast(m){ const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('show'), 1800); }
+
+/* ===== 画面 ===== */
+function render(){
+  document.documentElement.lang = lang; document.body.classList.toggle('light', theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
+  $('lead').textContent = t('貼り付けて、ボタンを押すだけ。文章はこの端末の中だけで整え、どこにも送りません。何度でも重ねてかけられ、「↶ 戻す」で元に戻せます。', 'Paste, then press a button. Everything happens on this device — nothing is uploaded. Stack as many steps as you like and undo anytime.');
+  ta.placeholder = t('ここに文章を貼り付けてください', 'Paste your text here');
+  $('bCopy').textContent = t('📋 コピー', '📋 Copy'); $('bUndo').textContent = t('↶ 戻す', '↶ Undo'); $('bClear').textContent = t('🗑 空にする', '🗑 Clear');
+  $('bEx1').textContent = t('🔰 住所の例', '🔰 Address example'); $('bEx2').textContent = t('🔰 ゴミ入りの例', '🔰 Junk example'); $('bEx3').textContent = t('🔰 海外の文字の例', '🔰 Accents example');
+  $('hQuick').textContent = t('おまかせ整形', 'ONE-CLICK'); $('hOps').textContent = t('ひとつずつ整える', 'STEP BY STEP'); $('hRep').textContent = t('置き換え', 'FIND & REPLACE'); $('hIns').textContent = t('🔎 見えない文字を見つける', '🔎 INVISIBLE CHARACTERS');
+  $('rFrom').placeholder = t('探す文字', 'Find'); $('rTo').placeholder = t('置き換える文字', 'Replace with'); $('lRe').textContent = t('正規表現を使う', 'Use regex'); $('bRep').textContent = t('すべて置き換え', 'Replace all');
+  $('quick').innerHTML = ''; QUICK.forEach(([k, ja, en, dj, de]) => { const b = document.createElement('button'); b.innerHTML = `${J() ? ja : en}<small>${J() ? dj : de}</small>`; b.onclick = () => apply(k); $('quick').append(b); });
+  $('ops').innerHTML = ''; OPS.forEach(([k, ja, en]) => { const b = document.createElement('button'); b.textContent = J() ? ja : en; b.onclick = () => apply(k); $('ops').append(b); });
+  $('iP').textContent = t('広告なし・登録なし・通信なし。文章も設定も、この端末の中だけに保存されます。', 'No ads, no sign-up, no network. Your text and settings stay on this device.');
+  $('iCof').textContent = t('ひとりで作っています。役に立ったら、コーヒー 1 杯分の応援がうれしいです。', 'Made by one person. If it helped, a coffee would mean a lot.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・最初の公開：おまかせ整形 3 種、ひとつずつの整形 20 種（世界の文字をそろえる・アクセントを外すを含む）、置き換え（正規表現）、見えない文字の表示（絵文字ののりは残す）、文字数カウント', '• First release: 3 one-click cleaners, 20 step-by-step tools incl. Unicode normalize & remove accents, find & replace (regex), invisible character view, character counter');
+  $('guide').innerHTML = J() ? GUIDE_JA : GUIDE_EN;
+  stats(); inspect();
+}
+const GUIDE_JA = `<h3>📖 説明書き（ちょっと高度）</h3>
+<details><summary>全角と半角って何が違うの？</summary><p>見た目は似ていても、コンピューターの中では別の文字です。「１」と「1」は、ちがう番号（Unicode）を持っています。そのため、申し込みフォームで「半角で入れてください」と言われたり、検索で見つからなかったりします。</p></details>
+<details><summary>住所のハイフンがそろわない理由</summary><p>「−（マイナス）」「‐（ハイフン）」「―（ダッシュ）」「ー（長音）」「－（全角ハイフン）」は、どれも見た目がそっくりですが、全部ちがう文字です。地図のサービスやワープロによって使う文字がちがうので、コピーすると混ざってしまいます。「住所をきれいにする」は、<b>数字と数字の間</b>にあるものだけを「-」にそろえます。「メゾン・ルーム」のようなカタカナの長音は変えません。</p></details>
+<details><summary>見えない文字はどこから来るの？</summary><ul><li><code>ZWSP</code>（ゼロ幅スペース）：Web ページやチャットで、長い言葉の折り返し位置として入ります。</li><li><code>NBSP</code>（改行しない空白）：Word や HTML の <code>&amp;nbsp;</code> から入ります。</li><li><code>BOM</code>：Windows で保存したファイルの先頭に入ることがあります。</li><li><code>“ ”</code>：Word や Slack が、自動でくるんとした引用符に変えます。</li></ul><p>どれも目には見えないので、プログラムに貼ると「なぜか動かない」原因になります。上の欄に、オレンジ色の印で表示されます。</p></details>
+<details><summary>🌍 海外の文字を使うとき</summary><ul><li><b>é・ü・ñ・ß などは、どの整形でも壊れません。</b>全角と半角の変換は、全角の英数字だけに効きます。</li><li><b>絵文字は守ります：</b>👨‍👩‍👧 のような家族の絵文字は、見えない「のり」の文字（ZWJ）でつながっています。「見えない文字を消す」は、絵文字やほかの国の文字の間にあるのりは残し、🔗 の印で見せます。</li><li><b>「“ ” „ « » を普通の記号に」はコード向けです。</b>ドイツ語の „ “、フランス語の « » は、その国の正しい書き方なので、ふつうの文章には使わないでください。</li><li><b>見た目が同じなのに違う文字：</b>「é」は 1 文字で書く形と、「e ＋ ´」の 2 文字で書く形があります。検索や重複チェックで別物になるので、「🌍 見た目が同じ文字をそろえる」で 1 文字の形にそろえます。上の欄には ◌́ の印で出ます。</li><li><b>アクセントを外す：</b>URL やファイル名、メールアドレス用に、café を cafe、Müller を Muller、Straße を Strasse にします。ドイツ語の ü は本来 ue と書く決まりもあるので、名前に使うときは本人の書き方を確かめてください。</li><li><b>Title Case：</b>élan → Élan、ñandú → Ñandú のように、世界の文字でも大文字になります。</li></ul></details>
+<details><summary>正規表現の入門</summary><ul><li><code>\\d</code> = 数字 1 つ、<code>\\d+</code> = 数字の並び</li><li><code>\\s</code> = 空白、<code>^</code> = 行の頭、<code>$</code> = 行の終わり</li><li>例：探す <code>(\\d+)年(\\d+)月</code> → 置き換え <code>$1/$2</code> で「2026年11月」が「2026/11」になります。</li></ul></details>
+<details><summary>安全について</summary><p>このページは、文章をどこにも送りません。整えた文章は、次に開いたときのためにこの端末のブラウザの中だけに残ります。気になる場合は「🗑 空にする」を押してください。</p></details>`;
+const GUIDE_EN = `<h3>📖 GUIDE</h3>
+<details><summary>Full-width vs half-width?</summary><p>"１" and "1" look alike but are different Unicode characters. Japanese forms often require half-width, and search may fail with the wrong one.</p></details>
+<details><summary>Why invisible characters?</summary><ul><li><code>ZWSP</code> zero-width space — from web pages & chats</li><li><code>NBSP</code> non-breaking space — from Word / HTML</li><li><code>BOM</code> — at the start of some Windows files</li><li><code>“ ”</code> smart quotes — auto-inserted by Word, Slack, email</li></ul><p>They break code silently. They're highlighted in orange above.</p></details>
+<details><summary>🌍 Accents & other scripts</summary><ul><li>é, ü, ñ, ß are never broken by any tool.</li><li>Emoji are protected: the invisible joiner (ZWJ) inside 👨‍👩‍👧 is kept and shown with 🔗.</li><li>The quotes tool is for code — „German“ and «French» quotes are correct in normal text.</li><li>"Normalize" merges e + ´ into a single é, so search and de-duplication work.</li><li>"Remove accents" is for URLs and file names: café → cafe, Straße → Strasse.</li><li>Title Case works with all letters: élan → Élan.</li></ul></details>
+<details><summary>Regex basics</summary><ul><li><code>\\d</code> digit, <code>\\s</code> space, <code>^</code> line start, <code>$</code> line end</li><li>Find <code>(\\d+)-(\\d+)</code>, replace <code>$2-$1</code> to swap numbers.</li></ul></details>
+<details><summary>Privacy</summary><p>Nothing is uploaded. Your text is kept only in this browser so it's here next time. Press "Clear" to remove it.</p></details>`;
+
+ta.addEventListener('input', changed);
+$('bCopy').onclick = async () => { try { await navigator.clipboard.writeText(ta.value); toast(t('コピーしました 📋', 'Copied 📋')); } catch(e){ ta.select(); document.execCommand('copy'); toast(t('コピーしました 📋', 'Copied 📋')); } };
+$('bUndo').onclick = () => { if (!undo.length){ toast(t('戻せる操作はありません', 'Nothing to undo')); return; } ta.value = undo.pop(); changed(); };
+$('bClear').onclick = () => { if (ta.value) undo.push(ta.value); ta.value = ''; changed(); };
+$('bEx1').onclick = () => { if (ta.value) undo.push(ta.value); ta.value = '日本、〒１５０−０００２ 東京都渋谷区渋谷２丁目２１−１　渋谷ヒカリエ ３４Ｆ'; changed(); toast(t('「📮 住所をきれいにする」を押してみてください', 'Now try "Clean up an address"')); };
+$('bEx2').onclick = () => { if (ta.value) undo.push(ta.value); ta.value = '\uFEFFconst msg\u00A0= \u201CHello\u201D;\u200B\nconsole.log(msg);\u3000\u3000\n// \u2014 copied from a web page'; changed(); toast(t('オレンジの印がゴミです。「🧹 コード用」を押してみてください', 'Orange marks = junk. Try "Clean up for code"')); };
+$('bEx3').onclick = () => { if (ta.value) undo.push(ta.value); ta.value = 'Cafe\u0301 cre\u0300me — Mu\u0308ller, Straße 5\nélan ñandú «Bonjour» „Hallo“\nFamily: 👨\u200D👩\u200D👧\u200B'; changed(); toast(t('◌́ は 2 文字の形。🔗 は絵文字ののりで、消しません', '◌́ = decomposed accent. 🔗 = emoji glue, kept')); };
+$('bRep').onclick = () => {
+  const f = $('rFrom').value, r = $('rTo').value; if (!f) return;
+  let re; try { re = $('rRe').checked ? new RegExp(f, 'g') : new RegExp(f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'); } catch(e){ toast(t('正規表現の書き方に誤りがあります', 'Invalid regex')); return; }
+  const before = ta.value, after = before.replace(re, $('rRe').checked ? r : r.replace(/\$/g, '$$$$'));
+  if (after === before){ toast(t('見つかりませんでした', 'Not found')); return; }
+  undo.push(before); ta.value = after; changed(); toast(t('置き換えました ✓', 'Replaced ✓'));
+};
+$('tLang').onclick = () => { lang = J() ? 'en' : 'ja'; lsSet('meriditext_lang', lang); render(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); render(); };
+const info = $('info'); $('tInfo').onclick = () => info.classList.add('show'); $('iClose').onclick = () => info.classList.remove('show');
+info.addEventListener('pointerdown', e => { if (e.target === info) info.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') info.classList.remove('show'); if ((e.ctrlKey || e.metaKey) && e.key === 'z' && document.activeElement !== ta && undo.length){ ta.value = undo.pop(); changed(); } });
+render();
+})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

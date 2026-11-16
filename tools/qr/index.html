@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi QR — 期限切れにならない「直接の QR コード」を無料で | Direct QR Code Maker</title>
+<meta name="description" content="広告ページを通らない、ずっと使える直接の QR コードを無料で作成。URL・文字・Wi-Fi・連絡先・メール・電話。色や真ん中の 🐾、PNG と SVG で保存。登録なし・通信なし。A free direct QR code maker — never expires, no tracking, no sign-up.">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--acc:#39ff14;--warn:#ffb020}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--acc:#1f7a3a;--warn:#b86a00}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E)}
+a{color:inherit}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.home{font:12px 'Courier New',monospace;opacity:.7;text-decoration:none}
+.brand{margin-right:auto;font:bold 16px 'Courier New',monospace;letter-spacing:4px;color:var(--acc)}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)} .tg.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.lead{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 380px;gap:14px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.panel h3{font:bold 12px 'Courier New',monospace;letter-spacing:2px;color:var(--acc);margin-bottom:8px}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.f label{font-size:12px;color:var(--sub)}
+.f input,.f textarea,.f select{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:14px 'Courier New','Hiragino Sans',monospace;outline:none;width:100%}
+.f textarea{min-height:90px;resize:vertical}
+.f input:focus,.f textarea:focus{border-color:var(--acc)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row .f{flex:1;min-width:140px}
+.sw{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--sub)}
+.sw input[type=color]{width:38px;height:30px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px}
+.preview{display:flex;flex-direction:column;align-items:center;gap:10px}
+#qrBox{width:100%;max-width:340px;aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff;transition:transform .6s var(--E)}
+#qrBox svg{width:100%;height:100%;display:block;border-radius:14px}
+.meta{font:11.5px 'Courier New',monospace;color:var(--sub);text-align:center;line-height:1.7}
+.warn{font-size:12.5px;color:var(--warn);line-height:1.7;min-height:1.4em;text-align:center}
+.big{border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--ink);border-radius:12px;padding:9px 16px;font:bold 13px 'Hiragino Sans',sans-serif;cursor:pointer}
+.marks{display:flex;gap:5px;flex-wrap:wrap}
+.marks button{font-size:18px;width:38px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;cursor:pointer}
+.marks button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.guide details{border-top:1px solid var(--line);padding:8px 0}
+.guide summary{cursor:pointer;font-weight:bold;font-size:13px}
+.guide p,.guide li,.guide td,.guide th{font-size:12.5px;line-height:1.85;color:var(--sub)}
+.guide p{margin-top:6px}.guide ul{padding-left:18px;margin-top:6px}
+.guide table{border-collapse:collapse;margin-top:6px;width:100%}.guide td,.guide th{border-bottom:1px solid var(--line);padding:3px 6px;text-align:left}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .4s,transform .6s var(--E);pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:10px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.ibox>p{font-size:13px;line-height:1.8;color:var(--sub);margin-bottom:12px}
+.ifam{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ifam a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;text-decoration:none}
+.icof{text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font-size:12.5px;color:var(--sub);line-height:1.7}
+.icof a{display:inline-block;margin-top:8px;padding:8px 18px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 12.5px 'Courier New',monospace;text-decoration:none}
+.icl{font-size:12px;color:var(--sub);line-height:1.8}
+@media print{header,.grid>div:first-child,.guide,.preview .row,.toast{display:none!important}body{background:#fff}#qrBox{max-width:70vw;margin:auto}}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/tools/">← Meridi Tools</a>
+  <div class="brand">MERIDI QR</div>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tLang"></button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<main>
+  <p class="lead" id="lead"></p>
+  <div class="grid">
+    <div>
+      <div class="panel"><div class="tabs" id="tabs"></div><div id="form"></div></div>
+      <div class="panel"><h3 id="hLook"></h3>
+        <div class="row">
+          <label class="sw"><input type="color" id="cFg" value="#111111"> <span id="lFg"></span></label>
+          <label class="sw"><input type="color" id="cBg" value="#ffffff"> <span id="lBg"></span></label>
+          <label class="sw"><input type="checkbox" id="cRound"> <span id="lRound"></span></label>
+          <div class="f" style="min-width:150px"><label id="lEcl"></label><select id="sEcl"></select></div>
+        </div>
+        <div class="f"><label id="lMark"></label><div class="marks" id="marks"></div></div>
+      </div>
+      <div class="panel guide" id="guide"></div>
+    </div>
+    <div>
+      <div class="panel preview">
+        <div id="qrBox"></div>
+        <div class="meta" id="meta"></div>
+        <div class="warn" id="warn"></div>
+        <div class="row" style="justify-content:center">
+          <button class="big" id="bPng">⬇ PNG</button><button class="big" id="bSvg">⬇ SVG</button>
+          <button class="tg" id="bCopy"></button><button class="tg" id="bPrint">🖨</button>
+        </div>
+        <div class="row" style="justify-content:center"><span class="sw" id="lSize"></span><select class="tg" id="sSize"><option>512</option><option selected>1024</option><option>2048</option></select></div>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>🔳 Meridi QR</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p id="iP"></p>
+  <div class="ifam">
+    <a href="https://meridibrand.com/">🏠 Meridi Brand</a><a href="https://meridibrand.com/tools/">🧰 Meridi Tools</a>
+    <a href="https://meridibrand.com/convert/">🧮 Convert</a><a href="https://meridibrand.com/meet/">📅 Meet</a>
+    <a href="https://meridibrand.com/play/">🎮 Play</a><a href="https://meridistore.booth.pm/items/8790105">💻 Sync</a>
+  </div>
+  <div class="icof"><span id="iCof"></span><br><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+/* ===== QR エンコーダ（バイトモード・版 1〜40・誤り訂正 L/M/Q/H） ===== */
+const QR = (() => {
+  const EF = { L: 1, M: 0, Q: 3, H: 2 }, EO = { L: 0, M: 1, Q: 2, H: 3 };
+  const ECW = [
+    [-1,7,10,15,20,26,18,20,24,30,18,20,24,26,30,22,24,28,30,28,28,28,28,30,30,26,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+    [-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28],
+    [-1,13,22,18,26,18,24,18,22,20,24,28,26,24,20,30,24,28,28,26,30,28,30,30,30,30,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+    [-1,17,28,22,16,22,28,26,26,24,28,24,28,22,24,24,30,28,28,26,28,30,24,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]];
+  const NB = [
+    [-1,1,1,1,1,1,2,2,2,2,4,4,4,4,4,6,6,6,6,7,8,8,9,9,10,12,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25],
+    [-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49],
+    [-1,1,1,2,2,4,4,6,6,8,8,8,10,12,16,12,17,16,18,21,20,23,23,25,27,29,34,34,35,38,40,43,45,48,51,53,56,59,62,65,68],
+    [-1,1,1,2,4,4,4,5,6,8,8,11,11,16,16,18,16,19,21,25,25,25,34,30,32,35,37,40,42,45,48,51,54,57,60,63,66,70,74,77,81]];
+  const bit = (x, i) => ((x >>> i) & 1) !== 0;
+  function rawModules(v){ let r = (16 * v + 128) * v + 64; if (v >= 2){ const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; } return r; }
+  const dataCW = (v, e) => Math.floor(rawModules(v) / 8) - ECW[EO[e]][v] * NB[EO[e]][v];
+  function mul(x, y){ let z = 0; for (let i = 7; i >= 0; i--){ z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; } return z & 0xFF; }
+  function divisor(d){ const r = new Array(d).fill(0); r[d - 1] = 1; let root = 1; for (let i = 0; i < d; i++){ for (let j = 0; j < r.length; j++){ r[j] = mul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; } root = mul(root, 2); } return r; }
+  function remainder(data, div){ const r = div.map(() => 0); for (const b of data){ const f = b ^ r.shift(); r.push(0); div.forEach((c, i) => r[i] ^= mul(c, f)); } return r; }
+  function formatBits(e, mask){ const d = (EF[e] << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537); return ((d << 10) | r) ^ 0x5412; }
+  function versionBits(v){ let r = v; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25); return (v << 12) | r; }
+  function alignPos(v){ if (v === 1) return []; const n = Math.floor(v / 7) + 2, step = v === 32 ? 26 : Math.ceil((v * 4 + 4) / (n * 2 - 2)) * 2, res = [6]; for (let p = v * 4 + 10; res.length < n; p -= step) res.splice(1, 0, p); return res; }
+
+  function encode(text, ecl = 'M', minVer = 1){
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let ver;
+    for (ver = minVer; ver <= 40; ver++){ const cc = ver <= 9 ? 8 : 16; if (4 + cc + bytes.length * 8 <= dataCW(ver, ecl) * 8) break; }
+    if (ver > 40) throw new Error('TOO_LONG');
+    const cap = dataCW(ver, ecl) * 8, bb = [];
+    const put = (val, len) => { for (let i = len - 1; i >= 0; i--) bb.push((val >>> i) & 1); };
+    put(4, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    put(0, Math.min(4, cap - bb.length)); put(0, (8 - bb.length % 8) % 8);
+    for (let p = 0xEC; bb.length < cap; p ^= 0xEC ^ 0x11) put(p, 8);
+    const data = []; for (let i = 0; i < bb.length; i += 8){ let v = 0; for (let j = 0; j < 8; j++) v = (v << 1) | bb[i + j]; data.push(v); }
+    // 誤り訂正と並べ替え
+    const e = EO[ecl], nb = NB[e][ver], bl = ECW[e][ver], raw = Math.floor(rawModules(ver) / 8), nShort = nb - raw % nb, sLen = Math.floor(raw / nb), div = divisor(bl), blocks = [];
+    for (let i = 0, k = 0; i < nb; i++){ const dat = data.slice(k, k + sLen - bl + (i < nShort ? 0 : 1)); k += dat.length; const ec = remainder(dat, div); if (i < nShort) dat.push(0); blocks.push(dat.concat(ec)); }
+    const all = []; for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== sLen - bl || j >= nShort) all.push(b[i]); });
+    // 模様を置く
+    const size = ver * 4 + 17, M = [...Array(size)].map(() => new Array(size).fill(false)), F = [...Array(size)].map(() => new Array(size).fill(false));
+    const set = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+    for (let i = 0; i < size; i++){ set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    [[3, 3], [size - 4, 3], [3, size - 4]].forEach(([x, y]) => { for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++){ const d = Math.max(Math.abs(dx), Math.abs(dy)), xx = x + dx, yy = y + dy; if (xx >= 0 && xx < size && yy >= 0 && yy < size) set(xx, yy, d !== 2 && d !== 4); } });
+    const ap = alignPos(ver), n = ap.length;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){ if ((i === 0 && j === 0) || (i === 0 && j === n - 1) || (i === n - 1 && j === 0)) continue; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(ap[i] + dx, ap[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1); }
+    const drawFormat = mask => { const b = formatBits(ecl, mask);
+      for (let i = 0; i <= 5; i++) set(8, i, bit(b, i)); set(8, 7, bit(b, 6)); set(8, 8, bit(b, 7)); set(7, 8, bit(b, 8)); for (let i = 9; i < 15; i++) set(14 - i, 8, bit(b, i));
+      for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(b, i)); for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(b, i)); set(8, size - 8, true); };
+    drawFormat(0);
+    if (ver >= 7){ const b = versionBits(ver); for (let i = 0; i < 18; i++){ const t = bit(b, i), a = size - 11 + i % 3, c = Math.floor(i / 3); set(a, c, t); set(c, a, t); } }
+    let idx = 0;
+    for (let right = size - 1; right >= 1; right -= 2){ if (right === 6) right = 5;
+      for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++){ const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert;
+        if (!F[y][x] && idx < all.length * 8){ M[y][x] = bit(all[idx >>> 3], 7 - (idx & 7)); idx++; } } }
+    const maskFn = [ (x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, (x, y) => x % 3 === 0, (x, y) => (x + y) % 3 === 0, (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => x * y % 2 + x * y % 3 === 0, (x, y) => (x * y % 2 + x * y % 3) % 2 === 0, (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0 ];
+    const applyMask = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!F[y][x] && maskFn[m](x, y)) M[y][x] = !M[y][x]; };
+    const penalty = () => { let p = 0, dark = 0;
+      const line = get => { let r = 0, run = 0, prev = null; const seq = [];
+        for (let i = 0; i < size; i++){ const c = get(i); seq.push(c ? 1 : 0); if (c === prev) run++; else { if (run >= 5) r += run - 2; run = 1; prev = c; } }
+        if (run >= 5) r += run - 2;
+        const s = seq.join(''); [/(?=10111010000)/g, /(?=00001011101)/g].forEach(re => { r += (s.match(re) || []).length * 40; }); return r; };
+      for (let i = 0; i < size; i++){ p += line(k => M[i][k]); p += line(k => M[k][i]); }
+      for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++){ const c = M[y][x]; if (c === M[y][x + 1] && c === M[y + 1][x] && c === M[y + 1][x + 1]) p += 3; }
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (M[y][x]) dark++;
+      p += Math.floor(Math.abs(dark * 100 / (size * size) - 50) / 5) * 10; return p; };
+    let best = 0, bestP = Infinity;
+    for (let m = 0; m < 8; m++){ applyMask(m); drawFormat(m); const p = penalty(); if (p < bestP){ bestP = p; best = m; } applyMask(m); }
+    applyMask(best); drawFormat(best);
+    return { size, modules: M, version: ver, ecl, mask: best, bytes: bytes.length };
+  }
+  return { encode, _t: { mul, divisor, remainder, formatBits, versionBits, dataCW, alignPos } };
+})();
+
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+let lang = lsGet('meridiqr_lang') || ((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+const J = () => lang === 'ja', t = (a, b) => J() ? a : b;
+let S = { type: 'url', mark: '', ecl: 'M', v: {} };
+try { const x = JSON.parse(lsGet('meridiqr_v1') || 'null'); if (x) S = Object.assign(S, x); } catch(e){}
+const save = () => lsSet('meridiqr_v1', JSON.stringify(S));
+
+/* ===== 種類ごとの入力 ===== */
+const esc = s => String(s || '').replace(/([\\;,:"])/g, '\\$1');
+const TYPES = {
+  url:  { ic:'🔗', n:['URL','URL'], f:[['url','https://','https://example.com']], build: v => { let u = (v.url || '').trim(); if (u && !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u; return u; } },
+  text: { ic:'📝', n:['文字','Text'], f:[['text','', '', 'area']], build: v => v.text || '' },
+  wifi: { ic:'📶', n:['Wi-Fi','Wi-Fi'], f:[['ssid',['ネットワーク名（SSID）','Network name (SSID)'],''],['pass',['パスワード','Password'],''],['sec',['暗号化','Security'],'WPA','sel',['WPA','WEP','nopass']],['hid',['隠しネットワーク','Hidden network'],'','chk']],
+          build: v => v.ssid ? `WIFI:T:${v.sec === 'nopass' ? 'nopass' : (v.sec || 'WPA')};S:${esc(v.ssid)};${v.sec === 'nopass' ? '' : `P:${esc(v.pass)};`}${v.hid ? 'H:true;' : ''};` : '' },
+  card: { ic:'👤', n:['連絡先','Contact'], f:[['name',['名前','Name'],''],['org',['会社・お店','Organization'],''],['tel',['電話','Phone'],''],['mail',['メール','Email'],''],['web',['ホームページ','Website'],''],['adr',['住所','Address'],'']],
+          build: v => (v.name || v.tel || v.mail) ? ['BEGIN:VCARD','VERSION:3.0',`N:${esc(v.name)};;;;`,`FN:${esc(v.name)}`, v.org && `ORG:${esc(v.org)}`, v.tel && `TEL;TYPE=CELL:${v.tel}`, v.mail && `EMAIL:${v.mail}`, v.web && `URL:${v.web}`, v.adr && `ADR:;;${esc(v.adr)};;;;`, 'END:VCARD'].filter(Boolean).join('\r\n') : '' },
+  mail: { ic:'✉️', n:['メール','Email'], f:[['to',['宛先','To'],''],['sub',['件名','Subject'],''],['body',['本文','Message'],'','area']], build: v => v.to ? `mailto:${v.to}?subject=${encodeURIComponent(v.sub || '')}&body=${encodeURIComponent(v.body || '')}` : '' },
+  tel:  { ic:'📞', n:['電話','Phone'], f:[['tel',['電話番号','Phone number'],'']], build: v => v.tel ? 'tel:' + v.tel.replace(/[^\d+]/g, '') : '' },
+  sms:  { ic:'💬', n:['SMS','SMS'], f:[['tel',['電話番号','Phone number'],''],['body',['本文','Message'],'','area']], build: v => v.tel ? `SMSTO:${v.tel.replace(/[^\d+]/g, '')}:${v.body || ''}` : '' },
+};
+const MARKS = ['', '🐾', '🐈', '🐈‍⬛', '😺', '☕', '⭐', '❤️', '🎵', '🍜'];
+
+/* ===== 描く ===== */
+let last = null;
+function contrast(a, b){ const L = h => { const n = parseInt(h.slice(1), 16), c = [n >> 16, n >> 8 & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }; const x = L(a), y = L(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); }
+function svgOf(q, fg, bg, round, mark){
+  const n = q.size, Q = 4, W = n + Q * 2, ms = mark ? Math.round(n * .22) : 0, m0 = (n - ms) / 2;
+  const inMark = (x, y) => mark && x >= m0 - .5 && x < m0 + ms + .5 && y >= m0 - .5 && y < m0 + ms + .5;
+  const isFinder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+  let p = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++){
+    if (!q.modules[y][x] || inMark(x, y)) continue;
+    if (round && !isFinder(x, y)) p += `<circle cx="${x + Q + .5}" cy="${y + Q + .5}" r=".46"/>`;
+    else p += `<rect x="${x + Q}" y="${y + Q}" width="1.02" height="1.02"/>`;
+  }
+  let mk = '';
+  if (mark){ const c = Q + n / 2; mk = `<rect x="${c - ms / 2}" y="${c - ms / 2}" width="${ms}" height="${ms}" rx="${ms * .22}" fill="${bg}"/><text x="${c}" y="${c + ms * .33}" font-size="${ms * .82}" text-anchor="middle">${mark}</text>`; }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${W}" shape-rendering="${round ? 'geometricPrecision' : 'crispEdges'}"><rect width="${W}" height="${W}" fill="${bg}"/><g fill="${fg}">${p}</g>${mk}</svg>`;
+}
+function update(){
+  const T = TYPES[S.type], data = T.build(S.v[S.type] || {}), fg = $('cFg').value, bg = $('cBg').value;
+  const ecl = S.mark ? 'H' : S.ecl; $('sEcl').value = ecl; $('sEcl').disabled = !!S.mark;
+  if (!data){ $('qrBox').innerHTML = `<div style="color:#999;font-size:13px;padding:20px;text-align:center">${t('左に入力すると、ここに QR コードが出ます', 'Fill in the form to make a QR code')}</div>`; $('meta').textContent = ''; $('warn').textContent = ''; last = null; return; }
+  let q; try { q = QR.encode(data, ecl); } catch(e){ $('warn').textContent = t('⚠ 長すぎて QR コードに入りません。短くしてください。', '⚠ Too long to fit in a QR code.'); last = null; return; }
+  const svg = svgOf(q, fg, bg, $('cRound').checked, S.mark); last = { svg, q, data };
+  $('qrBox').innerHTML = svg; $('qrBox').style.background = bg;
+  $('meta').innerHTML = t(`版 ${q.version}（${q.size}×${q.size} マス）・誤り訂正 ${ecl}・${q.bytes} バイト`, `Version ${q.version} (${q.size}×${q.size}) · error correction ${ecl} · ${q.bytes} bytes`);
+  const c = contrast(fg, bg), w = [];
+  if (c < 3) w.push(t('⚠ 色の差が小さく、読み取れないことがあります。', '⚠ Low contrast — may not scan.'));
+  const lum = h => { const n = parseInt(h.slice(1), 16); return (n >> 16) * .299 + (n >> 8 & 255) * .587 + (n & 255) * .114; };
+  if (lum(fg) > lum(bg)) w.push(t('⚠ 明るい模様に暗い背景は、読めないアプリがあります。', '⚠ Light-on-dark codes fail in some apps.'));
+  if (q.version > 15) w.push(t('ℹ 情報が多いので模様が細かくなっています。印刷は大きめに。', 'ℹ Dense code — print it larger.'));
+  $('warn').textContent = w.join(' ');
+}
+function renderForm(){
+  const T = TYPES[S.type], v = S.v[S.type] = S.v[S.type] || {};
+  $('form').innerHTML = T.f.map(([k, lab, ph, kind, opts]) => {
+    const L = Array.isArray(lab) ? (J() ? lab[0] : lab[1]) : lab;
+    if (kind === 'area') return `<div class="f">${L ? `<label>${L}</label>` : ''}<textarea data-k="${k}" placeholder="${S.type === 'text' ? t('ここに文字を入れてください', 'Type your text') : ''}">${(v[k] || '').replace(/</g, '&lt;')}</textarea></div>`;
+    if (kind === 'sel') return `<div class="f"><label>${L}</label><select data-k="${k}">${opts.map(o => `<option ${(v[k] || ph) === o ? 'selected' : ''} value="${o}">${o === 'nopass' ? t('なし', 'None') : o}</option>`).join('')}</select></div>`;
+    if (kind === 'chk') return `<label class="sw" style="margin-bottom:8px"><input type="checkbox" data-k="${k}" ${v[k] ? 'checked' : ''}> ${L}</label>`;
+    return `<div class="f"><label>${L}</label><input data-k="${k}" value="${(v[k] || '').replace(/"/g, '&quot;')}" placeholder="${ph}" autocomplete="off"></div>`;
+  }).join('') + (S.type === 'wifi' ? `<p style="font-size:11.5px;color:var(--sub);line-height:1.7">${t('🔒 パスワードは QR コードの中に入ります。お客さん用の Wi-Fi など、見られても良いネットワークで使ってください。この画面からは、どこにも送られません。', '🔒 The password is stored inside the code — use it for guest networks. Nothing is sent anywhere.')}</p>` : '');
+  $('form').querySelectorAll('[data-k]').forEach(el => el.addEventListener('input', () => { v[el.dataset.k] = el.type === 'checkbox' ? el.checked : el.value; save(); update(); }));
+}
+function render(){
+  document.documentElement.lang = lang; document.body.classList.toggle('light', theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語'; $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
+  $('lead').textContent = t('作った QR コードは、入れた文字がそのまま模様になる「直接の QR」です。どこのサイトも通らないので、期限切れにならず、ずっと使えます。作るのも全部この端末の中です。', 'These are direct QR codes: your text becomes the pattern itself. No redirect site in between, so they never expire. Everything happens on this device.');
+  $('tabs').innerHTML = ''; Object.entries(TYPES).forEach(([k, T]) => { const b = document.createElement('button'); b.className = 'tg' + (S.type === k ? ' on' : ''); b.textContent = T.ic + ' ' + (J() ? T.n[0] : T.n[1]); b.onclick = () => { S.type = k; save(); render(); }; $('tabs').append(b); });
+  $('hLook').textContent = t('🎨 見た目', '🎨 STYLE'); $('lFg').textContent = t('模様の色', 'Pattern'); $('lBg').textContent = t('背景の色', 'Background'); $('lRound').textContent = t('丸い点にする', 'Rounded dots');
+  $('lEcl').textContent = t('誤り訂正（欠けても読める強さ）', 'Error correction');
+  $('sEcl').innerHTML = [['L', t('L：約 7%', 'L: ~7%')], ['M', t('M：約 15%（ふつう）', 'M: ~15% (default)')], ['Q', t('Q：約 25%', 'Q: ~25%')], ['H', t('H：約 30%（真ん中に絵）', 'H: ~30% (for a logo)')]].map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+  $('lMark').textContent = t('真ん中の絵（入れると誤り訂正は自動で H）', 'Center mark (switches to H automatically)');
+  $('marks').innerHTML = MARKS.map(m => `<button class="${S.mark === m ? 'on' : ''}" data-m="${m}">${m || '∅'}</button>`).join('');
+  $('marks').querySelectorAll('button').forEach(b => b.onclick = () => { S.mark = b.dataset.m; save(); render(); });
+  $('bCopy').textContent = t('📋 画像をコピー', '📋 Copy image'); $('lSize').textContent = t('PNG の大きさ', 'PNG size');
+  $('iP').textContent = t('広告なし・登録なし・通信なし。入れた文字やパスワードは、この端末の中だけで QR コードになります。', 'No ads, no sign-up, no network. Your text and passwords only become a QR code on this device.');
+  $('iCof').textContent = t('ひとりで作っています。チラシやお店で役に立ったら、コーヒー 1 杯分の応援がうれしいです。', 'Made by one person. If it helped your shop or flyer, a coffee would mean a lot.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・最初の公開：URL・文字・Wi-Fi・連絡先・メール・電話・SMS の 7 種類／模様と背景の色、丸い点、真ん中の絵（🐾 など 9 種）／誤り訂正 L・M・Q・H／PNG（512〜2048）と SVG の保存、画像のコピー、印刷／色の差の注意／説明書き', '• First release: 7 types (URL, text, Wi-Fi, contact, email, phone, SMS) / colours, rounded dots, center marks (🐾 and more) / error correction L·M·Q·H / PNG (512–2048) & SVG export, copy, print / contrast warnings / guide');
+  $('guide').innerHTML = J() ? GUIDE_JA : GUIDE_EN;
+  renderForm(); update();
+}
+const GUIDE_JA = `<h3>📖 説明書き（ちょっと高度）</h3>
+<details open><summary>「直接の QR」と「動的 QR」のちがい</summary><p>「無料の QR 作成」の中には、作った QR コードの中身が<b>作成サイトの転送用の URL</b>になっているものがあります（動的 QR）。読み取ると、いったんそのサイトを通ってから目的のページへ移ります。そのため、しばらくすると有料の会員にならないと使えなくなったり、広告が挟まったり、いつ誰が読み取ったかを記録されたりすることがあります。</p><p>Meridi QR は、入れた URL や文字が<b>そのまま模様</b>になる「直接の QR」です。間に何も通らないので、期限切れになりません。そのかわり、印刷したあとに中身を書き換えることはできません。</p></details>
+<details><summary>誤り訂正 L・M・Q・H</summary><p>QR コードは、模様が少し欠けたり汚れたりしても読めるように、同じ情報を余分に入れています。H にすると約 30% が欠けても読めるので、真ん中に絵を置けます。そのかわり、模様は細かくなります。</p><table><tr><th>L</th><td>約 7%</td><td>情報をたくさん入れたいとき</td></tr><tr><th>M</th><td>約 15%</td><td>ふつう</td></tr><tr><th>Q</th><td>約 25%</td><td>汚れやすい場所（工場・屋外）</td></tr><tr><th>H</th><td>約 30%</td><td>真ん中に絵を入れるとき</td></tr></table></details>
+<details><summary>印刷するときの大きさの目安</summary><p>読み取る距離の<b>約 10 分の 1</b>が目安です。手に持って読むチラシなら 2〜3cm、2m 離れて読むポスターなら 20cm くらい。まわりに白い余白（4 マス分）を残すと読みやすくなります。SVG で保存すると、どれだけ大きく印刷しても線が荒れません。</p></details>
+<details><summary>色の決まり</summary><p>模様は暗く、背景は明るくするのが基本です。逆にしたり、色の差が小さかったりすると、読めないアプリがあります。画面の下に注意が出たら、色を見直してください。</p></details>
+<details><summary>🔒 安全について</summary><p>このページは何も送りません。Wi-Fi のパスワードも、この端末の中で QR コードになるだけです。ただし、QR コードの中にはパスワードがそのまま入るので、お客さん用など見られても良いネットワークに使ってください。知らない QR コードを読むときは、開く前に表示された URL を確かめましょう。</p></details>`;
+const GUIDE_EN = `<h3>📖 GUIDE</h3>
+<details open><summary>Direct vs dynamic QR codes</summary><p>Many "free QR" sites encode a redirect link to their own server. Later the code may stop working unless you pay, show ads, or track scans. Meridi QR encodes your content directly — nothing in between, so it never expires (but can't be edited after printing).</p></details>
+<details><summary>Error correction</summary><p>L ~7%, M ~15%, Q ~25%, H ~30% of the code can be damaged and still scan. H lets you put a mark in the middle.</p></details>
+<details><summary>Printing size</summary><p>About 1/10 of the scanning distance: 2–3 cm for a handheld flyer, ~20 cm for a poster read from 2 m. Keep a white margin. SVG stays sharp at any size.</p></details>
+<details><summary>Privacy</summary><p>Nothing is uploaded. Wi-Fi passwords are stored inside the code itself, so use it for guest networks.</p></details>`;
+async function pngBlob(){ const px = +$('sSize').value; const img = new Image(); const url = URL.createObjectURL(new Blob([last.svg], { type: 'image/svg+xml' }));
+  await new Promise((r, j) => { img.onload = r; img.onerror = j; img.src = url; });
+  const c = document.createElement('canvas'); c.width = c.height = px; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, px, px); URL.revokeObjectURL(url);
+  return new Promise(r => c.toBlob(r, 'image/png')); }
+const dl = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+$('bPng').onclick = async () => { if (!last) return; try { dl(await pngBlob(), `meridi-qr-${S.type}.png`); } catch(e){ toast(t('保存できませんでした', 'Could not save')); } };
+$('bSvg').onclick = () => { if (last) dl(new Blob([last.svg], { type: 'image/svg+xml' }), `meridi-qr-${S.type}.svg`); };
+$('bCopy').onclick = async () => { if (!last) return; try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob() })]); toast(t('画像をコピーしました 📋', 'Image copied 📋')); } catch(e){ toast(t('このブラウザでは画像のコピーができません。PNG で保存してください', 'Copy not supported — use PNG')); } };
+$('bPrint').onclick = () => print();
+['cFg', 'cBg', 'cRound'].forEach(id => $(id).addEventListener('input', update));
+$('sEcl').onchange = () => { S.ecl = $('sEcl').value; save(); update(); };
+$('tLang').onclick = () => { lang = J() ? 'en' : 'ja'; lsSet('meridiqr_lang', lang); render(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); render(); };
+const info = $('info'); $('tInfo').onclick = () => info.classList.add('show'); $('iClose').onclick = () => info.classList.remove('show');
+info.addEventListener('pointerdown', e => { if (e.target === info) info.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') info.classList.remove('show'); });
+let tt; function toast(m){ const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('show'), 2000); }
+if (!S.v.url) S.v.url = { url: 'https://meridibrand.com/' };
+render();
+})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

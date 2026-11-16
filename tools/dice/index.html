@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Dice — TRPG ダイスローラー（2d6+3・d20・d100・クトゥルフ判定） | Dice Roller</title>
+<meta name="description" content="広告なしの無料 TRPG ダイスローラー。2d6+3、4d6kh3、d20 の有利・不利、d100 とクトゥルフ神話 TRPG の技能判定、爆発ダイス、確率グラフ、マクロ保存。A free ad-free dice roller for D&D, Call of Cthulhu and more — with probability charts.">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--acc:#39ff14;--gold:#ffd76a;--red:#ff8a7a}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--acc:#1f7a3a;--gold:#a87800;--red:#c0392b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E)}
+a{color:inherit}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.home{font:12px 'Courier New',monospace;opacity:.7;text-decoration:none}
+.brand{margin-right:auto;font:bold 16px 'Courier New',monospace;letter-spacing:4px;color:var(--acc)}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.tg.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+main{max-width:1180px;margin:0 auto;padding:14px}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 330px;gap:14px}
+@media(max-width:880px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.panel h3{font:bold 12px 'Courier New',monospace;letter-spacing:2px;color:var(--acc);margin-bottom:8px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.expr{flex:1;min-width:180px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font:bold 20px 'Courier New',monospace;outline:none;letter-spacing:1px}
+.expr:focus{border-color:var(--acc)}
+.roll{border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--ink);border-radius:14px;padding:11px 22px;font:bold 16px 'Hiragino Sans',sans-serif;letter-spacing:2px;cursor:pointer}
+.qd{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.qd button{background:transparent;border:1px solid var(--line);border-radius:12px;padding:6px 8px 4px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;font:bold 11px 'Courier New',monospace;transition:border-color .2s,transform .3s var(--E)}
+.qd button:hover{border-color:var(--acc);transform:translateY(-2px)}
+.qd svg{width:30px;height:30px}
+.cnt{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--sub);margin-top:8px;flex-wrap:wrap}
+.cnt button{background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:3px 9px;cursor:pointer;font:12px 'Courier New',monospace}
+.cnt button.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.err{color:var(--red);font-size:12.5px;min-height:1.4em;margin-top:6px}
+.tray{min-height:190px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:14px;border-radius:14px;background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--acc) 7%,transparent),transparent 70%);perspective:700px}
+.die{width:66px;height:66px;position:relative;transform-origin:50% 60%}
+.die svg{width:100%;height:100%;overflow:visible}
+.die.drop{opacity:.32;filter:grayscale(1)}
+.die.drop::after{content:'';position:absolute;left:8%;right:8%;top:50%;height:2px;background:var(--red);transform:rotate(-18deg)}
+.die .bd{position:absolute;right:-4px;top:-6px;font:bold 10px 'Courier New',monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 4px;color:var(--gold)}
+.die.tumble{animation:tum var(--d,.75s) var(--E) both}
+@keyframes tum{0%{transform:translate3d(var(--x,0),-90px,0) rotate(var(--r,540deg)) rotateX(220deg) scale(.6);opacity:0}55%{opacity:1}70%{transform:translate3d(0,6px,0) rotate(-8deg) rotateX(0) scale(1.04)}85%{transform:translate3d(0,-4px,0) rotate(3deg) scale(.99)}100%{transform:none}}
+.total{text-align:center;margin-top:6px}
+.total b{display:block;font:bold clamp(46px,9vw,84px) 'Courier New',monospace;color:var(--acc);line-height:1;transition:color .6s}
+.total .lbl{font:12px 'Courier New',monospace;color:var(--sub);letter-spacing:2px}
+.total .brk{font:13px 'Courier New',monospace;color:var(--sub);margin-top:6px;word-break:break-all}
+.badge{display:inline-block;margin-top:8px;padding:5px 16px;border-radius:20px;font:bold 14px 'Hiragino Sans',sans-serif;letter-spacing:2px;opacity:0;transform:translateY(6px);transition:opacity .8s var(--E),transform .8s var(--E)}
+.badge.show{opacity:1;transform:none}
+.badge.crit{color:var(--gold);border:1px solid var(--gold);box-shadow:0 0 22px color-mix(in srgb,var(--gold) 40%,transparent)}
+.badge.fum{color:var(--red);border:1px solid var(--red)}
+.badge.ok{color:var(--acc);border:1px solid var(--acc)}
+.badge.ng{color:var(--sub);border:1px solid var(--line)}
+.total.crit b{color:var(--gold)} .total.fum b{color:var(--red)}
+.side .btns{display:flex;flex-direction:column;gap:5px}
+.side .btns button{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px;text-align:left;cursor:pointer}
+.side .btns button:hover{border-color:var(--acc)}
+.side .btns button small{display:block;color:var(--sub);font-size:10.5px;margin-top:2px}
+#chart svg{width:100%;height:150px;display:block}
+.cstat{font:11.5px 'Courier New',monospace;color:var(--sub);line-height:1.8;margin-top:4px}
+.cstat b{color:var(--ink)}
+.hist{max-height:220px;overflow:auto;font:12px 'Courier New',monospace}
+.hist div{display:flex;justify-content:space-between;gap:8px;padding:4px 2px;border-bottom:1px dashed var(--line);cursor:pointer}
+.hist div:hover{color:var(--acc)}
+.hist span:last-child{font-weight:bold}
+.mac{display:flex;gap:4px;align-items:center;margin-bottom:5px}
+.mac button.m{flex:1;text-align:left;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 9px;cursor:pointer;font-size:12.5px}
+.mac button.m small{color:var(--sub);font:11px 'Courier New',monospace;margin-left:6px}
+.mac button.x{background:none;border:none;color:var(--sub);cursor:pointer;font-size:14px}
+.inp{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font:13px 'Courier New',monospace;outline:none;min-width:0}
+.coc{display:none}.dnd{display:none}
+body.m-coc .coc{display:block} body.m-dnd .dnd{display:block}
+.lv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:12px;text-align:center}
+.lv div{border:1px solid var(--line);border-radius:10px;padding:6px 2px;transition:border-color .5s,background .5s}
+.lv div b{display:block;font:bold 16px 'Courier New',monospace}
+.lv div.hit{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 15%,transparent)}
+.abil{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px;text-align:center;font:12px 'Courier New',monospace}
+@media(max-width:520px){.abil{grid-template-columns:repeat(3,1fr)}.lv{grid-template-columns:repeat(2,1fr)}}
+.abil div{border:1px solid var(--line);border-radius:10px;padding:6px 2px}
+.abil b{display:block;font-size:20px;color:var(--acc)}
+.guide details{border-top:1px solid var(--line);padding:8px 0}
+.guide summary{cursor:pointer;font-weight:bold;font-size:13px}
+.guide p,.guide li,.guide td,.guide th{font-size:12.5px;line-height:1.85;color:var(--sub)}
+.guide p{margin-top:6px}.guide ul{padding-left:18px;margin-top:6px}
+.guide table{border-collapse:collapse;margin-top:6px;width:100%}
+.guide td,.guide th{border-bottom:1px solid var(--line);padding:3px 6px;text-align:left}
+.guide code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:0 4px;font-size:12px;color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .4s,transform .6s var(--E);pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:10px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.ibox>p{font-size:13px;line-height:1.8;color:var(--sub);margin-bottom:12px}
+.ifam{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ifam a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;text-decoration:none}
+.icof{text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font-size:12.5px;color:var(--sub);line-height:1.7}
+.icof a{display:inline-block;margin-top:8px;padding:8px 18px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 12.5px 'Courier New',monospace;text-decoration:none}
+.icl{font-size:12px;color:var(--sub);line-height:1.8}
+/* 立体の 6 面ダイス（桃鉄風） */
+.die3{--s:62px;--hz:calc(var(--s) / 2);width:var(--s);height:var(--s);position:relative;perspective:520px}
+.die3::before{content:'';position:absolute;left:10%;right:10%;bottom:-10px;height:12px;border-radius:50%;background:radial-gradient(#0008,#0000 70%)}
+.cube{position:absolute;inset:0;transform-style:preserve-3d}
+.face{position:absolute;inset:0;border-radius:22%;background:radial-gradient(circle at 35% 30%,#ffffff,#f1ebdc 60%,#dcd2bb);box-shadow:inset 0 0 0 1px #c9bfa688,inset -3px -4px 8px #0000001f;backface-visibility:hidden}
+.face.dim{background:radial-gradient(circle at 35% 30%,#9a9890,#77756d)}
+.face i{position:absolute;width:19%;height:19%;margin:-9.5% 0 0 -9.5%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#444,#111);box-shadow:inset 0 2px 2px #0008}
+.face i.p1{width:30%;height:30%;margin:-15% 0 0 -15%;background:radial-gradient(circle at 40% 35%,#ff6b5e,#c0161a)}
+.face i.np{background:none;box-shadow:none;width:auto;height:auto;margin:0;transform:translate(-50%,-50%);font-style:normal;font-size:calc(var(--s) * .22)}
+.die3.drop::after{content:'';position:absolute;left:4%;right:4%;top:50%;height:3px;background:var(--red);transform:rotate(-18deg);z-index:5}
+.die3.small{--s:44px}
+@media (prefers-reduced-motion:reduce){.die.tumble{animation:none}}
+</style>
+</head>
+<body class="m-dice">
+<header>
+  <a class="home" href="https://meridibrand.com/tools/">← Meridi Tools</a>
+  <div class="brand">MERIDI DICE</div>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tLook"></button>
+  <button class="tg" id="tSnd"></button>
+  <button class="tg" id="tLang"></button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <div class="row">
+          <input class="expr" id="expr" spellcheck="false" autocomplete="off">
+          <button class="roll" id="bRoll"></button>
+        </div>
+        <div class="qd" id="qd"></div>
+        <div class="cnt" id="cnt"></div>
+        <div class="err" id="err"></div>
+      </div>
+
+      <div class="panel coc" id="cocP">
+        <h3 id="hCoc"></h3>
+        <div class="row">
+          <label class="cnt" style="margin:0"><span id="lSkill"></span> <input class="inp" id="skill" type="number" min="1" max="99" style="width:70px"></label>
+          <label class="cnt" style="margin:0"><span id="lBP"></span>
+            <select class="inp" id="bp"><option value="-2"></option><option value="-1"></option><option value="0" selected></option><option value="1"></option><option value="2"></option></select></label>
+          <button class="roll" id="bCoc" style="padding:8px 18px;font-size:14px"></button>
+        </div>
+        <div class="lv" id="lv"></div>
+      </div>
+
+      <div class="panel dnd" id="dndP">
+        <h3 id="hDnd"></h3>
+        <div class="row">
+          <button class="tg" id="bAdv"></button><button class="tg" id="bNorm"></button><button class="tg" id="bDis"></button>
+          <label class="cnt" style="margin:0"><span id="lMod"></span> <input class="inp" id="mod" type="number" value="0" style="width:60px"></label>
+          <label class="cnt" style="margin:0">DC <input class="inp" id="dc" type="number" placeholder="—" style="width:60px"></label>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="tg" id="bAbil"></button></div>
+        <div class="abil" id="abil"></div>
+      </div>
+
+      <div class="panel">
+        <div class="tray" id="tray"></div>
+        <div class="total" id="total"></div>
+      </div>
+
+      <div class="panel guide" id="guide"></div>
+    </div>
+
+    <div class="side">
+      <div class="panel"><h3 id="hChart"></h3><div id="chart"></div><div class="cstat" id="cstat"></div></div>
+      <div class="panel"><h3 id="hPre"></h3><div class="btns" id="pre"></div></div>
+      <div class="panel"><h3 id="hMac"></h3><div id="macs"></div>
+        <div class="row" style="margin-top:6px"><input class="inp" id="mName" style="flex:1"><button class="tg" id="bMac"></button></div></div>
+      <div class="panel"><h3 id="hHist"></h3><div class="hist" id="hist"></div></div>
+    </div>
+  </div>
+</main>
+
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>🎲 Meridi Dice</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p id="iP"></p>
+  <div class="ifam">
+    <a href="https://meridibrand.com/">🏠 Meridi Brand</a><a href="https://meridibrand.com/tools/">🧰 Meridi Tools</a>
+    <a href="https://meridibrand.com/play/">🎮 Play</a><a href="https://meridibrand.com/lingo/">🐾 Lingo</a>
+    <a href="https://meridibrand.com/convert/">🧮 Convert</a><a href="https://meridibrand.com/stars/">🌌 Stars</a>
+  </div>
+  <div class="icof"><span id="iCof"></span><br><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+const LS = 'meridice_v1';
+let S = { lang: (navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en', snd: true, mode: 'dice', expr: '2d6+3', cnt: 1, skill: 50, macros: null, hist: [], nyan: false, look: '3d' };
+try { const x = JSON.parse(lsGet(LS) || 'null'); if (x) S = Object.assign(S, x); } catch(e){}
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+if (!S.macros) S.macros = [['Fireball', '8d6'], ['Longsword', '1d8+3'], ['Sanity', '1d100'], ['Stats', '4d6kh3']];
+const save = () => lsSet(LS, JSON.stringify(S));
+const J = () => S.lang === 'ja';
+const t = (ja, en) => J() ? ja : en;
+
+/* ===== 公平な乱数（暗号用の乱数＋偏りを除く） ===== */
+function rnd(n){
+  const buf = new Uint32Array(1), lim = Math.floor(0x100000000 / n) * n;
+  try { do { crypto.getRandomValues(buf); } while (buf[0] >= lim); return buf[0] % n + 1; }
+  catch(e){ return Math.floor(Math.random() * n) + 1; }
+}
+
+/* ===== 式を読む ===== */
+// 対応：NdM、d%、dF、!（爆発）、kh/kl/k、dh/dl、rN（N 以下を 1 回振り直し）、>=N など（成功数）、定数、＋−
+const TERM = /^([+\-]?)(?:(\d*)d(\d+|%|f)((?:!|kh\d+|kl\d+|k\d+|dh\d+|dl\d+|r\d+|(?:>=|<=|>|<)\d+)*)|(\d+))/;
+function parse(src){
+  let s = (src || '').normalize('NFKC').toLowerCase().replace(/\s+/g, '').replace(/[ｄ]/g, 'd').replace(/[−–—]/g, '-').replace(/×/g, 'x');
+  if (!s) throw t('式を入れてください', 'Please enter an expression');
+  const terms = []; let first = true;
+  while (s.length){
+    const m = s.match(TERM);
+    if (!m || (!first && !m[1])) throw t('読めない所があります：', "Can't read: ") + s.slice(0, 12);
+    first = false; s = s.slice(m[0].length);
+    const sign = m[1] === '-' ? -1 : 1;
+    if (m[5] !== undefined){ terms.push({ k: 'n', sign, v: +m[5] }); continue; }
+    const n = m[2] === '' ? 1 : +m[2];
+    const sides = m[3] === '%' ? 100 : m[3] === 'f' ? 'F' : +m[3];
+    if (n < 1 || n > 100) throw t('ダイスの数は 1〜100 個です', 'Dice count must be 1–100');
+    if (sides !== 'F' && (sides < 2 || sides > 1000)) throw t('面の数は 2〜1000 です', 'Sides must be 2–1000');
+    const T = { k: 'd', sign, n, sides, ex: false, keep: null, re: 0, succ: null, raw: m[0].replace(/^[+\-]/, '') };
+    const mods = m[4].match(/!|kh\d+|kl\d+|k\d+|dh\d+|dl\d+|r\d+|(?:>=|<=|>|<)\d+/g) || [];
+    for (const md of mods){
+      if (md === '!'){ if (sides === 'F' || sides < 3) throw t('爆発は 3 面以上で使えます', 'Exploding needs 3+ sides'); T.ex = true; }
+      else if (/^kh?\d/.test(md)) T.keep = ['h', +md.replace(/\D/g, '')];
+      else if (/^kl/.test(md)) T.keep = ['l', +md.slice(2)];
+      else if (/^dh/.test(md)) T.keep = ['l', n - +md.slice(2)];
+      else if (/^dl/.test(md)) T.keep = ['h', n - +md.slice(2)];
+      else if (/^r/.test(md)) T.re = +md.slice(1);
+      else { const mm = md.match(/(>=|<=|>|<)(\d+)/); T.succ = [mm[1], +mm[2]]; }
+    }
+    if (T.keep && (T.keep[1] < 1 || T.keep[1] > n)) throw t('残す数が多すぎるか、少なすぎます', 'Keep/drop count out of range');
+    if (sides !== 'F' && T.re >= sides) throw t('振り直しの数が大きすぎます', 'Reroll value too high');
+    terms.push(T);
+  }
+  if (terms.filter(x => x.k === 'd').reduce((a, x) => a + x.n, 0) > 200) throw t('ダイスは合計 200 個までです', 'Max 200 dice in total');
+  return terms;
+}
+const cmp = (v, [op, x]) => op === '>=' ? v >= x : op === '<=' ? v <= x : op === '>' ? v > x : v < x;
+function rollTerm(T, R = rnd){
+  if (T.k === 'n') return { value: T.sign * T.v, dice: [] };
+  const one = () => T.sides === 'F' ? R(3) - 2 : R(T.sides);
+  let dice = [];
+  for (let i = 0; i < T.n; i++){
+    let v = one(), d = { v, sides: T.sides, kept: true, tag: '' };
+    if (T.re && v <= T.re){ d.tag = 'r'; d.from = v; d.v = v = one(); }
+    dice.push(d);
+    if (T.ex){ let c = 0; while (v === T.sides && c++ < 30){ v = one(); dice.push({ v, sides: T.sides, kept: true, tag: '!' }); } }
+  }
+  if (T.keep){
+    const idx = dice.map((d, i) => i).sort((a, b) => T.keep[0] === 'h' ? dice[b].v - dice[a].v : dice[a].v - dice[b].v);
+    idx.forEach((i, r) => { if (r >= T.keep[1]) dice[i].kept = false; });
+  }
+  const kept = dice.filter(d => d.kept);
+  const value = T.succ ? kept.filter(d => cmp(d.v, T.succ)).length : kept.reduce((a, d) => a + d.v, 0);
+  if (T.succ) kept.forEach(d => d.hit = cmp(d.v, T.succ));
+  return { value: T.sign * value, dice };
+}
+function rollAll(terms, R){ const parts = terms.map(T => rollTerm(T, R)); return { parts, total: parts.reduce((a, p) => a + p.value, 0) }; }
+
+/* ===== 確率の分布 ===== */
+function distribution(terms){
+  const plain = terms.every(T => T.k === 'n' || (!T.ex && !T.keep && !T.re && !T.succ));
+  if (plain){
+    let dist = new Map([[0, 1]]);
+    for (const T of terms){
+      if (T.k === 'n'){ const nd = new Map(); dist.forEach((p, v) => nd.set(v + T.sign * T.v, p)); dist = nd; continue; }
+      const faces = T.sides === 'F' ? [-1, 0, 1] : Array.from({ length: T.sides }, (_, i) => i + 1);
+      for (let i = 0; i < T.n; i++){
+        const nd = new Map();
+        dist.forEach((p, v) => faces.forEach(f => { const k = v + T.sign * f; nd.set(k, (nd.get(k) || 0) + p / faces.length); }));
+        dist = nd;
+        if (dist.size > 5000) return mc(terms);
+      }
+    }
+    return { dist, exact: true };
+  }
+  return mc(terms);
+}
+function mc(terms){
+  const N = 20000, dist = new Map(), R = n => Math.floor(Math.random() * n) + 1;
+  for (let i = 0; i < N; i++){ const v = rollAll(terms, R).total; dist.set(v, (dist.get(v) || 0) + 1 / N); }
+  return { dist, exact: false };
+}
+function drawChart(terms, result){
+  let D; try { D = distribution(terms); } catch(e){ $('chart').innerHTML = ''; $('cstat').textContent = ''; return; }
+  const ks = [...D.dist.keys()].sort((a, b) => a - b), min = ks[0], max = ks[ks.length - 1];
+  const pm = Math.max(...D.dist.values()), w = 300, h = 140, n = max - min + 1, bw = w / n;
+  let mean = 0; D.dist.forEach((p, v) => mean += p * v);
+  let ge = 0; if (result != null) D.dist.forEach((p, v) => { if (v >= result) ge += p; });
+  let bars = '';
+  for (let v = min; v <= max; v++){
+    const p = D.dist.get(v) || 0, bh = p / pm * (h - 18), hit = v === result;
+    bars += `<rect x="${(v - min) * bw + bw * .1}" y="${h - 14 - bh}" width="${Math.max(1, bw * .8)}" height="${bh}" rx="${Math.min(3, bw / 4)}" fill="${hit ? 'var(--gold)' : 'var(--acc)'}" opacity="${hit ? 1 : .45}"><title>${v}: ${(p * 100).toFixed(2)}%</title></rect>`;
+  }
+  const lab = (v, a) => `<text x="${(v - min + .5) * bw}" y="${h - 2}" font-size="10" fill="var(--sub)" text-anchor="${a}" font-family="Courier New">${v}</text>`;
+  $('chart').innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${bars}${lab(min, 'start')}${n > 2 ? lab(Math.round(mean), 'middle') : ''}${lab(max, 'end')}</svg>`;
+  $('cstat').innerHTML = (J() ? `最小 <b>${min}</b> ／ 平均 <b>${mean.toFixed(2)}</b> ／ 最大 <b>${max}</b>` : `min <b>${min}</b> / avg <b>${mean.toFixed(2)}</b> / max <b>${max}</b>`)
+    + (result != null ? '<br>' + t(`この目（${result}）以上が出る確率：`, `Chance of ${result} or more: `) + `<b>${(ge * 100).toFixed(ge < .01 ? 2 : 1)}%</b>` : '')
+    + (D.exact ? '' : `<br><span style="opacity:.7">${t('※ 20,000 回振ったときの近い値です', '* Estimated from 20,000 simulated rolls')}</span>`);
+}
+
+/* ===== ダイスの絵 ===== */
+const SHAPE = {
+  4: '<polygon points="50,6 95,88 5,88"/>',
+  6: '<rect x="10" y="10" width="80" height="80" rx="14"/>',
+  8: '<polygon points="50,4 94,50 50,96 6,50"/><path d="M6,50 L94,50" class="ln"/>',
+  10: '<polygon points="50,4 94,42 50,96 6,42"/><path d="M6,42 L50,58 L94,42 M50,58 L50,96" class="ln"/>',
+  12: '<polygon points="50,4 95,37 78,92 22,92 5,37"/><polygon points="50,24 74,42 65,72 35,72 26,42" class="ln"/>',
+  20: '<polygon points="50,3 93,27 93,73 50,97 7,73 7,27"/><polygon points="50,22 78,70 22,70" class="ln"/>',
+  100: '<polygon points="50,4 94,42 50,96 6,42"/><path d="M6,42 L50,58 L94,42 M50,58 L50,96" class="ln"/>',
+  F: '<rect x="10" y="10" width="80" height="80" rx="14"/>',
+  x: '<circle cx="50" cy="50" r="44"/>'
+};
+const PIPS = { 1:[[50,50]], 2:[[30,30],[70,70]], 3:[[28,28],[50,50],[72,72]], 4:[[30,30],[70,30],[30,70],[70,70]], 5:[[28,28],[72,28],[50,50],[28,72],[72,72]], 6:[[30,26],[70,26],[30,50],[70,50],[30,74],[70,74]] };
+function dieSVG(d){
+  const k = SHAPE[d.sides] ? d.sides : 'x';
+  const col = d.hit === false ? 'var(--sub)' : (d.sides === 20 && d.v === 20) ? 'var(--gold)' : (d.sides === 20 && d.v === 1) ? 'var(--red)' : 'var(--acc)';
+  let face;
+  if (d.sides === 6){
+    face = (PIPS[d.v] || []).map(([x, y]) => S.nyan ? `<text x="${x}" y="${y + 7}" font-size="20" text-anchor="middle">🐾</text>` : `<circle cx="${x}" cy="${y}" r="8" fill="${col}"/>`).join('');
+  } else {
+    const txt = d.sides === 'F' ? (d.v > 0 ? '+' : d.v < 0 ? '−' : '·') : d.sides === 100 ? String(d.v === 100 ? '00' : d.v).padStart(2, '0') : d.v;
+    const fs = String(txt).length > 2 ? 26 : d.sides === 4 ? 30 : 34;
+    face = `<text x="50" y="${d.sides === 4 ? 74 : d.sides === 10 || d.sides === 100 ? 52 : 62}" font-size="${fs}" font-weight="bold" text-anchor="middle" font-family="Courier New" fill="${col}">${txt}</text>`;
+  }
+  return `<svg viewBox="0 0 100 100"><g fill="color-mix(in srgb, ${col} 12%, var(--card))" stroke="${col}" stroke-width="4" stroke-linejoin="round">${SHAPE[k]}</g><style>.ln{fill:none;stroke:${col};stroke-width:2;opacity:.45}</style>${face}</svg>`;
+}
+function iconSVG(s){ return dieSVG({ sides: s, v: s === 6 ? 6 : s === 100 ? 100 : s === 'F' ? 1 : s }); }
+
+/* ===== 音（カラコロ） ===== */
+let AC = null;
+function ac(){ try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch(e){} }
+function clack(n){
+  if (!S.snd || !AC) return;
+  try {
+    const hits = Math.min(14, 4 + n * 2);
+    for (let i = 0; i < hits; i++){
+      const t0 = AC.currentTime + i * (0.045 + Math.random() * 0.05) + Math.pow(i / hits, 2) * 0.25;
+      const len = 0.03, buf = AC.createBuffer(1, AC.sampleRate * len, AC.sampleRate), ch = buf.getChannelData(0);
+      for (let j = 0; j < ch.length; j++) ch[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / ch.length, 3);
+      const src = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+      src.buffer = buf; f.type = 'bandpass'; f.frequency.value = 1800 + Math.random() * 2400; f.Q.value = 3;
+      g.gain.value = 0.35 * (1 - i / hits * .7);
+      src.connect(f); f.connect(g); g.connect(AC.destination); src.start(t0);
+    }
+  } catch(e){}
+}
+function chime(good){ if (!S.snd || !AC) return; try { (good ? [784, 988, 1319] : [330, 262]).forEach((fr, i) => { const o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime + 0.6 + i * 0.13; o.type = 'triangle'; o.frequency.value = fr; g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.09, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6); o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + 0.7); }); } catch(e){} }
+
+/* ===== 振る ===== */
+let lastTerms = null;
+const FINAL = { 1:[0,0], 2:[0,-90], 3:[-90,0], 4:[90,0], 5:[0,90], 6:[0,180] };
+const FACES = [[1,'rotateY(0deg)'],[6,'rotateY(180deg)'],[2,'rotateY(90deg)'],[5,'rotateY(-90deg)'],[3,'rotateX(90deg)'],[4,'rotateX(-90deg)']];
+function cubeDie(d, i, small){
+  const w = document.createElement('div'); w.className = 'die3' + (d.kept ? '' : ' drop') + (small ? ' small' : '');
+  const c = document.createElement('div'); c.className = 'cube';
+  c.innerHTML = FACES.map(([n, tr]) => `<div class="face${d.kept ? '' : ' dim'}" style="transform:${tr} translateZ(var(--hz))">` +
+    PIPS[n].map(([x, y]) => S.nyan ? `<i class="np" style="left:${x}%;top:${y}%">🐾</i>` : `<i class="${n === 1 ? 'p1' : ''}" style="left:${x}%;top:${y}%"></i>`).join('') + '</div>').join('');
+  w.append(c);
+  if (d.tag) w.insertAdjacentHTML('beforeend', d.tag === '!' ? '<span class="bd" style="position:absolute;right:-4px;top:-6px;z-index:6;font:bold 10px Courier New;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 4px;color:var(--gold)">💥</span>' : `<span style="position:absolute;right:-4px;top:-6px;z-index:6;font:bold 10px Courier New;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 4px;color:var(--gold)">↻${d.from}</span>`);
+  const [rx, ry] = FINAL[d.v], z = Math.random() * 24 - 12, sx = Math.random() > .5 ? 1 : -1, sy = Math.random() > .5 ? 1 : -1;
+  const end = `rotateZ(${z}deg) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  c.style.transform = end;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && c.animate){
+    const x0 = Math.random() * 160 - 80;
+    c.animate([
+      { transform: `translate3d(${x0}px,-120px,0) rotateZ(${z * 3}deg) rotateX(${rx + sx * 1080}deg) rotateY(${ry + sy * 720}deg)`, offset: 0 },
+      { transform: `translate3d(${x0 * .2}px,4px,0) rotateZ(${z}deg) rotateX(${rx + sx * 60}deg) rotateY(${ry + sy * 40}deg)`, offset: .62 },
+      { transform: `translate3d(0,-7px,0) rotateZ(${z}deg) rotateX(${rx - sx * 14}deg) rotateY(${ry - sy * 8}deg)`, offset: .8 },
+      { transform: `translate3d(0,0,0) rotateZ(${z}deg) rotateX(${rx + sx * 4}deg) rotateY(${ry}deg)`, offset: .92 },
+      { transform: end, offset: 1 }
+    ], { duration: 950 + Math.random() * 300, delay: Math.min(i, 20) * 45, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' });
+  }
+  return w;
+}
+function showDice(allDice){
+  const tray = $('tray'); tray.innerHTML = '';
+  const many = allDice.length > 24;
+  const use3d = S.look === '3d' && !many;
+  allDice.forEach((d, i) => {
+    if (use3d && d.sides === 6){ tray.append(cubeDie(d, i, allDice.length > 12)); return; }
+    const el = document.createElement('div'); el.className = 'die' + (d.kept ? '' : ' drop');
+    if (many){ el.style.width = el.style.height = '44px'; }
+    el.innerHTML = dieSVG(d) + (d.tag === '!' ? '<span class="bd">💥</span>' : d.tag === 'r' ? `<span class="bd">↻${d.from}</span>` : '');
+    el.style.setProperty('--r', (Math.random() > .5 ? 1 : -1) * (360 + Math.random() * 540) + 'deg');
+    el.style.setProperty('--x', (Math.random() * 120 - 60) + 'px');
+    el.style.setProperty('--d', (0.6 + Math.random() * 0.35) + 's');
+    el.style.animationDelay = Math.min(i, 20) * 0.035 + 's';
+    el.classList.add('tumble'); tray.append(el);
+  });
+}
+function setTotal(big, label, brk, badge){
+  const tt = $('total'); tt.className = 'total' + (badge && /crit|fum/.test(badge[0]) ? ' ' + badge[0] : '');
+  tt.innerHTML = `<span class="lbl">${label}</span><b>${big}</b><div class="brk">${brk}</div>${badge ? `<span class="badge ${badge[0]}">${badge[1]}</span>` : ''}`;
+  if (badge) setTimeout(() => { const b = tt.querySelector('.badge'); if (b) b.classList.add('show'); }, 650);
+}
+function addHist(expr, total, note){ S.hist.unshift([expr, total, note || '', Date.now()]); S.hist = S.hist.slice(0, 40); save(); renderHist(); }
+function rollExpr(expr, opt = {}){
+  ac(); $('err').textContent = '';
+  let terms; try { terms = parse(expr); } catch(e){ $('err').textContent = '⚠ ' + e; return null; }
+  const r = rollAll(terms); const all = r.parts.flatMap(p => p.dice);
+  showDice(all); clack(all.length);
+  const brk = r.parts.map((p, i) => { const T = terms[i];
+    if (T.k === 'n') return (T.sign < 0 ? '− ' : (i ? '+ ' : '')) + T.v;
+    const ds = p.dice.map(d => d.kept ? (T.succ ? (d.hit ? `<b>${d.v}</b>` : d.v) : d.v) : `<s>${d.v}</s>`).join(',');
+    return (T.sign < 0 ? '− ' : (i ? '+ ' : '')) + `${T.raw}[${ds}]` + (T.succ ? `→${Math.abs(p.value)}${t('成功', '✓')}` : '');
+  }).join(' ');
+  let badge = null;
+  const d20 = terms.filter(T => T.k === 'd' && T.sides === 20);
+  if (d20.length === 1 && (d20[0].n === 1 || d20[0].keep && d20[0].keep[1] === 1)){
+    const kept = r.parts[terms.indexOf(d20[0])].dice.find(d => d.kept);
+    if (kept && kept.v === 20){ badge = ['crit', t('✨ クリティカル！ NAT 20', '✨ CRITICAL! NAT 20')]; chime(true); }
+    else if (kept && kept.v === 1){ badge = ['fum', t('💀 ファンブル… NAT 1', '💀 FUMBLE… NAT 1')]; chime(false); }
+  }
+  if (opt.dc != null && !isNaN(opt.dc)){
+    const ok = r.total >= opt.dc;
+    if (!badge || badge[0] !== 'crit' && badge[0] !== 'fum') badge = ok ? ['ok', t(`成功（DC ${opt.dc}）`, `SUCCESS (DC ${opt.dc})`)] : ['ng', t(`失敗（DC ${opt.dc}）`, `FAIL (DC ${opt.dc})`)];
+  }
+  setTotal(r.total, opt.label || expr.toUpperCase(), brk, badge);
+  addHist(expr, r.total, opt.note); lastTerms = terms; drawChart(terms, r.total);
+  return r;
+}
+
+/* ===== クトゥルフ（d100 判定） ===== */
+function cocRoll(){
+  ac(); const sk = Math.max(1, Math.min(99, +$('skill').value || 50)); S.skill = sk; save();
+  const bp = +$('bp').value, ones = rnd(10) - 1, tens = [];
+  for (let i = 0; i <= Math.abs(bp); i++) tens.push(rnd(10) - 1);
+  const val = t2 => { const v = t2 * 10 + ones; return v === 0 ? 100 : v; };
+  const cands = tens.map(val), pick = bp > 0 ? Math.min(...cands) : bp < 0 ? Math.max(...cands) : cands[0];
+  const dice = tens.map(t2 => ({ sides: 100, v: t2 * 10 === 0 ? 100 : t2 * 10, kept: val(t2) === pick, tag: '' }));
+  let seen = false; dice.forEach(d => { if (d.kept){ if (seen) d.kept = false; seen = true; } });
+  dice.push({ sides: 10, v: ones === 0 ? 10 : ones, kept: true, tag: '' });
+  const allD = dice.map(d => d.sides === 10 ? Object.assign({}, d, { v: ones }) : Object.assign({}, d, { v: d.v === 100 ? 0 : d.v }));
+  showDice(allD.map(d => d.sides === 10 ? { sides: 10, v: d.v, kept: true } : { sides: 100, v: d.v === 0 ? 100 : d.v, kept: d.kept }));
+  clack(dice.length);
+  const lv = pick === 1 ? 0 : pick <= Math.floor(sk / 5) ? 1 : pick <= Math.floor(sk / 2) ? 2 : pick <= sk ? 3 : (pick === 100 || (sk < 50 && pick >= 96)) ? 5 : 4;
+  const NAMES = J() ? ['クリティカル', 'イクストリーム成功', 'ハード成功', 'レギュラー成功', '失敗', 'ファンブル'] : ['CRITICAL', 'EXTREME SUCCESS', 'HARD SUCCESS', 'REGULAR SUCCESS', 'FAILURE', 'FUMBLE'];
+  const badge = lv === 0 ? ['crit', '✨ ' + NAMES[0]] : lv === 5 ? ['fum', '💀 ' + NAMES[5]] : lv <= 3 ? ['ok', NAMES[lv]] : ['ng', NAMES[4]];
+  if (lv === 0) chime(true); if (lv === 5) chime(false);
+  setTotal(String(pick).padStart(2, '0'), t(`技能 ${sk}`, `SKILL ${sk}`) + (bp ? (bp > 0 ? t(` ・ボーナス ${bp}`, ` · BONUS ${bp}`) : t(` ・ペナルティ ${-bp}`, ` · PENALTY ${-bp}`)) : ''), t('十の位 ', 'tens ') + tens.map(x => x * 10 || '00').join(' / ') + t(' ＋ 一の位 ', ' + ones ') + ones, badge);
+  renderLv(sk, lv);
+  addHist(`CoC ${sk}${bp ? (bp > 0 ? '+B' + bp : '+P' + -bp) : ''}`, pick, NAMES[lv]);
+  const T = [{ k: 'd', sign: 1, n: 1, sides: 100, ex: false, keep: null, re: 0, succ: null, raw: 'd100' }]; drawChart(T, pick);
+}
+function renderLv(sk, hit){
+  const L = J() ? ['クリティカル', 'イクストリーム', 'ハード', 'レギュラー'] : ['Critical', 'Extreme', 'Hard', 'Regular'];
+  const V = ['01', '≤ ' + Math.floor(sk / 5), '≤ ' + Math.floor(sk / 2), '≤ ' + sk];
+  $('lv').innerHTML = L.map((l, i) => `<div class="${hit === i ? 'hit' : ''}">${l}<b>${V[i]}</b></div>`).join('');
+}
+
+/* ===== D&D ===== */
+function abilities(){
+  ac(); const out = [], all = [];
+  for (let i = 0; i < 6; i++){
+    const r = rollTerm({ k: 'd', sign: 1, n: 4, sides: 6, ex: false, keep: ['h', 3], re: 0, succ: null });
+    out.push(r.value); all.push(...r.dice);
+  }
+  showDice(all); clack(24);
+  const N = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+  $('abil').innerHTML = out.map((v, i) => { const m = Math.floor((v - 10) / 2); return `<div>${N[i]}<b>${v}</b>${m >= 0 ? '+' : ''}${m}</div>`; }).join('');
+  const sum = out.reduce((a, b) => a + b, 0);
+  setTotal(sum, t('能力値の合計（4d6 で低い 1 個を捨てる × 6）', 'ABILITY TOTAL (4d6 drop lowest × 6)'), out.join(' · '), null);
+  addHist('4d6kh3 ×6', sum, out.join('/'));
+  drawChart(parse('4d6kh3'), null);
+}
+
+/* ===== 画面 ===== */
+const QD = [4, 6, 8, 10, 12, 20, 100, 'F'];
+const PRE = [
+  ['1d20', 'd20', '何でも判定（D&D）', 'Any check (D&D)'],
+  ['2d20kh1', t('有利', 'Advantage'), '2 回振って高いほう', 'Roll twice, keep higher'],
+  ['2d20kl1', t('不利', 'Disadvantage'), '2 回振って低いほう', 'Roll twice, keep lower'],
+  ['4d6kh3', '4d6kh3', '能力値（低い 1 個を捨てる）', 'Ability score (drop lowest)'],
+  ['3d6', '3d6', 'クトゥルフの能力値（×5）', 'CoC characteristic (×5)'],
+  ['2d6', '2d6', 'ソード・ワールドなどの判定', 'Sword World / PbtA checks'],
+  ['1d100', 'd100', '百分率・正気度', 'Percentile / Sanity'],
+  ['8d6', '8d6', 'ファイアーボール', 'Fireball'],
+  ['5d10>=8', '5d10>=8', '8 以上の数を数える（WoD）', 'Count successes ≥8 (WoD)'],
+  ['4dF', '4dF', 'FATE（＋・０・−）', 'FATE / Fudge dice'],
+  ['3d6!', '3d6!', '爆発ダイス（6 で振り足し）', 'Exploding (roll again on 6)'],
+];
+function render(){
+  document.documentElement.lang = S.lang; document.body.classList.toggle('light', theme === 'light');
+  document.body.classList.remove('m-dice', 'm-coc', 'm-dnd'); document.body.classList.add('m-' + S.mode);
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
+  $('tSnd').textContent = S.snd ? '🔊' : '🔇';
+  $('tLook').textContent = S.look === '3d' ? t('🎲 立体', '🎲 3D') : t('🔷 平ら', '🔷 Flat'); $('tLook').title = t('6 面ダイスの見た目（立体＝桃鉄風／平ら＝軽い）', 'Look of d6 (3D / flat & light)');
+  $('tabs').innerHTML = '';
+  [['dice', t('🎲 ダイス', '🎲 Dice')], ['coc', t('🐙 クトゥルフ判定', '🐙 Call of Cthulhu')], ['dnd', t('⚔️ D&D', '⚔️ D&D')]].forEach(([k, l]) => {
+    const b = document.createElement('button'); b.className = 'tg' + (S.mode === k ? ' on' : ''); b.textContent = l; b.onclick = () => { S.mode = k; save(); render(); }; $('tabs').append(b); });
+  $('expr').value = S.expr; $('expr').placeholder = t('例：2d6+3、4d6kh3、d20', 'e.g. 2d6+3, 4d6kh3, d20');
+  $('bRoll').textContent = t('🎲 振る', '🎲 ROLL');
+  $('qd').innerHTML = '';
+  QD.forEach(s => { const b = document.createElement('button'); b.innerHTML = iconSVG(s) + (s === 'F' ? 'dF' : 'd' + s); b.title = t('クリックで振る ／ Shift＋クリックで式に足す', 'Click to roll / Shift+click to add');
+    b.onclick = e => { const term = (S.cnt > 1 ? S.cnt : '') + 'd' + (s === 'F' ? 'F' : s);
+      if (e.shiftKey && $('expr').value.trim()){ $('expr').value += '+' + term; S.expr = $('expr').value; save(); return; }
+      $('expr').value = S.expr = term; save(); rollExpr(term); };
+    $('qd').append(b); });
+  $('cnt').innerHTML = `<span>${t('個数', 'Count')}</span>` + [1, 2, 3, 4, 5, 6, 8, 10].map(n => `<button data-n="${n}" class="${S.cnt === n ? 'on' : ''}">${n}</button>`).join('') + `<span style="margin-left:6px;opacity:.7">${t('Shift＋クリックで式に足す', 'Shift+click to add to the expression')}</span>`;
+  $('cnt').querySelectorAll('button').forEach(b => b.onclick = () => { S.cnt = +b.dataset.n; save(); render(); });
+  $('hCoc').textContent = t('🐙 クトゥルフ神話 TRPG（第 7 版）の技能判定', '🐙 CALL OF CTHULHU (7th ed.) SKILL ROLL');
+  $('lSkill').textContent = t('技能値', 'Skill'); $('skill').value = S.skill; $('lBP').textContent = t('ボーナス／ペナルティ', 'Bonus / Penalty');
+  const bpo = $('bp').options; ['ペナルティ 2', 'ペナルティ 1', 'なし', 'ボーナス 1', 'ボーナス 2'].forEach((l, i) => bpo[i].textContent = J() ? l : ['Penalty 2', 'Penalty 1', 'None', 'Bonus 1', 'Bonus 2'][i]);
+  $('bCoc').textContent = t('🎲 判定する', '🎲 ROLL'); renderLv(S.skill, -1);
+  $('hDnd').textContent = t('⚔️ ダンジョンズ＆ドラゴンズ', '⚔️ DUNGEONS & DRAGONS');
+  $('bAdv').textContent = t('⬆ 有利で振る', '⬆ Advantage'); $('bNorm').textContent = t('d20 で振る', 'Normal d20'); $('bDis').textContent = t('⬇ 不利で振る', '⬇ Disadvantage');
+  $('lMod').textContent = t('修正', 'Mod'); $('bAbil').textContent = t('🧙 能力値を 6 つ作る（4d6 で低い 1 個を捨てる）', '🧙 Roll 6 ability scores (4d6 drop lowest)');
+  $('hChart').textContent = t('📊 確率のグラフ', '📊 PROBABILITY'); $('hPre').textContent = t('🔰 よく使う振り方', '🔰 COMMON ROLLS');
+  $('hMac').textContent = t('⭐ マイ・マクロ', '⭐ MY MACROS'); $('hHist').textContent = t('📜 履歴', '📜 HISTORY');
+  $('mName').placeholder = t('名前（例：剣の攻撃）', 'Name (e.g. Sword)'); $('bMac').textContent = t('＋ 今の式を保存', '+ Save current');
+  $('pre').innerHTML = ''; PRE.forEach(([e, l, dj, de]) => { const b = document.createElement('button'); b.innerHTML = `<b style="font-family:Courier New">${l}</b> <small>${J() ? dj : de}</small>`; b.onclick = () => { $('expr').value = S.expr = e; save(); rollExpr(e); }; $('pre').append(b); });
+  renderMacs(); renderHist();
+  $('iP').textContent = t('広告なし・登録なし・通信なし。ダイスは、暗号にも使われる乱数で、偏りなく振っています。履歴とマクロは、この端末の中だけに保存されます。', 'No ads, no sign-up, no network. Dice use a cryptographic random generator with no bias. History and macros stay on this device.');
+  $('iCof').textContent = t('ひとりで作っています。卓が盛り上がったら、コーヒー 1 杯分の応援がうれしいです。', 'Made by one person. If your table had fun, a coffee would mean a lot.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・最初の公開：式の入力（NdM・kh/kl・dh/dl・爆発・振り直し・成功数・dF）、8 種類のダイスの絵と転がる動き、6 面ダイスの立体表示（桃鉄風・切り替え可）、確率のグラフ、クトゥルフ第 7 版の判定（ボーナス・ペナルティダイス）、D&D の有利・不利と DC、能力値づくり、マクロ、履歴、説明書き', '• First release: dice notation (NdM, kh/kl, dh/dl, exploding, reroll, success counting, dF), 8 animated dice, probability chart, Call of Cthulhu 7e rolls with bonus/penalty dice, D&D advantage / disadvantage & DC, ability scores, macros, history, guide');
+  $('guide').innerHTML = J() ? GUIDE_JA : GUIDE_EN;
+  if (lastTerms) drawChart(lastTerms, S.hist[0] ? +S.hist[0][1] : null); else { try { drawChart(parse(S.expr), null); } catch(e){} }
+  if (!$('tray').children.length) setTotal('—', t('ダイスを振ってください', 'ROLL SOME DICE'), t('Enter キーでも振れます', 'Press Enter to roll'), null);
+}
+function renderMacs(){
+  $('macs').innerHTML = '';
+  S.macros.forEach(([n, e], i) => { const d = document.createElement('div'); d.className = 'mac';
+    d.innerHTML = `<button class="m">${n.replace(/[<>&]/g, '')}<small>${e}</small></button><button class="x" title="${t('消す', 'Delete')}">✕</button>`;
+    d.querySelector('.m').onclick = () => { $('expr').value = S.expr = e; save(); rollExpr(e, { note: n }); };
+    d.querySelector('.x').onclick = () => { S.macros.splice(i, 1); save(); renderMacs(); };
+    $('macs').append(d); });
+}
+function renderHist(){
+  $('hist').innerHTML = S.hist.length ? S.hist.map(([e, v, n], i) => `<div data-i="${i}" title="${t('もう一度振る', 'Roll again')}"><span>${e}${n ? ' <small style="opacity:.6">' + String(n).replace(/[<>&]/g, '') + '</small>' : ''}</span><span>${v}</span></div>`).join('') : `<span style="opacity:.6;font-size:12px">${t('まだありません', 'Nothing yet')}</span>`;
+  $('hist').querySelectorAll('div').forEach(d => d.onclick = () => { const e = S.hist[+d.dataset.i][0]; if (/^CoC|×6/.test(e)) return; $('expr').value = S.expr = e; save(); rollExpr(e); });
+}
+
+const GUIDE_JA = `<h3>📖 説明書き（ちょっと高度）</h3>
+<details open><summary>🔰 はじめての方へ：TRPG とダイス</summary><p>TRPG（テーブルトーク RPG）は、紙とサイコロで遊ぶ、会話で進める RPG です。「扉を開けてみます」と言葉で行動を決め、うまくいくかどうかをダイスで決めます。<b>d6</b> は 6 面、<b>d20</b> は 20 面のダイスという意味です。</p></details>
+<details><summary>✍️ 式の書き方</summary><table><tr><th>書き方</th><th>意味</th></tr>
+<tr><td><code>2d6+3</code></td><td>6 面を 2 個振って、3 を足す</td></tr>
+<tr><td><code>d20</code>・<code>1d20</code></td><td>20 面を 1 個（1 は省略できます）</td></tr>
+<tr><td><code>d%</code>・<code>d100</code></td><td>1〜100（百分率）</td></tr>
+<tr><td><code>4d6kh3</code></td><td>4 個振って、<b>高い</b> 3 個を残す（keep highest）</td></tr>
+<tr><td><code>2d20kl1</code></td><td>2 個振って、<b>低い</b> 1 個を残す（keep lowest）</td></tr>
+<tr><td><code>4d6dl1</code></td><td>低い 1 個を捨てる（drop lowest）。<code>kh3</code> と同じ結果</td></tr>
+<tr><td><code>3d6!</code></td><td>爆発ダイス：最大の目が出たら、もう 1 個振り足す（💥 の印）</td></tr>
+<tr><td><code>2d6r1</code></td><td>1 が出たら、1 回だけ振り直す（↻ の印）</td></tr>
+<tr><td><code>5d10&gt;=8</code></td><td>8 以上が出た<b>個数</b>を数える（成功数）</td></tr>
+<tr><td><code>4dF</code></td><td>FATE ダイス：＋・０・− の 3 種類の面</td></tr>
+<tr><td><code>1d8+2d6-1</code></td><td>組み合わせもできます</td></tr></table><p>全角で入れても大丈夫です（<code>２ｄ６＋３</code> も読めます）。</p></details>
+<details><summary>⚔️ D&D：有利と不利</summary><p>第 5 版では、状況が良いと <b>有利（Advantage）</b>：d20 を 2 回振って高いほう、悪いと <b>不利（Disadvantage）</b>：低いほうを使います。式で書くと <code>2d20kh1</code> と <code>2d20kl1</code> です。DC（難しさ）を入れると、成功か失敗かを出します。d20 で 20 が出ると ✨ クリティカル、1 が出ると 💀 ファンブルです。</p><p>有利だと、平均はおよそ 10.5 から 13.8 に上がります。右のグラフで、形が右にかたよるのが見られます。</p></details>
+<details><summary>🐙 クトゥルフ神話 TRPG（第 7 版）の判定</summary><p>d100 を振って、<b>技能値以下</b>なら成功です。成功の度合いは 4 段階あります。</p><table><tr><td>クリティカル</td><td>01</td></tr><tr><td>イクストリーム成功</td><td>技能値の 1/5 以下</td></tr><tr><td>ハード成功</td><td>技能値の 1/2 以下</td></tr><tr><td>レギュラー成功</td><td>技能値以下</td></tr><tr><td>ファンブル</td><td>100（技能値が 50 未満なら 96〜100）</td></tr></table><p><b>ボーナス・ダイス</b>は十の位を余分に振って<b>小さいほう</b>、<b>ペナルティ・ダイス</b>は<b>大きいほう</b>を使います。一の位は共通です。（ルールの細かい所は、遊んでいるルールブックに合わせてください）</p></details>
+<details><summary>📊 確率のグラフの読み方</summary><p><code>1d12</code> はどの目も同じくらい出ますが、<code>2d6</code> は 7 がいちばん出やすく（約 16.7%）、2 と 12 は 1/36（約 2.8%）しか出ません。ダイスの数が増えるほど、グラフは真ん中が高い「山の形」になります。これが、同じ「2〜12」でも <code>2d6</code> と <code>1d11+1</code> で遊び心地が違う理由です。</p><p>金色の棒が今の目で、「この目以上が出る確率」も出します。爆発や振り直しなど複雑な式は、20,000 回振ってみた近い値です。</p></details>
+<details><summary>🔒 公平さについて</summary><p>ダイスは、暗号にも使われる乱数（<code>crypto.getRandomValues</code>）で振っています。さらに、どの目も同じ確率になるように、わずかな偏りも取り除いています。前の結果が次の結果に影響することはありません。「さっき 1 が出たから次は大きい目」ということもありません。</p></details>
+<details><summary>🎲 立体と平らの切り替え</summary><p>右上の「🎲 立体」を押すと、6 面ダイスだけが角の丸い立体のサイコロになり、ころんと転がって止まります。「🔷 平ら」は軽いので、古いスマホやダイスをたくさん振るときに向いています。ダイスが 25 個以上のときは、自動で平らな絵になります。4・8・10・12・20 面は、どちらでも平らな絵です。</p></details>
+<details><summary>⌨️ キーボード</summary><p><b>Enter</b>：振る ／ <b>A</b>：d20 有利 ／ <b>D</b>：d20 不利 ／ <b>R</b>：もう一度 ／ <b>Esc</b>：閉じる</p></details>`;
+const GUIDE_EN = `<h3>📖 GUIDE</h3>
+<details open><summary>🔰 New to tabletop RPGs?</summary><p>In a TRPG you describe what your character does, and dice decide whether it works. <b>d6</b> = six-sided die, <b>d20</b> = twenty-sided.</p></details>
+<details><summary>✍️ Dice notation</summary><table>
+<tr><td><code>2d6+3</code></td><td>two d6, add 3</td></tr><tr><td><code>d%</code></td><td>1–100</td></tr>
+<tr><td><code>4d6kh3</code></td><td>keep highest 3</td></tr><tr><td><code>2d20kl1</code></td><td>keep lowest 1</td></tr>
+<tr><td><code>4d6dl1</code></td><td>drop lowest 1</td></tr><tr><td><code>3d6!</code></td><td>exploding (roll again on max) 💥</td></tr>
+<tr><td><code>2d6r1</code></td><td>reroll 1s once ↻</td></tr><tr><td><code>5d10&gt;=8</code></td><td>count successes</td></tr>
+<tr><td><code>4dF</code></td><td>Fate / Fudge dice</td></tr></table></details>
+<details><summary>⚔️ D&D advantage</summary><p>Advantage = <code>2d20kh1</code>, disadvantage = <code>2d20kl1</code>. Advantage raises the average from 10.5 to about 13.8. Set a DC to see success or failure.</p></details>
+<details><summary>🐙 Call of Cthulhu 7e</summary><p>Roll d100 ≤ skill. Extreme ≤ skill/5, Hard ≤ skill/2, Critical = 01, Fumble = 100 (96+ if skill &lt; 50). Bonus dice keep the lower tens die, penalty dice the higher.</p></details>
+<details><summary>📊 Reading the chart</summary><p><code>2d6</code> rolls 7 most often (16.7%); 2 and 12 only 2.8%. More dice → a bell curve. The gold bar is your roll.</p></details>
+<details><summary>🔒 Fairness</summary><p>Rolls use <code>crypto.getRandomValues</code> with rejection sampling — every face is exactly equally likely, and past rolls never affect the next.</p></details>
+<details><summary>⌨️ Keys</summary><p>Enter roll · A advantage · D disadvantage · R reroll · Esc close</p></details>`;
+
+/* ===== 操作 ===== */
+const doRoll = () => { const e = $('expr').value.trim(); if (/^nyan$/i.test(e)){ S.nyan = !S.nyan; save(); $('expr').value = S.expr = '6d6'; toast(S.nyan ? '🐾 にゃんこダイス ON' : '🐾 にゃんこダイス OFF'); rollExpr('6d6'); return; } S.expr = e; save(); rollExpr(e); };
+$('bRoll').onclick = doRoll;
+$('expr').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); doRoll(); } });
+$('expr').addEventListener('input', () => { try { drawChart(parse($('expr').value), null); $('err').textContent = ''; } catch(e){} });
+$('bCoc').onclick = cocRoll;
+const dnd = e => { const m = +$('mod').value || 0, dc = $('dc').value === '' ? null : +$('dc').value; const ex = e + (m ? (m > 0 ? '+' : '') + m : ''); $('expr').value = S.expr = ex; save(); rollExpr(ex, { dc }); };
+$('bAdv').onclick = () => dnd('2d20kh1'); $('bNorm').onclick = () => dnd('1d20'); $('bDis').onclick = () => dnd('2d20kl1');
+$('bAbil').onclick = abilities;
+$('bMac').onclick = () => { const e = $('expr').value.trim(); try { parse(e); } catch(er){ $('err').textContent = '⚠ ' + er; return; } const n = $('mName').value.trim() || e; S.macros.push([n.slice(0, 24), e]); $('mName').value = ''; save(); renderMacs(); toast(t('保存しました ⭐', 'Saved ⭐')); };
+$('tLang').onclick = () => { S.lang = J() ? 'en' : 'ja'; save(); render(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); render(); };
+$('tSnd').onclick = () => { S.snd = !S.snd; ac(); save(); render(); };
+$('tLook').onclick = () => { S.look = S.look === '3d' ? 'flat' : '3d'; save(); render(); toast(S.look === '3d' ? t('🎲 6 面ダイスを立体にしました', '🎲 3D d6 on') : t('🔷 平らな絵にしました（軽い）', '🔷 Flat dice (lighter)')); if (S.hist[0] && !/^CoC|×6/.test(S.hist[0][0])) rollExpr(S.expr); };
+const info = $('info'); $('tInfo').onclick = () => info.classList.add('show'); $('iClose').onclick = () => info.classList.remove('show');
+info.addEventListener('pointerdown', e => { if (e.target === info) info.classList.remove('show'); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ info.classList.remove('show'); return; }
+  if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'enter'){ e.preventDefault(); S.mode === 'coc' ? cocRoll() : doRoll(); }
+  else if (k === 'a') dnd('2d20kh1'); else if (k === 'd') dnd('2d20kl1');
+  else if (k === 'r'){ S.mode === 'coc' ? cocRoll() : doRoll(); }
+});
+let tt; function toast(m){ const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('show'), 2000); }
+window.__dice = { parse, rollAll, distribution };
+render();
+})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

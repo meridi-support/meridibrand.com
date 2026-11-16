@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Tools — 広告なしの小さな道具箱 | Ad-free Little Tools</title>
+<meta name="description" content="広告なし・登録なし・通信なしの小さな道具箱。大きなタイマーとスコアボード、テキスト整形、TRPG のダイス、期限切れにならない QR コード、写真の位置情報を消す道具。A free, ad-free toolbox — timer & scoreboard, text cleaner, TRPG dice, direct QR codes and photo location remover. Nothing is uploaded.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120acc;--acc:#39ff14}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffffdd;--acc:#1f7a3a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E)}
+a{color:inherit;text-decoration:none}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7}.home:hover{opacity:1;color:var(--acc)}
+.sp{margin-right:auto}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+.hero{text-align:center;padding:30px 16px 10px}
+.hero .box{font-size:52px;display:inline-block;transition:transform .8s var(--E)}
+.hero .box:hover{transform:rotate(-8deg) scale(1.08)}
+.hero h1{font:bold clamp(26px,5vw,40px) 'Courier New',monospace;letter-spacing:6px;color:var(--acc);margin-top:6px}
+.hero p{font-size:14px;color:var(--sub);line-height:1.9;margin-top:8px}
+.mani .dare{display:inline-block;font-size:15px;line-height:2;color:var(--sub);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--acc) 70%,transparent);text-decoration-thickness:2px;margin-top:6px}
+.mani .no{display:inline-block;font:bold clamp(20px,3.6vw,28px) 'Hiragino Sans','Yu Gothic',sans-serif;color:var(--ink);letter-spacing:3px;margin:8px 0 6px}
+.hero .tag{font:12px 'Courier New',monospace;letter-spacing:2px;margin-top:6px;opacity:.75}
+.search{display:block;margin:16px auto 0;width:min(420px,92%);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:10px 16px;font-size:14px;outline:none}
+.search:focus{border-color:var(--acc)}
+main{max-width:1060px;margin:0 auto;padding:18px 14px 30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;transition:border-color .3s,transform .5s var(--E),box-shadow .5s;opacity:0;transform:translateY(16px)}
+.card.in{opacity:1;transform:none}
+a.card:hover{border-color:var(--acc);transform:translateY(-4px);box-shadow:0 10px 30px color-mix(in srgb,var(--acc) 12%,transparent)}
+.card .ic{font-size:34px}
+.card h2{font-size:17px}
+.card p{font-size:12.8px;color:var(--sub);line-height:1.75;flex:1}
+.card .chips{display:flex;gap:5px;flex-wrap:wrap}
+.card .chips span{font:10.5px 'Courier New',monospace;border:1px solid var(--line);border-radius:10px;padding:2px 7px;color:var(--sub)}
+.card .go{font:bold 12.5px 'Courier New',monospace;color:var(--acc);letter-spacing:1px}
+.badge{position:absolute;top:12px;right:12px;font:bold 10px 'Courier New',monospace;letter-spacing:1px;padding:3px 8px;border-radius:10px;border:1px solid var(--acc);color:var(--acc)}
+.card.soon{opacity:.55}.card.soon.in{opacity:.55}
+.card.soon .badge{border-color:var(--sub);color:var(--sub)}
+.empty{grid-column:1/-1;text-align:center;color:var(--sub);font-size:13px;padding:20px;display:none}
+.note{margin-top:22px;background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:16px 18px;font-size:13px;color:var(--sub);line-height:1.9}
+.note b{color:var(--ink)}
+.note a{color:var(--acc);text-decoration:underline;text-underline-offset:3px}
+.links{margin-top:14px;text-align:center;font:12px 'Courier New',monospace;color:var(--sub);line-height:2.2}
+.links a{margin:0 6px}.links a:hover{color:var(--acc)}
+.coffee{display:inline-block;margin-top:10px;padding:9px 20px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 13px 'Courier New',monospace}
+.mani{text-align:center;font-size:13.5px;line-height:1.9;color:var(--sub);margin:4px 0 14px}
+.mani b{color:var(--ink)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px;transform:translateY(12px);transition:transform .5s var(--E)}
+.info.show .ibox{transform:none}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:6px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.itag{text-align:center;font:bold 13px 'Courier New',monospace;color:var(--acc);letter-spacing:2px;margin-bottom:12px}
+.icl{font-size:12px;color:var(--sub);line-height:1.8;border-top:1px solid var(--line);padding-top:10px}
+footer{text-align:center;padding:16px;font:11px 'Courier New',monospace;color:var(--sub);opacity:.75}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/">← Meridi Brand</a>
+  <span class="sp"></span>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tLang"></button>
+  <button class="tg" id="tTheme"></button>
+</header>
+
+<section class="hero">
+  <div class="box" id="box" title="🐾">🧰</div>
+  <h1>MERIDI TOOLS</h1>
+  <p id="lead"></p>
+  <div class="tag">No Ads. No Subscriptions. Just Tools.</div>
+  <input class="search" id="q" autocomplete="off">
+</section>
+
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="note" id="note"></div>
+  <div class="links">
+    <a href="https://meridibrand.com/">🏠 Meridi Brand</a>
+    <a href="https://meridibrand.com/convert/">🧮 Convert</a>
+    <a href="https://meridibrand.com/play/">🎮 Play</a>
+    <a href="https://meridibrand.com/lingo/">🐾 Lingo</a>
+    <a href="https://meridibrand.com/meet/">📅 Meet</a>
+    <a href="https://meridibrand.com/stars/">🌌 Stars</a>
+    <a href="https://meridibrand.com/depths/">🌊 Depths</a>
+    <a href="https://meridistore.booth.pm/items/8790105">💻 Sync</a>
+    <br>
+    <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a>
+    <a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a>
+    <a href="mailto:meridisupport@gmail.com">✉️ Contact</a>
+    <br>
+    <a class="coffee" href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a>
+  </div>
+</main>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>🧰 Meridi Tools</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <div class="mani" id="mani"></div>
+  <div class="itag">No Ads. No Subscriptions. Just Tools.</div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<footer>© 2026 Meridi Brand · Meridi Tools v1.0.0 · 🐾 Built by one person and three cats</footer>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+let lang = lsGet('meriditools_lang') || ((navigator.language || 'en').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+const J = () => lang === 'ja';
+const t = (ja, en) => J() ? ja : en;
+
+const TOOLS = [
+  { ic:'⏱', url:'timer/', name:['タイマー＆スコアボード','Timer & Scoreboard'],
+    d:['F1・アイスホッケー・バスケ・陸上・パタパタ時計・砂時計の 6 つの見た目。カウントダウン、ラップ付きストップウォッチ、タバタや HIIT のインターバル、2 チームのスコアボード。','Six looks — F1, hockey, basketball, track, flip clock, hourglass. Countdown, lap stopwatch, Tabata / HIIT intervals and a two-team scoreboard.'],
+    chips:['F1','HIIT','Tabata','Scoreboard'], k:'timer stopwatch countdown interval tabata hiit boxing scoreboard タイマー ストップウォッチ インターバル スコア' },
+  { ic:'✂️', url:'text/', name:['テキスト整形','Text Cleaner'],
+    d:['Google Maps の住所を半角に、コードに混ざる見えない文字（ゼロ幅スペースなど）を色付きで見つけて消す、PDF の改行を直す、文字数を数える。文章は端末の外に出ません。','Fix full-width addresses, find & remove invisible characters (zero-width spaces, BOM, smart quotes), join PDF line breaks, count characters. Nothing is uploaded.'],
+    chips:['全角⇔半角','ZWSP','Regex','Accents'], k:'text cleaner full-width half-width zenkaku hankaku invisible zero width space bom regex accent 全角 半角 住所 見えない 文字数' },
+  { ic:'🎲', url:'dice/', name:['TRPG ダイス','TRPG Dice Roller'],
+    d:['2d6+3、4d6kh3、d20 の有利・不利、クトゥルフ第 7 版の技能判定、爆発ダイス。確率のグラフ付き。6 面ダイスは桃鉄風の立体でころころ転がります。','2d6+3, 4d6kh3, d20 advantage / disadvantage, Call of Cthulhu 7e skill rolls, exploding dice — with live probability charts and 3D rolling d6.'],
+    chips:['D&D','CoC 7e','d20','Probability'], k:'dice roller trpg d20 d6 dnd d&d call of cthulhu coc advantage probability ダイス サイコロ クトゥルフ' },
+  { ic:'🔳', url:'qr/', name:['QR コードを作る','QR Code Maker'],
+    d:['広告ページを通らない「直接の QR」。期限切れにならず、ずっと使えます。Wi-Fi・連絡先・URL。真ん中に 🐾 も入れられます。','Direct QR codes that never expire and never pass through ad pages. URL, Wi-Fi, contacts — and a 🐾 in the middle.'],
+    chips:['🐾','Wi-Fi','vCard','SVG'], k:'qr code qrcode wifi vcard contact direct never expire QRコード 二次元 名刺' },
+  { ic:'📍', url:'photo/', name:['写真の位置情報を消す','Photo Location Remover'],
+    d:['写真に残っている撮影場所や機種の情報を一覧で見せて、ボタン 1 つで消します。写真は端末の外に一切出しません。','See the GPS location and camera info hidden in your photos, then remove it with one click. Photos never leave your device.'],
+    chips:['EXIF','GPS','Privacy'], k:'exif gps photo location privacy metadata remove strip 位置情報 写真 画像 撮影場所' },
+];
+
+function render(){
+  document.documentElement.lang = lang; document.body.classList.toggle('light', theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
+  $('lead').innerHTML = t('広告なし・登録なし・通信なしの、小さな道具箱。<br>アプリが有料になったり、広告だらけになったりして困った人のための道具を、少しずつ詰めていきます。', 'A little toolbox with no ads, no sign-up and no uploads.<br>Simple tools for anyone tired of apps that went paid or got buried in ads — added one by one.');
+  $('mani').innerHTML = t('<span class="dare">月額 980 円の電卓。<br>3 回押すと出てくる広告。<br>×ボタンが見つからない画面。</span><br><b class="no">— もう、いりません。</b><br>広告なし・登録なし・通信なし。買い切りでも、月額でもなく、<b>ずっと無料</b>の道具を、ひとつずつ詰めていきます。', '<span class="dare">A $9.99/month calculator.<br>An ad every third tap.<br>A close button you can never find.</span><br><b class="no">— Enough.</b><br>No ads. No sign-up. No uploads. Not a trial, not a subscription — <b>free tools that stay free</b>, added one by one.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・道具箱を開きました：⏱ タイマー＆スコアボード、✂️ テキスト整形、🎲 TRPG ダイス、🔳 QR コードを作る、📍 写真の位置情報を消す', '• Toolbox opened: ⏱ Timer & Scoreboard, ✂️ Text Cleaner, 🎲 TRPG Dice, 🔳 QR Code Maker, 📍 Photo Location Remover');
+  $('q').placeholder = t('🔍 道具を探す（例：住所、d20、タバタ）', '🔍 Find a tool (e.g. d20, tabata, zero-width)');
+  const q = $('q').value.trim().toLowerCase();
+  const g = $('grid'); g.innerHTML = '';
+  let shown = 0;
+  TOOLS.forEach((x, i) => {
+    const hay = (x.k + ' ' + x.name.join(' ') + ' ' + x.d.join(' ')).toLowerCase();
+    if (q && !hay.includes(q)) return;
+    shown++;
+    const el = document.createElement(x.soon ? 'div' : 'a');
+    el.className = 'card' + (x.soon ? ' soon' : '');
+    if (!x.soon) el.href = x.url;
+    el.innerHTML = `<span class="badge">${x.soon ? 'SOON' : 'FREE'}</span><div class="ic">${x.ic}</div><h2>${J() ? x.name[0] : x.name[1]}</h2><p>${J() ? x.d[0] : x.d[1]}</p><div class="chips">${x.chips.map(c => `<span>${c}</span>`).join('')}</div><div class="go">${x.soon ? t('準備中', 'Coming soon') : t('開く →', 'Open →')}</div>`;
+    g.append(el);
+    setTimeout(() => el.classList.add('in'), 60 + i * 90);
+  });
+  const e = document.createElement('div'); e.className = 'empty'; e.textContent = t('見つかりませんでした。ほしい道具があれば、下のリンクから教えてください 🐾', 'Nothing found. Tell us what tool you need via the link below 🐾');
+  e.style.display = shown ? 'none' : 'block'; g.append(e);
+  $('note').innerHTML = t(
+    '🧰 <b>この道具箱は、みんなで育てていきます。</b><br>「この機能がほしい」「TRPG のこのルールに対応してほしい」「ここが使いにくい」など、ひとことでも大歓迎です。くわしい方の知恵をお借りしながら、少しずつ良くしていきます。<br>👉 <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">ご意見・ご要望はこちら（日本語でも OK）</a>　／　✉️ <a href="mailto:meridisupport@gmail.com">meridisupport@gmail.com</a><br>📱 古いスマートフォンやタブレットでは、動きがカクカクすることがあります。',
+    '🧰 <b>This toolbox grows with you.</b><br>Missing a feature? Need a TRPG rule we don\'t support? Something awkward to use? Even one line of feedback helps — experts especially welcome.<br>👉 <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">Share ideas & requests</a> / ✉️ <a href="mailto:meridisupport@gmail.com">meridisupport@gmail.com</a><br>📱 Animations may stutter on older phones or tablets.');
+}
+$('q').addEventListener('input', render);
+const info = $('info'); $('tInfo').onclick = () => info.classList.add('show'); $('iClose').onclick = () => info.classList.remove('show');
+info.addEventListener('pointerdown', e => { if (e.target === info) info.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') info.classList.remove('show'); });
+$('tLang').onclick = () => { lang = J() ? 'en' : 'ja'; lsSet('meriditools_lang', lang); render(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); render(); };
+// 🐾 道具箱を 5 回押すと…
+let n = 0; $('box').onclick = () => { if (++n === 5){ $('box').textContent = '🐈'; setTimeout(() => { $('box').textContent = '🧰'; n = 0; }, 2400); } };
+render();
+})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

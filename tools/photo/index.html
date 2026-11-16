@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Photo Clean — 写真の位置情報（GPS・Exif）を確認して消す | Remove Photo Location</title>
+<meta name="description" content="写真に残っている撮影場所（GPS）、日時、機種、持ち主の名前などを一覧で確認して、ボタン 1 つで消す無料の道具。写真は端末の外に一切出ません。広告なし・登録なし。See and remove GPS location and camera data from photos — nothing is uploaded.">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120a;--acc:#39ff14;--warn:#ffb020;--bad:#ff7a6a}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffff;--acc:#1f7a3a;--warn:#b86a00;--bad:#c0392b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E)}
+a{color:inherit}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.home{font:12px 'Courier New',monospace;opacity:.7;text-decoration:none}
+.brand{margin-right:auto;font:bold 16px 'Courier New',monospace;letter-spacing:4px;color:var(--acc)}
+.tg{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap}
+.tg:hover{border-color:var(--acc)}
+main{max-width:1060px;margin:0 auto;padding:14px}
+.lead{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px}
+.drop{display:block;width:100%;border:2px dashed var(--line);border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;transition:border-color .3s,background .3s;background:var(--card)}
+.drop.over,.drop:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+.drop b{display:block;pointer-events:none;font-size:17px;margin-bottom:6px}
+.drop span{display:block;font-size:12.5px;color:var(--sub);pointer-events:none}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.big{border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--ink);border-radius:12px;padding:9px 16px;font:bold 13px 'Hiragino Sans',sans-serif;cursor:pointer}
+.big:disabled{opacity:.4;cursor:default}
+.sw{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--sub)}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:12px;opacity:0;transform:translateY(10px);transition:opacity .6s var(--E),transform .6s var(--E),border-color .4s}
+.item.in{opacity:1;transform:none}
+.item.risk{border-color:color-mix(in srgb,var(--bad) 60%,transparent)}
+.item.clean{border-color:var(--acc)}
+.item img{width:96px;height:96px;object-fit:cover;border-radius:10px;flex:none;background:#111}
+.item .bd{flex:1;min-width:0}
+.item h4{font-size:13px;word-break:break-all;margin-bottom:4px}
+.tags{display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.55}
+.tags div{display:flex;gap:6px}
+.tags i{font-style:normal;flex:none}
+.tags .r{color:var(--bad)} .tags .w{color:var(--warn)} .tags .ok{color:var(--acc)}
+.item .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.item .act a,.item .act button{font:12px 'Courier New',monospace;border:1px solid var(--line);border-radius:10px;padding:4px 9px;background:transparent;color:var(--ink);text-decoration:none;cursor:pointer}
+.item .act a:hover,.item .act button:hover{border-color:var(--acc)}
+.sum{font-size:13px;color:var(--sub);margin:4px 0 10px;min-height:1.4em}
+.guide{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.guide h3{font:bold 12px 'Courier New',monospace;letter-spacing:2px;color:var(--acc);margin-bottom:6px}
+.guide details{border-top:1px solid var(--line);padding:8px 0}
+.guide summary{cursor:pointer;font-weight:bold;font-size:13px}
+.guide p,.guide li,.guide td,.guide th{font-size:12.5px;line-height:1.85;color:var(--sub)}
+.guide p{margin-top:6px}.guide ul{padding-left:18px;margin-top:6px}
+.guide table{border-collapse:collapse;margin-top:6px;width:100%}.guide td,.guide th{border-bottom:1px solid var(--line);padding:3px 6px;text-align:left}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);padding:9px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .4s,transform .6s var(--E);pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:10px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.ibox>p{font-size:13px;line-height:1.8;color:var(--sub);margin-bottom:12px}
+.ifam{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ifam a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;text-decoration:none}
+.icof{text-align:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font-size:12.5px;color:var(--sub);line-height:1.7}
+.icof a{display:inline-block;margin-top:8px;padding:8px 18px;border-radius:20px;border:1px solid var(--acc);color:var(--acc);font:bold 12.5px 'Courier New',monospace;text-decoration:none}
+.icl{font-size:12px;color:var(--sub);line-height:1.8}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="https://meridibrand.com/tools/">← Meridi Tools</a>
+  <div class="brand">MERIDI PHOTO CLEAN</div>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tLang"></button>
+  <button class="tg" id="tTheme"></button>
+</header>
+<main>
+  <p class="lead" id="lead"></p>
+  <label class="drop" id="drop"><input type="file" id="file" accept="image/*" multiple hidden><b id="dT"></b><span id="dS"></span></label>
+  <div class="bar">
+    <button class="big" id="bAll" disabled></button>
+    <label class="sw"><input type="checkbox" id="cOri" checked> <span id="lOri"></span></label>
+    <label class="sw"><input type="checkbox" id="cMap"> <span id="lMap"></span></label>
+    <button class="tg" id="bClear"></button>
+  </div>
+  <div class="sum" id="sum"></div>
+  <div class="list" id="list"></div>
+  <div class="guide" id="guide"></div>
+</main>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>📍 Meridi Photo Clean</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p id="iP"></p>
+  <div class="ifam">
+    <a href="https://meridibrand.com/">🏠 Meridi Brand</a><a href="https://meridibrand.com/tools/">🧰 Meridi Tools</a>
+    <a href="https://meridibrand.com/ground/">🪨 Ground</a><a href="https://meridibrand.com/stars/">🌌 Stars</a>
+    <a href="https://meridibrand.com/convert/">🧮 Convert</a><a href="https://meridibrand.com/play/">🎮 Play</a>
+  </div>
+  <div class="icof"><span id="iCof"></span><br><a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">☕ Buy Me a Coffee</a></div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+'use strict';
+/* ===== EXIF の読み取りと、JPEG のメタデータ削除 ===== */
+const EXIF = (() => {
+  const TAGS = { 0x010F:'Make', 0x0110:'Model', 0x0131:'Software', 0x0132:'DateTime', 0x013B:'Artist', 0x8298:'Copyright', 0x0112:'Orientation',
+    0x9003:'DateTimeOriginal', 0x9004:'DateTimeDigitized', 0xA430:'CameraOwnerName', 0xA431:'BodySerialNumber', 0xA433:'LensMake', 0xA434:'LensModel', 0xA435:'LensSerialNumber',
+    0x829A:'ExposureTime', 0x829D:'FNumber', 0x8827:'ISO', 0x920A:'FocalLength', 0xA002:'PixelXDimension', 0xA003:'PixelYDimension', 0x8769:'ExifIFD', 0x8825:'GPSIFD', 0x9010:'OffsetTime' };
+  const GPS = { 0x0001:'LatRef', 0x0002:'Lat', 0x0003:'LonRef', 0x0004:'Lon', 0x0005:'AltRef', 0x0006:'Alt', 0x0007:'TimeStamp', 0x001D:'DateStamp', 0x0011:'ImgDirection' };
+  const SIZE = { 1:1, 2:1, 3:2, 4:4, 5:8, 7:1, 9:4, 10:8 };
+  function readTIFF(dv, start){
+    const le = dv.getUint16(start) === 0x4949, u16 = o => dv.getUint16(start + o, le), u32 = o => dv.getUint32(start + o, le), i32 = o => dv.getInt32(start + o, le);
+    if (u16(2) !== 42) return null;
+    const out = {}, gps = {};
+    function val(type, count, off){
+      const sz = (SIZE[type] || 1) * count, p = sz <= 4 ? off : u32(off);
+      if (start + p + sz > dv.byteLength) return null;
+      if (type === 2){ let s = ''; for (let i = 0; i < count; i++){ const c = dv.getUint8(start + p + i); if (!c) break; s += String.fromCharCode(c); } return s.trim(); }
+      const one = i => type === 3 ? u16(p + i * 2) : type === 4 ? u32(p + i * 4) : type === 9 ? i32(p + i * 4) : type === 5 ? u32(p + i * 8) / (u32(p + i * 8 + 4) || 1) : type === 10 ? i32(p + i * 8) / (i32(p + i * 8 + 4) || 1) : dv.getUint8(start + p + i);
+      if (type === 7) return '[binary]';
+      return count === 1 ? one(0) : Array.from({ length: Math.min(count, 8) }, (_, i) => one(i));
+    }
+    function ifd(off, map, dst, depth){
+      if (!off || depth > 3 || start + off + 2 > dv.byteLength) return;
+      const n = u16(off);
+      for (let i = 0; i < n; i++){
+        const e = off + 2 + i * 12; if (start + e + 12 > dv.byteLength) break;
+        const tag = u16(e), type = u16(e + 2), count = u32(e + 4), name = map[tag];
+        if (!name) continue;
+        if (name === 'ExifIFD'){ ifd(u32(e + 8), TAGS, dst, depth + 1); continue; }
+        if (name === 'GPSIFD'){ ifd(u32(e + 8), GPS, gps, depth + 1); continue; }
+        const v = val(type, count, e + 8); if (v !== null && v !== '') dst[name] = v;
+      }
+    }
+    ifd(u32(4), TAGS, out, 0);
+    const dms = a => Array.isArray(a) ? a[0] + a[1] / 60 + (a[2] || 0) / 3600 : a;
+    if (gps.Lat != null && gps.Lon != null){
+      out.lat = dms(gps.Lat) * (gps.LatRef === 'S' ? -1 : 1); out.lon = dms(gps.Lon) * (gps.LonRef === 'W' ? -1 : 1);
+      if (gps.Alt != null) out.alt = gps.Alt * (gps.AltRef === 1 ? -1 : 1);
+    }
+    if (Object.keys(gps).length) out._gps = true;
+    return out;
+  }
+  // JPEG を読む。返り値：{ info, segments: [{marker, name, start, end}] }
+  function scanJPEG(buf){
+    const dv = new DataView(buf); if (dv.getUint16(0) !== 0xFFD8) return null;
+    let p = 2; const segs = []; let info = {};
+    while (p + 4 <= dv.byteLength){
+      if (dv.getUint8(p) !== 0xFF){ p++; continue; }
+      const m = dv.getUint8(p + 1);
+      if (m === 0xD8 || (m >= 0xD0 && m <= 0xD7) || m === 0x01){ p += 2; continue; }
+      if (m === 0xD9) break;
+      const len = dv.getUint16(p + 2), seg = { marker: m, start: p, end: p + 2 + len };
+      if (m === 0xE1){
+        const id = String.fromCharCode(...new Uint8Array(buf, p + 4, Math.min(6, len - 2)));
+        if (id.startsWith('Exif')){ seg.name = 'EXIF'; try { info = readTIFF(dv, p + 10) || {}; } catch(e){} }
+        else if (id.startsWith('http')) seg.name = 'XMP';
+        else seg.name = 'APP1';
+      } else if (m === 0xED) seg.name = 'IPTC';
+      else if (m === 0xFE) seg.name = 'COMMENT';
+      else if (m === 0xE2) seg.name = 'ICC';
+      else if (m >= 0xE3 && m <= 0xEF) seg.name = 'APP' + (m - 0xE0);
+      else if (m === 0xE0) seg.name = 'JFIF';
+      segs.push(seg);
+      if (m === 0xDA) break; // ここから先は画像そのもの
+      p = seg.end;
+    }
+    return { info, segments: segs };
+  }
+  // 画像そのものはそのままに、メタデータの部分だけ取り除く（画質は落ちない）
+  function stripJPEG(buf, keepOrientation){
+    const sc = scanJPEG(buf); if (!sc) return null;
+    const drop = new Set(['EXIF', 'XMP', 'IPTC', 'COMMENT', 'APP1']);
+    for (let i = 3; i <= 15; i++) drop.add('APP' + i);
+    const parts = [new Uint8Array([0xFF, 0xD8])];
+    let tail = 2;
+    for (const s of sc.segments){
+      if (s.marker === 0xDA){ tail = s.start; break; }
+      if (!drop.has(s.name)) parts.push(new Uint8Array(buf, s.start, s.end - s.start));
+      tail = s.end;
+    }
+    if (keepOrientation && sc.info.Orientation && sc.info.Orientation !== 1){
+      // 向きだけを持つ、小さな EXIF を作り直す
+      const o = sc.info.Orientation, b = new Uint8Array([0xFF,0xE1,0x00,0x22,0x45,0x78,0x69,0x66,0x00,0x00,0x4D,0x4D,0x00,0x2A,0x00,0x00,0x00,0x08,0x00,0x01,0x01,0x12,0x00,0x03,0x00,0x00,0x00,0x01,0x00,o,0x00,0x00,0x00,0x00,0x00,0x00]);
+      parts.splice(1, 0, b);
+    }
+    parts.push(new Uint8Array(buf, tail));
+    let n = 0; parts.forEach(x => n += x.length); const out = new Uint8Array(n); let k = 0; parts.forEach(x => { out.set(x, k); k += x.length; });
+    return out;
+  }
+  return { scanJPEG, stripJPEG, readTIFF };
+})();
+
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+let lang = lsGet('meridiphoto_lang') || ((navigator.language || 'ja').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+const J = () => lang === 'ja', t = (a, b) => J() ? a : b;
+const H = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
+let items = [];
+
+async function cleanCanvas(file){
+  // JPEG 以外は、絵を描き直して PNG にする（メタデータは引きつがれない）
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => null);
+  let w, h, src = bmp;
+  if (!bmp){ const im = new Image(); im.src = URL.createObjectURL(file); await im.decode(); w = im.naturalWidth; h = im.naturalHeight; src = im; } else { w = bmp.width; h = bmp.height; }
+  const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(src, 0, 0);
+  const type = file.type === 'image/webp' ? 'image/webp' : 'image/png';
+  return new Promise(r => c.toBlob(b => r(b), type, .95));
+}
+async function addFiles(files){
+  for (const f of files){
+    if (!f.type.startsWith('image/') && !/\.(heic|heif)$/i.test(f.name)) continue;
+    const buf = await f.arrayBuffer(), isJpg = new Uint8Array(buf, 0, 2)[0] === 0xFF && new Uint8Array(buf, 0, 2)[1] === 0xD8;
+    const sc = isJpg ? EXIF.scanJPEG(buf) : null, info = sc ? sc.info : {};
+    const extra = sc ? sc.segments.filter(s => ['XMP', 'IPTC', 'COMMENT'].includes(s.name)).map(s => s.name) : [];
+    const heic = /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+    items.push({ f, buf, isJpg, heic, info, extra, url: URL.createObjectURL(f), out: null });
+  }
+  render();
+}
+function fmtLoc(i){ return `${Math.abs(i.lat).toFixed(5)}°${i.lat >= 0 ? 'N' : 'S'}, ${Math.abs(i.lon).toFixed(5)}°${i.lon >= 0 ? 'E' : 'W'}`; }
+function tagsOf(it){
+  const i = it.info, r = [];
+  if (it.heic){ r.push(['w', '⚠', t('HEIC 形式は、このブラウザでは中を読めないことがあります。iPhone の「設定 → カメラ → フォーマット → 互換性優先」で JPEG にするか、共有のときに「位置情報」を切ってください。', 'HEIC may not be readable here. Use JPEG (iPhone: Settings → Camera → Formats → Most Compatible) or turn off Location when sharing.')]); return r; }
+  if (i.lat != null) r.push(['r', '📍', t(`撮影場所：${fmtLoc(i)}`, `Location: ${fmtLoc(i)}`) + (i.alt != null ? ` ・ ${t('高さ', 'alt')} ${Math.round(i.alt)}m` : '') + ($('cMap').checked ? ` <a href="https://www.google.com/maps/search/?api=1&query=${i.lat},${i.lon}" target="_blank" rel="noopener">${t('地図で見る', 'map')}</a>` : '')]);
+  else if (i._gps) r.push(['w', '📍', t('位置情報の欄があります（中身は空か、読めない形）', 'A GPS section exists (empty or unreadable)')]);
+  const when = i.DateTimeOriginal || i.DateTime; if (when) r.push(['w', '🕒', t(`撮影日時：${when}`, `Taken: ${when}`)]);
+  if (i.Make || i.Model) r.push(['w', '📷', t(`機種：${[i.Make, i.Model].filter(Boolean).join(' ')}`, `Camera: ${[i.Make, i.Model].filter(Boolean).join(' ')}`)]);
+  if (i.Artist || i.CameraOwnerName || i.Copyright) r.push(['r', '👤', t(`名前：${[i.Artist, i.CameraOwnerName, i.Copyright].filter(Boolean).join(' / ')}`, `Name: ${[i.Artist, i.CameraOwnerName, i.Copyright].filter(Boolean).join(' / ')}`)]);
+  if (i.BodySerialNumber || i.LensSerialNumber) r.push(['r', '🔢', t(`製造番号：${[i.BodySerialNumber, i.LensSerialNumber].filter(Boolean).join(' / ')}`, `Serial: ${[i.BodySerialNumber, i.LensSerialNumber].filter(Boolean).join(' / ')}`)]);
+  if (i.Software) r.push(['w', '🛠', t(`ソフト：${i.Software}`, `Software: ${i.Software}`)]);
+  if (it.extra.length) r.push(['w', '🗂', t(`ほかの情報：${it.extra.join('・')}`, `Other data: ${it.extra.join(', ')}`)]);
+  if (!r.length) r.push(['ok', '✨', it.isJpg ? t('目立つ情報は見つかりませんでした。きれいだにゃ', 'Nothing sensitive found. Squeaky clean!') : t('JPEG 以外の画像です。念のため描き直して、情報のない画像にできます', 'Not a JPEG — can be redrawn as a clean image')]);
+  return r;
+}
+function render(){
+  const L = $('list'); L.innerHTML = '';
+  let risky = 0, some = 0;
+  items.forEach((it, k) => {
+    const tg = tagsOf(it), isRisk = tg.some(x => x[0] === 'r'), hasAny = tg.some(x => x[0] === 'r' || x[0] === 'w'); if (isRisk && !it.out) risky++; if (hasAny && !it.out) some++;
+    const el = document.createElement('div'); el.className = 'item' + (it.out ? ' clean' : isRisk ? ' risk' : '');
+    el.innerHTML = `<img src="${it.url}" alt=""><div class="bd"><h4>${H(it.f.name)} <span style="opacity:.6;font-weight:normal">${(it.f.size / 1024).toFixed(0)} KB</span></h4><div class="tags">${(it.out ? [['ok', '✅', t('情報を消しました', 'Cleaned')]] : tg).map(([c, ic, s]) => `<div class="${c}"><i>${ic}</i><span>${s}</span></div>`).join('')}</div>
+      <div class="act">${it.out ? `<a href="${it.out.url}" download="${H(it.out.name)}">⬇ ${t('保存', 'Save')}</a>` : `<button data-k="${k}">🧹 ${t('情報を消す', 'Clean')}</button>`}</div></div>`;
+    L.append(el); setTimeout(() => el.classList.add('in'), 30 + k * 60);
+  });
+  L.querySelectorAll('button[data-k]').forEach(b => b.onclick = () => clean(+b.dataset.k));
+  $('bAll').disabled = !items.some(it => !it.out);
+  $('sum').innerHTML = items.length ? (some ? t(`${items.length} 枚のうち、<b>${some} 枚</b>に情報が残っています（📍 場所や 👤 名前などは <b>${risky} 枚</b>）。`, `<b>${some}</b> of ${items.length} photo(s) still contain data (<b>${risky}</b> with 📍 location or 👤 personal info).`) : t(`${items.length} 枚とも、目立つ情報は残っていません ✨`, `No notable data in ${items.length} photo(s) ✨`)) : '';
+}
+async function clean(k){
+  const it = items[k]; if (it.out) return;
+  try {
+    let blob, name = it.f.name.replace(/\.[^.]+$/, '');
+    if (it.isJpg){ const out = EXIF.stripJPEG(it.buf, $('cOri').checked); blob = new Blob([out], { type: 'image/jpeg' }); name += '_clean.jpg'; }
+    else { blob = await cleanCanvas(it.f); name += blob.type === 'image/webp' ? '_clean.webp' : '_clean.png'; }
+    it.out = { url: URL.createObjectURL(blob), name, blob };
+    // 念のため、もう一度読んで確かめる
+    if (it.isJpg){ const sc = EXIF.scanJPEG(await blob.arrayBuffer()); if (sc && sc.info.lat != null) throw new Error('left'); }
+    render(); toast(t('🧹 情報を消しました', '🧹 Cleaned'));
+  } catch(e){ toast(t('この画像は処理できませんでした', 'Could not process this image')); }
+}
+async function cleanAll(){ for (let k = 0; k < items.length; k++) if (!items[k].out) await clean(k);
+  if (items.length > 1){ toast(t('✅ すべて消しました。1 枚ずつ「⬇ 保存」できます', '✅ All cleaned — save each one')); } }
+
+function texts(){
+  document.documentElement.lang = lang; document.body.classList.toggle('light', theme === 'light');
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語'; $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
+  $('lead').textContent = t('写真には、撮った場所（GPS）や日時、機種などが、目に見えない形で残っていることがあります。写真を入れると中身を一覧で見せ、ボタン 1 つで消します。写真は、この端末の外に一切出ません。', 'Photos can quietly carry where (GPS) and when they were taken, and which camera. Add photos to see what is inside, then remove it in one click. Nothing leaves this device.');
+  $('dT').textContent = t('📷 写真をここに置く（または押して選ぶ）', '📷 Drop photos here (or tap to choose)');
+  $('dS').textContent = t('JPEG・PNG・WebP。何枚でも。', 'JPEG, PNG, WebP — as many as you like.');
+  $('bAll').textContent = t('🧹 すべての情報を消す', '🧹 Clean all'); $('lOri').textContent = t('写真の向きの情報だけは残す（横倒しを防ぐ）', 'Keep orientation only (prevents sideways photos)');
+  $('lMap').textContent = t('撮影場所を地図で見るリンクを出す（Google マップが開きます）', 'Show a map link for the location (opens Google Maps)');
+  $('bClear').textContent = t('🗑 一覧を空にする', '🗑 Clear list');
+  $('iP').textContent = t('広告なし・登録なし・通信なし。写真はこの端末の中だけで読んで、この端末の中だけで書き直します。そもそも画像をどこかに送る仕組みがありません。', 'No ads, no sign-up, no network. Photos are read and rewritten only on this device — there is no upload at all.');
+  $('iCof').textContent = t('ひとりで作っています。安心して写真を送れたら、コーヒー 1 杯分の応援がうれしいです。', 'Made by one person. If it helped you share safely, a coffee would mean a lot.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・最初の公開：JPEG の撮影場所・日時・機種・名前・製造番号などを一覧で表示／画質を落とさずに情報だけを消す（向きは残せる）／PNG・WebP は描き直して情報のない画像に／何枚でもまとめて処理／消したあとにもう一度読んで確かめる／説明書き', '• First release: list GPS, date, camera, owner name and serials in JPEGs / remove them without re-compressing (orientation optional) / redraw PNG & WebP as clean images / batch processing / re-check after cleaning / guide');
+  $('guide').innerHTML = J() ? GUIDE_JA : GUIDE_EN;
+  render();
+}
+const GUIDE_JA = `<h3>📖 説明書き（ちょっと高度）</h3>
+<details open><summary>写真に残っている情報（Exif）とは？</summary><p>デジタルカメラやスマホの写真には、<b>Exif（イグジフ）</b>という情報が、画像と一緒に保存されています。</p><table><tr><th>情報</th><th>気をつけたい理由</th></tr><tr><td>📍 撮影場所（緯度・経度）</td><td>自宅や子どもの学校、よく行く場所がわかってしまう</td></tr><tr><td>🕒 撮影日時</td><td>生活のリズムがわかる</td></tr><tr><td>📷 機種</td><td>同じ人の写真だと結び付けられる手がかりになる</td></tr><tr><td>👤 名前・🔢 製造番号</td><td>持ち主がわかることがある</td></tr></table><p>家で撮った猫の写真をそのまま送ると、家の場所が一緒に付いて行くこともあります。</p></details>
+<details><summary>SNS やチャットでは消える？</summary><p>主な SNS の多くは、投稿するときに位置情報を消していると言われます。ただ、<b>メールの添付、チャットで「元の画質のまま」送る、クラウドの共有リンク、ホームページに直接載せる</b>などでは、残ったままになることがあります。消えるかどうかはサービスや設定によって変わるので、気になる写真は、送る前にここで確かめるのが安心です。</p></details>
+<details><summary>画質は落ちる？</summary><p>JPEG は、<b>画像そのものには一切手を加えず</b>、情報の部分だけを切り取ります。そのため画質は変わりません。PNG や WebP は、念のため絵を描き直して保存します。</p><p>「向きの情報だけは残す」にしておくと、スマホを縦にして撮った写真が横倒しになるのを防げます。向きの情報には、場所や名前は入っていません。</p></details>
+<details><summary>そもそも残さないようにするには</summary><ul><li><b>iPhone：</b>設定 → プライバシーとセキュリティ → 位置情報サービス → カメラ を「なし」。共有のときは「オプション」で「位置情報」を切る</li><li><b>Android：</b>カメラアプリの設定で「位置情報タグ」を切る（機種によって名前が違います）</li></ul></details>
+<details><summary>🔒 安全について</summary><p>このページには、写真を送る仕組みがそもそもありません。写真はこの端末のブラウザの中だけで読まれ、消したあとの写真もこの端末に保存されます。一覧を空にするか、ページを閉じると、画面からも消えます。</p></details>`;
+const GUIDE_EN = `<h3>📖 GUIDE</h3>
+<details open><summary>What is Exif?</summary><p>Photos often store hidden data: GPS location, date and time, camera model, sometimes the owner's name and serial numbers. Sharing a photo can share where you live.</p></details>
+<details><summary>Do social networks remove it?</summary><p>Many major networks strip location when you post, but email attachments, "original quality" chat transfers, cloud links and your own website often keep it. Check before you share.</p></details>
+<details><summary>Does quality change?</summary><p>JPEGs are not re-compressed — only the data block is cut out. PNG/WebP are redrawn. "Keep orientation" prevents sideways photos and contains no personal data.</p></details>
+<details><summary>Turn it off at the source</summary><ul><li>iPhone: Settings → Privacy & Security → Location Services → Camera → Never</li><li>Android: turn off "location tags" in the camera app settings</li></ul></details>
+<details><summary>Privacy</summary><p>There is no upload code at all. Everything stays in this browser.</p></details>`;
+
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', ev => addFiles([...ev.dataTransfer.files]));
+$('file').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+$('bAll').onclick = cleanAll;
+$('bClear').onclick = () => { items.forEach(it => { URL.revokeObjectURL(it.url); if (it.out) URL.revokeObjectURL(it.out.url); }); items = []; render(); };
+$('cMap').onchange = render;
+$('tLang').onclick = () => { lang = J() ? 'en' : 'ja'; lsSet('meridiphoto_lang', lang); texts(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); texts(); };
+const info = $('info'); $('tInfo').onclick = () => info.classList.add('show'); $('iClose').onclick = () => info.classList.remove('show');
+info.addEventListener('pointerdown', e => { if (e.target === info) info.classList.remove('show'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') info.classList.remove('show'); });
+document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])]; if (f.length) addFiles(f); });
+let tt; function toast(m){ const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('show'), 2200); }
+texts();
+})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
