@@ -30,6 +30,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | **Free** | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
 | 🧮 **MeridiConvert** | Unit converter, graph-paper drafting & handy calculators | **Free** | [meridibrand.com/convert](https://meridibrand.com/convert) |
+| 🧰 **Meridi Tools** | Ad-free toolbox — timer & scoreboard, text cleaner, TRPG dice, direct QR codes, photo location remover | **Free** | [meridibrand.com/tools](https://meridibrand.com/tools) |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
 
@@ -58,6 +59,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | [merididepths](https://github.com/meridi-support/merididepths) | 🌊 MeridiDepths — Deep-Sea Explorer |
 | [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
 | [meridiconvert](https://github.com/meridi-support/meridiconvert) | 🧮 MeridiConvert — Unit Converter & Calculators |
+| [meriditools](https://github.com/meridi-support/meriditools) | 🧰 Meridi Tools — Ad-free Toolbox |
 | [meridi-square](https://github.com/meridi-support/meridi-square) | 💬 Community hub & discussions |
 
 ---
