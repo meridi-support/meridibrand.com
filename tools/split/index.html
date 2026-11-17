@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>割り勘・精算＆チップ計算 — 広告なし・登録なし | Split Bill & Tip Calculator — Meridi Tools</title>
+<meta name="description" content="広告なし・登録なしの無料の割り勘・精算ツール。忘年会・新年会・飲み会の幹事さんに。金額÷人数のかんたん割り勘、100円・500円単位の切り上げ、払った人に✅、誰が誰にいくら払うかを最少の回数で。海外旅行のチップの目安（13か国・地域）も。Free, ad-free bill splitter & tip calculator — quick split, round up, tick off who paid, fewest payments, tipping guide by country. No sign-up, nothing uploaded.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+<style>
+:root{--g:#39ff14;--c:#00d4ff;--bg:#0a0a0a;--p:#0f160f;--t:#d6ecd6;--m:#7a9a7a;--w:#ffb000;--r:#ff5c7a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:"Courier New",monospace;line-height:1.6}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;max-width:860px;margin:0 auto;padding:14px 16px}
+header a{color:var(--g);text-decoration:none}
+.ver{background:none;border:1px solid var(--g);color:var(--g);font-family:inherit;border-radius:4px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:0 16px 40px}
+h1{color:var(--g);font-size:1.4rem;margin:.2em 0}h2{color:var(--c);font-size:1.05rem;margin:0 0 10px}
+.sub{color:var(--m);font-size:.9rem;margin:0 0 14px}
+section{background:var(--p);border:1px solid #1e3a1e;border-radius:8px;padding:14px;margin:14px 0}
+input,select,button{font-family:inherit;font-size:.95rem;background:#050905;color:var(--t);border:1px solid #2c4a2c;border-radius:4px;padding:6px 8px}
+input[type=number]{width:110px}input.nm{width:130px}
+button{cursor:pointer;border-color:var(--g);color:var(--g)}button.pri{background:var(--g);color:#000;font-weight:bold}
+button.x{border-color:#553;color:var(--m);padding:2px 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #2c4a2c;border-radius:14px;padding:2px 4px 2px 10px;margin:3px}
+.chk{display:inline-flex;align-items:center;gap:3px;margin-right:8px;font-size:.9rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}td,th{border-bottom:1px solid #1e3a1e;padding:6px 4px;text-align:left}
+th{color:var(--m);font-weight:normal}
+.pos{color:var(--g)}.neg{color:var(--r)}.note{color:var(--m);font-size:.82rem}
+.warn{color:var(--w);font-size:.85rem}
+.pay{font-size:1.05rem;padding:8px 10px;border-left:3px solid var(--c);margin:6px 0;background:#081014}
+.big{font-size:1.3rem;color:var(--g)}
+label.pay{display:block;cursor:pointer}label.pay.done{opacity:.45;text-decoration:line-through}.sum{color:var(--c);margin-top:8px}
+input[type=range]{width:220px;accent-color:var(--g)}
+#panel{display:none;position:fixed;inset:0;background:#000c;z-index:9;align-items:center;justify-content:center;padding:16px}
+#panel .in{background:var(--p);border:1px solid var(--g);border-radius:8px;max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:18px}
+#panel a{color:var(--c)}#panel ul{padding-left:18px;margin:6px 0}#panel li{margin:3px 0;font-size:.88rem}#panel hr{border:none;border-top:1px solid #2c4a2c;margin:12px 0}
+footer{text-align:center;color:var(--m);font-size:.8rem;padding:20px}
+
+/* ---- 画面の大きさに合わせる ---- */
+html{-webkit-text-size-adjust:100%}
+input,select,button{min-height:40px;max-width:100%}
+input[type=checkbox]{min-height:auto;width:20px;height:20px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:600px){
+ header,main{padding-left:10px;padding-right:10px}
+ h1{font-size:1.2rem}section{padding:12px 10px}
+ input,select,button{font-size:16px}
+ input[type=number],input.nm{width:100%;flex:1 1 120px}
+ .row{gap:6px}.row>select{flex:1 1 140px}
+ input[type=range]{width:100%}
+ .big{font-size:1.15rem}
+ #elist td:nth-child(4){font-size:.8rem}
+ .pay{font-size:.95rem}
+}
+@media (min-width:601px) and (max-width:1024px){
+ main,header{max-width:760px}
+ input,select,button{min-height:44px}
+}
+@media (min-width:1280px){
+ main,header{max-width:980px}
+}
+@media print{
+ header button,#fold,.x,#share,#copy,#pr,#reset,footer{display:none!important}
+ body{background:#fff;color:#000}section{border-color:#999;background:#fff}
+ .pay{background:#fff;border-left-color:#000}
+}
+</style></head><body>
+<header><a href="https://meridibrand.com/tools/" id="back">← Meridi Tools</a>
+<div><button class="ver" id="lang">EN</button> <button class="ver" id="verbtn">v1.0.0</button></div></header>
+<main>
+<h1>💸 <span data-t="title"></span></h1>
+
+<section><h2 data-t="q0"></h2>
+<div class="row"><input type="number" id="qa" min="0" step="any" value="12000"> <select id="qc"></select> ÷ <input type="number" id="qn" min="1" step="1" value="9" style="width:70px"> <span data-t="qppl"></span></div>
+<div class="row"><label class="chk"><input type="checkbox" id="qx"> <span data-t="qx"></span></label> <span data-t="rnd"></span> <select id="qr"></select></div>
+<div class="big" id="qout"></div><div class="note" id="qsub"></div>
+<p class="note" data-t="qnote"></p>
+</section>
+<section><h2 data-t="s1"></h2>
+<div class="row"><span data-t="base"></span> <select id="base"></select></div>
+<div class="note" data-t="curnote"></div>
+<div id="people"></div>
+<div class="row"><input class="nm" id="newp" maxlength="16"><button id="addp" data-t="add"></button></div>
+</section>
+
+<section><h2 data-t="s2"></h2>
+<div class="row"><span data-t="bill"></span> <input type="number" id="tb" min="0" step="any" value="100"> <b class="curl"></b></div>
+<div class="row"><span data-t="country"></span> <select id="tc"></select></div>
+<div class="row"><input type="range" id="tr" min="0" max="30" step="1" value="20"> <b id="tp"></b></div>
+<div id="tinfo" class="note"></div>
+<div class="row big" id="tout"></div>
+<div class="warn" data-t="svc"></div>
+<div class="row"><button id="tadd" data-t="tadd"></button></div>
+</section>
+
+<section><h2 data-t="s3"></h2>
+<div class="row"><input class="nm" id="ed" maxlength="30"> <input type="number" id="ea" min="0" step="any"> <b class="curl"></b>
+<span data-t="tip"></span><input type="number" id="et" min="0" max="100" step="any" value="0" style="width:70px">%</div>
+<div class="row"><span data-t="paid"></span> <select id="ep"></select></div>
+<div class="row" id="ew"></div>
+<div class="row"><button class="pri" id="eadd" data-t="eadd"></button></div>
+<div class="tw"><table><thead><tr><th data-t="h1"></th><th data-t="h2"></th><th data-t="h3"></th><th data-t="h4"></th><th></th></tr></thead><tbody id="elist"></tbody></table></div>
+</section>
+
+
+<section><h2 data-t="s4"></h2>
+<div class="tw"><table><thead><tr><th data-t="b1"></th><th data-t="b2"></th><th data-t="b3"></th><th data-t="b4"></th></tr></thead><tbody id="bal"></tbody></table></div>
+<div class="row"><button id="fold" class="x" aria-expanded="true">▼</button> <span data-t="rnd"></span> <select id="rnd"></select></div>
+<div id="pays" style="margin-top:12px"></div>
+<p class="note" id="paynote"></p>
+<div class="row"><button id="share" data-t="share"></button> <button id="copy" data-t="copy"></button> <button id="pr" data-t="print"></button> <button id="reset" class="x" data-t="reset"></button></div>
+<div class="note" id="msg"></div>
+</section>
+</main>
+<div id="panel"><div class="in" id="pin"></div></div>
+<footer>No Ads. No Subscriptions. Just Tools. 🐾</footer>
+<script>
+/* ===== Meridi Split v1.0.0 — eval / new Function は使いません ===== */
+var CUR={JPY:0,USD:2,EUR:2,GBP:2,CAD:2,AUD:2,KRW:0,TWD:0,CNY:2,HKD:2,SGD:2,THB:2,MXN:2,CHF:2,NZD:2,PHP:2,VND:0,INR:2,BRL:2};
+var SYM={JPY:"¥",USD:"$",EUR:"€",GBP:"£",KRW:"₩",CNY:"¥",THB:"฿",INR:"₹"};
+/* チップの目安（変わることがあります）: [最小,おすすめ,最大] % */
+var TIPS=[
+ ["us","🇺🇸","アメリカ","United States",15,20,25,"18%がふつう、良いサービスで20%。最近は20%が基本とする案内も","18% is standard, 20% for good service; many now treat 20% as the baseline"],
+ ["ca","🇨🇦","カナダ","Canada",15,18,20,"レストランではチップが前提。割合はアメリカより少し低め。端末で18・20・25%と出ても、選ぶ額は自由","Expected at restaurants; slightly lower than the US. Card terminals may suggest 18/20/25% — you can choose"],
+ ["mx","🇲🇽","メキシコ","Mexico",10,10,20,"チップ（propina）が前提。10〜15%がふつう、とても良ければ20%。地元の人は10%が多い","Tipping (propina) is expected: 10–15% is customary, 20% for excellent; many locals leave 10%"],
+ ["gb","🇬🇧","イギリス","United Kingdom",0,10,10,"伝票に service charge があれば不要。なければ5〜10%","No tip if a service charge is on the bill; otherwise 5–10%"],
+ ["fr","🇫🇷","フランス","France",0,5,10,"値段にサービス料が含まれます（service compris）。小銭を置くか、良ければ5〜10%","Service is included in menu prices (service compris). Leave small change, or 5–10% for great service"],
+ ["de","🇩🇪","ドイツ","Germany",0,5,10,"切りのいい額に切り上げるか5〜10%。必須ではありません","Round up or leave 5–10%. Not required"],
+ ["it","🇮🇹","イタリア","Italy",0,0,10,"必須ではありません。coperto（席料）はチップではありません。servizio（サービス料）が入っていればチップは不要","Not expected. Coperto is a cover charge, not a tip; if servizio is on the bill, no tip needed"],
+ ["es","🇪🇸","スペイン","Spain",0,5,10,"必須ではありません。端数の切り上げか5〜10%","Not required. Round up or leave 5–10%"],
+ ["au","🇦🇺","オーストラリア","Australia",0,0,10,"必須ではなく、払わなくても失礼ではありません。特別な食事なら端数の切り上げか10%まで","Optional and not rude to skip. Round up or up to 10% for a special meal"],
+ ["kr","🇰🇷","韓国","South Korea",0,0,0,"チップの習慣はありません。メニューの値段に税とサービス料が含まれます","No tipping custom; menu prices already include tax and service"],
+ ["cn","🇨🇳","中国","China",0,0,0,"チップの習慣はほとんどありません。支払いはアプリが中心","Tipping is rare; payments are mostly by app"],
+ ["jp","🇯🇵","日本","Japan",0,0,0,"チップの習慣はありません。置くと店員さんが戸惑うことも","No tipping culture — leaving a tip may confuse staff"],
+ ["xx","🌍","自分で決める","Custom",0,15,30,"",""]];
+var T={ja:{title:"割り勘・精算＆チップ",lead:"広告なし・登録なし。入力した内容はこの端末の外に出ません（共有リンクを送ったときだけ、その相手に届きます）。",
+ q0:"⚡ かんたん割り勘（名前なし）",qppl:"人",qx:"集める人（予約した人）の分は集めない",qnote:"名前を入れて、誰が払ったか ✅ を付けたいときは、下の 1〜4 を使ってください。",qper:function(a){return "1 人 "+a},qsum:function(n,a,x){return (x?"集める人以外の ":"")+n+" 人から "+a},qex:function(a){return "あまり "+a+"（次回に回すなど）"},
+ s1:"👥 1. メンバーと通貨",base:"通貨：",curnote:"すべての金額をこの通貨で入れます。途中で変えても、金額は換算されません。",add:"＋ 追加",
+ s2:"💡 2. チップの目安",bill:"金額：",country:"国・地域：",svc:"⚠️ 伝票に service charge（サービス料）が入っていないか確かめましょう。入っていればチップは二重になります。",tadd:"↓ この金額を支払いに追加",
+ s3:"🧾 3. 支払い",tip:"チップ",paid:"払った人：",eadd:"＋ 支払いを追加",h1:"内容",h2:"金額",h3:"払った人",h4:"割る人",
+ s4:"✅ 4. 精算",rnd:"集めやすく：",nornd:"切り上げない（ぴったり）",up:function(u){return u+" 単位に切り上げ"},sum:function(a,b,r){return a+" / "+b+" 件 済み ・ 残り "+r},extra:function(x){return "切り上げで "+x+" 多く集まります（次回に回すか、受け取った人の分に）"},changed:"⚠️ 精算の中身が変わったので、いくつかの ✅ を外しました。もう一度確かめてください。",b1:"メンバー",b2:"払った",b3:"使った",b4:"差し引き",share:"🔗 共有リンクを作る",copy:"📋 結果をコピー",print:"🖨 印刷",reset:"全部消す",
+ tipOut:function(t,tot){return "チップ "+t+" ／ 合計 "+tot},per:"1人あたり",dflt:"食事",
+ none:"精算の必要はありません 🎉",payfmt:function(a,b,m){return a+" → "+b+"　"+m},
+ exact:function(n){return "いちばん少ない回数："+n+" 回（計算で確かめた最少の回数です）"},
+ approx:function(n){return n+" 回（人数が多いので、ほぼ最少の回数です）"},
+ needp:"メンバーを2人以上入れてください",needw:"割る人を1人以上選んでください",needa:"金額を入れてください",
+ copied:"コピーしました",shared:"リンクをコピーしました。送った相手は同じ精算を開けます。",rst:"全部消しますか？",
+ rate:function(c,b){return "1 "+c+" = "},
+ info:"<b>💸 割り勘・精算＆チップ v1.0.0</b><p>割り勘・精算とチップの目安を、1つにまとめた道具です。</p><p>広告なし・登録なし。入力した内容はこの端末の外に出ません（共有リンクを送ったときだけ、その相手に届きます）。</p><ul><li>💱 好きな通貨で（円・ドル・ユーロなど 19 種類）</li><li>⚡ 金額÷人数のかんたん割り勘</li><li>💡 国ごとのチップの目安</li><li>🔢 「誰が誰にいくら」を、いちばん少ない回数で</li><li>✅ 払った人にチェック、100円・500円単位の切り上げ</li><li>🔗 共有リンク（サーバーには保存しません）</li></ul><p class='note'>チップの目安は変わることがあります。お店の案内や伝票を優先してください。計算結果は目安です。</p><hr><b>📜 v1.0.0 — 2026-11-17</b><ul><li>⚡ かんたん割り勘：金額÷人数をすぐ計算。集める人（幹事）の分を除く設定つき</li><li>💡 チップの目安：13 か国・地域（アメリカ・カナダ・メキシコ・イギリス・フランス・ドイツ・イタリア・スペイン・オーストラリア・韓国・中国・日本・自分で決める）。目安は調べて確かめたものです</li><li>🧾 支払いごとに「払った人」「割る人」を選べる。チップの % も支払いごとに</li><li>🔢 精算：「誰が誰にいくら」を、いちばん少ない回数で（18 人まで最少を計算で確かめます）</li><li>🪙 集めやすく：10・100・500・1,000 円単位の切り上げ。多く集まる額も表示</li><li>✅ 払った人にチェック。「〇 / 〇 件済み・残り ¥〇〇」を表示。精算が変わると合わない ✅ は自動で外れます</li><li>📂 精算の一覧を畳む・広げる</li><li>🔗 共有リンク（サーバーには保存しません）・📋 結果のコピー・🖨 印刷</li><li>📱 スマホ・タブレット・PC の画面に合わせて自動で並べ替え</li><li>💱 通貨 19 種類から 1 つを選べます</li></ul>"},
+ en:{title:"Split Bill & Tip",lead:"No ads, no sign-up. Everything stays on this device (a share link only goes to whoever you send it to).",
+ q0:"⚡ Quick split (no names)",qppl:"people",qx:"Don't collect from the organizer",qnote:"To add names and tick off who has paid, use steps 1–4 below.",qper:function(a){return a+" each"},qsum:function(n,a,x){return "Collect "+a+" from "+n+(x?" others":" people")},qex:function(a){return a+" left over (keep for next time)"},
+ s1:"👥 1. People & currency",base:"Currency:",curnote:"Enter every amount in this currency. Changing it later does not convert amounts.",add:"+ Add",
+ s2:"💡 2. How much to tip",bill:"Bill:",country:"Country/region:",svc:"⚠️ Check whether a service charge is already on the bill — otherwise you may tip twice.",tadd:"↓ Add this as an expense",
+ s3:"🧾 3. Expenses",tip:"Tip",paid:"Paid by:",eadd:"+ Add expense",h1:"What",h2:"Amount",h3:"Paid by",h4:"Split between",
+ s4:"✅ 4. Settle up",rnd:"Round up to:",nornd:"No rounding (exact)",up:function(u){return "nearest "+u},sum:function(a,b,r){return a+" / "+b+" paid · "+r+" left"},extra:function(x){return "Rounding collects "+x+" extra (keep it for next time, or for the collector)"},changed:"⚠️ The settlement changed, so some ✅ were cleared. Please check again.",b1:"Person",b2:"Paid",b3:"Share",b4:"Balance",share:"🔗 Create share link",copy:"📋 Copy result",print:"🖨 Print",reset:"Clear all",
+ tipOut:function(t,tot){return "Tip "+t+" / Total "+tot},per:"per person",dflt:"Meal",
+ none:"All settled 🎉",payfmt:function(a,b,m){return a+" → "+b+"   "+m},
+ exact:function(n){return "Fewest payments: "+n+" (proven minimum)"},
+ approx:function(n){return n+" payments (near-minimum for large groups)"},
+ needp:"Add at least 2 people",needw:"Pick at least one person to split with",needa:"Enter an amount",
+ copied:"Copied",shared:"Link copied. Anyone you send it to will see the same settlement.",rst:"Clear everything?",
+ rate:function(c,b){return "1 "+c+" = "},
+ info:"<b>💸 Split Bill & Tip v1.0.0</b><p>Bill splitting and a tipping guide in one.</p><p>No ads, no sign-up. Everything stays on this device (a share link only goes to whoever you send it to).</p><ul><li>💱 Pick your currency (19 to choose from)</li><li>⚡ Quick split: amount ÷ people</li><li>💡 Tipping guide by country</li><li>🔢 Who pays whom, in the fewest payments</li><li>✅ Tick off who's paid, round up for easy cash</li><li>🔗 Share links (nothing is stored on a server)</li></ul><p class='note'>Tipping customs change — follow the restaurant and the bill first. Results are estimates.</p><hr><b>📜 v1.0.0 — 2026-11-17</b><ul><li>⚡ Quick split: amount ÷ people, with an option to skip the organizer</li><li>💡 Tipping guide for 13 countries/regions (researched)</li><li>🧾 Pick who paid and who shares each expense, with per-expense tip %</li><li>🔢 Fewest payments (proven minimum up to 18 people)</li><li>🪙 Round up to 10 / 100 / 500 / 1,000, with the extra shown</li><li>✅ Tick off who has paid, with paid / remaining totals; stale ticks clear automatically</li><li>📂 Fold / unfold the payment list</li><li>🔗 Share links (nothing stored on a server), 📋 copy, 🖨 print</li><li>📱 Layout adapts to phones, tablets and PCs</li><li>💱 Choose from 19 currencies</li></ul>"}};
+function gs(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function ss(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var L=gs("meridi_lang")||((navigator.language||"en").slice(0,2)=="ja"?"ja":"en");
+var S={v:1,base:"JPY",people:[],rates:{},ex:[],rnd:0,done:[],fold:false};
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function dec(c){return CUR[c]==null?2:CUR[c]}
+function fmt(minor,c){var d=dec(c),v=minor/Math.pow(10,d);return (SYM[c]||"")+v.toLocaleString(L=="ja"?"ja-JP":"en-US",{minimumFractionDigits:d,maximumFractionDigits:d})+(SYM[c]?"":" "+c)}
+function fmtv(v,c){return fmt(Math.round(v*Math.pow(10,dec(c))),c)}
+/* ---- 計算 ---- */
+function balances(){var n=S.people.length,paid=[],owe=[],i;for(i=0;i<n;i++){paid[i]=0;owe[i]=0}
+ var bad=[],U=Math.pow(10,dec(S.base));
+ S.ex.forEach(function(e){var r=1;
+  var w=e.w.filter(function(x){return x<n});if(!w.length||e.p>=n)return;
+  var tot=Math.round(e.a*(1+(e.t||0)/100)*r*U);
+  paid[e.p]+=tot;var each=Math.floor(tot/w.length),rem=tot-each*w.length;
+  w.forEach(function(x,k){owe[x]+=each+(k<rem?1:0)})});
+ return {paid:paid,owe:owe,bad:bad}}
+function settle(bal){/* bal: 整数の配列（合計0）→ {pays:[[from,to,amt]],exact:bool} */
+ var idx=[],v=[],i;for(i=0;i<bal.length;i++)if(bal[i]!==0){idx.push(i);v.push(bal[i])}
+ var n=v.length,groups=[];
+ if(n===0)return{pays:[],exact:true};
+ var pos=v.filter(function(x){return x>0}).length;
+ if(pos===1||pos===n-1){var cr=[],db=[];v.forEach(function(x,k){if(x>0)cr.push(k);else db.push(k)});groups=[v.map(function(_,k){return k})];n=0}
+ else if(n<=18){var F=(1<<n)-1,sum=new Array(F+1),dp=new Array(F+1),m,b;sum[0]=0;dp[0]=0;
+  for(m=1;m<=F;m++){b=m&-m;sum[m]=sum[m^b]+v[Math.log2(b)|0];var best=0;
+   for(i=0;i<n;i++)if(m>>i&1){if(dp[m^(1<<i)]>best)best=dp[m^(1<<i)]}
+   dp[m]=best+(sum[m]===0?1:0)}
+  var mask=F,cur=[];
+  while(mask){var add=sum[mask]===0?1:0,pick=-1;
+   for(i=0;i<n;i++)if(mask>>i&1&&dp[mask^(1<<i)]===dp[mask]-add){pick=i;break}
+   cur.push(pick);mask^=1<<pick;if(sum[mask]===0){groups.push(cur);cur=[]}}
+ }else groups=[v.map(function(_,k){return k})];
+ var pays=[];
+ groups.forEach(function(g){var cr=[],db=[];g.forEach(function(k){if(v[k]>0)cr.push([idx[k],v[k]]);else db.push([idx[k],-v[k]])});
+  cr.sort(function(a,b){return b[1]-a[1]});db.sort(function(a,b){return b[1]-a[1]});
+  var a=0,c=0;while(a<db.length&&c<cr.length){var x=Math.min(db[a][1],cr[c][1]);pays.push([db[a][0],cr[c][0],x]);
+   db[a][1]-=x;cr[c][1]-=x;if(db[a][1]===0)a++;if(cr[c][1]===0)c++}});
+ return{pays:pays,exact:n<=18}}
+/* ---- 画面 ---- */
+function opts(sel,val){sel.innerHTML=Object.keys(CUR).map(function(c){return'<option'+(c==val?' selected':'')+'>'+c+'</option>'}).join("")}
+function tipRow(){var k=$("tc").value;for(var i=0;i<TIPS.length;i++)if(TIPS[i][0]==k)return TIPS[i];return TIPS[0]}
+function renderTip(){var r=tipRow(),p=parseFloat($("tr").value),b=parseFloat($("tb").value)||0,c=S.base;
+ $("tp").textContent=p+"%";
+ $("tinfo").innerHTML=r[0]=="xx"?"":(L=="ja"?"目安：":"Guide: ")+(r[4]==r[6]?r[4]+"%":r[4]+"〜"+r[6]+"%")+"　"+esc(L=="ja"?r[7]:r[8]);
+ var n=Math.max(1,S.people.length);
+ $("tout").innerHTML=esc(T[L].tipOut(fmtv(b*p/100,c),fmtv(b*(1+p/100),c)))+'<span class="note">　'+T[L].per+" "+esc(fmtv(b*(1+p/100)/n,c))+"</span>"}
+function setTipCountry(){var r=tipRow();$("tr").value=r[5];renderTip()}
+function render(){var t=T[L];document.documentElement.lang=L;$("lang").textContent=L=="ja"?"EN":"日本語";
+ document.querySelectorAll("[data-t]").forEach(function(el){var v=t[el.dataset.t];if(typeof v=="string")el.textContent=v});
+ opts($("qc"),S.base);var qd=dec(S.base),QU=qd===0?[0,10,100,500,1000]:[0,Math.pow(10,qd),5*Math.pow(10,qd),10*Math.pow(10,qd)],qv=+$("qr").value||0;
+ $("qr").innerHTML=QU.map(function(u){return'<option value="'+u+'"'+(u==qv?' selected':'')+'>'+(u?t.up(fmt(u,S.base)):t.nornd)+'</option>'}).join("");renderQuick();
+ $("newp").placeholder=L=="ja"?"名前":"Name";$("ed").placeholder=t.dflt;$("ea").placeholder=L=="ja"?"金額":"Amount";
+ opts($("base"),S.base);
+ var tcv=$("tc").value;$("tc").innerHTML=TIPS.map(function(r){return'<option value="'+r[0]+'">'+r[1]+" "+(L=="ja"?r[2]:r[3])+'</option>'}).join("");if(tcv)$("tc").value=tcv;
+ $("people").innerHTML=S.people.map(function(p,i){return'<span class="chip">'+esc(p)+' <button class="x" data-dp="'+i+'">×</button></span>'}).join("");
+ var ep=$("ep").value;$("ep").innerHTML=S.people.map(function(p,i){return'<option value="'+i+'">'+esc(p)+'</option>'}).join("");if(ep&&ep<S.people.length)$("ep").value=ep;
+ $("ew").innerHTML=(L=="ja"?"割る人：":"Split: ")+S.people.map(function(p,i){return'<label class="chk"><input type="checkbox" checked data-w="'+i+'">'+esc(p)+'</label>'}).join("");
+ $("elist").innerHTML=S.ex.map(function(e,i){return'<tr><td>'+esc(e.d)+'</td><td>'+esc(fmtv(e.a,S.base))+(e.t?' <span class="note">+'+e.t+'%</span>':'')+'</td><td>'+esc(S.people[e.p]||"?")+'</td><td>'+e.w.map(function(x){return esc(S.people[x]||"?")}).join(", ")+'</td><td><button class="x" data-de="'+i+'">×</button></td></tr>'}).join("");
+ document.querySelectorAll(".curl").forEach(function(el){el.textContent=S.base});
+ var d=dec(S.base),RU=d===0?[0,10,100,500,1000]:[0,Math.pow(10,d),5*Math.pow(10,d),10*Math.pow(10,d)];
+ if(RU.indexOf(+S.rnd)<0)S.rnd=0;
+ $("rnd").innerHTML=RU.map(function(u){return'<option value="'+u+'"'+(u==S.rnd?' selected':'')+'>'+(u?t.up(fmt(u,S.base)):t.nornd)+'</option>'}).join("");
+ renderTip();renderSettle();save()}
+function renderSettle(){var t=T[L],B=balances(),n=S.people.length,rows="",bal=[],i;
+ for(i=0;i<n;i++){bal[i]=B.paid[i]-B.owe[i];
+  rows+='<tr><td>'+esc(S.people[i])+'</td><td>'+fmt(B.paid[i],S.base)+'</td><td>'+fmt(B.owe[i],S.base)+'</td><td class="'+(bal[i]>0?"pos":bal[i]<0?"neg":"")+'">'+(bal[i]>0?"+":"")+fmt(bal[i],S.base)+'</td></tr>'}
+ $("bal").innerHTML=rows;
+ var R=settle(bal),U=+S.rnd||0,extra=0,keys=[],rest=0,nd=0;
+ var P=R.pays.map(function(p){var a=U>1?Math.ceil(p[2]/U)*U:p[2];extra+=a-p[2];var k=p[0]+">"+p[1]+":"+a;keys.push(k);return{f:p[0],to:p[1],a:a,o:p[2],k:k}});
+ var before=S.done.length;S.done=S.done.filter(function(k){return keys.indexOf(k)>=0});
+ var changed=before>S.done.length;
+ $("pays").innerHTML=P.length?'<div id="plist"'+(S.fold?' style="display:none"':'')+'>'+P.map(function(x){var d=S.done.indexOf(x.k)>=0;if(d)nd++;else rest+=x.a;
+  return'<label class="pay'+(d?' done':'')+'"><input type="checkbox" data-pk="'+x.k+'"'+(d?' checked':'')+'> '+esc(t.payfmt(S.people[x.f],S.people[x.to],fmt(x.a,S.base)))+(x.a!==x.o?' <span class="note">('+fmt(x.o,S.base)+')</span>':'')+'</label>'}).join("")+'</div>'
+  +'<div class="sum">'+t.sum(nd,P.length,fmt(rest,S.base))+'</div>'
+  +(extra?'<div class="note">'+t.extra(fmt(extra,S.base))+'</div>':'')
+  +(changed?'<div class="warn">'+t.changed+'</div>':'')
+  :(S.ex.length?'<div class="pay">'+t.none+'</div>':"");
+ $("paynote").textContent=P.length?(R.exact?t.exact(P.length):t.approx(P.length)):"";
+ S._txt=P.map(function(x){return(S.done.indexOf(x.k)>=0?"✅ ":"⬜ ")+t.payfmt(S.people[x.f],S.people[x.to],fmt(x.a,S.base))}).join("\n")}
+function renderQuick(){var t=T[L],c=S.base,U=Math.pow(10,dec(c)),tot=Math.round((parseFloat($("qa").value)||0)*U),n=Math.max(1,Math.floor(+$("qn").value||1)),R=+$("qr").value||0,x=$("qx").checked&&n>1;
+ if(!(tot>0)){$("qout").textContent="";$("qsub").textContent="";return}
+ var per=Math.ceil(tot/n);if(R>1)per=Math.ceil(per/R)*R;var payers=x?n-1:n,extra=per*n-tot;
+ $("qout").textContent=t.qper(fmt(per,c));$("qsub").textContent=t.qsum(payers,fmt(per*payers,c),x)+(extra>0?" ・ "+t.qex(fmt(extra,c)):"")}
+function save(){var o={v:1,base:S.base,people:S.people,rates:S.rates,ex:S.ex,rnd:S.rnd,done:S.done};ss("meridi_split",JSON.stringify(o))}
+function load(o){if(!o||!Array.isArray(o.people))return;S.base=CUR[o.base]!=null?o.base:"JPY";S.people=o.people.slice(0,30).map(String);
+ S.rates=o.rates||{};S.rnd=+o.rnd||0;S.done=Array.isArray(o.done)?o.done.map(String):[];S.ex=(o.ex||[]).filter(function(e){return e&&isFinite(e.a)&&Array.isArray(e.w)})}
+function msg(s){$("msg").textContent=s;setTimeout(function(){$("msg").textContent=""},4000)}
+function copyText(s,done){try{navigator.clipboard.writeText(s).then(function(){msg(done)},function(){prompt("",s)})}catch(e){prompt("",s)}}
+/* ---- 操作 ---- */
+$("addp").onclick=function(){var v=$("newp").value.trim();if(!v)return;S.people.push(v.slice(0,16));$("newp").value="";render()};
+$("newp").onkeydown=function(e){if(e.key=="Enter")$("addp").click()};
+$("people").onclick=function(e){var i=e.target.dataset.dp;if(i==null)return;i=+i;
+ S.ex=S.ex.filter(function(x){return x.p!==i}).map(function(x){x.w=x.w.filter(function(w){return w!==i}).map(function(w){return w>i?w-1:w});if(x.p>i)x.p--;return x}).filter(function(x){return x.w.length});
+ S.people.splice(i,1);render()};
+$("base").onchange=function(){S.base=this.value;S.rnd=0;render()};
+$("fold").onclick=function(){S.fold=!S.fold;var l=$("plist");if(l)l.style.display=S.fold?"none":"";this.textContent=S.fold?"▶":"▼";this.setAttribute("aria-expanded",!S.fold)};
+$("qa").oninput=renderQuick;$("qn").oninput=renderQuick;$("qx").onchange=renderQuick;$("qr").onchange=renderQuick;
+$("qc").onchange=function(){S.base=this.value;S.rnd=0;render()};
+$("rnd").onchange=function(){S.rnd=+this.value;renderSettle();save()};
+$("pays").onchange=function(e){var k=e.target.dataset.pk;if(!k)return;var i=S.done.indexOf(k);if(i<0)S.done.push(k);else S.done.splice(i,1);renderSettle();save()};
+$("tc").onchange=setTipCountry;$("tr").oninput=renderTip;$("tb").oninput=renderTip;
+$("tadd").onclick=function(){$("ea").value=$("tb").value;$("et").value=$("tr").value;$("ea").scrollIntoView({behavior:"smooth",block:"center"})};
+$("eadd").onclick=function(){var t=T[L];if(S.people.length<2)return msg(t.needp);var a=parseFloat($("ea").value);if(!(a>0))return msg(t.needa);
+ var w=[];document.querySelectorAll("[data-w]").forEach(function(c){if(c.checked)w.push(+c.dataset.w)});if(!w.length)return msg(t.needw);
+ S.ex.push({d:$("ed").value.trim()||t.dflt,a:a,c:S.base,t:Math.max(0,parseFloat($("et").value)||0),p:+$("ep").value,w:w});
+ $("ed").value="";$("ea").value="";$("et").value=0;render()};
+$("elist").onclick=function(e){var i=e.target.dataset.de;if(i==null)return;S.ex.splice(+i,1);render()};
+$("share").onclick=function(){var o={v:1,base:S.base,people:S.people,rates:S.rates,ex:S.ex,rnd:S.rnd,done:S.done},u;
+ try{u=location.href.split("#")[0]+"#s="+encodeURIComponent(JSON.stringify(o))}catch(e){u=""}copyText(u,T[L].shared)};
+$("copy").onclick=function(){copyText((S._txt||T[L].none)+"\n— Meridi Split 🐾 meridibrand.com/tools/split/",T[L].copied)};
+$("pr").onclick=function(){window.print()};
+$("reset").onclick=function(){if(confirm(T[L].rst)){S.people=[];S.ex=[];S.rates={};S.done=[];S.rnd=0;render()}};
+$("lang").onclick=function(){L=L=="ja"?"en":"ja";ss("meridi_lang",L);render()};
+$("verbtn").onclick=function(){$("pin").innerHTML=T[L].info+'<p>☕ <a href="https://buymeacoffee.com/meridius" target="_blank" rel="noopener">Buy Me a Coffee</a> ・ <a href="https://meridibrand.com/">meridibrand.com</a></p><button id="pcl">OK</button>';
+ $("panel").style.display="flex";$("pcl").onclick=function(){$("panel").style.display="none"}};
+$("panel").onclick=function(e){if(e.target.id=="panel")this.style.display="none"};
+/* ---- はじまり ---- */
+(function(){var h="";try{h=location.hash}catch(e){}
+ if(h.indexOf("#s=")===0){try{load(JSON.parse(decodeURIComponent(h.slice(3))))}catch(e){}}
+ else{try{load(JSON.parse(gs("meridi_split")||"null"))}catch(e){}}
+ if(!S.people.length)S.people=L=="ja"?["たま","みけ","くろ"]:["Alex","Sam","Kei"];
+ render();$("tc").value=L=="ja"?"us":"us";setTipCountry()})();
+</script>
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body></html>
