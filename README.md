@@ -22,15 +22,15 @@ Every tool is a vessel. What you fill it with is up to you.
 
 | Tool | Description | Price | Live Demo |
 |------|-------------|-------|-----------|
-| 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
+| 📅 **MeridiMeet** | Multi-Timezone Scheduler with Firebase sync — show-my-time view & add to calendar | **Free** | [meridibrand.com/meet](https://meridibrand.com/meet) |
 | 🐾🪄 **MeridiLingo** | 760+ expressions & AI prompts — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 💻 **MeridiSync** | High-speed snippet manager for Windows | ¥1,000 / &#36;8 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
-| 🌌 **MeridiStars** | Planetarium — 88 constellations, 119 locations | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| 🌌 **MeridiStars** | Planetarium — 88 constellations, 150 deep-sky objects, camera mode & a journey to the black hole | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
 | 🪨 **MeridiGround** | From the sky to Earth's core — rock layers, volcanoes, plate tectonics & 11 world stages | **Free** | [meridibrand.com/ground](https://meridibrand.com/ground) |
 | 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | **Free** | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
 | 🧮 **MeridiConvert** | Unit converter, graph-paper drafting & handy calculators | **Free** | [meridibrand.com/convert](https://meridibrand.com/convert) |
-| 🧰 **Meridi Tools** | Ad-free toolbox — timer & scoreboard, text cleaner, TRPG dice, direct QR codes, photo location remover | **Free** | [meridibrand.com/tools](https://meridibrand.com/tools) |
+| 🧰 **Meridi Tools** | Ad-free toolbox (7 tools) — timer & scoreboard, text cleaner, TRPG dice, direct QR codes, photo location remover, bill splitter, timecard & wage calculator | **Free** | [meridibrand.com/tools](https://meridibrand.com/tools) |
 | 🗺️ **MeridiAtlas** | GIS for the Rest of Us | 2027 Q1 | — |
 | 📔 **MeridiDiary** | Your Journey, Your Map | Planned | — |
 
@@ -59,7 +59,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | [merididepths](https://github.com/meridi-support/merididepths) | 🌊 MeridiDepths — Deep-Sea Explorer |
 | [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
 | [meridiconvert](https://github.com/meridi-support/meridiconvert) | 🧮 MeridiConvert — Unit Converter & Calculators |
-| [meriditools](https://github.com/meridi-support/meriditools) | 🧰 Meridi Tools — Ad-free Toolbox |
+| [meriditools](https://github.com/meridi-support/meriditools) | 🧰 Meridi Tools — Ad-free Toolbox (7 tools) |
 | [meridi-square](https://github.com/meridi-support/meridi-square) | 💬 Community hub & discussions |
 
 ---
