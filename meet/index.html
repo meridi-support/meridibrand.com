@@ -73,7 +73,77 @@
 .changelog-close{position:absolute;top:12px;right:18px;color:#888;font-size:1.5rem;cursor:pointer;background:none;border:none;}
 .changelog-close:hover{background:#00ff41;color:#1a1a2e;}
 
-    </style>
+    
+/* v2.0.2: ☀️ ライト表示（ふだん使い向け） */
+.theme-btn{position:fixed;top:12px;right:12px;z-index:9000;background:#111;border:1px solid #00ff00;color:#00ff00;border-radius:20px;padding:6px 12px;font-size:0.85rem;cursor:pointer;font-family:inherit}
+body.light{background:#f5f7fa;color:#1f2937}
+body.light h1{color:#15803d;text-shadow:none}
+body.light .subtitle,body.light .ad-tag{color:#6b7280}
+body.light .section{background:#ffffff;border-color:#d1d5db;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+body.light .section h3{color:#15803d !important}
+body.light .calendar-nav button,body.light .add-btn,body.light .edit-link{background:#f3f4f6;border-color:#16a34a;color:#15803d}
+body.light .calendar-nav button:hover,body.light .add-btn:hover,body.light .edit-link:hover{background:#16a34a;color:#fff}
+body.light .month-title,body.light .calendar-header,body.light .timezone-notice{color:#15803d;text-shadow:none}
+body.light .day-btn{background:#ffffff;border-color:#d1d5db;color:#1f2937}
+body.light .days-grid .day-btn:nth-child(7n+1){color:#dc2626}
+body.light .days-grid .day-btn:nth-child(7n){color:#2563eb}
+body.light .day-btn:disabled{color:#c0c4cc !important;background:#f9fafb;border-color:#eef0f3}
+body.light .day-btn.selected{background:#16a34a !important;color:#fff !important;box-shadow:none;border-color:#16a34a}
+body.light input[type="text"],body.light textarea,body.light select{background:#fff;border-color:#9ca3af;color:#111827}
+body.light input[type="text"]:focus,body.light textarea:focus,body.light select:focus{box-shadow:0 0 0 2px rgba(22,163,74,.35);border-color:#16a34a}
+body.light button.action-btn,body.light .modal-close-btn{background:#16a34a;color:#fff;box-shadow:none}
+body.light button.action-btn:hover{background:#15803d;box-shadow:none}
+body.light .slot-row{background:#f3f4f6;color:#1f2937}
+body.light .radio-group button{background:#e5e7eb;border-color:#d1d5db;color:#1f2937}
+body.light .radio-group button.active-ok{background:#16a34a;color:#fff;box-shadow:none}
+body.light .radio-group button.active-maybe{background:#f59e0b;color:#fff;box-shadow:none}
+body.light .radio-group button.active-no{background:#e11d48;color:#fff;box-shadow:none}
+body.light .summary-table{background:#fff}
+body.light .summary-table th,body.light .summary-table td{border-color:#e5e7eb;color:#1f2937}
+body.light .summary-table th{background:#f3f4f6;color:#15803d}
+body.light .summary-table td.slot-axis{color:#14532d;background:#f9fafb}
+body.light .cell-ok{color:#15803d !important;background:rgba(22,163,74,.1)}
+body.light .cell-maybe{color:#b45309 !important;background:rgba(245,158,11,.12)}
+body.light .cell-no{color:#be123c !important;background:rgba(225,29,72,.08)}
+body.light .comment-text{color:#6b7280;border-top-color:#e5e7eb}
+body.light .row-best{border-color:#16a34a !important;box-shadow:inset 0 0 0 1px rgba(22,163,74,.3)}
+body.light .row-best td.slot-axis{color:#fff !important;background:#16a34a !important}
+body.light .row-best td.slot-axis::after{background:#fff;color:#15803d}
+body.light .premium-ad-bar{background:#fff;border-color:#9ca3af;color:#374151}
+body.light .premium-ad-bar a,body.light a{color:#15803d !important;border-color:#15803d}
+body.light .modal-overlay{background:rgba(17,24,39,.45)}
+body.light .modal-box{background:#fff;border-color:#16a34a;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+body.light .modal-body{color:#1f2937}
+body.light .modal-title.success{color:#15803d}
+body.light .changelog-overlay{background:rgba(17,24,39,.45)}
+body.light .changelog-box{background:#fff;border-color:#16a34a;color:#1f2937}
+body.light .changelog-box h2,body.light .changelog-box h3{color:#15803d}
+body.light .changelog-box hr{border-top-color:#e5e7eb}
+body.light .theme-btn{background:#fff;border-color:#9ca3af;color:#374151}
+body.light span[style*="#888"],body.light div[style*="#888"]{color:#6b7280 !important}
+
+/* v2.0.2: 人数・ボタン・カレンダー・キーボード・スマホ */
+.slot-count{display:block;font-size:0.72rem;font-weight:normal;color:#9ca3af;margin-top:3px}
+.row-best .slot-count{color:#052e16}
+.board-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ics-box{margin-top:10px;padding:8px 10px;border:1px dashed #00ff00;border-radius:6px;font-size:0.85rem}
+.ics-box select{width:auto;margin-left:6px;padding:4px}
+.kb-hint{font-size:0.72rem;color:#6b7280;margin:4px 0 0;text-align:right}
+.slot-row.kb-focus{outline:2px solid #00ff00;outline-offset:1px}
+@media (pointer:coarse){.kb-hint{display:none}}
+@media (max-width:600px){
+  body{margin:12px auto;padding:12px}
+  .radio-group button{min-width:46px;min-height:44px;padding:8px 10px;font-size:1.05rem;margin-left:4px}
+  .slot-row{flex-wrap:wrap;gap:6px}
+  .board-tools .add-btn{flex:1 1 100%;min-height:42px}
+  .theme-btn{top:6px;right:6px;padding:4px 10px;font-size:0.8rem}
+  h1{margin-top:28px}
+}
+body.light .slot-count{color:#6b7280}
+body.light .row-best .slot-count{color:#ecfdf5}
+body.light .ics-box{border-color:#16a34a;background:#f0fdf4}
+body.light .slot-row.kb-focus{outline-color:#16a34a}
+</style>
 
     <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -100,6 +170,21 @@
 
 
 <body>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Light / Dark">☀️ Light</button>
+    <script>
+        // v2.0.2: ☀️ ライト／🌙 ダーク（最初は Matrix Green のダーク。選んだ方をこの端末に記憶）
+        function applyTheme(light) {
+            document.body.classList.toggle('light', light);
+            var b = document.getElementById('themeBtn');
+            if (b) b.textContent = light ? '🌙 Dark' : '☀️ Light';
+        }
+        function toggleTheme() {
+            var light = !document.body.classList.contains('light');
+            applyTheme(light);
+            try { localStorage.setItem('meridimeet_theme', light ? 'light' : 'dark'); } catch (e) {}
+        }
+        try { applyTheme(localStorage.getItem('meridimeet_theme') === 'light'); } catch (e) {}
+    </script>
 
     <h1>MeridiMeet</h1>
     <div class="subtitle" id="subtitleText">海外との会議・ゲーム・イベントの時差をゼロにするスケジュール調整ツール</div>
@@ -173,6 +258,7 @@
             <label style="margin-top:8px;display:block;">💬 Comment / コメント (optional):</label>
             <textarea id="attendeeComment" placeholder="e.g. I might be 5 min late / 5分遅れるかも"></textarea>
             <div id="attendeeSlots"></div>
+            <div class="kb-hint">⌨️ 1 ⭕ · 2 🔺 · 3 ✖️ · ↑↓</div>
             <button class="action-btn" onclick="submitAttendance()">回答を送信する</button>
         </div>
         <div class="section">
@@ -181,6 +267,16 @@
             <div style="overflow-x:auto;">
                 <table class="summary-table" id="summaryTable"></table>
             </div>
+            <div class="board-tools">
+                <button class="add-btn" id="zoneBtn" onclick="toggleBoardZone()">🌍 自分の時間で見る</button>
+                <button class="add-btn" onclick="copyEventLink()">🔗 リンクをもう一度コピー / Copy link</button>
+            </div>
+            <div id="icsBox" class="ics-box" style="display:none;">
+                👑 <b>BEST</b> →
+                <button class="add-btn" onclick="downloadICS()">📅 カレンダーに追加 / Add to calendar</button>
+                <select id="icsLen" title="長さ / Length"><option value="30">30 min</option><option value="60" selected>1 h</option><option value="90">1.5 h</option><option value="120">2 h</option><option value="180">3 h</option></select>
+            </div>
+            <div style="margin-top:12px;font-size:0.8rem;color:#888;">🏆 <a href="https://meridibrand.com/play/" target="_blank" style="color:#a3e635;">大会の組み合わせを作る / Make a tournament bracket</a>（MeridiPlay）</div>
         </div>
     </div>
 
@@ -193,9 +289,9 @@
         </div>
     </div>
 
-    <!-- Footer (v2.0.1: links fixed) -->
+    <!-- Footer (v2.0.2) -->
     <div class="premium-ad-bar">
-        MeridiMeet <span class="version-clickable" onclick="document.getElementById('changelogOverlay').classList.add('active');">v2.0.1</span> |
+        MeridiMeet <span class="version-clickable" onclick="document.getElementById('changelogOverlay').classList.add('active');">v2.0.2</span> |
         <span class="ad-tag">▲ Presented by</span> |
         🌐 <a href="https://meridibrand.com" target="_blank">Meridi Brand</a> ·
         📖 <a href="https://meridibrand.com/lingo" target="_blank">MeridiLingo</a> ·
@@ -374,6 +470,7 @@
                     timestamps.push({ original: localStr, utc: localDate.toISOString() });
                 });
             });
+            timestamps.sort(function(a, b) { return a.utc < b.utc ? -1 : a.utc > b.utc ? 1 : 0; });   // v2.0.2: 時刻順に
             var data = { name: name, description: description, category: category, creatorZone: localZone, timestamps: timestamps };
             if (!db) {
                 showCustomAlert("Error", isJapanese ? "サーバーに接続できませんでした。通信環境を確認して、もう一度お試しください。" : "Could not connect to the server. Please check your connection and try again.", false);
@@ -388,7 +485,7 @@
                     navigator.clipboard.writeText(finalURL).then(function() {
                         showCustomAlert(
                             isJapanese ? "成功" : "SUCCESS",
-                            isJapanese ? "URLをコピーしました！調整相手に送ってください。" : "URL copied! Share it with your group.",
+                            isJapanese ? "URLをコピーしました！調整相手に送ってください。<br><br><span style=\"font-size:0.8rem;color:#888;\">☕ 役に立ったら <a href=\"https://buymeacoffee.com/meridius\" target=\"_blank\" style=\"color:#a3e635;\">Buy Me a Coffee</a></span>" : "URL copied! Share it with your group.<br><br><span style=\"font-size:0.8rem;color:#888;\">☕ Found it useful? <a href=\"https://buymeacoffee.com/meridius\" target=\"_blank\" style=\"color:#a3e635;\">Buy Me a Coffee</a></span>",
                             true
                         );
                     });
@@ -401,7 +498,7 @@
                 }
                 setTimeout(function() {
                     window.location.href = finalURL;
-                }, 1500);
+                }, 3000);
             }).catch(function(err) {
                 showCustomAlert("Error", "Firebase save failed: " + err.message, false);
             });
@@ -412,6 +509,13 @@
         var eventIdParam = urlParams.get('id');
         var eventDataParam = urlParams.get('event');
 
+        // v2.0.2: ?title= / ?desc= をイベント名と説明に入れておく（トーナメント表などから開いたとき）
+        var preTitle = urlParams.get('title'), preDesc = urlParams.get('desc');
+        if (!eventIdParam && !eventDataParam && (preTitle || preDesc)) {
+            if (preTitle) document.getElementById('eventName').value = preTitle.slice(0, 120);
+            if (preDesc) document.getElementById('eventDescription').value = preDesc.slice(0, 500);
+        }
+
         if (eventIdParam && !db) {
             showCustomAlert("Error", isJapanese ? "サーバーに接続できませんでした。" : "Could not connect to the server.", false);
         } else if (eventIdParam) {
@@ -419,7 +523,7 @@
             db.ref('events/' + eventIdParam).once('value').then(function(snapshot) {
                 var data = snapshot.val();
                 if (data) {
-                    decodedEventData = data;
+                    decodedEventData = data; sortSlots(decodedEventData);
                     document.getElementById('creatorView').style.display = 'none';
                     document.getElementById('attendeeView').style.display = 'block';
                     document.getElementById('subtitleText').textContent = data.name;
@@ -428,8 +532,7 @@
                         data.creatorZone +
                         '<br>' +
                         (isJapanese ? '名前を入力し、あなたの現地時間で空いている日時に回答してください。' : 'Enter your name and respond based on your local time.');
-                    document.getElementById('boardTimezoneLabel').textContent =
-                        (isJapanese ? '主催者時間: ' : 'Organizer time: ') + data.creatorZone;
+                    refreshBoardZoneUI();
                     refreshAttendeeSlots();
                     db.ref('responses/' + eventIdParam).on('value', function(respSnapshot) {
                         respondents = {};
@@ -448,7 +551,7 @@
             });
         } else if (eventDataParam) {
             try {
-                decodedEventData = JSON.parse(decodeURIComponent(eventDataParam));
+                decodedEventData = JSON.parse(decodeURIComponent(eventDataParam)); sortSlots(decodedEventData);
                 document.getElementById('creatorView').style.display = 'none';
                 document.getElementById('attendeeView').style.display = 'block';
                 document.getElementById('subtitleText').textContent = decodedEventData.name;
@@ -457,8 +560,7 @@
                     (isJapanese ? '主催者のタイムゾーン: ' : "Organizer's timezone: ") + zone +
                     '<br>' +
                     (isJapanese ? '名前を入力し、あなたの現地時間で空いている日時に回答してください。' : 'Enter your name and respond based on your local time.');
-                document.getElementById('boardTimezoneLabel').textContent =
-                    (isJapanese ? '主催者時間: ' : 'Organizer time: ') + zone;
+                refreshBoardZoneUI();
                 refreshAttendeeSlots();
             } catch (e) {
                 showCustomAlert("Error", "Invalid Event URL.", false);
@@ -575,6 +677,70 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // v2.0.2: 🌍 集計ボードを自分の時間で見る（この端末に記憶）
+        var boardLocal = false; try { boardLocal = localStorage.getItem('meridimeet_boardLocal') === '1'; } catch (e) {}
+        function boardZone(creatorZone) { return boardLocal ? getLocalTimezone() : (creatorZone || 'UTC'); }
+        function boardLabelText() {
+            if (!decodedEventData) return '';
+            return boardLocal ? ((isJapanese ? 'あなたの時間: ' : 'Your time: ') + getLocalTimezone()) : ((isJapanese ? '主催者時間: ' : 'Organizer time: ') + (decodedEventData.creatorZone || 'UTC'));
+        }
+        function toggleBoardZone() {
+            boardLocal = !boardLocal; try { localStorage.setItem('meridimeet_boardLocal', boardLocal ? '1' : '0'); } catch (e) {}
+            refreshBoardZoneUI(); updateBoard();
+        }
+        function refreshBoardZoneUI() {
+            var l = document.getElementById('boardTimezoneLabel'); if (l) l.textContent = boardLabelText();
+            var b = document.getElementById('zoneBtn'); if (b) b.textContent = boardLocal ? (isJapanese ? '🏠 主催者の時間で見る' : '🏠 Show organizer time') : (isJapanese ? '🌍 自分の時間で見る' : '🌍 Show my time');
+        }
+
+        // v2.0.2: 🔗 このページのリンクをもう一度コピー
+        function copyEventLink() {
+            var url = window.location.href.split('#')[0];
+            function done() { showCustomAlert(isJapanese ? "コピーしました" : "Copied", (isJapanese ? "このリンクを送ると、回答と集計ボードが開きます。<br>" : "Send this link to open the answer form and board.<br>") + '<span style="font-size:0.8rem;word-break:break-all;">' + escHTML(url) + '</span>', true); }
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function() { showCustomAlert(isJapanese ? "リンク" : "Link", escHTML(url), true); });
+            else showCustomAlert(isJapanese ? "リンク" : "Link", escHTML(url), true);
+        }
+
+        // v2.0.2: 📅 カレンダーに追加（.ics をその場で作る。サーバーは使わない）
+        var bestSlotUTC = null;
+        function icsEsc(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
+        function icsTime(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+        function downloadICS() {
+            if (!bestSlotUTC || !decodedEventData) return;
+            var mins = parseInt(document.getElementById('icsLen').value, 10) || 60;
+            var st = new Date(bestSlotUTC), en = new Date(st.getTime() + mins * 60000), url = window.location.href.split('#')[0];
+            var name = decodedEventData.name || 'MeridiMeet';
+            var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Meridi Brand//MeridiMeet 2.0.2//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+                'BEGIN:VEVENT', 'UID:' + icsTime(st) + '-' + Math.random().toString(36).slice(2, 10) + '@meridibrand.com', 'DTSTAMP:' + icsTime(new Date()),
+                'DTSTART:' + icsTime(st), 'DTEND:' + icsTime(en), 'SUMMARY:' + icsEsc(name),
+                'DESCRIPTION:' + icsEsc((decodedEventData.description ? decodedEventData.description + '\n\n' : '') + 'MeridiMeet: ' + url), 'URL:' + url,
+                'END:VEVENT', 'END:VCALENDAR'];
+            var blob = new Blob([lines.join('\r\n') + '\r\n'], { type: 'text/calendar;charset=utf-8' });
+            var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'meridimeet.ics';
+            document.body.appendChild(a); a.click(); setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+            showCustomAlert(isJapanese ? "カレンダー" : "Calendar", (isJapanese ? "meridimeet.ics を保存しました。開くと予定に追加できます。<br>（海外の人のカレンダーでは、自動で現地時間になります）" : "Saved meridimeet.ics. Open it to add the event.<br>(It shows in each person's own time zone.)") + '<br><br><span style="font-size:0.8rem;color:#888;">☕ ' + (isJapanese ? '役に立ったら' : 'Found it useful?') + ' <a href="https://buymeacoffee.com/meridius" target="_blank" style="color:#a3e635;">Buy Me a Coffee</a></span>', true);
+        }
+
+        // v2.0.2: ⌨️ キーボードで回答（⭕🔺✖️ の行で 1 / 2 / 3、↑↓ で行を移動）
+        document.addEventListener('keydown', function(e) {
+            var t = e.target, tag = t && t.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            var rows = document.querySelectorAll('#attendeeSlots .slot-row'); if (!rows.length) return;
+            var cur = document.querySelector('#attendeeSlots .slot-row.kb-focus'), idx = cur ? Array.prototype.indexOf.call(rows, cur) : -1;
+            function focus(i) { rows.forEach(function(r) { r.classList.remove('kb-focus'); }); if (rows[i]) { rows[i].classList.add('kb-focus'); rows[i].scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } }
+            var k = e.key;
+            if (k === '1' || k === '2' || k === '3') {
+                if (idx < 0) idx = 0;
+                var b = rows[idx].querySelectorAll('.radio-group button')[+k - 1]; if (b) b.click();
+                focus(Math.min(rows.length - 1, idx + 1)); e.preventDefault();
+            } else if (k === 'ArrowDown') { focus(Math.min(rows.length - 1, idx + 1)); e.preventDefault(); }
+            else if (k === 'ArrowUp') { focus(Math.max(0, idx - 1)); e.preventDefault(); }
+        });
+
+        // v2.0.2: 時間枠を時刻順に（前に作られた予定も、開いたときに並べ直す。回答は時刻で記録されているのでずれない）
+        function sortSlots(d) { if (d && d.timestamps && d.timestamps.sort) d.timestamps.sort(function(a, b) { return a.utc < b.utc ? -1 : a.utc > b.utc ? 1 : 0; }); }
+        function escHTML(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : String(s)); return d.innerHTML; }
+
         function updateBoard() {
             if (!decodedEventData) return;
             var table = document.getElementById('summaryTable');
@@ -584,8 +750,8 @@
             var headerRow = '<tr><th style="text-align:left;">時間枠</th>';
             keys.forEach(function(k) {
                 var r = respondents[k];
-                headerRow += '<th>' + r.name + '<br><span style="font-size:0.65rem;color:#888;">(' + (r.timezone || '').replace(/.*\//, '') + ')</span>';
-                if (r.comment) headerRow += '<br><span class="comment-text">💬 ' + r.comment + '</span>';
+                headerRow += '<th>' + escHTML(r.name) + '<br><span style="font-size:0.65rem;color:#888;">(' + escHTML((r.timezone || '').replace(/.*\//, '')) + ')</span>';
+                if (r.comment) headerRow += '<br><span class="comment-text">💬 ' + escHTML(r.comment) + '</span>';
                 headerRow += '<br><span class="edit-link" onclick="startEdit(\'' + k + '\')">⚙️ ' + (isJapanese ? '編集' : 'Edit') + '</span>';
                 headerRow += '</th>';
             });
@@ -597,24 +763,24 @@
             decodedEventData.timestamps.forEach(function(ts, idx) {
                 var utcDate = new Date(ts.utc);
                 var label = utcDate.toLocaleString('en-US', {
-                    timeZone: creatorZone,
+                    timeZone: boardZone(creatorZone),
                     weekday: 'short', month: 'short', day: 'numeric',
                     hour: '2-digit', minute: '2-digit', hour12: false
                 });
-                var score = 0;
+                var score = 0, nOk = 0, nMaybe = 0;
                 var cells = '';
                 keys.forEach(function(k) {
                     var safeKey = ts.utc.replace(/\./g, '-');
                     var val = respondents[k].answers[safeKey] || '-';
                     var cellClass = '';
                     var display = val;
-                    if (val === 'ok') { cellClass = 'cell-ok'; display = '⭕'; score += 2; }
-                    else if (val === 'maybe') { cellClass = 'cell-maybe'; display = '🔺'; score += 1; }
+                    if (val === 'ok') { cellClass = 'cell-ok'; display = '⭕'; score += 2; nOk++; }
+                    else if (val === 'maybe') { cellClass = 'cell-maybe'; display = '🔺'; score += 1; nMaybe++; }
                     else if (val === 'no') { cellClass = 'cell-no'; display = '✖️'; }
                     cells += '<td class="' + cellClass + '">' + display + '</td>';
                 });
                 if (score > bestScore) { bestScore = score; bestIdx = idx; }
-                rows += '<tr data-idx="' + idx + '" data-score="' + score + '"><td class="slot-axis">' + label + '</td>' + cells + '</tr>';
+                rows += '<tr data-idx="' + idx + '" data-score="' + score + '"><td class="slot-axis">' + label + (keys.length ? '<span class="slot-count">⭕ ' + nOk + (isJapanese ? '人' : '') + ' · 🔺 ' + nMaybe + (isJapanese ? '人' : '') + '</span>' : '') + '</td>' + cells + '</tr>';
             });
 
             table.innerHTML = headerRow + rows;
@@ -626,6 +792,16 @@
         }
     }
 }
+            // v2.0.2: 👑 BEST の時間を 📅 カレンダーへ（同点はいちばん早い時間）
+            var icsBox = document.getElementById('icsBox');
+            if (icsBox) {
+                if (bestScore > 0 && keys.length > 0) {
+                    var bt = null;
+                    decodedEventData.timestamps.forEach(function(ts, idx) { if (!bt) { var row = table.querySelector('tr[data-idx="' + idx + '"]'); if (row && row.classList.contains('row-best')) bt = ts; } });
+                    bestSlotUTC = bt ? bt.utc : null;
+                    icsBox.style.display = bestSlotUTC ? 'block' : 'none';
+                } else { icsBox.style.display = 'none'; bestSlotUTC = null; }
+            }
         }
 
         renderCalendar();
@@ -635,6 +811,22 @@
   <div class="changelog-box" style="position:relative;">
     <button class="changelog-close" onclick="document.getElementById('changelogOverlay').classList.remove('active');">&times;</button>
     <h2>📜 CHANGELOG</h2>
+    <h3>🏆 v2.0.2 — 2026-11-24</h3>
+    <ul>
+      <li>New: open with <code>?title=</code> and <code>?desc=</code> to pre-fill the event name and description (e.g. from a tournament bracket) / リンクでイベント名と説明を入れた状態で開けるように</li>
+      <li>New: 🏆 "Make a tournament bracket" link under the board (MeridiPlay) / 集計ボードの下に大会の組み合わせ作りへの入り口</li>
+      <li>New: a small ☕ thank-you note after your link is created; the message now stays 3 s (was 1.5 s) before opening the board / リンクを作り終えたときに小さく ☕、お知らせを 1.5 秒→3 秒表示</li>
+      <li>New: ☀️ Light mode for everyday use (button at top right; remembered on this device. Matrix Green dark stays the default) / ふだん使い向けのライト表示（右上のボタン、この端末に記憶。最初はこれまでどおりダーク）</li>
+      <li>Changed: time slots are now listed in time order, for everyone and in every time zone (older events are re-sorted when opened; answers stay matched) / 時間枠を時刻順に並べる（前に作った予定も開いたときに並べ直し、回答はずれない）</li>
+      <li>New: 🔗 "Copy link" on the board, to share the event again later / 集計ボードからリンクをもう一度コピー</li>
+      <li>New: 👑 head count on each time slot (⭕ 3 · 🔺 1) / 時間枠ごとに ⭕ と 🔺 の人数</li>
+      <li>New: 🌍 "Show my time" switches the board between the organizer's time and your own (remembered) / 集計ボードを主催者の時間⇔自分の時間に切り替え（端末に記憶）</li>
+      <li>New: 📅 "Add to calendar" for the 👑 BEST slot — makes a small .ics file on the spot (no server). Pick the length (30 min–3 h). Opens in each person's own time zone / BEST の時間を .ics でカレンダーへ（その場で作る・長さを選べる・海外では現地時間に）</li>
+      <li>New: ⌨️ answer with the keyboard: 1 ⭕ · 2 🔺 · 3 ✖️, ↑↓ to move (on computers) / パソコンでは 1・2・3 キーで回答、↑↓ で移動</li>
+      <li>Changed: 📱 bigger ⭕🔺✖️ buttons and full-width tools on phones / スマホで ⭕🔺✖️ を大きく、ボタンを横いっぱいに</li>
+      <li>Fixed: names and comments are now shown as plain text, so typed symbols such as &lt; &gt; can't break the board / 名前・コメントに記号を入れても表が崩れないように</li>
+    </ul>
+    <hr>
     <h3>🔧 v2.0.1 — 2026-11-09</h3>
     <ul>
       <li>Fixed footer links (MeridiLingo / MeridiSync / Support)</li>
