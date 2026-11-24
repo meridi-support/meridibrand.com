@@ -3,9 +3,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MeridiStars — Planetarium</title>
-<meta name="description" content="A free planetarium in your browser — 88 constellations, 9,000+ real stars and the sky from 119 places worldwide. No location data collected. 無料のブラウザ・プラネタリウム。">
-  <!--
-  MeridiStars v1.0.0 (World edition): Real stars (Yale Bright Star Catalog, 5th ed., public domain) + stereographic dome projection
+<meta name="description" content="MeridiStars: a single-file planetarium — 9,096 real stars, 88 constellations, Milky Way, Sun, Moon and planets as seen from 119 places around the world.">
+<!--
+  MeridiStars v1.1.0 (World edition): Real stars (Yale Bright Star Catalog, 5th ed., public domain) + stereographic dome projection
   Eclipse Predictions by Fred Espenak, NASA's GSFC (eclipse list 2026–2035)
   Moon: Meeus, Astronomical Algorithms ch.47 main terms
   Sun/planet positions: NASA JPL 'Approximate Positions of the Planets' (Standish), Moon: Astronomical Almanac low-precision formulae
@@ -21,7 +21,7 @@ body{background:#000;color:#e0e0e0;font-family:'Segoe UI',sans-serif;overflow:hi
 .mode-tabs{display:flex;gap:4px;}
 .mode-tab{padding:5px 12px;border:1px solid #333;border-radius:6px;cursor:pointer;font-size:0.8em;background:#111;color:#aaa;transition:all 0.3s;}
 .mode-tab.active{background:#ffd700;color:#000;border-color:#ffd700;font-weight:bold;}
-.controls{display:flex;gap:6px;padding:6px 14px;background:rgba(0,0,0,0.85);flex-wrap:wrap;z-index:20;position:relative;align-items:center;}
+.controls{display:flex;gap:6px;padding:6px 14px;background:rgba(0,0,0,0.85);flex-wrap:wrap;z-index:21;position:relative;align-items:center;touch-action:manipulation;}
 .controls input[type=datetime-local]{background:#111;color:#e0e0e0;border:1px solid #333;padding:3px 6px;border-radius:5px;font-size:0.8em;color-scheme:dark;}
 .controls select,.controls input[type=text]{background:#111;color:#e0e0e0;border:1px solid #333;padding:4px 8px;border-radius:5px;font-size:0.8em;}
 .controls input[type=range]{width:140px;accent-color:#ffd700;}
@@ -29,8 +29,22 @@ body{background:#000;color:#e0e0e0;font-family:'Segoe UI',sans-serif;overflow:hi
 .ctrl-btn{background:#222;color:#ffd700;border:1px solid #444;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:0.8em;}
 .ctrl-btn:hover{background:#333;}
 .ctrl-btn.active{background:#ffd700;color:#000;font-weight:bold;}
-canvas{display:block;cursor:grab;}
+body.viewonly .top-bar,body.viewonly .controls,body.viewonly .hud,body.viewonly .hud2,body.viewonly .trip-bar,body.viewonly .info-panel{display:none!important}body.viewonly{--tripHud:0}body.viewonly canvas{cursor:none}#viewTip{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);color:#ccc;font:13px sans-serif;background:rgba(0,0,0,.5);padding:6px 14px;border-radius:14px;transition:opacity 1s;pointer-events:none;z-index:99}
+canvas{display:block;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 canvas.grabbing{cursor:grabbing;}
+.cam-bar{position:fixed;left:50%;bottom:34px;transform:translate(-50%,160px);display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;max-width:96vw;background:rgba(5,5,20,0.92);border:1px solid #ffd700;border-radius:14px;padding:8px 10px;z-index:24;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.cam-bar.show{transform:translate(-50%,0)}
+.cam-bar select{background:#111;color:#ffd700;border:1px solid #444;border-radius:5px;padding:4px 6px;font-size:0.8em}
+.cam-chk{color:#ddd;font-size:0.78em;display:inline-flex;align-items:center;gap:4px}
+.cam-warn{color:#ffd700;font-size:0.78em;flex-basis:100%;text-align:center}
+.trip-pick{position:fixed;inset:0;background:rgba(0,0,10,0.7);display:flex;align-items:center;justify-content:center;z-index:40;opacity:0;pointer-events:none;transition:opacity .4s}
+.trip-pick.show{opacity:1;pointer-events:auto}
+.tp-box{position:relative;width:min(440px,92vw);background:rgba(5,5,20,0.97);border:1px solid #ffd700;border-radius:12px;padding:20px;color:#ddd;font-size:0.85em;line-height:1.7}
+.tp-box h3{color:#ffd700;margin-bottom:8px}.tp-box .close{position:absolute;top:8px;right:12px;cursor:pointer;color:#ffd700;font-size:1.2em}
+.tp-btn{display:block;width:100%;margin-top:10px;padding:10px;text-align:left;font-size:0.95em;line-height:1.5}.tp-btn small{color:#aaa}
+.trip-bar{position:fixed;left:50%;bottom:40px;transform:translate(-50%,120px);background:rgba(5,5,20,0.92);border:1px solid #ffd700;border-radius:20px;padding:6px 12px;color:#ffd700;font-size:0.85em;z-index:25;transition:transform .5s cubic-bezier(.22,1,.36,1);white-space:nowrap;max-width:96vw;overflow-x:auto}
+.trip-bar.show{transform:translate(-50%,0)}
+@media (max-width:700px){.trip-bar{white-space:normal;text-align:center;line-height:2.1;width:94vw;bottom:34px}.trip-bar .ctrl-btn{margin:2px}}
 .info-panel{position:fixed;right:0;top:0;width:320px;height:100%;background:rgba(5,5,20,0.97);border-left:1px solid #ffd700;padding:18px;overflow-y:auto;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);z-index:30;}
 .info-panel.open{transform:translateX(0);}
 .info-panel .close{position:absolute;top:8px;right:12px;font-size:1.3em;cursor:pointer;color:#ffd700;}
@@ -95,10 +109,13 @@ canvas.grabbing{cursor:grabbing;}
     <option value="ja">日本語</option>
   </select>
   <button class="ctrl-btn" id="mwBtn" onclick="toggleMW()">🌌 Milky Way: ON</button>
+  <button class="ctrl-btn active" id="dsoBtn" onclick="toggleDSO()" title="Galaxies, nebulae & clusters (G)">🌫 Deep Sky: 📷 Photo</button>
   <button class="ctrl-btn active" id="horizonBtn" onclick="toggleHorizon()">🧭 Horizon: ON</button>
   <button class="ctrl-btn" id="bndBtn" onclick="toggleBounds()">Boundaries: OFF</button>
   <button class="ctrl-btn" id="gridBtn" onclick="toggleGrid()">Grid: OFF</button>
   <button class="ctrl-btn" id="labelBtn" onclick="toggleLabels()">Labels: ON</button>
+  <button class="ctrl-btn" id="camBtn" onclick="toggleCam()" title="Camera mode (C)">📷 Camera: OFF</button>
+  <button class="ctrl-btn" id="liteBtn" onclick="toggleLite()" title="Lighter drawing for phones and older devices (F)">🪶 Lite: OFF</button>
   <button class="ctrl-btn" onclick="resetView()">Reset View</button>
 </div>
 <div class="controls" id="timeControls">
@@ -115,17 +132,45 @@ canvas.grabbing{cursor:grabbing;}
   <button class="ctrl-btn" id="spd3600" onclick="setSpeed(3600)">×3600</button>
   <button class="ctrl-btn" id="eventsBtn" onclick="toggleEvents()">📅 Events</button>
   <button class="ctrl-btn" id="dayStarBtn" onclick="toggleDayStars()">☀️⭐ Day Stars: OFF</button>
-  <label>Keys: Space ⏯ · ←→ ±1h · N now · H horizon · / search · L labels · B bounds · M Milky Way · D day stars · E events · P place · Esc close</label>
+  <label>Keys: Space ⏯ · ←→ ±1h · N now · H horizon · / search · L labels · B bounds · M Milky Way · G deep sky · F lite · C camera · D day stars · E events · P place · Esc close</label>
 </div>
 <div class="controls" id="solarControls" style="display: none;">
+  <select id="langSel2" onchange="setLang(this.value)" title="Label language">
+    <option value="both">EN + 日本語</option>
+    <option value="en">English</option>
+    <option value="ja">日本語</option>
+  </select>
   <label>Speed:</label>
   <input type="range" id="speedSlider" min="1" max="100" value="30">
-  <button class="ctrl-btn" id="pauseBtn" onclick="togglePause()">⏸ Pause</button>
+  <button class="ctrl-btn" id="pauseBtn" type="button" onclick="togglePause()" title="Pause / play the planets (Space)">⏸ Pause</button>
   <button class="ctrl-btn" onclick="resetSolar()">Reset</button>
   <button class="ctrl-btn" id="orbitBtn" onclick="toggleOrbits()">Orbits: ON</button>
   <button class="ctrl-btn" id="plabelBtn" onclick="togglePLabels()">Labels: ON</button>
+  <button class="ctrl-btn active" id="tripBtn" onclick="document.getElementById('tripPick').classList.add('show')">🕳 Journey to the black hole / ブラックホールへ</button>
 </div>
 <canvas id="mainCanvas"></canvas>
+<div class="trip-pick" id="tripPick"><div class="tp-box">
+  <span class="close" onclick="document.getElementById('tripPick').classList.remove('show')">✕</span>
+  <h3>🕳 Journey to the black hole<br><span style="font-size:0.8em;color:#ccc">ブラックホールへの旅</span></h3>
+  <p>From the Solar System to Sagittarius A*, the black hole at the centre of the Milky Way — about 27,000 light years.<br>太陽系から、天の川銀河の中心のブラックホール「いて座A＊」まで、約27,000光年の旅です。</p>
+  <button class="ctrl-btn tp-btn" onclick="startTrip('stops')">🚉 With a stop / 途中停車あり<br><small>Gaia BH1 — the nearest black hole · いちばん近いブラックホールに停まります</small></button>
+  <button class="ctrl-btn tp-btn" onclick="startTrip('express')">🚄 Express / 寄り道なし<br><small>Straight to the centre · まっすぐ中心へ</small></button>
+</div></div>
+<div class="trip-bar" id="tripBar">
+  <span id="tripRun"><button class="ctrl-btn active" id="tripPauseBtn" onclick="tripPause()">⏸ Pause / 一時停止</button> <button class="ctrl-btn" onclick="tripEnd()">✕ Back / 戻る</button> <button class="ctrl-btn tripLite" onclick="toggleLite()" title="F">🪶 Lite</button></span>
+  <span id="tripStop" style="display:none">🚉 <b>Gaia BH1</b> — ~1,560 ly · <button class="ctrl-btn" onclick="showGaiaInfo(true)">ℹ️ Details / 詳細</button> <button class="ctrl-btn active" onclick="tripGo()">▶ Continue / 進む</button></span>
+  <span id="tripDone" style="display:none">🕳 <b>Sagittarius A*</b> — ~27,000 ly · <button class="ctrl-btn" onclick="showSgrInfo()">ℹ️ Details / 詳細</button> <button class="ctrl-btn" onclick="startTrip(trip.plan)">↻ Again / もう一度</button> <button class="ctrl-btn" onclick="viewMode(true)" title="V">🖼 View / 眺める</button> <button class="ctrl-btn tripLite" onclick="toggleLite()" title="F">🪶 Lite</button> <button class="ctrl-btn" onclick="tripEnd()">✕ Back / 戻る</button></span>
+</div>
+<div class="cam-bar" id="camBar">
+  <select id="camIso" onchange="camSet('iso',+this.value)"></select>
+  <select id="camSh" onchange="camSet('sh',+this.value)"></select>
+  <select id="camF" onchange="camSet('f',+this.value)"></select>
+  <select id="camMm" onchange="camSet('mm',+this.value)"></select>
+  <select id="camBortle" onchange="camSet('bortle',+this.value)"></select>
+  <label class="cam-chk"><input type="checkbox" id="camTrail" checked onchange="camSet('trail',this.checked)"> 🌀 Trails / 軌跡</label>
+  <label class="cam-chk"><input type="checkbox" id="camClean" onchange="cam_.clean=this.checked"> 🖼 Photo only / 線と名前を消す</label>
+  <span id="camWarn" class="cam-warn"></span>
+</div>
 <div class="info-panel" id="infoPanel">
   <span class="close" onclick="closePanel()">✕</span>
   <div id="infoContent"></div>
@@ -159,8 +204,8 @@ canvas.grabbing{cursor:grabbing;}
   <div id="eventsList"></div>
   <div class="ev-src">Eclipse Predictions by Fred Espenak, NASA's GSFC</div>
 </div>
-<div class="hud" id="hud">Drag to look around · Scroll to zoom · Click a star</div>
-<div class="hud2">MeridiStars v1.0.0 🐾</div>
+<div class="hud" id="hud">Drag to look around · Scroll / pinch to zoom · Click or tap a star</div>
+<div class="hud2">MeridiStars v1.1.0 🐾</div>
 <div id="toast" style="position: fixed; top: 120px; left: 50%; transform: translateX(-50%); background: rgba(20, 20, 50, 0.92); border: 1px solid rgb(255, 215, 0); color: rgb(255, 215, 0); padding: 8px 16px; border-radius: 8px; font-size: 0.85em; z-index: 40; opacity: 0; transition: opacity 0.4s; pointer-events: none;"></div>
 
 <script>
@@ -199,11 +244,12 @@ var horizonMode=true,viewAz=180,viewAlt=30;   // horizon mode camera (az from No
 var OBS_LAT=35.6895,OBS_LON=139.6917;        // observer (starts in Tokyo every time)
 var LOC={n:'Tokyo',ja:'東京',lat:35.6895,lon:139.6917,tz:'Asia/Tokyo',c:'Japan'};
 var obsDate=new Date();                       // observed time (moves with the time controls)
-var timeSpeed=1,timePaused=false,dayStars=false,lastFrame=0,lastUI=0;
+var timeSpeed=1,timePaused=false,dayStars=false,lastFrame=0,lastUI=0,lastDraw=0;
+var lite=(function(){try{var s=localStorage.getItem('meridistars_lite');if(s!==null)return s==='1';}catch(e){}return !!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<820);})();
 var skyDayF=0,skyDim=0,sunAlt=-90;
 var ZEN=[0,0,1],NOR=[1,0,0],EAS=[0,1,0];      // local frame in equatorial coords
 var mwCells=[];        // camera: center RA/Dec (deg), horizontal field of view (deg)
-var FOV_MIN=20,FOV_MAX=180;
+var FOV_MIN=1,FOV_MAX=180;
 var cam={};                             // camera basis (computed each frame)
 var D2R=Math.PI/180;
 var starSprites=[],mwSprite=null;
@@ -321,7 +367,7 @@ var showBounds=false;
 // ============================================
 var planets=[
 {n:"Mercury",color:"#b0b0b0",r:6,d:60,speed:4.15,m:"The smallest planet and closest to the Sun. Named after the Roman messenger god for its swift orbit of just 88 Earth days."},
-{n:"Venus",color:"#e8c56d",r:9,d:90,speed:1.62,m:"Earth's 'sister planet' with a toxic atmosphere. Its surface temperature of 465°C makes it hotter than Mercury."},
+{n:"Venus",color:"#e8c56d",r:9,d:90,speed:1.62,m:"Earth's 'sister planet' with a toxic atmosphere. Its surface temperature of about 464°C makes it hotter than Mercury."},
 {n:"Earth",color:"#4a90d9",r:10,d:130,speed:1,m:"Our home — the only known planet with liquid water on its surface and the only confirmed harbor of life."},
 {n:"Mars",color:"#c1440e",r:8,d:170,speed:0.53,m:"The Red Planet — named after the Roman god of war. Home to Olympus Mons, the tallest volcano in the solar system."},
 {n:"Jupiter",color:"#c88b3a",r:22,d:240,speed:0.084,m:"The king of planets — so massive it could contain all other planets combined. Its Great Red Spot is a storm larger than Earth."},
@@ -364,6 +410,30 @@ function init(){
   },{passive:false});
   canvas.addEventListener('click',handleClick);
   window.addEventListener('keydown',onKey);
+  // 📱 touch: one finger = look around, two fingers = pinch zoom, tap = info
+  var tp={},tpN=0,pinch0=0,fov0=0,zoom0=1,tapT=0;
+  function tlist(){var a=[];for(var k in tp)a.push(tp[k]);return a;}
+  canvas.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse')return;
+    e.preventDefault();try{canvas.setPointerCapture(e.pointerId);}catch(er){}
+    tp[e.pointerId]={x:e.clientX,y:e.clientY};tpN++;
+    if(tpN===1){dragMoved=0;tapT=performance.now();fly=null;}
+    if(tpN===2){var a=tlist();pinch0=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1;fov0=fov;zoom0=zoom;dragMoved=99;}
+  },{passive:false});
+  canvas.addEventListener('pointermove',function(e){
+    if(e.pointerType==='mouse'||!tp[e.pointerId])return;
+    e.preventDefault();
+    var p=tp[e.pointerId],dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+    if(tpN===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(mode==='sky')rotateView(dx,dy);else{offX+=dx;offY+=dy;}}
+    else if(tpN>=2){var a=tlist(),d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1;
+      if(mode==='sky')fov=Math.max(FOV_MIN,Math.min(FOV_MAX,fov0*pinch0/d));else zoom=Math.max(0.2,Math.min(6,zoom0*d/pinch0));}
+  },{passive:false});
+  function tEnd(e){
+    if(e.pointerType==='mouse'||!tp[e.pointerId])return;
+    delete tp[e.pointerId];tpN=Math.max(0,tpN-1);
+    if(tpN===1){var a=tlist();a[0].x=a[0].x;}            // keep looking with the remaining finger
+  }
+  canvas.addEventListener('pointerup',tEnd);canvas.addEventListener('pointercancel',tEnd);
 
   generateBgStars();     // Solar System background
   buildStarSprites();
@@ -373,6 +443,10 @@ function init(){
   buildCityList();
   buildEvents();
   generateMilkyWay();
+  loadDSO();
+  buildSearchList();
+  try{var sl=localStorage.getItem('meridistars_lang');if(sl==='en'||sl==='ja'||sl==='both')setLang(sl);}catch(e){}
+  liteUI();
   animate();
 }
 
@@ -814,11 +888,21 @@ function toggleDayStars(){
   var b=document.getElementById('dayStarBtn');
   b.textContent=dayStars?'☀️⭐ Day Stars: ON':'☀️⭐ Day Stars: OFF';b.classList.toggle('active',dayStars);
 }
+function viewMode(on){
+  document.body.classList.toggle('viewonly',on);
+  if(on){var t=document.getElementById('viewTip');if(!t){t=document.createElement('div');t.id='viewTip';document.body.appendChild(t);}t.textContent=J_()?'クリック / Esc でもどる':'Click / Esc to return';t.style.opacity=1;setTimeout(function(){t.style.opacity=0;},2500);}
+}
+document.addEventListener('click',function(e){if(document.body.classList.contains('viewonly')&&!e.target.closest('button')){viewMode(false);}},true);
 function onKey(e){
+  if(document.body.classList.contains('viewonly')&&(e.key==='Escape'||e.key==='v'||e.key==='V')){viewMode(false);return;}
+  if(mode!=='sky'&&trip&&trip.state==='done'&&(e.key==='v'||e.key==='V')){viewMode(true);return;}
   if(e.key==='Escape'){closePanel();toggleEvents(false);toggleLocPanel(false);return;}
   var tg=e.target&&e.target.tagName;
   if((tg==='INPUT'&&e.target.type!=='range')||tg==='SELECT'||tg==='TEXTAREA')return;
-  if(mode!=='sky')return;
+  if(mode!=='sky'){                                          // Solar System: Space = pause / play
+    if(e.key===' '){e.preventDefault();if(tg==='BUTTON')e.target.blur();togglePause();}
+    return;
+  }
   if(tg==='BUTTON'||tg==='INPUT')e.target.blur();          // avoid double-trigger of focused controls
   var k=e.key;
   if(k===' '){e.preventDefault();toggleTimePause();}
@@ -830,6 +914,9 @@ function onKey(e){
   else if(k==='l'||k==='L'){toggleLabels();}
   else if(k==='b'||k==='B'){toggleBounds();}
   else if(k==='m'||k==='M'){toggleMW();}
+  else if(k==='g'||k==='G'){toggleDSO();}
+  else if(k==='f'||k==='F'){toggleLite();}
+  else if(k==='c'||k==='C'){toggleCam();}
   else if(k==='d'||k==='D'){toggleDayStars();}
   else if(k==='e'||k==='E'){toggleEvents();}
   else if(k==='p'||k==='P'){e.preventDefault();toggleLocPanel();}
@@ -1159,7 +1246,7 @@ function rotateView(dx,dy){
 function belowHorizon(x,y,z){return horizonMode&&(x*ZEN[0]+y*ZEN[1]+z*ZEN[2])<-0.002;}
 
 function limitMag(){                          // narrower view → fainter stars appear
-  return 5.2+(FOV_MAX-fov)/(FOV_MAX-FOV_MIN)*1.5;
+  return Math.min(6.5,5.2+(180-fov)/160*1.5)+(fov<20?Math.log(20/fov)/Math.LN2*0.6:0);
 }
 
 var SEASON_FLIP={Spring:'Autumn',Summer:'Winter',Autumn:'Spring',Winter:'Summer'};
@@ -1194,23 +1281,34 @@ function drawNightSky(){
   var bot=[8+(150-8)*skyDayF,10+(185-10)*skyDayF,30+(225-30)*skyDayF];
   g.addColorStop(1,mix(bot,[205,115,70],tw*0.55));
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  if(cam_.on&&skyDayF<0.25)camSkyFill();
 
   var zf=Math.sqrt(100/fov);                  // size factor from zoom
 
   // Milky Way (soft, subtle)
-  if(showMW){
-    ctx.globalCompositeOperation='lighter';
+  var camMW=cam_.on?Math.max(0,Math.min(1.9,1.35*Math.pow(2,(camEV()-10.9)*0.3)*(1.6-Math.max(0,(21.5-(camSkyMag()-camMoonSky()*2.0))*0.42)))):1;
+  var mwZ=fov<24?Math.max(0,(fov-14)/10):1;                     // the haze fades out when zoomed in like a telescope (and its huge blobs stop costing time)
+  if(showMW&&mwZ>0){
     var mr=2.8*D2R*2*cam.scale;               // ~2.8° blob radius in pixels
+    // 🪶 lite: the haze is painted into a small offscreen picture and stretched up (soft anyway, so it looks the same)
+    var LQ=lite?4:1,tc=ctx,mwW=W,mwH=H;
+    if(lite){ if(!drawNightSky.mwc){drawNightSky.mwc=document.createElement('canvas');}
+      var mc=drawNightSky.mwc;mwW=Math.ceil(W/LQ);mwH=Math.ceil(H/LQ);if(mc.width!==mwW||mc.height!==mwH){mc.width=mwW;mc.height=mwH;}
+      tc=mc.getContext('2d');tc.clearRect(0,0,mwW,mwH); }
+    tc.globalCompositeOperation='lighter';
+    var mq=mr/LQ;
     for(var i=0;i<mwCells.length;i++){
       var p=mwCells[i];
       if(!project(p.x,p.y,p.z))continue;
       if(P.x<-mr||P.x>W+mr||P.y<-mr||P.y>H+mr)continue;
-      ctx.globalAlpha=(0.018+p.a*0.075)*(1-skyDim);
-      ctx.drawImage(mwSprite,P.x-mr,P.y-mr,mr*2,mr*2);
+      tc.globalAlpha=(0.018+p.a*0.075)*(1-skyDim)*mwZ*camMW;
+      tc.drawImage(mwSprite,P.x/LQ-mq,P.y/LQ-mq,mq*2,mq*2);
     }
-    ctx.globalAlpha=1;
-    ctx.globalCompositeOperation='source-over';
+    tc.globalAlpha=1;tc.globalCompositeOperation='source-over';
+    if(lite){ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(drawNightSky.mwc,0,0,mwW,mwH,0,0,mwW*LQ,mwH*LQ);ctx.globalCompositeOperation='source-over';}
   }
+
+  drawDSO();
 
   // Grid (RA/Dec)
   if(showGrid)drawGrid();
@@ -1242,6 +1340,7 @@ function drawNightSky(){
   }
 
   // Constellation lines (all 88)
+  if(!(cam_.on&&cam_.clean)){
   ctx.strokeStyle='rgba(100,180,255,0.4)';
   ctx.lineWidth=1;
   ctx.beginPath();
@@ -1255,8 +1354,10 @@ function drawNightSky(){
     ctx.beginPath();sel.lines.forEach(function(vs){pathVecs(vs,false);});ctx.stroke();
   }
 
+  }
   // Real stars
-  var lim=limitMag()-skyDim*8.5,time=Date.now()*0.001,shown=0;
+  var lim=(cam_.on?camLimit():limitMag())-skyDim*8.5-(lite?0.7:0),time=Date.now()*0.001,shown=0;
+  var trailing=cam_.on&&cam_.trail&&camTrails(lim);
   ctx.globalCompositeOperation='lighter';
   for(var j=0;j<realStars.length;j++){
     var s=realStars[j];
@@ -1269,7 +1370,8 @@ function drawNightSky(){
     var bright=lim-s.mag;                      // 0 (faint) … ~8 (Sirius)
     var rad=(1.4+bright*1.15)*zf;
     var alpha=Math.min(1,0.25+bright*0.3);
-    if(s.mag<2.5)alpha*=0.92+Math.sin(time*2.3+j)*0.08;   // gentle twinkle on bright stars
+    if(s.mag<2.5&&!lite&&!cam_.on)alpha*=0.92+Math.sin(time*2.3+j)*0.08;
+    if(trailing&&s.mag<Math.min(lim,lite?5.5:7)){alpha*=0.35;rad*=0.7;}           // the start point stays faintly as a dot   // gentle twinkle on bright stars
     ctx.globalAlpha=alpha;
     ctx.drawImage(starSprites[s.bin],P.x-rad*2,P.y-rad*2,rad*4,rad*4);
   }
@@ -1281,8 +1383,9 @@ function drawNightSky(){
   drawShowers();
   if(horizonMode)drawGround();
 
+  if(cam_.on){camNoise();camVignette();camHud();}
   // Labels
-  if(showLabels){
+  if(showLabels&&!(cam_.on&&cam_.clean)){
     ctx.textAlign='center';
     // star names
     ctx.font='11px "Segoe UI",sans-serif';
@@ -1293,6 +1396,7 @@ function drawNightSky(){
       if(!st.vis||!st.name||(st.mag>nameMag&&st.hr!==424))continue;   // Polaris always labeled
       ctx.fillText(starLabel(st),st.sx,st.sy+16);
     }
+    drawDSOLabels();
     // constellation names
     ctx.font='12px "Segoe UI",monospace';
     ctx.fillStyle='rgba(140,190,255,0.75)';
@@ -1422,14 +1526,14 @@ function drawSolarSystem(){
       ctx.fillStyle='rgba(255,255,255,0.7)';
       ctx.font=Math.max(9,11*zoom)+'px monospace';
       ctx.textAlign='center';
-      ctx.fillText(p.n,px,py-p.r*zoom*2-6);
+      ctx.fillText(planetLabel(p.n),px,py-p.r*zoom*2-6);
     }
     p._x=px;p._y=py;
   });
 
   if(showPLabels){
     ctx.fillStyle='#ffd700';ctx.font='12px monospace';ctx.textAlign='center';
-    ctx.fillText('Sun',cx,cy-20*zoom);
+    ctx.fillText(labelLang==='ja'?'太陽':labelLang==='en'?'Sun':'Sun 太陽',cx,cy-20*zoom);
   }
 
   if(!solarPaused)solarAngle+=0.005*speed;
@@ -1458,6 +1562,7 @@ function handleClick(e){
       if(ds<bestSD||(bestS&&ds<bestSD+2&&s.mag<bestS.mag)){bestSD=Math.min(bestSD,ds);bestS=s;}
     }
     if(bestS){showStarInfo(bestS);return;}
+    var dh=dsoHit(mx,my);if(dh){showDSOInfo(dh);return;}
     // 2) which constellation's IAU boundary contains the clicked point
     var dir=unproject(mx,my);
     var cra=(Math.atan2(dir[1],dir[0])/D2R+360)%360;
@@ -1476,7 +1581,7 @@ function handleClick(e){
       var d=Math.hypot(p._x-mx,p._y-my);
       if(d<bestPD){bestPD=d;bestP=p;}
     });
-    if(bestP)showPlanetInfo(bestP);
+    if(bestP){lastPlanet=bestP;showPlanetInfo(bestP);}
   }
 }
 
@@ -1501,44 +1606,46 @@ function lumNote(sp){
   return '';
 }
 function showStarInfo(s){
+  lastInfo=['showStarInfo',s];
   selectedC=null;
   updateObserver();
   var aa=altAzOf(s.x,s.y,s.z),con=constellationAt(s.ra,s.dec),cj=con&&conByName[con]?conByName[con].ja:'';
-  var title=s.name?(s.name+(s.ja?' <span style="font-size:0.8em;color:#ccc">'+s.ja+'</span>':'')):(s.des||('HR '+s.hr));
+  var title=s.name?(labelLang==='ja'&&s.ja?s.ja:labelLang==='en'?s.name:s.name+(s.ja?' <span style="font-size:0.8em;color:#ccc">'+s.ja+'</span>':'')):(s.des||('HR '+s.hr));
   var dist=s.ly?('~'+s.ly.toLocaleString()+' ly'):'—';
   var lum=lumNote(s.sp||'');
   document.getElementById('infoContent').innerHTML=
     '<h2>✦ '+title+'</h2>'
     +'<div class="sub">'+(s.des?s.des+' · ':'')+'HR '+s.hr+' · Yale Bright Star Catalog</div>'
     +'<div class="info-grid">'
-    +'<div class="info-item"><div class="lbl">Magnitude / 等級</div><div class="val">'+s.mag.toFixed(2)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Distance / 距離</div><div class="val">'+dist+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Spectral type</div><div class="val">'+(s.sp||'—')+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Temperature</div><div class="val">~'+s.temp.toLocaleString()+' K</div></div>'
-    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">Color / 色</div><div class="val">'+colorName(s.temp)+(spectralNote(s.sp)?' · '+spectralNote(s.sp):'')+'</div></div>'
-    +(lum?'<div class="info-item" style="grid-column:span 2"><div class="lbl">Class / 分類</div><div class="val">'+lum+'</div></div>':'')
-    +'<div class="info-item"><div class="lbl">Right Ascension</div><div class="val">'+fmtRA(s.ra)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Declination</div><div class="val">'+fmtDec(s.dec)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Altitude ('+LOC.n+')</div><div class="val">'+aa.alt.toFixed(1)+'°'+(aa.alt<0?' ↓':'')+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Azimuth</div><div class="val">'+aa.az.toFixed(0)+'°</div></div>'
-    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">In constellation / 星座</div><div class="val">'+(con?con+(cj?' · '+cj:''):'—')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Magnitude','等級')+'</div><div class="val">'+s.mag.toFixed(2)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Distance','距離')+'</div><div class="val">'+dist+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Spectral type','スペクトル型')+'</div><div class="val">'+(s.sp||'—')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Temperature','表面温度')+'</div><div class="val">~'+s.temp.toLocaleString()+' K</div></div>'
+    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Color','色')+'</div><div class="val">'+colorName(s.temp)+(spectralNote(s.sp)?' · '+spectralNote(s.sp):'')+'</div></div>'
+    +(lum?'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Class','分類')+'</div><div class="val">'+lum+'</div></div>':'')
+    +'<div class="info-item"><div class="lbl">'+LB('Right Ascension','赤経')+'</div><div class="val">'+fmtRA(s.ra)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Declination','赤緯')+'</div><div class="val">'+fmtDec(s.dec)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Altitude','高度')+' ('+LOC.n+')</div><div class="val">'+aa.alt.toFixed(1)+'°'+(aa.alt<0?' ↓':'')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Azimuth','方位')+'</div><div class="val">'+aa.az.toFixed(0)+'°</div></div>'
+    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('In constellation','星座')+'</div><div class="val">'+(con?con+(cj?' · '+cj:''):'—')+'</div></div>'
     +'</div>'
-    +'<div class="myth">'+(s.ly?'The light you see left this star about '+s.ly.toLocaleString()+' years ago.<br>今見えている光は、約'+s.ly.toLocaleString()+'年前にこの星を出発した光です。':'Distance is not listed in the catalog for this star.')
+    +'<div class="myth">'+(s.ly?LT('The light you see left this star about '+s.ly.toLocaleString()+' years ago.','今見えている光は、約'+s.ly.toLocaleString()+'年前にこの星を出発した光です。'):LT('Distance is not listed in the catalog for this star.','この星の距離は、星表に載っていません。'))
     +'<br><small style="color:#777">Distance from BSC5 parallax (approximate). '+fmtJST(obsDate)+'</small></div>';
   document.getElementById('infoPanel').classList.add('open');
 }
 
 function showBodyInfo(b){
+  lastInfo=['showBodyInfo',b];
   selectedC=null;
   var aa=altAzOf(b.x,b.y,b.z),con=constellationAt(b.ra,b.dec),cj=con&&conByName[con]?conByName[con].ja:'';
   var icon={Sun:'☀️',Moon:'🌙'}[b.k]||'🪐';
   var dist=b.k==='Moon'?'~384,400 km':b.dist.toFixed(3)+' AU';
   var extra=b.k==='Moon'
-    ?'<div class="info-item"><div class="lbl">Illuminated</div><div class="val">'+Math.round(b.illum*100)+'%</div></div>'
-     +(b.umbra>0?'<div class="info-item" style="grid-column:span 2"><div class="lbl">Lunar eclipse / 月食</div><div class="val">'+(b.umbra>=1?'Total / 皆既中':'Partial / 部分食 '+Math.round(b.umbra*100)+'%')+'</div></div>':'')
-     +(b.eclipseCover>0?'<div class="info-item" style="grid-column:span 2"><div class="lbl">Solar eclipse / 日食</div><div class="val">'+Math.round(b.eclipseCover*100)+'% covered</div></div>':'')
-     +'<div class="info-item"><div class="lbl">Moon age</div><div class="val">'+b.age.toFixed(1)+' days</div></div>'
-    :'<div class="info-item"><div class="lbl">Magnitude</div><div class="val">'+b.mag.toFixed(1)+'</div></div>';
+    ?'<div class="info-item"><div class="lbl">'+LB('Illuminated','輝いている部分')+'</div><div class="val">'+Math.round(b.illum*100)+'%</div></div>'
+     +(b.umbra>0?'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Lunar eclipse','月食')+'</div><div class="val">'+(b.umbra>=1?LB('Total','皆既中'):LB('Partial','部分食')+' '+Math.round(b.umbra*100)+'%')+'</div></div>':'')
+     +(b.eclipseCover>0?'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Solar eclipse','日食')+'</div><div class="val">'+Math.round(b.eclipseCover*100)+LB('% covered','% 欠け')+'</div></div>':'')
+     +'<div class="info-item"><div class="lbl">'+LB('Moon age','月齢')+'</div><div class="val">'+b.age.toFixed(1)+LB(' days',' 日')+'</div></div>'
+    :'<div class="info-item"><div class="lbl">'+LB('Magnitude','等級')+'</div><div class="val">'+b.mag.toFixed(1)+'</div></div>';
   var note=b.k==='Sun'?'The Sun\'s altitude controls the sky color: below −12° it is night, around 0° twilight, above +4° full daylight.'
     :b.k==='Moon'?'Position from Meeus lunar theory (main terms), seen from the chosen place (parallax included). Checked against NASA eclipse times.'
     :'Position from NASA JPL approximate orbital elements (valid 1800–2050).';
@@ -1547,47 +1654,64 @@ function showBodyInfo(b){
     +'<div class="sub">'+b.ja+' · '+b.t+'</div>'
     +'<div class="info-grid">'
     +extra
-    +'<div class="info-item"><div class="lbl">Distance</div><div class="val">'+dist+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Right Ascension</div><div class="val">'+fmtRA(b.ra)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Declination</div><div class="val">'+fmtDec(b.dec)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Altitude ('+LOC.n+')</div><div class="val">'+aa.alt.toFixed(1)+'°</div></div>'
-    +'<div class="info-item"><div class="lbl">Azimuth</div><div class="val">'+aa.az.toFixed(0)+'°</div></div>'
-    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">In constellation</div><div class="val">'+(con?con+(cj?' · '+cj:''):'—')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Distance','距離')+'</div><div class="val">'+dist+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Right Ascension','赤経')+'</div><div class="val">'+fmtRA(b.ra)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Declination','赤緯')+'</div><div class="val">'+fmtDec(b.dec)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Altitude','高度')+' ('+LOC.n+')</div><div class="val">'+aa.alt.toFixed(1)+'°</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Azimuth','方位')+'</div><div class="val">'+aa.az.toFixed(0)+'°</div></div>'
+    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('In constellation','星座')+'</div><div class="val">'+(con?con+(cj?' · '+cj:''):'—')+'</div></div>'
     +'</div>'
     +'<div class="myth">'+note+'<br><small>'+fmtJST(obsDate)+'</small></div>';
   document.getElementById('infoPanel').classList.add('open');
 }
 
 function showConstellationInfo(c){
+  lastInfo=['showConstellationInfo',c];
   var se={Winter:'❄️',Spring:'🌸',Summer:'☀️',Autumn:'🍂',All:'🌐'};
   var bright=c.b<0.15?'⭐⭐⭐ Very Bright':c.b<0.3?'⭐⭐ Bright':c.b<0.5?'⭐ Moderate':'Dim';
   selectedC=c.n;
   var hasLines='';
   document.getElementById('infoContent').innerHTML=
-    '<h2>'+(se[c.s]||'')+' '+c.n+(c.ja?' <span style="font-size:0.8em;color:#ccc">'+c.ja+'</span>':'')+'</h2>'
+    '<h2>'+(se[c.s]||'')+' '+(labelLang==='ja'&&c.ja?c.ja:labelLang==='en'?c.n:c.n+(c.ja?' <span style="font-size:0.8em;color:#ccc">'+c.ja+'</span>':''))+'</h2>'
     +'<div class="sub">'+(c.ja?c.ja+' · ':'')+'Constellation'+(c.abbr?' ('+c.abbr+')':'')+'</div>'
     +'<div class="info-grid">'
-    +'<div class="info-item"><div class="lbl">Season'+(OBS_LAT<0?' (south)':'')+'</div><div class="val">'+(OBS_LAT<0&&SEASON_FLIP[c.s]?SEASON_FLIP[c.s]:c.s)+'</div></div>'
-    +'<div class="info-item"><div class="lbl">Right Ascension</div><div class="val">'+c.ra.toFixed(1)+'h</div></div>'
-    +'<div class="info-item"><div class="lbl">Declination</div><div class="val">'+c.dec.toFixed(0)+'°</div></div>'
-    +'<div class="info-item"><div class="lbl">Brightness</div><div class="val">'+bright+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Season','季節')+(OBS_LAT<0?LB(' (south)','（南半球）'):'')+'</div><div class="val">'+(OBS_LAT<0&&SEASON_FLIP[c.s]?SEASON_FLIP[c.s]:c.s)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Right Ascension','赤経')+'</div><div class="val">'+c.ra.toFixed(1)+'h</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Declination','赤緯')+'</div><div class="val">'+c.dec.toFixed(0)+'°</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Brightness','明るさ')+'</div><div class="val">'+bright+'</div></div>'
     +'</div>'
     +hasLines
     +'<div class="myth">'+c.m+'</div>';
   document.getElementById('infoPanel').classList.add('open');
 }
 
+
+var PLANET_JA={Mercury:['水星','太陽にいちばん近い、いちばん小さな惑星。88日で太陽を1周します。ローマ神話の、足の速い使いの神の名前です。'],
+  Venus:['金星','地球の「双子」と呼ばれる大きさ。でも厚い雲におおわれ、地表は約464°C。水星より熱い惑星です。'],
+  Earth:['地球','わたしたちの星。表面に液体の水があり、生き物がいると分かっている、ただひとつの惑星です。'],
+  Mars:['火星','赤い惑星。ローマ神話の戦いの神の名前です。太陽系でいちばん高い火山、オリンポス山があります。'],
+  Jupiter:['木星','惑星の王さま。ほかの惑星をぜんぶ合わせたよりも重く、大赤斑は地球より大きな嵐です。'],
+  Saturn:['土星','太陽系の宝石。美しい環は、数えきれないほどの氷と岩のつぶでできています。'],
+  Uranus:['天王星','横だおしで回る氷の惑星。1781年にハーシェルが見つけた、望遠鏡で見つかった最初の惑星です。'],
+  Neptune:['海王星','いちばん風の強い惑星で、風速は時速2,100kmにもなります。青い色はメタンのためです。']};
+var PLANET_REAL={Mercury:[0.387,0.241,4879],Venus:[0.723,0.615,12104],Earth:[1.0,1.0,12756],Mars:[1.524,1.881,6792],Jupiter:[5.204,11.86,142984],Saturn:[9.572,29.42,120536],Uranus:[19.164,83.75,51118],Neptune:[30.18,163.72,49528]};   // NASA Planetary Fact Sheet (distance = semi-major axis, period, diameter)
+function planetLabel(n){var j=PLANET_JA[n];if(labelLang==='ja')return j?j[0]:n;if(labelLang==='en')return n;return n+(j?' '+j[0]:'');}
 function showPlanetInfo(p){
+  lastInfo=['showPlanetInfo',p];
+  var ja=PLANET_JA[p.n]||['',''],rd=PLANET_REAL[p.n]||[0,0,0],yr=rd[1];
+  var per=yr<1?Math.round(yr*365.25)+' days / '+Math.round(yr*365.25)+'日':yr.toFixed(yr<2?2:1)+' years / '+yr.toFixed(yr<2?2:1)+'年';
+  var en=labelLang!=='ja',jp=labelLang!=='en';
   document.getElementById('infoContent').innerHTML=
-    '<h2>🪐 '+p.n+'</h2>'
-    +'<div class="sub">Planet</div>'
+    '<h2>🪐 '+(en?p.n:'')+(jp?' <span style="font-size:0.8em;color:#ccc">'+ja[0]+'</span>':'')+'</h2>'
+    +'<div class="sub">Planet / 惑星</div>'
     +'<div class="info-grid">'
-    +'<div class="info-item"><div class="lbl">Orbit Distance</div><div class="val">'+p.d+' AU (scaled)</div></div>'
-    +'<div class="info-item"><div class="lbl">Orbital Speed</div><div class="val">'+p.speed.toFixed(3)+'x</div></div>'
-    +'<div class="info-item"><div class="lbl">Size</div><div class="val">'+p.r+' (scaled)</div></div>'
-    +'<div class="info-item"><div class="lbl">Rings</div><div class="val">'+(p.rings?'Yes ✨':'No')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Distance from the Sun','太陽からの距離')+'</div><div class="val">'+rd[0]+' AU</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('One orbit','1周')+'</div><div class="val">'+per+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Diameter','直径')+'</div><div class="val">'+rd[2].toLocaleString()+' km</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Rings','環')+'</div><div class="val">'+(p.rings?'Yes ✨ / あり':'—')+'</div></div>'
     +'</div>'
-    +'<div class="myth">'+p.m+'</div>';
+    +'<div class="myth">'+(en?p.m:'')+(en&&jp?'<br>':'')+(jp?ja[1]:'')
+    +'<br><br><span style="font-size:0.8em;color:#888">Data: NASA Planetary Fact Sheet · '+(en?'The map is not to scale — distances and sizes are squeezed so every planet fits. ':'')+(jp?'図の距離と大きさは、全部の惑星が画面に入るように縮めています。':'')+'</span></div>';
   document.getElementById('infoPanel').classList.add('open');
 }
 
@@ -1597,7 +1721,8 @@ function closePanel(){document.getElementById('infoPanel').classList.remove('ope
 // CONTROLS
 // ============================================
 function setMode(m){
-  mode=m;
+  mode=m;if(m!=='solar'&&trip)tripEnd();
+  var cb=document.getElementById('camBar');if(cb)cb.classList.toggle('show',cam_.on&&m==='sky');   // the camera settings belong to the night sky only
   document.getElementById('skyTab').classList.toggle('active',m==='sky');
   document.getElementById('solarTab').classList.toggle('active',m==='solar');
   document.getElementById('skyControls').style.display=m==='sky'?'flex':'none';
@@ -1625,6 +1750,7 @@ function buildSearchList(){
   constellations.forEach(function(c){if(conByName[c.n])searchItems.push({label:c.n+(c.ja?' · '+c.ja:''),keys:[c.n,c.ja,c.abbr],con:c});});
   realStars.forEach(function(s){if(s.name)searchItems.push({label:'★ '+s.name+(s.ja?' · '+s.ja:''),keys:[s.name,s.ja],star:s});});
   skyBodies.forEach(function(b){searchItems.push({label:'● '+b.n+' · '+b.ja,keys:[b.n,b.ja],body:b});});
+  dsoList.forEach(function(o){var id=o.id,ng=dsoFmtId(o.ngc);searchItems.push({label:'✧ '+[id,o.en!==id?o.en:'',o.ja].filter(Boolean).join(' · '),keys:[id,o.en,o.ja,ng,ng.replace(' ',''),o.ngc],dso:o});});
   var dl=document.getElementById('searchList');
   dl.innerHTML=searchItems.map(function(it){return '<option value="'+it.label.replace(/"/g,'&quot;')+'">';}).join('');
 }
@@ -1652,10 +1778,12 @@ function goToItem(it){
   var ra,dec;
   if(it.con){var g=conByName[it.con.n];ra=g.cra;dec=g.cdec;}
   else if(it.star){ra=it.star.ra;dec=it.star.dec;}
+  else if(it.dso){ra=it.dso.ra;dec=it.dso.dec;}
   else{computeBodies(obsDate);ra=it.body.ra;dec=it.body.dec;}
-  flyTo(ra,dec,it.con?70:40);
+  flyTo(ra,dec,it.con?70:it.dso?Math.max(FOV_MIN,Math.min(60,(it.dso.a||10)/60*6)):40);
   if(it.con)showConstellationInfo(it.con);
   else if(it.star)showStarInfo(it.star);
+  else if(it.dso)showDSOInfo(it.dso);
   else showBodyInfo(it.body);
 }
 // smooth camera move (ヌルヌル)
@@ -1687,7 +1815,19 @@ function showToast(msg){
   var el=document.getElementById('toast');el.textContent=msg;el.style.opacity=1;
   clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.style.opacity=0;},3500);
 }
-function setLang(v){labelLang=v;document.getElementById('langSel').value=v;}
+function LB(en,ja){return labelLang==='en'?en:labelLang==='ja'?ja:en+' / '+ja;}
+function LT(en,ja){return labelLang==='en'?en:labelLang==='ja'?ja:en+'<br>'+ja;}
+function setLang(v){labelLang=v;if(cam_.on)camUI();document.getElementById('langSel').value=v;var l2=document.getElementById('langSel2');if(l2)l2.value=v;
+  refreshInfo();
+  try{localStorage.setItem('meridistars_lang',v);}catch(e){}
+  tripUI();
+}
+var lastPlanet=null,lastInfo=null;
+function refreshInfo(){                              // the open panel follows the language switch
+  if(!lastInfo||!document.getElementById('infoPanel').classList.contains('open'))return;
+  var f={showStarInfo:showStarInfo,showDSOInfo:showDSOInfo,showConstellationInfo:showConstellationInfo,showBodyInfo:showBodyInfo,showPlanetInfo:showPlanetInfo,showGaiaInfo:showGaiaInfo,showSgrInfo:showSgrInfo}[lastInfo[0]];
+  if(f){var keepSel=selectedC;f(lastInfo[1]);if(lastInfo[0]!=='showConstellationInfo')selectedC=keepSel;}
+}
 function starLabel(s){
   if(labelLang==='ja')return s.ja||s.name;
   if(labelLang==='en')return s.name;
@@ -1713,7 +1853,7 @@ function resetView(){
   document.getElementById('seasonFilter').value='All';document.getElementById('searchBox').value='';
   skyFilter='All';skySearchTerm='';searchHitsCon=false;selectedC=null;fly=null;closePanel();
 }
-function togglePause(){solarPaused=!solarPaused;document.getElementById('pauseBtn').textContent=solarPaused?'▶ Play':'⏸ Pause';}
+function togglePause(){if(trip){tripPause();return;}solarPaused=!solarPaused;document.getElementById('pauseBtn').textContent=solarPaused?'▶ Play':'⏸ Pause';}
 function toggleOrbits(){showOrbits=!showOrbits;document.getElementById('orbitBtn').textContent=showOrbits?'Orbits: ON':'Orbits: OFF';}
 function togglePLabels(){showPLabels=!showPLabels;document.getElementById('plabelBtn').textContent=showPLabels?'Labels: ON':'Labels: OFF';}
 function resetSolar(){solarAngle=0;solarPaused=false;offX=0;offY=0;zoom=1;document.getElementById('pauseBtn').textContent='⏸ Pause';}
@@ -1721,21 +1861,777 @@ function resetSolar(){solarAngle=0;solarPaused=false;offX=0;offY=0;zoom=1;docume
 // ============================================
 // ANIMATION LOOP
 // ============================================
+
+// ============================================
+// DEEP SKY — galaxies, nebulae, clusters (v1.1.0)
+// Positions, sizes, magnitudes, position angles: OpenNGC by Mattia Verga (CC BY-SA 4.0)
+// https://github.com/mattiaverga/OpenNGC
+// ============================================
+var DSO_DATA=[["M1","NGC1952","snr",83.6332,22.0145,8.4,8.0,4.0,null,"Crab Nebula","かに星雲","crab",6500,""],["M2","NGC7089","gc",323.3625,-0.8233,6.25,8.4,null,null,"M2","","",null,""],["M3","NGC5272","gc",205.5468,28.3754,6.39,16.2,null,null,"M3","","",null,""],["M4","NGC6121","gc",245.8975,-26.5255,5.4,28.2,null,null,"M4","","",7200,""],["M5","NGC5904","gc",229.6406,2.0827,5.95,15.0,null,null,"M5","","",null,""],["M6","NGC6405","oc",265.0865,-32.2542,4.2,15.6,null,null,"Butterfly Cluster","バタフライ星団","",1590,""],["M7","NGC6475","oc",268.4632,-34.7928,3.3,22.2,null,null,"Ptolemy's Cluster","トレミー星団","",980,""],["M8","NGC6523","neb",270.922,-24.3802,5.8,45.0,30.0,90,"Lagoon Nebula","干潟星雲","lagoon",4100,""],["M9","NGC6333","gc",259.7991,-18.5162,8.42,6.9,null,null,"M9","","",null,""],["M10","NGC6254","gc",254.2875,-4.0993,4.98,9.3,null,null,"M10","","",null,""],["M11","NGC6705","oc",282.775,-6.27,5.8,9.0,null,null,"Wild Duck Cluster","野鴨星団","",6200,""],["M12","NGC6218","gc",251.8105,-1.9478,6.07,11.1,null,null,"M12","","",null,""],["M13","NGC6205","gc",250.4235,36.4613,5.8,16.5,null,null,"Great Globular in Hercules","ヘルクレス座球状星団","",22200,""],["M14","NGC6402","gc",264.4007,-3.2459,5.73,9.9,null,null,"M14","","",null,""],["M15","NGC7078","gc",322.4932,12.1668,6.3,11.1,null,null,"M15","","",null,""],["M16","NGC6611","neb",274.7007,-13.8072,6.0,35,28,null,"Eagle Nebula","わし星雲","",7000,""],["M17","NGC6618","neb",275.1963,-16.1715,7.0,12.6,null,null,"Omega Nebula","オメガ星雲","",5000,""],["M18","NGC6613","oc",274.9937,-17.102,6.9,6.0,null,null,"M18","","",null,""],["M19","NGC6273","gc",255.657,-26.2679,5.57,7.5,null,null,"M19","","",null,""],["M20","NGC6514","neb",270.6755,-22.9719,8.5,28.0,28.0,null,"Trifid Nebula","三裂星雲","trifid",5200,""],["M21","NGC6531","oc",271.056,-22.4901,5.9,6.0,null,null,"M21","","",null,""],["M22","NGC6656","gc",279.1008,-23.9034,5.1,12.6,null,null,"M22","","",10600,""],["M23","NGC6494","oc",269.2699,-18.9853,5.5,16.8,null,null,"M23","","",null,""],["M24","IC4715","oc",274.2338,-18.5146,4.5,120.0,60.0,90.0,"Small Sgr Star Cloud","いて座スタークラウド","",null,""],["M25","IC4725","oc",277.9449,-19.1149,4.6,14.1,null,null,"M25","","",null,""],["M26","NGC6694","oc",281.3278,-9.3836,8.87,6.0,null,null,"M26","","",null,""],["M27","NGC6853","pn",299.9016,22.721,7.4,6.7,null,null,"Dumbbell Nebula","あれい状星雲","dumbbell",1360,""],["M28","NGC6626","gc",276.137,-24.8698,6.9,5.1,null,null,"M28","","",null,""],["M29","NGC6913","oc",305.9907,38.5077,6.6,3.6,null,null,"M29","","",null,""],["M30","NGC7099","gc",325.0918,-23.1791,7.1,9.0,null,null,"M30","","",null,""],["M31","NGC0224","gal",10.6848,41.2691,3.44,177.83,69.66,35.0,"Andromeda Galaxy","アンドロメダ銀河","m31",2500000.0,"Sb"],["M32","NGC0221","gal",10.6743,40.8653,8.13,7.74,4.86,170.0,"M32","","",null,"E"],["M33","NGC0598","gal",23.462,30.6602,5.79,62.09,36.73,23.0,"Triangulum Galaxy","さんかく座銀河","",2700000.0,"Sc"],["M34","NGC1039","oc",40.5308,42.7461,5.2,22.5,null,null,"M34","","",null,""],["M35","NGC2168","oc",92.2711,24.3386,5.3,24.0,null,null,"M35","","",null,""],["M36","NGC1960","oc",84.0739,34.1407,6.0,7.2,null,null,"M36","","",null,""],["M37","NGC2099","oc",88.0765,32.553,5.6,11.4,null,null,"M37","","",null,""],["M38","NGC1912","oc",82.177,35.8549,6.4,9.6,null,null,"M38","","",null,""],["M39","NGC7092","oc",322.9513,48.4382,4.6,19.5,null,null,"M39","","",null,""],["M40","M040","dbl",185.5671,58.0844,8.0,null,null,null,"M40","","",null,""],["M41","NGC2287","oc",101.4998,-20.7542,4.5,12.0,null,null,"M41","","",null,""],["M42","NGC1976","neb",83.8187,-5.3897,4.0,90.0,60.0,null,"Orion Nebula","オリオン大星雲","m42",1344,""],["M43","NGC1982","neb",83.8807,-5.2675,9.0,20.0,15.0,null,"Mairan's Nebula","ド・メラン星雲","neb",null,""],["M44","NGC2632","oc",130.0925,19.6721,3.1,108.6,null,null,"Beehive Cluster","プレセペ星団","",577,""],["M45","Mel022","oc",56.8692,24.1053,1.6,110,110,90.0,"Pleiades","すばる","m45",444,""],["M46","NGC2437","oc",115.4451,-14.81,6.1,21.0,null,null,"M46","","",null,""],["M47","NGC2422","oc",114.1459,-14.4826,4.4,19.8,null,null,"M47","","",null,""],["M48","NGC2548","oc",123.4299,-5.7504,5.8,28.2,null,null,"M48","","",null,""],["M49","NGC4472","gal",187.4448,8.0005,8.28,10.21,8.38,156.0,"M49","","",null,"E"],["M50","NGC2323","oc",105.6686,-8.364,5.9,14.1,null,null,"M50","","",null,""],["M51","NGC5194","gal",202.4696,47.1952,8.36,13.71,11.67,163.0,"Whirlpool Galaxy","子持ち銀河","",31000000.0,"SABb"],["M52","NGC7654","oc",351.2017,61.5932,6.9,9.9,null,null,"M52","","",null,""],["M53","NGC5024","gc",198.2301,18.1691,7.79,9.0,null,null,"M53","","",null,""],["M54","NGC6715","gc",283.7636,-30.4785,7.7,5.1,null,null,"M54","","",null,""],["M55","NGC6809","gc",294.9975,-30.9621,6.49,12.0,null,null,"M55","","",null,""],["M56","NGC6779","gc",289.148,30.1845,8.4,5.8,null,null,"M56","","",null,""],["M57","NGC6720","pn",283.3959,33.0286,8.8,1.27,null,null,"Ring Nebula","環状星雲","ring",2300,""],["M58","NGC4579","gal",189.4313,11.8182,10.3,5.01,3.84,90.0,"M58","","",null,"Sb"],["M59","NGC4621","gal",190.5093,11.647,9.56,4.55,3.21,165.0,"M59","","",null,"E"],["M60","NGC4649","gal",190.9166,11.5527,8.79,6.78,5.45,105.0,"M60","","",null,"E"],["M61","NGC4303","gal",185.4787,4.4736,10.25,6.89,6.56,20.0,"M61","","",null,"Sbc"],["M62","NGC6266","gc",255.3025,-30.1124,6.4,7.8,null,null,"M62","","",null,""],["M63","NGC5055","gal",198.9555,42.0293,8.61,11.83,7.16,103.0,"Sunflower Galaxy","ひまわり銀河","",29000000.0,"Sbc"],["M64","NGC4826","gal",194.1818,21.683,8.52,10.52,5.33,114.0,"Black Eye Galaxy","黒眼銀河","",17000000.0,"SABa"],["M65","NGC3623","gal",169.733,13.0924,9.32,7.64,1.97,173.0,"M65","","",null,"Sa"],["M66","NGC3627","gal",170.0623,12.9915,8.92,10.28,4.61,168.0,"M66","","",null,"Sb"],["M67","NGC2682","oc",132.8339,11.8119,6.9,33.0,null,null,"M67","","",null,""],["M68","NGC4590","gc",189.8667,-26.743,7.96,6.6,null,null,"M68","","",null,""],["M69","NGC6637","gc",277.8468,-32.348,7.6,5.7,null,null,"M69","","",null,""],["M70","NGC6681","gc",280.8027,-32.2919,7.9,6.6,null,null,"M70","","",null,""],["M71","NGC6838","gc",298.4421,18.7784,8.2,6.9,null,null,"M71","","",null,""],["M72","NGC6981","gc",313.3663,-12.5371,8.96,4.5,null,null,"M72","","",null,""],["M73","NGC6994","ast",314.7332,-12.6355,8.9,null,null,null,"M73","","",null,""],["M74","NGC0628","gal",24.174,15.7837,9.31,9.89,9.33,87.0,"M74","","",null,"Sc"],["M75","NGC6864","gc",301.5202,-21.9222,8.26,3.6,null,null,"M75","","",null,""],["M76","NGC0650","pn",25.582,51.5755,10.1,1.12,null,null,"Barbell Nebula","小あれい状星雲","dumbbell",2500,""],["M77","NGC1068","gal",40.6696,-0.0133,9.29,6.11,5.61,12.0,"M77","","",null,"Sb"],["M78","NGC2068","rfn",86.6909,0.0793,8.0,4.5,null,null,"M78","","refl",null,""],["M79","NGC1904","gc",81.0441,-24.5242,8.16,7.2,null,null,"M79","","",null,""],["M80","NGC6093","gc",244.2605,-22.9751,7.3,5.7,null,null,"M80","","",null,""],["M81","NGC3031","gal",148.8882,69.0653,6.92,21.63,11.25,157.0,"Bode's Galaxy","ボーデの銀河","",12000000.0,"Sab"],["M82","NGC3034","gal",148.9697,69.6794,8.3,10.99,5.11,66.0,"Cigar Galaxy","葉巻銀河","cigar",12000000.0,"S?"],["M83","NGC5236","gal",204.254,-29.8654,7.21,13.61,13.21,45.0,"Southern Pinwheel Galaxy","南の回転花火銀河","",15000000.0,"Sc"],["M84","NGC4374","gal",186.2656,12.887,9.79,7.41,6.44,133.0,"M84","","",null,"E"],["M85","NGC4382","gal",186.3505,18.1915,9.05,6.95,5.35,12.0,"M85","","",null,"S0-a"],["M86","NGC4406","gal",186.5489,12.9462,8.86,11.53,8.43,128.0,"M86","","",null,"E"],["M87","NGC4486","gal",187.7059,12.3911,9.0,7.11,6.67,153.0,"Virgo A","おとめ座A","",53000000.0,"E"],["M88","NGC4501","gal",187.9965,14.4204,10.33,8.65,4.38,138.0,"M88","","",null,"Sb"],["M89","NGC4552","gal",188.9159,12.5563,10.08,8.13,8.0,150.0,"M89","","",null,"E"],["M90","NGC4569","gal",189.2075,13.1629,9.54,9.12,3.82,22.0,"M90","","",null,"Sab"],["M91","NGC4548","gal",188.8602,14.4963,10.96,5.55,4.52,150.0,"M91","","",null,"Sb"],["M92","NGC6341","gc",259.2803,43.1365,6.52,14.4,null,null,"M92","","",null,""],["M93","NGC2447","oc",116.1218,-23.8531,6.2,15.0,null,null,"M93","","",null,""],["M94","NGC4736","gal",192.7211,41.1204,8.24,7.74,6.68,105.0,"M94","","",null,"SABa"],["M95","NGC3351","gal",160.9904,11.7038,9.77,7.23,4.45,11.0,"M95","","",null,"Sb"],["M96","NGC3368","gal",161.6906,11.8199,9.21,8.26,5.51,5.0,"M96","","",null,"Sab"],["M97","NGC3587","pn",168.6988,55.019,9.9,3.58,null,null,"Owl Nebula","ふくろう星雲","",2030,""],["M98","NGC4192","gal",183.4512,14.9003,10.84,11.04,2.66,152.0,"M98","","",null,"SABb"],["M99","NGC4254","gal",184.7067,14.4165,9.84,5.04,4.74,23.0,"Coma Pinwheel","","",null,"Sc"],["M100","NGC4321","gal",185.7285,15.8218,9.47,6.1,5.62,108.0,"M100","","",null,"SABb"],["M101","NGC5457","gal",210.8023,54.3489,7.9,23.99,23.07,28.0,"Pinwheel Galaxy","回転花火銀河","",21000000.0,"SABc"],["M103","NGC0581","oc",23.3409,60.658,7.4,4.5,null,null,"M103","","",null,""],["M104","NGC4594","gal",189.9976,-11.6231,8.59,8.45,4.91,90.0,"Sombrero Galaxy","ソンブレロ銀河","sombrero",31000000.0,"Sa"],["M105","NGC3379","gal",161.9566,12.5816,9.27,4.89,4.25,71.0,"M105","","",null,"E"],["M106","NGC4258","gal",184.7396,47.304,9.29,16.98,7.24,150.0,"M106","","",null,"Sbc"],["M107","NGC6171","gc",248.133,-13.0536,7.8,7.8,null,null,"M107","","",null,""],["M108","NGC3556","gal",167.879,55.6741,10.05,3.98,1.66,79.0,"M108","","",null,"Sc"],["M109","NGC3992","gal",179.3999,53.3745,9.88,8.07,5.64,78.0,"M109","","",null,"Sbc"],["M110","NGC0205","gal",10.092,41.6853,8.15,16.22,9.59,170.0,"M110","","",null,"E"],["","NGC0869","oc",34.744,57.1172,3.7,14.4,null,null,"Double Cluster (h Per)","二重星団 h","",7500,""],["","NGC0884","oc",35.6337,57.1441,3.8,10.5,null,null,"Double Cluster (χ Per)","二重星団 χ","",7500,""],["","NGC7000","neb",314.8214,44.5288,4.0,120.0,100,null,"North America Nebula","北アメリカ星雲","",2600,""],["","NGC6960","snr",311.4924,30.5951,7.0,210.0,160.0,null,"Western Veil Nebula","網状星雲（西）","veil",null,""],["","NGC6992","snr",314.0795,31.7428,7.0,60.0,60,0,"Eastern Veil Nebula","網状星雲（東）","veil",null,""],["","NGC1499","neb",60.8101,36.3675,5.0,160.0,40.0,130,"California Nebula","カリフォルニア星雲","",null,""],["","NGC2237","neb",97.7275,5.0492,null,80,60,null,"Rosette Nebula","ばら星雲","rosette",5200,""],["","NGC2264","neb",100.2427,9.8955,3.9,11.4,null,null,"Christmas Tree Cluster","クリスマスツリー星団","",null,""],["","IC1396","neb",324.7401,57.4891,null,170,140,null,"Elephant's Trunk Nebula (IC 1396)","象の鼻星雲","",null,""],["","NGC7293","pn",337.4107,-20.8373,7.3,16.33,null,null,"Helix Nebula","らせん星雲","ring",650,""],["","NGC6543","pn",269.6391,66.6332,9.01,0.9,null,null,"Cat's Eye Nebula","キャッツアイ星雲","",3300,""],["","NGC2392","pn",112.2948,20.9118,9.61,0.86,null,null,"Eskimo Nebula","エスキモー星雲","",null,""],["","NGC7009","pn",316.045,-11.3632,8.0,0.7,0.52,70.0,"Saturn Nebula","土星状星雲","",null,""],["","NGC0253","gal",11.888,-25.2882,11.11,26.79,4.58,53.0,"Sculptor Galaxy","ちょうこくしつ座銀河","",11400000.0,"SABc"],["","NGC4565","gal",189.0866,25.9877,10.86,16.75,2.89,135.0,"Needle Galaxy","ニードル銀河","edge",null,"Sb"],["","NGC5128","gal",201.3651,-43.0191,7.22,25.88,19.77,33.0,"Centaurus A","ケンタウルス座A","cena",12000000.0,"S0"],["","NGC5139","gc",201.6912,-47.4769,5.33,27.0,null,null,"Omega Centauri","オメガ星団","",17000,""],["","NGC0104","gc",6.0223,-72.0814,4.09,31.8,null,null,"47 Tucanae","きょしちょう座47","",14700,""],["","NGC3372","neb",161.2855,-59.8667,3.0,120.0,120.0,null,"Carina Nebula","イータカリーナ星雲","",7500,""],["","NGC2070","neb",84.6765,-69.1009,7.25,16.0,16.0,null,"Tarantula Nebula","タランチュラ星雲","",160000,""],["","NGC0292","gal",13.1866,-72.8286,2.3,299.92,179.89,45.0,"Small Magellanic Cloud","小マゼラン雲","mc",200000,"SBm"],["","NGC4755","oc",193.4045,-60.3563,null,7.8,null,null,"Jewel Box","宝石箱星団","",null,""],["","IC2602","oc",160.7395,-64.3942,null,48.0,null,null,"Southern Pleiades","南のすばる","",null,""],["","NGC6888","neb",303.0273,38.3549,7.44,20.0,10.0,null,"Crescent Nebula","三日月星雲","",null,""],["","IC5146","neb",328.3698,47.2669,7.2,10.0,10.0,null,"Cocoon Nebula","まゆ星雲","",null,""],["","IC0405","neb",79.1228,34.3562,10.0,50.0,30.0,null,"Flaming Star Nebula","まがたま星雲","neb",null,""],["","NGC0457","oc",19.886,58.2907,6.4,7.8,null,null,"Owl Cluster","ふくろう星団","",null,""],["","Mel111","oc",186.275,26.1,null,253.5,null,null,"Coma Star Cluster","かみのけ座星団","",null,""],["","IC0434","neb",85.2537,-2.4538,7.3,90.0,30.0,null,"IC 434","IC 434（馬頭星雲のうしろ）","",null,""],["","NGC1435","neb",56.542,23.765,null,30.0,30.0,null,"Merope Nebula","メローペ星雲","refl",null,""],["","NGC2516","oc",119.5294,-60.7535,3.8,24.3,null,null,"Southern Beehive","南のプレセペ","",null,""],["","NGC3532","oc",166.4493,-58.7705,3.0,12.0,null,null,"Wishing Well Cluster","ウィッシングウェル星団","",null,""],["","NGC0891","gal",35.6392,42.3491,10.01,13.03,3.03,22.0,"NGC 891","NGC 891","edge",null,"Sb"],["","NGC4631","gal",190.5334,32.5415,9.24,14.45,2.2,86.0,"Whale Galaxy","くじら銀河","",null,"SBcd"],["","ESO056-115","gal",80.8938,-69.7561,0.9,646.0,550.0,170.0,"Large Magellanic Cloud","大マゼラン雲","mc",160000,"SBm"],["","B033","dark",85.2458,-2.4583,null,6.0,4.0,90.0,"Horsehead Nebula","馬頭星雲","horse",1375,""],["","C041","oc",66.725,15.8667,0.5,329.0,null,null,"Hyades","ヒアデス星団","",153,""],["","C099","dark",187.8292,-63.7433,null,420,300,null,"Coalsack","コールサック","coal",null,""],["","Cl399","oc",291.35,20.1833,3.6,70.0,null,null,"Coathanger (Brocchi's Cluster)","コートハンガー（ブロッキ星団）","",null,""],["","C009","neb",344.475,62.5183,null,50.0,30.0,90.0,"Cave Nebula","洞窟星雲","",null,""],["","NGC5195","gal",202.4983,47.2661,9.58,5.5,4.36,79.0,"NGC 5195 (M51's companion)","子持ち銀河の子","",31000000.0,"SBa"]];
+var dsoList=[],dsoMode='photo',dsoShown=0,dsoQueue=[],dsoCur=null;
+function dsoWork(){                                // ~6 ms of work, then hand the screen back
+  var t0=performance.now();
+  while(performance.now()-t0<6){
+    if(!dsoCur){ while(dsoQueue.length&&dsoQueue[0].spr)dsoQueue.shift(); var nx=dsoQueue.shift(); if(!nx)break; dsoCur=dsoJob(nx); if(!dsoCur)continue; }
+    if(dsoCur.step(6-(performance.now()-t0)))dsoCur=null;
+  }
+  setTimeout(dsoWork,dsoQueue.length||dsoCur?16:400);
+}
+var DSO_T={gal:['Galaxy','銀河'],neb:['Emission nebula','散光星雲'],rfn:['Reflection nebula','反射星雲'],pn:['Planetary nebula','惑星状星雲'],
+  snr:['Supernova remnant','超新星残骸'],gc:['Globular cluster','球状星団'],oc:['Open cluster','散開星団'],dark:['Dark nebula','暗黒星雲'],dbl:['Double star','二重星'],ast:['Asterism','星の並び']};
+function dsoFmtId(n){
+  if(!n)return '';
+  var m=n.match(/^(NGC|IC|Mel|ESO|B|C|Cl)0*(\d.*)$/);if(!m)return n;
+  var p={NGC:'NGC ',IC:'IC ',Mel:'Mel ',ESO:'ESO ',B:'Barnard ',C:'Caldwell ',Cl:'Collinder '}[m[1]];
+  return p+m[2].replace(/^0+(?=\d)/,'');
+}
+function loadDSO(){
+  dsoList=DSO_DATA.map(function(d,i){
+    var v=radecVec(d[3],d[4]);
+    return {i:i,id:d[0],ngc:d[1],t:d[2],ra:d[3],dec:d[4],mag:d[5],a:d[6],b:d[7]||d[6],pa:d[8]||0,en:d[9],ja:d[10],sh:d[11],ly:d[12],hub:d[13],
+      x:v[0],y:v[1],z:v[2],spr:null,vis:false,sx:0,sy:0,pr:0};
+  });
+  dsoList.sort(function(p,q){return (p.t==='dark')-(q.t==='dark');});   // dark clouds are drawn last, over the light behind them
+  // pictures are made a little at a time in the background, so the sky never stops moving
+  dsoList.forEach(function(o){if(o.sh||(o.mag!=null&&o.mag<6))dsoQueue.push(o);});
+  setTimeout(dsoWork,600);
+}
+function dsoRand(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function dsoNoise(seed){
+  var r=dsoRand(seed),p=new Uint8Array(512),g=new Float32Array(256),i,j,t;
+  for(i=0;i<256;i++){p[i]=i;g[i]=r();}
+  for(i=255;i>0;i--){j=Math.floor(r()*(i+1));t=p[i];p[i]=p[j];p[j]=t;}
+  for(i=0;i<256;i++)p[i+256]=p[i];
+  function n(x,y){var xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;xi&=255;yi&=255;
+    var a=g[p[p[xi]+yi]],b=g[p[p[xi+1]+yi]],c=g[p[p[xi]+yi+1]],d=g[p[p[xi+1]+yi+1]],u=xf*xf*(3-2*xf),w=yf*yf*(3-2*yf);
+    return a+(b-a)*u+(c-a)*w+(a-b-c+d)*u*w;}
+  return function(x,y,oct){oct=oct||5;var s=0,amp=0.5,f=1,norm=0;for(var k=0;k<oct;k++){s+=amp*n(x*f+k*17.3,y*f-k*9.1);norm+=amp;f*=2.03;amp*=0.5;}return s/norm;};
+}
+function sst(a,b,x){var t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);}
+// Each object gets its own picture, drawn once from its type and catalog shape.
+function buildDsoSprite(o){ var job=dsoJob(o);if(job)while(!job.step(1e9));}
+function dsoJob(o){
+  var big=o.sh||(o.a&&o.a>=30),N=lite?(big?128:64):(big?192:96);
+  if(o.t==='dbl'||o.t==='ast'||!o.a){o.spr='dot';return null;}
+  var ext={gal:1.35,gc:1.5,pn:1.3,oc:1.05,dark:1.15}[o.t]||1.15;
+  var fb=dsoNoise(o.i*7919+13),rnd=dsoRand(o.i*104729+7);
+  var R=new Float32Array(N*N),G=new Float32Array(N*N),B=new Float32Array(N*N),A=null;
+  var edge=o.t==='gal'&&(o.b/o.a<0.32||o.sh==='edge'||o.sh==='sombrero'||o.sh==='cigar'),spiral=o.t==='gal'&&!edge&&!/^E|^S0|^I/.test(o.hub)&&o.ngc!=='NGC5195'&&o.sh!=='cena'&&o.sh!=='mc';
+  var pitch=(/c/.test(o.hub)?0.42:/a/.test(o.hub)?0.22:0.3);
+  var x,y,u,v,r,th,c,k,idx;
+  if(o.t==='dark')A=new Float32Array(N*N);
+  var row=0,stage=0;
+  function rows(budget){
+    var t0=performance.now();
+    while(row<N){
+      y=row;
+      for(x=0;x<N;x++){
+    u=((x+0.5)/N*2-1)*ext;v=((y+0.5)/N*2-1)*ext;r=Math.sqrt(u*u+v*v);th=Math.atan2(v,u);idx=y*N+x;
+    var rr=0,gg=0,bb=0;
+    if(o.t==='gal'){
+      if(o.sh==='mc'){                                     // Magellanic Clouds: patchy, a bar, pink star-forming knots
+        c=fb(u*2.4,v*2.4,5);var bar=Math.exp(-(v*v)/0.03-(u*u)/0.35);
+        var I=(Math.exp(-r*r/0.45)*Math.pow(c,1.6)*0.95+bar*0.32)*sst(1.3,0.8,r);
+        rr=I*0.86;gg=I*0.9;bb=I*1.0;
+        k=fb(u*11,v*11,3);if(k>0.66){var kk=(k-0.66)*5*I;rr+=kk;gg+=kk*0.3;bb+=kk*0.55;}
+      }else{
+        var incl=o.b/o.a<0.55,core=Math.exp(-r*r/(incl?0.012:0.0045))*0.95+Math.exp(-r/(incl?0.13:0.1))*0.5;
+        var disk=Math.exp(-r/(spiral?(incl?0.4:0.34):0.24))*0.9,arm=0,ang=0;
+        if(spiral){ang=th-Math.log(r+0.03)/Math.tan(pitch);var wob=fb(u*2.5,v*2.5,3)*2.2;arm=Math.pow(0.5+0.5*Math.cos(2*ang+wob),incl?1.6:3);}
+        c=fb(u*3.2+5,v*3.2+5,4);
+        var d=disk*(spiral?(incl?0.55+0.6*arm:0.3+0.95*arm):1)*(0.75+0.5*c),dust=1;
+        if(spiral)dust=1-(incl?0.72:0.6)*Math.pow(0.5+0.5*Math.cos(2*ang+(incl?1.25:0.95)+fb(u*4,v*4,3)*2),incl?7:5)*sst(0.08,0.32,r);
+        if(edge){var lv=o.sh==='sombrero'?v+0.1:v,lw=o.sh==='sombrero'?0.07:0.05;dust*=1-0.88*Math.exp(-(lv*lv)/(lw*lw))*sst(1.15,0.2,Math.abs(u));}
+        if(o.sh==='sombrero'){core=Math.exp(-(u*u/0.09+v*v/0.12))*0.95+Math.exp(-r*r/0.004)*0.6;d=Math.exp(-Math.abs(v)/0.07)*Math.exp(-Math.abs(u)/0.55)*0.8;}
+        else if(edge){d=Math.exp(-Math.abs(v)/0.09)*Math.exp(-Math.abs(u)/0.42)*(0.8+0.4*c);}
+        var I2=(core+d*dust)*sst(1.38,0.85,r);
+        if(spiral){rr=core*1.0+d*dust*0.72;gg=core*0.86+d*dust*0.8;bb=core*0.62+d*dust*1.05;
+          k=fb(u*15,v*15,3);if(k>0.7&&arm>0.45){var kn=(k-0.7)*7*arm*disk;rr+=kn;gg+=kn*0.32;bb+=kn*0.62;}}
+        else{rr=I2*1.0;gg=I2*0.85;bb=I2*0.66;}
+        if(o.sh==='cigar'){var fil=Math.pow(1-Math.abs(2*fb(u*7,v*2.2,4)-1),6)*Math.exp(-u*u/0.05)*Math.exp(-Math.abs(v)/0.55);rr+=fil*0.9;gg+=fil*0.22;bb+=fil*0.3;}
+        if(o.sh==='cena'){var lt=v*0.88-u*0.48;var ln=1-0.9*Math.exp(-lt*lt/0.012)*sst(0.9,0.2,r)*(0.6+0.6*fb(u*6,v*6,3));rr*=ln;gg*=ln;bb*=ln;}
+        rr*=sst(1.38,0.85,r);gg*=sst(1.38,0.85,r);bb*=sst(1.38,0.85,r);
+      }
+    }else if(o.t==='neb'||o.t==='rfn'){
+      c=fb(u*2.1+o.i,v*2.1,5);var c2=fb(u*5.5,v*5.5,4),env=sst(1.1,0.25,r);
+      var I3=env*Math.pow(Math.max(0,c-0.3)*1.7,1.5)*(0.55+0.9*c2);
+      if(o.t==='rfn'||o.sh==='refl'){rr=I3*0.42;gg=I3*0.6;bb=I3*1.05;}
+      else{rr=I3*1.05;gg=I3*0.22;bb=I3*0.36;}
+      if(o.sh==='m42'){                                    // pink wings, a teal-white heart, the dark "fish mouth"
+        var hc=Math.exp(-((u-0.05)*(u-0.05)+(v+0.08)*(v+0.08))/0.025);
+        var wing=sst(1.1,0.1,r)*Math.pow(c,1.4)*1.3;
+        rr=wing*1.0+hc*0.9;gg=wing*0.3+hc*1.0;bb=wing*0.5+hc*0.95;
+        var mouth=Math.exp(-((u-0.3)*(u-0.3))/0.008-((v+0.12)*(v+0.12))/0.05);rr*=1-0.8*mouth;gg*=1-0.8*mouth;bb*=1-0.8*mouth;
+      }else if(o.sh==='lagoon'){var lane=Math.exp(-Math.pow(v+0.05-0.25*u*u,2)/0.01)*sst(0.9,0.1,Math.abs(u));rr*=1-0.75*lane;gg*=1-0.75*lane;bb*=1-0.75*lane;
+        var hg=Math.exp(-((u-0.1)*(u-0.1)+(v+0.18)*(v+0.18))/0.01);rr+=hg*0.9;gg+=hg*0.55;bb+=hg*0.5;}
+      else if(o.sh==='trifid'){var redp=sst(0.95,0.2,r)*sst(0.45,-0.2,u),bluep=sst(1.05,0.2,Math.hypot(u-0.85,v))*sst(0.3,0.8,u);
+        var lanes=0;[0.35,2.35,4.45].forEach(function(a0){var dth=Math.atan2(Math.sin(th-a0),Math.cos(th-a0));lanes=Math.max(lanes,Math.exp(-dth*dth/0.02)*sst(0.05,0.2,r)*sst(1.0,0.7,r));});
+        var Ib=Math.pow(c,1.2);rr=(Ib*redp*1.05+Ib*bluep*0.35)*(1-0.85*lanes);gg=(Ib*redp*0.22+Ib*bluep*0.55)*(1-0.85*lanes);bb=(Ib*redp*0.38+Ib*bluep*1.05)*(1-0.85*lanes);}
+      else if(o.sh==='rosette'){var ring=Math.exp(-Math.pow((r-0.6)/0.27,2))*Math.pow(c,1.2)*1.6*sst(0.12,0.3,r);rr=ring*1.05;gg=ring*0.25;bb=ring*0.35;}
+      else{var oiii=Math.exp(-r*r/0.08)*0.45*c2;gg+=oiii*0.75;bb+=oiii*0.7;rr+=oiii*0.25;}
+    }else if(o.t==='pn'){
+      if(o.sh==='dumbbell'){c=fb(u*5,v*5,3);var lob=Math.exp(-(u*u)/(0.04+0.55*v*v))*sst(0.95,0.35,Math.abs(v)*1.05+Math.abs(u)*0.3)*(0.8+0.4*c),envp=sst(1.0,0.4,r)*(0.4+0.25*c);
+        rr=lob*0.3+envp*1.0;gg=lob*0.95+envp*0.22;bb=lob*0.9+envp*0.35;}
+      else if(o.sh==='ring'||1){c=fb(u*4,v*4,4);var outer=Math.exp(-Math.pow((r-0.82)/0.14,2))*(0.7+0.6*c),inner=Math.exp(-Math.pow((r-0.52)/0.2,2))*0.8*(0.7+0.5*c),hole=Math.exp(-r*r/0.03)*0.15;
+        rr=outer*1.05+inner*0.25+hole*0.3;gg=outer*0.3+inner*0.95+hole*0.6;bb=outer*0.35+inner*0.9+hole*0.7;
+        if(o.sh!=='ring'){var s2=0.55;rr*=s2;}}
+    }else if(o.t==='snr'){
+      c=fb(u*3.5,v*3.5,5);var ridge=Math.pow(1-Math.abs(2*c-1),8);
+      if(o.sh==='veil'){var dd=Math.abs(r-0.8-0.07*Math.sin(th*3+o.i)),side=Math.pow(0.5+0.5*Math.cos(th-(o.ngc==='NGC6960'?3.4:0.3)),2.5);
+        var f1=Math.exp(-dd*dd/0.0016)*Math.pow(1-Math.abs(2*fb(u*6,v*6,4)-1),3)*side*2.2;
+        rr=f1*0.9;gg=f1*0.75;bb=f1*0.8;var f2=Math.exp(-Math.pow(r-0.84-0.07*Math.sin(th*3+o.i),2)/0.002)*side*1.2*fb(u*9,v*9,3);rr+=f2;gg+=f2*0.25;bb+=f2*0.3;}
+      else{var glow=Math.exp(-r*r/0.22)*0.55,fl=ridge*sst(1.0,0.35,r)*1.6;rr=glow*0.55+fl*1.05;gg=glow*0.65+fl*0.55;bb=glow*1.0+fl*0.3;}
+    }else if(o.t==='gc'){
+      var gl=Math.exp(-r*r/0.035)*0.75+Math.exp(-r/0.22)*0.25;rr=gl;gg=gl*0.93;bb=gl*0.8;
+    }else if(o.t==='oc'){
+      if(o.sh==='m45'){c=fb(u*2.2+3,v*6.5,5);var wisp=Math.exp(-r*r/0.3)*Math.pow(Math.max(0,c-0.25)*1.6,2)*1.3;rr=wisp*0.45;gg=wisp*0.62;bb=wisp*1.05;}
+    }else if(o.t==='dark'){
+      if(o.sh==='horse'){var head=Math.exp(-(Math.pow((u-0.15)/0.42,2)+Math.pow((v+0.05)/0.3,2))*2.2),snout=Math.exp(-(Math.pow((u-0.42)/0.22,2)+Math.pow((v-0.25)/0.18,2))*2.2),
+          neck=Math.exp(-Math.pow((v+0.1)/0.32,2)*2)*sst(0.2,-0.5,u)*sst(-1.2,-0.7,u);A[idx]=Math.min(1,(head+snout+neck)*1.1)*(0.85+0.3*fb(u*6,v*6,3));
+        var rim=sst(-0.1,1.1,u)*0.0;rr=rim;}
+      else{c=fb(u*2.5,v*2.5,5);A[idx]=sst(1.05,0.35,r)*(0.55+0.6*c);}
+    }
+        R[idx]=rr;G[idx]=gg;B[idx]=bb;
+      }
+      row++;
+      if(performance.now()-t0>budget)return false;
+    }
+    return true;
+  }
+  function finish(){
+  if(o.t==='gc'||o.t==='oc'){                              // stars of the cluster (fainter than the catalog stars)
+    var n=o.t==='gc'?(lite?450:900):Math.min(260,Math.round(40+(o.a||10)*2.2)),sig=o.t==='gc'?0.22:0.55;
+    if(o.sh==='m45')n=90;
+    for(var s=0;s<n;s++){
+      var rad=o.t==='gc'?Math.abs(Math.sqrt(-2*Math.log(rnd()+1e-9))*sig):Math.sqrt(rnd())*0.95,an=rnd()*6.283;
+      var px=Math.round(((Math.cos(an)*rad/ext)+1)/2*N),py=Math.round(((Math.sin(an)*rad/ext)+1)/2*N);
+      if(px<1||py<1||px>=N-1||py>=N-1)continue;
+      var lum=Math.pow(rnd(),o.t==='gc'?2.4:3.2)*(o.t==='gc'?1.5:1.8)+0.15,warm=o.t==='gc'?0.85+rnd()*0.15:0.75+rnd()*0.25;
+      var cr=o.t==='gc'?1:0.8+0.2*(1-warm),cg=o.t==='gc'?0.9:0.88,cb=o.t==='gc'?0.72+0.2*rnd():1;
+      for(var oy=-1;oy<=1;oy++)for(var ox=-1;ox<=1;ox++){var w=(ox||oy)?0.22:1,q=(py+oy)*N+px+ox;R[q]+=lum*w*cr;G[q]+=lum*w*cg;B[q]+=lum*w*cb;}
+    }
+  }
+  var cv=document.createElement('canvas'),ce=document.createElement('canvas');cv.width=cv.height=ce.width=ce.height=N;
+  var g1=cv.getContext('2d'),g2=ce.getContext('2d'),d1=g1.createImageData(N,N),d2=g2.createImageData(N,N);
+  for(var q2=0;q2<N*N;q2++){
+    var p4=q2*4;
+    if(A){var al=Math.max(0,Math.min(1,A[q2]));d1.data[p4]=d1.data[p4+1]=d1.data[p4+2]=0;d1.data[p4+3]=al*255;d2.data[p4]=d2.data[p4+1]=d2.data[p4+2]=0;d2.data[p4+3]=al*255;continue;}
+    var m=Math.max(R[q2],G[q2],B[q2]);if(m<=0.002)continue;
+    var al2=Math.min(1,m),sc=255/m;
+    d1.data[p4]=R[q2]*sc;d1.data[p4+1]=G[q2]*sc;d1.data[p4+2]=B[q2]*sc;d1.data[p4+3]=al2*255;
+    var gy=(R[q2]*0.3+G[q2]*0.59+B[q2]*0.11)/m;              // the eye sees faint light without colour
+    d2.data[p4]=gy*225;d2.data[p4+1]=gy*235;d2.data[p4+2]=gy*240;d2.data[p4+3]=Math.min(1,gy*m*1.1)*255;
+  }
+  g1.putImageData(d1,0,0);g2.putImageData(d2,0,0);
+  o.spr={c:cv,e:ce,ext:ext};
+  }
+  return {o:o,step:function(budget){ if(stage===0){ if(!rows(budget))return false; stage=1; } finish(); return true; }};
+}
+var dsoDot=null;
+function dsoDotSprite(){
+  if(dsoDot)return dsoDot;var c=document.createElement('canvas');c.width=c.height=32;var g=c.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);
+  gr.addColorStop(0,'rgba(235,225,255,0.9)');gr.addColorStop(0.35,'rgba(200,190,255,0.35)');gr.addColorStop(1,'rgba(200,190,255,0)');g.fillStyle=gr;g.fillRect(0,0,32,32);return dsoDot=c;
+}
+function dsoAlpha(o){
+  var a=o.a||1,b=o.b||a,mg=o.mag!=null?o.mag:9.5,sb=mg+2.5*Math.log(Math.max(0.3,a)*Math.max(0.3,b))/Math.LN10;
+  if(o.t==='dark')return dsoMode==='photo'?0.85:(o.sh==='coal'?0.45:0.05);
+  if(o.t==='gc'||o.t==='oc')sb=mg+1.2*Math.log(Math.max(0.3,a*b))/Math.LN10;
+  if(cam_.on){var ce=Math.pow(2,(camEV()-10.9)*0.5),cb=Math.max(0.15,1-Math.max(0,(21.5-(camSkyMag()-camMoonSky()*2.0))*0.35));return Math.max(0,Math.min(1,Math.max(0.2,Math.min(1,(21.5-sb)/6))*ce*cb))*(1-skyDim*0.97);}
+  var A=dsoMode==='photo'?Math.max(0.38,Math.min(1,(21.5-sb)/6)):Math.max(0,Math.min(0.85,(15.8-sb)/5))*(fov<25?1.35:1);
+  return A*(1-skyDim*0.97);
+}
+function drawDSO(){
+  dsoShown=0;
+  if(dsoMode==='off'){for(var z=0;z<dsoList.length;z++)dsoList[z].vis=false;return;}
+  var built=0,cs=cam.scale;
+  for(var i=0;i<dsoList.length;i++){
+    var o=dsoList[i];o.vis=false;
+    if(belowHorizon(o.x,o.y,o.z))continue;
+    if(!project(o.x,o.y,o.z))continue;
+    var cx=P.x,cy=P.y,guess=(o.a||2)/60*D2R*cs*1.6+24;
+    if(cx<-guess||cx>W+guess||cy<-guess||cy>H+guess)continue;
+    var al=dsoAlpha(o);if(al<0.01)continue;
+    // screen directions of north and east at this spot, per degree (handles projection and mirroring)
+    var dd=0.05,nx,ny,ex,ey;
+    var vn=radecVec(o.ra,Math.min(89.99,o.dec+dd));if(!project(vn[0],vn[1],vn[2]))continue;nx=(P.x-cx)/dd;ny=(P.y-cy)/dd;
+    var ve=radecVec(o.ra+dd/Math.max(0.02,Math.cos(o.dec*D2R)),o.dec);if(!project(ve[0],ve[1],ve[2]))continue;ex=(P.x-cx)/dd;ey=(P.y-cy)/dd;
+    var pa=o.pa*D2R,ca=Math.cos(pa),sa=Math.sin(pa),ha=(o.a||1)/120,hb=(o.b||o.a||1)/120;
+    var ux=(ca*nx+sa*ex)*ha,uy=(ca*ny+sa*ey)*ha,vx=(-sa*nx+ca*ex)*hb,vy=(-sa*ny+ca*ey)*hb;
+    var pr=Math.hypot(ux,uy);
+    o.sx=cx;o.sy=cy;o.pr=Math.max(pr,3);o.vis=true;dsoShown++;
+    if(!o.spr&&pr>2.5&&!o.queued){o.queued=true;dsoQueue.unshift(o);}
+    if(o.spr==='dot'||!o.spr||pr<2.5){
+      if(o.t==='dark')continue;
+      ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,al*0.85);var dr=Math.max(3,pr*1.6)*Math.min(1.6,Math.sqrt(100/Math.max(fov,12))*0.7);
+      ctx.drawImage(dsoDotSprite(),cx-dr,cy-dr,dr*2,dr*2);continue;
+    }
+    var e=o.spr.ext,img=dsoMode==='photo'?o.spr.c:o.spr.e;
+    ctx.globalCompositeOperation=o.t==='dark'?'source-over':'lighter';ctx.globalAlpha=Math.min(1,al);
+    ctx.setTransform(ux,uy,vx,vy,cx,cy);
+    ctx.drawImage(img,-e,-e,2*e,2*e);
+    ctx.setTransform(1,0,0,1,0,0);
+  }
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+function dsoLabel(o){
+  var nm=labelLang==='ja'?(o.ja||o.en):o.en,id=o.id||dsoFmtId(o.ngc);
+  if(labelLang==='both')nm=o.en+(o.ja?' '+o.ja:'');
+  if(!nm||nm===o.id)return id;
+  return (o.id&&nm.indexOf(o.id)<0?o.id+' ':'')+nm;
+}
+function drawDSOLabels(){
+  if(dsoMode==='off')return;
+  ctx.textAlign='center';ctx.font='10.5px "Segoe UI",sans-serif';ctx.fillStyle='rgba(200,180,255,0.82)';
+  var taken=[],ord=dsoList.filter(function(o){return o.vis;}).sort(function(p,q){return (q.pr||0)-(p.pr||0)||(p.mag||99)-(q.mag||99);});
+  for(var i=0;i<ord.length;i++){
+    var o=ord[i];
+    var show=(o.mag!=null&&o.mag<=5)||o.pr>16||fov<=30||(o.sh&&fov<=95);
+    if(!show)continue;
+    var tx=o.sx,ty=o.sy+Math.min(o.pr,60)*0.55+13,txt=dsoLabel(o),w=ctx.measureText(txt).width/2+4,clash=false;
+    for(var j=0;j<taken.length;j++){var q=taken[j];if(Math.abs(q[0]-tx)<q[2]+w&&Math.abs(q[1]-ty)<12){clash=true;break;}}
+    if(clash)continue;taken.push([tx,ty,w]);
+    ctx.fillText(txt,tx,ty);
+  }
+}
+var DSO_NOTE={
+  gal:['To the eye it is only a faint smudge — the arms and colours appear in long-exposure photos.','肉眼や双眼鏡では、ぼんやりした光のしみ。腕や色は、長い時間光をためた写真でやっと写ります。'],
+  neb:['The red is light from hydrogen (Hα). Our eyes are poor at faint red, so to the eye it looks grey, while photos show red and pink.','赤は水素が出す光（Hα）。人の目は暗い赤が苦手なので、目では灰色っぽく、写真では赤やピンクに写ります。'],
+  rfn:['Dust reflecting the light of nearby stars — blue for the same reason the daytime sky is blue.','近くの星の光を、ちりがはね返しています。青いのは、昼の空が青いのと同じ理由です。'],
+  pn:['Gas puffed off by an ageing star. Blue-green is oxygen, red is hydrogen.','年老いた星がはき出したガス。青緑は酸素、赤は水素の光です。'],
+  snr:['What is left after a star exploded.','星が爆発したあとの名残りです。'],
+  gc:['Hundreds of thousands of very old stars packed into a ball.','数十万個のとても古い星が、ボールのように集まっています。'],
+  oc:['Young stars born together from the same cloud of gas.','同じガスの雲から、いっしょに生まれた若い星の集まりです。'],
+  dark:['Dust blocking the light behind it.','後ろの光を、ちりがさえぎって黒く見えています。'],
+  dbl:['Two stars that look close together.','2つの星が、近くに並んで見えています。'],ast:['A small pattern of stars.','星が小さく並んだ形です。']};
+var DSO_SPECIAL={
+  M31:['One of the most distant things you can see with the naked eye. In photos it stretches about 6 full Moons across.','肉眼で見える、いちばん遠いもののひとつ。写真では、満月を約6個並べた長さに写ります。'],
+  M42:['Visible to the naked eye below Orion’s Belt. The four stars at its heart are the Trapezium.','肉眼でも、オリオン座の三つ星の下に見えます。真ん中の4つの星はトラペジウム。'],
+  M45:['6–7 stars to the naked eye. Photos show blue reflection nebulae — a dust cloud the cluster happens to be passing through.','肉眼で6〜7個。写真では、星のまわりに青い反射星雲が写ります（たまたま通りかかった、ちりの雲です）。'],
+  M1:['The remains of the supernova recorded in 1054.','1054年に記録された超新星の名残りです。'],
+  M57:['Even a small telescope shows the doughnut shape.','小さな望遠鏡でも、ドーナツの形に見えます。'],
+  M51:['Two galaxies passing each other.','2つの銀河がすれ違っています。'],
+  M104:['The dark band across it is a lane of dust.','真ん中の黒い帯は、ちりの帯です。'],
+  M13:['The finest globular cluster in northern skies.','北の空でいちばん見事な球状星団です。'],
+  M44:['A naked-eye haze in Cancer, known since ancient times.','かに座の真ん中に、肉眼でもぼんやり見えます。昔から知られた星団です。'],
+  NGC0292:['A small neighbour galaxy of the Milky Way, seen with the naked eye from the southern hemisphere.','天の川銀河のとなりの小さな銀河。南半球では肉眼で見えます。'],
+  'ESO056-115':['The biggest neighbour galaxy of the Milky Way, seen with the naked eye from the southern hemisphere.','天の川銀河のいちばん大きなお隣の銀河。南半球では肉眼で見えます。'],
+  B033:['In photos a dark horse’s head stands against red light. It is very hard to see with the eye.','写真では、赤い光の前に黒い馬の頭が浮かびます。目ではとても見えにくい天体です。'],
+  C099:['The dark hole next to the Southern Cross — visible to the naked eye.','南十字星のとなりの暗い穴。肉眼でもわかります。'],
+  NGC5139:['The largest globular cluster of the Milky Way.','天の川銀河で、いちばん大きな球状星団です。'],
+  NGC0869:['To the naked eye, two soft patches side by side.','肉眼でも、ぼんやりした光が2つ並んで見えます。'],
+  NGC7293:['One of the nearest planetary nebulae to Earth.','地球からいちばん近い惑星状星雲のひとつです。'],
+  NGC7000:['Shaped like the North American continent. Mostly red hydrogen light, so it shows up in photos rather than to the eye.','北アメリカ大陸の形。ほとんどが水素の赤い光なので、目よりも写真で写ります。']};
+function dsoFmtLy(ly){
+  if(!ly)return '—';
+  if(ly>=1e6)return '~'+(ly/1e6).toLocaleString(undefined,{maximumFractionDigits:1})+' million ly · 約'+(ly/1e4).toLocaleString(undefined,{maximumFractionDigits:0})+'万光年';
+  return '~'+Math.round(ly).toLocaleString()+' ly';
+}
+function showDSOInfo(o){
+  lastInfo=['showDSOInfo',o];
+  selectedC=null;updateObserver();
+  var aa=altAzOf(o.x,o.y,o.z),con=constellationAt(o.ra,o.dec),cj=con&&conByName[con]?conByName[con].ja:'',T=DSO_T[o.t]||['',''];
+  var id=[o.id,dsoFmtId(o.ngc)].filter(function(x,i,a){return x&&a.indexOf(x)===i;}).join(' · ');
+  var en0=(o.en&&o.en!==o.id?o.en:id),title=labelLang==='ja'&&o.ja?o.ja:labelLang==='en'?en0:en0+(o.ja?' <span style="font-size:0.8em;color:#ccc">'+o.ja+'</span>':'');
+  var sz=o.a?(o.a>=60?(o.a/60).toFixed(1)+'°':Math.round(o.a*10)/10+'′')+(o.b&&o.b!==o.a?' × '+(o.b>=60?(o.b/60).toFixed(1)+'°':Math.round(o.b*10)/10+'′'):''):'—';
+  var moon=o.a?(o.a/31).toFixed(o.a<31?2:1):null;
+  var note=DSO_SPECIAL[o.id]||DSO_SPECIAL[o.ngc]||DSO_NOTE[o.t]||['',''];
+  document.getElementById('infoContent').innerHTML=
+    '<h2>✧ '+title+'</h2>'
+    +'<div class="sub">'+id+' · '+T[0]+' / '+T[1]+(o.hub?' · '+o.hub:'')+'</div>'
+    +'<div class="info-grid">'
+    +'<div class="info-item"><div class="lbl">'+LB('Magnitude','等級')+'</div><div class="val">'+(o.mag!=null?o.mag.toFixed(1):'—')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Size','見かけの大きさ')+'</div><div class="val">'+sz+'</div></div>'
+    +(moon?'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Compared with the full Moon','満月とくらべて')+'</div><div class="val">×'+moon+'</div></div>':'')
+    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Distance','距離')+'</div><div class="val">'+dsoFmtLy(o.ly)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Right Ascension','赤経')+'</div><div class="val">'+fmtRA(o.ra)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Declination','赤緯')+'</div><div class="val">'+fmtDec(o.dec)+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Altitude','高度')+' ('+LOC.n+')</div><div class="val">'+aa.alt.toFixed(1)+'°'+(aa.alt<0?' ↓':'')+'</div></div>'
+    +'<div class="info-item"><div class="lbl">'+LB('Azimuth','方位')+'</div><div class="val">'+aa.az.toFixed(0)+'°</div></div>'
+    +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('In constellation','星座')+'</div><div class="val">'+(con?con+(cj?' · '+cj:''):'—')+'</div></div>'
+    +'</div>'
+    +'<div class="myth">'+LT(note[0],note[1])
+    +(o.ly?'<br><br>'+LT('The light you see left it about '+dsoFmtLy(o.ly).replace(/ · .*/,'').replace('~','')+' years ago.','今見えている光は、約'+(o.ly>=1e4?(o.ly/1e4).toLocaleString(undefined,{maximumFractionDigits:0})+'万':Math.round(o.ly).toLocaleString())+'年前に出発した光です。'):'')
+    +'<br><br><span style="font-size:0.8em;color:#888">Shown as: '+(dsoMode==='photo'?'📷 long-exposure photo / 長い時間の写真':'👁 naked eye & binoculars / 肉眼・双眼鏡')+' · Data: OpenNGC (CC BY-SA 4.0)'+(o.ly?' · distance: typical published value / 距離は代表的な値':'')+'</span></div>';
+  document.getElementById('infoPanel').classList.add('open');
+}
+function dsoHit(mx,my){
+  var best=null,bd=1e9;
+  for(var i=0;i<dsoList.length;i++){var o=dsoList[i];if(!o.vis)continue;var rr=Math.max(10,Math.min(o.pr,90)),d=Math.hypot(o.sx-mx,o.sy-my);if(d<rr&&d/rr<bd){bd=d/rr;best=o;}}
+  return best;
+}
+function toggleLite(){
+  lite=!lite;try{localStorage.setItem('meridistars_lite',lite?'1':'0');}catch(e){}
+  dsoList.forEach(function(o){o.spr=null;o.queued=false;});dsoQueue.length=0;dsoCur=null;
+  dsoList.forEach(function(o){if(o.sh||(o.mag!=null&&o.mag<6))dsoQueue.push(o);});
+  liteUI();showToast(lite?'🪶 Lite mode — lighter for phones & older devices / 軽量モード（スマホ・古い端末向け）':'🪶 Lite mode off — full detail / 軽量モードをオフにしました');
+}
+function liteUI(){var b=document.getElementById('liteBtn');if(b){b.textContent=lite?'🪶 Lite: ON':'🪶 Lite: OFF';b.classList.toggle('active',lite);}document.querySelectorAll('.tripLite').forEach(function(x){x.textContent=lite?'🪶 Lite: ON':'🪶 Lite: OFF';x.classList.toggle('active',lite);});}
+function toggleDSO(){
+  dsoMode=dsoMode==='photo'?'eye':dsoMode==='eye'?'off':'photo';
+  document.getElementById('dsoBtn').textContent={photo:'🌫 Deep Sky: 📷 Photo',eye:'🌫 Deep Sky: 👁 Eye',off:'🌫 Deep Sky: OFF'}[dsoMode];
+  document.getElementById('dsoBtn').classList.toggle('active',dsoMode!=='off');
+  showToast({photo:'📷 Long-exposure photo look / 長い時間光をためた写真の見え方',eye:'👁 Naked eye & binoculars / 肉眼・双眼鏡の見え方',off:'Deep sky hidden / 星雲・銀河を隠しました'}[dsoMode]);
+}
+
+
+// ============================================
+// 🕳 JOURNEY TO THE BLACK HOLE (v1.1.0, light version — Canvas 2D)
+// Distances: Gaia BH1 ≈ 1,560 ly (Ophiuchus) · Sagittarius A* ≈ 27,000 ly (26,996 ly), 4.3 million suns
+// ============================================
+var trip=null;                                  // {t:0..1 of the whole way, plan:'stops'|'express', state:'run'|'stop'|'done'}
+var TRIP_LY=[0, 1.58e-5*40, 4.2, 1560, 27000];   // Sun · beyond Neptune · nearest star · Gaia BH1 · Sgr A*
+var TRIP_SEG=[0,0.16,0.34,0.58,1];               // how much of the ride each leg takes (log scale feeling)
+function tripLy(t){                               // distance from Earth (light years) at ride progress t
+  for(var i=1;i<TRIP_SEG.length;i++){ if(t<=TRIP_SEG[i]){ var k=(t-TRIP_SEG[i-1])/(TRIP_SEG[i]-TRIP_SEG[i-1]),a=Math.max(TRIP_LY[i-1],1e-6),b=TRIP_LY[i];
+    return i===1?b*k*k:Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*(k*k*(3-2*k))); } }
+  return TRIP_LY[4];
+}
+function fmtTripLy(ly){
+  if(ly<0.01){var au=ly*63241;return (J_()?'地球から 約':'')+au.toFixed(au<10?1:0)+' AU'+(J_()?'':' from Earth');}
+  if(ly<10)return (J_()?'地球から 約':'')+ly.toFixed(1)+(J_()?' 光年':' light years from Earth');
+  return (J_()?'地球から 約':'')+Math.round(ly).toLocaleString()+(J_()?' 光年':' light years from Earth');
+}
+function J_(){return labelLang!=='en';}
+function startTrip(plan){
+  document.getElementById('tripPick').classList.remove('show');
+  trip={t:0,plan:plan,state:'run',t0:performance.now(),stopAt:plan==='stops'?TRIP_SEG[3]:2,stopped:false,seed:Math.random()*1000};
+  closePanel();document.getElementById('tripBar').classList.add('show');tripUI();
+}
+function tripUI(){
+  var b=document.getElementById('tripBar');if(!trip){b.classList.remove('show');return;}
+  var stop=trip.state==='stop',done=trip.state==='done',paused=trip.state==='paused';
+  var pb=document.getElementById('tripPauseBtn');if(pb)pb.textContent=paused?'▶ Play / 再開':'⏸ Pause / 一時停止';
+  document.getElementById('tripStop').style.display=stop?'':'none';
+  document.getElementById('tripDone').style.display=done?'':'none';
+  document.getElementById('tripRun').style.display=!stop&&!done?'':'none';
+  var sp=document.getElementById('pauseBtn');if(sp)sp.textContent=paused?'▶ Play':'⏸ Pause';
+}
+function tripGo(){if(!trip)return;trip.state='run';trip.stopped=true;trip.t0=performance.now()-trip.t*TRIP_MS;closePanel();tripUI();}
+function tripPause(){                                  // ⏸ / ▶ during the ride (button, Space key, or the Solar System Pause)
+  if(!trip)return;
+  if(trip.state==='run'){trip.state='paused';}
+  else if(trip.state==='paused'){trip.state='run';trip.t0=performance.now()-trip.t*TRIP_MS;}
+  tripUI();
+}
+function tripEnd(){trip=null;tripUI();closePanel();var sp=document.getElementById('pauseBtn');if(sp)sp.textContent=solarPaused?'▶ Play':'⏸ Pause';}
+var TRIP_MS=26000;                               // whole ride ≈ 26 s (ヌルヌル)
+function stepTrip(){
+  if(!trip||trip.state!=='run')return;
+  var t=Math.min(1,(performance.now()-trip.t0)/TRIP_MS);
+  if(!trip.stopped&&t>=trip.stopAt){t=trip.stopAt;trip.t=t;trip.state='stop';tripUI();showGaiaInfo(false);return;}
+  trip.t=t;if(t>=1){trip.state='done';tripUI();}
+}
+function showGaiaInfo(full){
+  lastInfo=['showGaiaInfo',full];
+  document.getElementById('infoContent').innerHTML='<h2>🕳 Gaia BH1</h2><div class="sub">'+LT('The nearest known black hole · toward Ophiuchus','いちばん近いブラックホール · へびつかい座の方向')+'</div>'
+   +'<div class="info-grid">'
+   +'<div class="info-item"><div class="lbl">'+LB('Distance','距離')+'</div><div class="val">~1,560 ly</div></div>'
+   +'<div class="info-item"><div class="lbl">'+LB('Mass','重さ')+'</div><div class="val">~10 ☉</div></div>'
+   +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Found','発見')+'</div><div class="val">2022 · Gaia</div></div></div>'
+   +'<div class="myth">'+LT('It orbits together with a Sun-like star. With no gas around it, it gives off almost no light — a “dormant” black hole, found from the tiny wobble of its companion star.','太陽に似た星と、ペアで回っています。まわりにガスがないので、ほとんど光を出さない「眠っている」ブラックホールです。星のわずかなゆれから見つかりました。')
+   +'<br><br>'+LT('That is only about 6% of the way to the centre of the Milky Way. Being dormant, it has no glowing disk — only the starlight around it is slightly bent.','ここまでで、天の川の中心までの約6%です。眠っているので、光る円盤はありません。まわりの星の光が、少しだけ曲がって見えます。')+'</div>';
+  document.getElementById('infoPanel').classList.add('open');
+}
+function showSgrInfo(){
+  lastInfo=['showSgrInfo',null];
+  document.getElementById('infoContent').innerHTML='<h2>🕳 Sagittarius A* <span style="font-size:0.8em;color:#ccc">いて座A＊</span></h2><div class="sub">'+LT('The supermassive black hole at the centre of the Milky Way','天の川銀河の中心の、超大質量ブラックホール')+'</div>'
+   +'<div class="info-grid">'
+   +'<div class="info-item"><div class="lbl">'+LB('Distance','距離')+'</div><div class="val">~27,000 ly</div></div>'
+   +'<div class="info-item"><div class="lbl">'+LB('Mass','重さ')+'</div><div class="val">~4.3 million ☉</div></div>'
+   +'<div class="info-item" style="grid-column:span 2"><div class="lbl">'+LB('Size of the ring','輪の大きさ')+'</div><div class="val">~64 million km · '+LT('smaller than Mercury’s orbit','水星の軌道より小さい')+'</div></div></div>'
+   +'<div class="myth">'+LT('In 2022 the Event Horizon Telescope — radio dishes around the world linked together — took its first picture. From Earth, dust hides it completely in visible light.','2022年、世界中の電波望遠鏡をつないだ「イベント・ホライズン・テレスコープ」が初めて姿を写しました。地球からはちりにさえぎられて、目に見える光では見えません。')
+   +'<br><br>'+LT('The glowing disk and bent light here are a simplified illustration. On devices with WebGL, the starry background is bent by gravity (gravitational lensing), worked out pixel by pixel. The arc over the top of the shadow is the far side of the disk, seen by light bent around the black hole. The left side is brighter because gas moving toward us looks brighter.','ここで描いている光る円盤と光のゆがみは、しくみを分かりやすくした再現です。WebGL が使える端末では、まわりの星空が重力でゆがむ様子（重力レンズ）を、1つ1つの点ごとに計算して描いています。黒い影の上にかかる光の弧は、ブラックホールの向こう側にある円盤が、重力で曲がった光で見えているものです。円盤の左側が明るいのは、こちらへ向かって回っているガスの光が強く見えるためです。')
+   +'<br><br><span style="font-size:0.8em;color:#888">Distance & mass: Gravity Collaboration / EHT (via published values)</span></div>';
+  document.getElementById('infoPanel').classList.add('open');
+}
+// --- drawing -------------------------------------------------
+var tripStars=null;
+function tripField(){ if(tripStars)return tripStars; var r=dsoRand(4242),a=[]; for(var i=0;i<900;i++){ var z=r(); a.push({x:r()*2-1,y:r()*2-1,z:0.05+z*0.95,m:r(),c:r()}); } return tripStars=a; }
+function drawTrip(){
+  var t=trip.t,ly=tripLy(t),cx=W/2,cy=H/2,R0=Math.min(W,H);
+  ctx.fillStyle='#01010a';ctx.fillRect(0,0,W,H);
+  // stars streaming past (speed follows how fast distance grows)
+  var f=tripField(),sp=trip.state==='run'?(0.6+6*Math.sin(Math.PI*Math.min(1,t*1.05))):0.05;
+  ctx.globalCompositeOperation='lighter';
+  for(var i=0;i<f.length;i++){ var s=f[i]; if(trip.state==='run'){ s.z-=0.0022*sp; if(s.z<0.03){s.z=1;s.x=Math.random()*2-1;s.y=Math.random()*2-1;} }
+    var px=cx+s.x/s.z*R0*0.35,py=cy+s.y/s.z*R0*0.35; if(px<-20||px>W+20||py<-20||py>H+20)continue;
+    var br=Math.min(1,(1-s.z)*1.3)*(0.4+0.6*s.m),len=trip.state==='run'?Math.min(40,sp*6*(1-s.z)):0;
+    ctx.strokeStyle='rgba('+(200+55*s.c|0)+','+(210+30*s.c|0)+',255,'+br+')';ctx.lineWidth=lite?1:1.4;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+(px-cx)/R0*len,py+(py-cy)/R0*len);ctx.stroke(); }
+  ctx.globalCompositeOperation='source-over';
+  // scene by leg
+  if(t<TRIP_SEG[2]){                                  // leaving the Sun
+    var k=t/TRIP_SEG[2],sr=Math.max(2,60*Math.pow(1-k,3)),g=ctx.createRadialGradient(cx,cy,0,cx,cy,sr*4);
+    g.addColorStop(0,'rgba(255,240,180,1)');g.addColorStop(0.25,'rgba(255,200,80,0.6)');g.addColorStop(1,'rgba(255,150,40,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,sr*4,0,7);ctx.fill();
+    if(k<0.6){ctx.globalAlpha=1-k/0.6;planets.forEach(function(p,j){var d=p.d*(1-k)*1.4,an=j*0.8+solarAngle*p.speed;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(cx+Math.cos(an)*d,cy+Math.sin(an)*d*0.4,Math.max(1,p.r*0.4*(1-k)),0,7);ctx.fill();});ctx.globalAlpha=1;}
+  }
+  if(t>TRIP_SEG[2]-0.06&&t<TRIP_SEG[3]+0.06){ var gk=1-Math.abs(t-TRIP_SEG[3])/0.06; if(gk>0){var grs=R0*0.035*Math.max(0.25,gk),gal=Math.min(1,gk*1.5);if(!drawGLHole(cx,cy,grs,gal,false,9))drawMiniHole(cx,cy,grs,gal,'Gaia BH1',false);else drawMiniHoleExtras(cx,cy,grs,gal,'Gaia BH1',false);} }
+  if(t>TRIP_SEG[3]+0.04){                               // the Milky Way grows ahead, then we dive to the centre
+    var mk=Math.min(1,(t-TRIP_SEG[3]-0.04)/(1-TRIP_SEG[3]-0.04)),gs=R0*(0.25+mk*mk*3.2),fade=1-Math.max(0,(mk-0.75)/0.25);
+    if(fade>0)drawGalaxyView(cx,cy,gs,fade,mk);
+    if(mk>0.62){var brs=R0*0.085*Math.pow((mk-0.62)/0.38,1.6),bal=Math.min(1,(mk-0.62)/0.2);var reach=16+Math.pow(Math.max(0,(mk-0.8)/0.2),2)*Math.max(W,H)/Math.max(1,brs*1.25/2.6)*1.2;if(!drawGLHole(cx,cy,brs,bal,true,reach))drawMiniHole(cx,cy,brs,bal,null,true);}
+  }
+  if(document.body.classList.contains('viewonly'))return;
+  // HUD: distance + legs
+  var lab=J_()?['☀️ 太陽系','🌟 いちばん近い星','🕳 Gaia BH1','🌌 天の川の中心']:['☀️ Solar System','🌟 Nearest star','🕳 Gaia BH1','🌌 Galactic centre'];
+  ctx.textAlign='center';ctx.font='bold 22px "Segoe UI",sans-serif';ctx.fillStyle='rgba(255,215,0,0.95)';ctx.fillText(fmtTripLy(ly),cx,64);
+  var bw=Math.min(560,W-60),bx=cx-bw/2,by=86;
+  ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fillRect(bx,by,bw,3);ctx.fillStyle='rgba(255,215,0,0.9)';ctx.fillRect(bx,by,bw*t,3);
+  ctx.font='11px "Segoe UI",sans-serif';
+  [TRIP_SEG[0],TRIP_SEG[2],TRIP_SEG[3],1].forEach(function(s,i){ var x=bx+bw*s; ctx.fillStyle=t>=s-0.001?'#ffd700':'#777';ctx.beginPath();ctx.arc(x,by+1.5,4,0,7);ctx.fill();
+    if(i===2&&trip.plan==='express'){ctx.fillStyle='#666';ctx.fillText((J_()?'通過':'passing'),x,by+30);}
+    ctx.fillStyle=t>=s-0.001?'rgba(255,230,170,0.9)':'#777';ctx.fillText(lab[i],x,by+18); });
+}
+function drawGalaxyView(cx,cy,gs,a,mk){
+  var r=dsoRand(77),tilt=0.38+0.5*mk;
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;ctx.translate(cx,cy);ctx.rotate(-0.35+mk*0.4);ctx.scale(1,tilt);
+  var g=ctx.createRadialGradient(0,0,0,0,0,gs*0.22);g.addColorStop(0,'rgba(255,230,180,'+(0.95*(1-mk*0.85))+')');g.addColorStop(1,'rgba(255,190,110,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,gs*0.22,0,7);ctx.fill();
+  var n=lite?900:2200;
+  for(var i=0;i<n;i++){ var arm=i%2,rr=Math.pow(r(),0.6)*gs*0.6,th=Math.log(rr/gs*8+0.6)*2.6+arm*Math.PI+(r()-0.5)*0.55;
+    var x=Math.cos(th)*rr,y=Math.sin(th)*rr,bl=r(); ctx.fillStyle=bl>0.8?'rgba(255,150,190,0.55)':'rgba('+(170+80*bl|0)+','+(190+50*bl|0)+',255,0.45)';
+    ctx.fillRect(x,y,1.6,1.6); }
+  // "you are here"
+  var sx=gs*0.33,sy=gs*0.05; ctx.restore();
+  if(mk<0.55){ var ang=-0.35+mk*0.4,px=cx+(Math.cos(ang)*sx-Math.sin(ang)*sy*tilt),py=cy+(Math.sin(ang)*sx+Math.cos(ang)*sy*tilt);
+    ctx.globalAlpha=a*(1-mk/0.55);ctx.strokeStyle='#ffd700';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(px,py,7,0,7);ctx.stroke();
+    ctx.fillStyle='#ffd700';ctx.font='12px "Segoe UI",sans-serif';ctx.textAlign='left';ctx.fillText(J_()?'☀️ 太陽はここ（中心まで約27,000光年）':'☀️ The Sun is here (~27,000 ly from the centre)',px+12,py+4);ctx.globalAlpha=1; }
+}
+// light version of the black hole: shadow, photon ring, smooth Doppler-bright disk, starlight bent outward (simple lensing)
+// disk=false for a dormant black hole (Gaia BH1 has no gas around it, so no glowing disk — only bent starlight and its companion star)
+function annSeg(c,cx,cy,r0,r1,a0,a1){c.beginPath();c.arc(cx,cy,r1,a0,a1);c.arc(cx,cy,r0,a1,a0,true);c.closePath();}
+function drawDiskHalf(cx,cy,rs,front,flat){
+  var N=lite?36:72,r0=rs*1.55,r1=rs*3.4;
+  ctx.save();ctx.translate(cx,cy);ctx.scale(1,flat);ctx.globalCompositeOperation='lighter';
+  var g=ctx.createRadialGradient(0,0,r0,0,0,r1);
+  for(var i=0;i<N;i++){
+    var a0=Math.PI*(front?0:1)+i*Math.PI/N,a1=a0+Math.PI/N+0.01,am=(a0+a1)/2;
+    var dop=0.5+0.5*(-Math.cos(am));                         // left side moves toward us → brighter and whiter
+    var gr=ctx.createRadialGradient(0,0,r0,0,0,r1);
+    gr.addColorStop(0,'rgba(255,'+(205+40*dop|0)+','+(150+80*dop|0)+','+(0.25+0.6*dop)+')');
+    gr.addColorStop(0.35,'rgba(255,'+(160+40*dop|0)+','+(80+40*dop|0)+','+(0.12+0.35*dop)+')');
+    gr.addColorStop(1,'rgba(200,90,40,0)');
+    ctx.fillStyle=gr;annSeg(ctx,0,0,r0,r1,a0,a1);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawMiniHoleExtras(cx,cy,rs,a,label,disk){
+  ctx.save();ctx.globalAlpha=a;
+  if(!disk){var ph=performance.now()*0.0004,sx=cx+Math.cos(ph)*rs*4.2,sy=cy+Math.sin(ph)*rs*1.3,st=Math.max(3,rs*0.3);
+    ctx.globalCompositeOperation='lighter';var cg=ctx.createRadialGradient(sx,sy,0,sx,sy,st*3);cg.addColorStop(0,'rgba(255,245,210,1)');cg.addColorStop(0.3,'rgba(255,215,140,0.5)');cg.addColorStop(1,'rgba(255,190,100,0)');
+    ctx.fillStyle=cg;ctx.beginPath();ctx.arc(sx,sy,st*3,0,7);ctx.fill();ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle='rgba(255,220,150,0.18)';ctx.setLineDash([3,5]);ctx.beginPath();ctx.ellipse(cx,cy,rs*4.2,rs*1.3,0,0,7);ctx.stroke();ctx.setLineDash([]);}
+  if(label){ctx.fillStyle='rgba(255,230,170,0.9)';ctx.font='12px "Segoe UI",sans-serif';ctx.textAlign='center';ctx.fillText(label,cx,cy+rs*(disk?3.6:5)+14);}
+  ctx.restore();
+}
+function drawMiniHole(cx,cy,rs,a,label,disk){
+  if(rs<1)return;
+  ctx.save();ctx.globalAlpha=a;
+  // bent starlight: only stars close to the hole are pushed outward and stretched into short arcs
+  var f=tripField(),reach=rs*7;ctx.globalCompositeOperation='lighter';
+  for(var i=0;i<f.length;i+=lite?2:1){ var s=f[i],bx=cx+s.x*W*0.55,by=cy+s.y*H*0.55,dx=bx-cx,dy=by-cy,d=Math.hypot(dx,dy)||1;
+    if(d>reach)continue;
+    var e=rs*1.9,nd=Math.sqrt(d*d+e*e),k=1-d/reach,an=Math.atan2(dy,dx),half=Math.min(0.9,k*k*1.6)*(lite?0.7:1);
+    ctx.strokeStyle='rgba(225,232,255,'+((0.25+0.5*s.m)*(0.4+0.6*k))+')';ctx.lineWidth=1.1;
+    ctx.beginPath();ctx.arc(cx,cy,nd,an-half*0.5,an+half*0.5);ctx.stroke();
+    if(k>0.55){ctx.globalAlpha=a*0.35;ctx.beginPath();ctx.arc(cx,cy,nd*0.92,an+Math.PI-half*0.3,an+Math.PI+half*0.3);ctx.stroke();ctx.globalAlpha=a;} }  // faint second image on the far side
+  ctx.globalCompositeOperation='source-over';
+  if(disk){
+    // the far side of the disk, seen lifted over the top by gravity
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    var lg=ctx.createRadialGradient(cx,cy,rs*1.3,cx,cy,rs*2.5);lg.addColorStop(0,'rgba(255,215,160,0.55)');lg.addColorStop(0.5,'rgba(255,160,80,0.18)');lg.addColorStop(1,'rgba(255,120,50,0)');
+    ctx.fillStyle=lg;ctx.beginPath();ctx.arc(cx,cy,rs*2.5,0,7);ctx.arc(cx,cy,rs*1.3,0,7,true);ctx.fill();ctx.restore();
+    drawDiskHalf(cx,cy,rs,false,0.24);
+  }
+  // photon ring
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  var pr=ctx.createRadialGradient(cx,cy,rs*1.22,cx,cy,rs*1.42);pr.addColorStop(0,'rgba(255,235,200,0)');pr.addColorStop(0.45,disk?'rgba(255,235,200,0.9)':'rgba(220,230,255,0.55)');pr.addColorStop(1,'rgba(255,235,200,0)');
+  ctx.fillStyle=pr;ctx.beginPath();ctx.arc(cx,cy,rs*1.42,0,7);ctx.arc(cx,cy,rs*1.22,0,7,true);ctx.fill();ctx.restore();
+  // the shadow
+  var sg=ctx.createRadialGradient(cx,cy,rs*1.1,cx,cy,rs*1.27);sg.addColorStop(0,'#000');sg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sg;ctx.beginPath();ctx.arc(cx,cy,rs*1.27,0,7);ctx.fill();
+  if(disk)drawDiskHalf(cx,cy,rs,true,0.24);
+  if(!disk){                                           // Gaia BH1's companion: a Sun-like star circling it
+    var ph=performance.now()*0.0004,sx=cx+Math.cos(ph)*rs*4.2,sy=cy+Math.sin(ph)*rs*1.3,st=Math.max(3,rs*0.3);
+    ctx.globalCompositeOperation='lighter';var cg=ctx.createRadialGradient(sx,sy,0,sx,sy,st*3);cg.addColorStop(0,'rgba(255,245,210,1)');cg.addColorStop(0.3,'rgba(255,215,140,0.5)');cg.addColorStop(1,'rgba(255,190,100,0)');
+    ctx.fillStyle=cg;ctx.beginPath();ctx.arc(sx,sy,st*3,0,7);ctx.fill();ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle='rgba(255,220,150,0.18)';ctx.setLineDash([3,5]);ctx.beginPath();ctx.ellipse(cx,cy,rs*4.2,rs*1.3,0,0,7);ctx.stroke();ctx.setLineDash([]);
+  }
+  if(label){ctx.fillStyle='rgba(255,230,170,0.9)';ctx.font='12px "Segoe UI",sans-serif';ctx.textAlign='center';ctx.fillText(label,cx,cy+rs*(disk?3.6:5)+14);}
+  ctx.restore();
+}
+
+// ============================================
+// 📷 CAMERA MODE (v1.1.0) — "roughly how a photo would come out"
+// exposure EV gain = log2(ISO/100) + log2(shutter s) − 2·log2(F)  (relative to ISO100 · 1 s · f/1)
+// ============================================
+var cam_={on:false,iso:3200,sh:15,f:2.8,mm:14,bortle:3,trail:true};
+var CAM_ISO=[100,200,400,800,1600,3200,6400,12800,25600],CAM_SH=[1,2,4,8,10,15,20,25,30,60,120,300,600,1200,1800,3600],CAM_F=[1.4,1.8,2,2.8,4,5.6,8],CAM_MM=[14,24,35,50,85,135];
+var CAM_BORTLE=[[1,'🏔️ Remote dark site / 山奥',21.9],[3,'🌾 Countryside / 田舎',21.5],[5,'🏡 Suburbs / 郊外',20.5],[7,'🏙️ City edge / 街はずれ',19.3],[9,'🌃 City centre / 都心',18.0]];
+function camEV(){return Math.log2(cam_.iso/100)+Math.log2(cam_.sh)-2*Math.log2(cam_.f/2.8)+1;}   // ≈ 10.9 for the classic ISO3200 · 15 s · f/2.8 (each step of 1 = twice the light)
+function camSkyMag(){var b=CAM_BORTLE.find(function(x){return x[0]===cam_.bortle;})||CAM_BORTLE[1];return b[2];}       // sky brightness, mag/arcsec²
+function camMoonSky(){                                             // moonlight brightens the sky (0 … ~1)
+  var m=skyBodies&&skyBodies[1];if(!m||!horizonMode)return 0;
+  var alt=Math.asin(Math.max(-1,Math.min(1,m.x*ZEN[0]+m.y*ZEN[1]+m.z*ZEN[2])))/D2R;if(alt<0)return 0;
+  return Math.pow(m.illum||0,1.7)*Math.min(1,alt/25+0.15)*0.85;
+}
+function camLimit(){                                               // faintest star the "photo" records
+  var ev=camEV(),sky=camSkyMag()-camMoonSky()*2.0;
+  return Math.min(11,Math.max(1,6.6+(ev-10.9)*0.62-(21.9-sky)*0.85));
+}
+function camSkyGlow(){                                             // 0 = black sky, 1 = washed out
+  var ev=camEV(),sky=camSkyMag()-camMoonSky()*2.0;
+  return Math.max(0,Math.min(1,0.18+(ev-10.9)*0.11+(21.5-sky)*0.2));
+}
+function camRule500(){return 500/cam_.mm;}                          // "500 rule" (full frame), seconds before stars visibly trail
+function camFov(){return 2*Math.atan(36/(2*cam_.mm))/D2R;}          // horizontal angle of view (full frame)
+function camSet(k,v){cam_[k]=v;if(k==='mm'){fov=Math.max(FOV_MIN,Math.min(FOV_MAX,camFov()));}camUI();}
+function toggleCam(){
+  cam_.on=!cam_.on;
+  if(cam_.on){if(!horizonMode)toggleHorizon();fov=Math.max(FOV_MIN,Math.min(FOV_MAX,camFov()));if(dsoMode==='eye'||dsoMode==='off'){cam_.prevDso=dsoMode;dsoMode='photo';}}
+  else if(cam_.prevDso){dsoMode=cam_.prevDso;cam_.prevDso=null;}
+  document.getElementById('camBar').classList.toggle('show',cam_.on);
+  var b=document.getElementById('camBtn');b.classList.toggle('active',cam_.on);b.textContent=cam_.on?'📷 Camera: ON':'📷 Camera: OFF';
+  camUI();
+  showToast(cam_.on?'📷 Camera mode — roughly how a photo would come out / 写真ならこう写る、の目安':'📷 Camera mode off / カメラモードを終了');
+}
+function camOpts(id,arr,cur,fmt){var e=document.getElementById(id);if(!e)return;e.innerHTML=arr.map(function(v){return '<option value="'+v+'"'+(v===cur?' selected':'')+'>'+fmt(v)+'</option>';}).join('');}
+function camUI(){
+  camOpts('camIso',CAM_ISO,cam_.iso,function(v){return 'ISO '+v;});
+  camOpts('camSh',CAM_SH,cam_.sh,function(v){return v<60?v+' s':v<3600?(v/60)+' min':'60 min';});
+  camOpts('camF',CAM_F,cam_.f,function(v){return 'f/'+v;});
+  camOpts('camMm',CAM_MM,cam_.mm,function(v){return v+' mm';});
+  var be=document.getElementById('camBortle');if(be){be.innerHTML=CAM_BORTLE.map(function(b){return '<option value="'+b[0]+'"'+(b[0]===cam_.bortle?' selected':'')+'>'+b[1]+'</option>';}).join('');}
+  camWarnUI();
+}
+function camWarnUI(){
+  var w=document.getElementById('camWarn');if(!w)return;
+  var r5=camRule500(),glow=camSkyGlow(),ms=[];
+  if(cam_.sh>r5*1.05)ms.push((cam_.trail?'🌀 ':'⚠️ ')+(labelLang==='en'?'Stars trail (500 rule ≈ '+r5.toFixed(0)+' s)':labelLang==='ja'?'星が線になります（500のルールで約'+r5.toFixed(0)+'秒まで）':'Stars trail · 星が線に（500 rule ≈ '+r5.toFixed(0)+' s）'));
+  else ms.push('✅ '+(labelLang==='en'?'Stars stay as points (up to ≈ '+r5.toFixed(0)+' s)':labelLang==='ja'?'星は点で写ります（約'+r5.toFixed(0)+'秒まで）':'Points · 点で写る（≈ '+r5.toFixed(0)+' s）'));
+  if(glow>0.75)ms.push('☀️ '+(labelLang==='en'?'Over-exposed':labelLang==='ja'?'明るすぎ':'Over-exposed · 明るすぎ'));
+  else if(camEV()<8.5)ms.push('🌑 '+(labelLang==='en'?'Under-exposed':labelLang==='ja'?'暗すぎ':'Under-exposed · 暗すぎ'));
+  if(camMoonSky()>0.3)ms.push('🌕 '+(labelLang==='en'?'Moonlight brightens the sky':labelLang==='ja'?'月明かりで空が明るい':'Moonlight · 月明かり'));
+  w.textContent=ms.join('  ·  ');
+}
+// sky colour of a photo: dark blue-black at a dark site, orange-brown under city light, grey-blue with the Moon
+function camSkyFill(){
+  var glow=camSkyGlow(),city=Math.max(0,(cam_.bortle-3)/6),moon=camMoonSky();
+  var r=8+glow*(70+90*city+40*moon),g=10+glow*(55+50*city+70*moon),b=26+glow*(70-20*city+110*moon);
+  var top='rgb('+Math.round(r*0.55)+','+Math.round(g*0.6)+','+Math.round(b*0.75)+')',bot='rgb('+Math.round(r*1.35+city*60*glow)+','+Math.round(g*1.15+city*25*glow)+','+Math.round(b*0.95)+')';
+  var gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+}
+// star trails: each bright star is drawn as an arc around the celestial pole, as long as the Earth turned during the exposure
+function camTrails(lim){
+  if(!(cam_.sh>camRule500()*1.05))return false;
+  var turn=Math.min(cam_.sh,3600)/86164*360*D2R;                  // Earth turns 360° per sidereal day
+  var lst=localSiderealDeg(obsDate),n=0,max=lite?600:2200,trailLim=Math.min(lim,lite?5.5:7);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+  for(var j=realStars.length-1;j>=0&&n<max;j--){
+    var s=realStars[j];if(s.mag>trailLim)continue;
+    var steps=Math.max(4,Math.min(40,Math.round(turn/D2R/1.5))),drawn=false,c=tempToRGB(s.temp),br=Math.max(0.12,Math.min(1,(trailLim-s.mag)/5));
+    ctx.strokeStyle='rgba('+Math.round(c[0]*0.75+64)+','+Math.round(c[1]*0.75+64)+','+Math.round(c[2]*0.75+64)+','+br+')';
+    ctx.lineWidth=Math.max(0.7,Math.min(2.6,(trailLim-s.mag)*0.38))*Math.sqrt(100/Math.max(fov,10))*0.8;
+    ctx.beginPath();
+    for(var k=0;k<=steps;k++){                                        // RA shifts backwards over the exposure
+      var ra=(s.ra-turn/D2R*k/steps+360)%360,v=radecVec(ra,s.dec);
+      if(belowHorizon(v[0],v[1],v[2])||!project(v[0],v[1],v[2])){drawn=false;continue;}
+      if(!drawn){ctx.moveTo(P.x,P.y);drawn=true;}else ctx.lineTo(P.x,P.y);
+    }
+    ctx.stroke();n++;
+  }
+  ctx.restore();return true;
+}
+// sensor noise: fine luminance + colour grain, stronger at high ISO
+var camNoiseC=null,camNoiseF=0;
+function camNoise(){
+  var amt=Math.max(0,Math.log2(cam_.iso/400))/6;if(amt<=0.01)return;
+  var NW=lite?240:Math.min(640,Math.round(W/1.6)),NH=Math.round(NW*H/W);
+  if(!camNoiseC){camNoiseC=document.createElement('canvas');}
+  if(camNoiseC.width!==NW||camNoiseC.height!==NH){camNoiseC.width=NW;camNoiseC.height=NH;camNoiseF=0;}
+  if(camNoiseF++%(lite?6:3)===0){                                    // grain changes a few times a second, like live view
+    var g=camNoiseC.getContext('2d'),im=g.createImageData(NW,NH),d=im.data;
+    for(var i=0;i<d.length;i+=4){var v=Math.pow(Math.random(),2.2)*255,cn=(Math.random()-0.5)*60;d[i]=v+cn;d[i+1]=v;d[i+2]=v-cn;d[i+3]=255;}
+    g.putImageData(im,0,0);
+  }
+  ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=Math.min(0.2,amt*0.17);ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(camNoiseC,0,0,W,H);ctx.restore();
+}
+function camVignette(){
+  var r=Math.hypot(W,H)/2,g=ctx.createRadialGradient(W/2,H/2,r*0.45,W/2,H/2,r);
+  var v=cam_.mm<=24?0.55:cam_.mm<=50?0.35:0.2;g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,'+v+')');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+function camHud(){
+  ctx.save();ctx.font='12px "Courier New",monospace';ctx.textAlign='left';
+  var txt='ISO '+cam_.iso+'  '+(cam_.sh<60?cam_.sh+'s':(cam_.sh/60)+'min')+'  f/'+cam_.f+'  '+cam_.mm+'mm  ·  EV '+camEV().toFixed(1);
+  ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(10,H-58,ctx.measureText(txt).width+16,20);ctx.fillStyle='#ffd700';ctx.fillText(txt,18,H-44);
+  // frame corners like a viewfinder
+  ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;var m=18,l=26;
+  [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]].forEach(function(c){ctx.beginPath();ctx.moveTo(c[0],c[1]+l*c[3]);ctx.lineTo(c[0],c[1]);ctx.lineTo(c[0]+l*c[2],c[1]);ctx.stroke();});
+  ctx.restore();
+}
+
+
+// ============================================
+// 🌀 WebGL GRAVITATIONAL LENSING (v1.1.0)
+// Each pixel looks "past" the black hole: light passing at distance r is bent so we see the sky at
+// β = r·(1 − θE²/r²)  (point-mass lens). Inside the shadow (≈2.6 rs, photon sphere) nothing comes back.
+// The far side of the disk is seen through the lens (the arc over the top); the near side sits in front.
+// ============================================
+var GLH={ok:null,c:null,g:null,p:null,u:{},tex:null};
+var GL_VS='attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}';
+var GL_FS=[
+'#ifdef GL_FRAGMENT_PRECISION_HIGH',
+'precision highp float;',
+'#else',
+'precision mediump float;',
+'#endif',
+'uniform sampler2D uBg;uniform vec2 uRes,uC,uPan;uniform float uRs,uT,uDisk,uReach,uA;',
+'float h12(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}',
+'vec3 starL(vec2 S,float cell,float prob,float px,float gain){',
+'  vec2 id=floor(S/cell);vec2 f=S-id*cell;float h=h12(id);if(h>prob)return vec3(0.);',
+'  vec2 pos=(vec2(h12(id+17.1),h12(id+43.7))*0.9+0.05)*cell;float d=length(f-pos);',
+'  float m=pow(h12(id+91.3),6.0),t=h12(id+7.7),sg=0.6*px;',
+'  vec3 c=t<0.18?vec3(1.0,0.77,0.55):(t<0.32?vec3(1.0,0.9,0.72):(t<0.8?vec3(1.0,0.99,0.96):vec3(0.72,0.8,1.0)));',
+'  float core=exp(-d*d/(2.0*sg*sg)),halo=m*0.22*exp(-d/(px*(1.0+2.5*m)))*(1.0-smoothstep(0.0,min(min(pos.x,pos.y),min(cell-pos.x,cell-pos.y)),d));',
+'  return c*(0.3+1.7*m)*gain*(core+halo);',
+'}',
+'float vn(vec2 p,vec2 P){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);',
+'  float a=h12(mod(i,P)),b=h12(mod(i+vec2(1.,0.),P)),c=h12(mod(i+vec2(0.,1.),P)),d=h12(mod(i+vec2(1.,1.),P));',
+'  return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}',
+'float fbm(vec2 p,vec2 P){float s=0.,a=0.5;for(int k=0;k<6;k++){s+=a*vn(p,P);p=p*2.0+vec2(1.7,9.2);P*=2.0;a*=0.5;}return s;}',
+'vec3 sky(vec2 uv){',   // the Milky Way is computed, not read from a picture: no texels, so no grid at any magnification
+'  vec2 u=vec2(fract(uv.x),fract(uv.y));',
+'  float yc=0.5+sin(u.x*6.2832)*0.068+sin(u.x*18.85+1.3)*0.018,dy=u.y-yc;',
+'  float n=fbm(u*vec2(8.,4.),vec2(8.,4.)),body=exp(-dy*dy/0.018)*(0.35+1.1*n*n);',
+'  float lane=smoothstep(0.46,0.66,fbm(u*vec2(16.,16.)+vec2(3.1,0.),vec2(16.,16.)))*exp(-dy*dy/0.004);',
+'  float pink=pow(smoothstep(0.52,0.76,fbm(u*vec2(24.,12.)+vec2(7.,2.),vec2(24.,12.))),2.0)*exp(-dy*dy/0.012);',
+'  float grain=fbm(u*vec2(256.,128.),vec2(256.,128.));',
+'  vec3 c=vec3(0.003,0.004,0.012)+vec3(0.60,0.56,0.66)*body*body*(0.8+0.4*grain)*0.43+vec3(1.0,0.36,0.58)*pink*0.42+vec3(0.55,0.42,0.75)*body*n*0.08;',
+'  return c*(1.0-0.88*lane);',
+'}',
+'vec3 bic(vec2 uv){',   // smooth B-spline sampling: hides the texel grid when the picture is magnified by the lens
+'  vec2 ts=vec2(2048.0,1024.0),st=uv*ts-0.5,i=floor(st),f=st-i;',
+'  vec2 w0=(1.0-f)*(1.0-f)*(1.0-f)/6.0,w1=(4.0-6.0*f*f+3.0*f*f*f)/6.0,w3=f*f*f/6.0,w2=1.0-w0-w1-w3;',
+'  vec2 s0=w0+w1,s1=w2+w3,o0=i-0.5+w1/s0,o1=i+1.5+w3/s1;',
+'  vec2 a=(o0+0.5)/ts,b=(o1+0.5)/ts;',
+'  return mix(mix(texture2D(uBg,vec2(b.x,b.y)).rgb,texture2D(uBg,vec2(a.x,b.y)).rgb,s0.x),mix(texture2D(uBg,vec2(b.x,a.y)).rgb,texture2D(uBg,vec2(a.x,a.y)).rgb,s0.x),s0.y);',
+'}',
+'vec3 disk(vec2 q,float back){',
+'  float fl=0.2;vec2 d=vec2(q.x,q.y/fl);float rad=length(d);',
+'  if(rad<3.0||rad>10.0)return vec3(0.);',
+'  float side=back>0.5?smoothstep(-0.12,0.12,q.y):smoothstep(0.12,-0.12,q.y);',
+'  float ang=atan(d.y,d.x);',
+'  float dop=0.5+0.5*(-d.x/rad);',                                     // gas moving toward us (left) looks brighter
+'  float temp=pow(3.0/rad,1.35);',
+'  float fl2=0.78+0.22*sin(ang*6.0-uT*0.5+rad*1.6)*sin(ang*2.0+uT*0.2-rad*0.8);',   // slow swirls, no flicker
+'  float edge=smoothstep(3.0,3.7,rad)*smoothstep(10.0,6.0,rad);',
+'  vec3 c=mix(vec3(1.0,0.42,0.12),vec3(1.0,0.93,0.8),clamp(temp*(0.6+0.8*dop),0.,1.));',
+'  return c*temp*(0.35+0.85*dop)*fl2*edge*1.5*side;',
+'}',
+'void main(){',
+'  vec2 p=(gl_FragCoord.xy-uC)/uRs;float r=length(p);',
+'  float E=3.0,sh=2.6;',
+'  vec2 b=p*(1.0-E*E/max(r*r,1e-4));',
+'  vec3 col=vec3(0.);',
+'  if(r>sh){',
+'    vec2 uv=uPan+b*uRs/vec2(uRes.x*1.7,uRes.x*0.85)*0.75;',
+'    col=sky(uv)+(h12(gl_FragCoord.xy)-0.5)/255.0;',
+'    float lum=dot(col,vec3(0.333));',
+'    vec2 S=mod(uv*vec2(4096.0,2048.0),vec2(4096.0,2048.0));float px=0.75*4096.0/(uRes.x*1.7);',
+'    float mg=min(1.0/max(0.02,abs(1.0-pow(E/r,4.0))),12.0);',   // point lens: stars get brighter, but stay points
+'    col+=mg*(starL(mat2(0.8,0.6,-0.6,0.8)*S,18.0,0.55,px,1.0)+starL(mat2(0.6,-0.8,0.8,0.6)*S+vec2(3.3,1.7),9.0,0.06+clamp(lum*2.5,0.0,0.22),px,0.45)+starL(mat2(0.28,0.96,-0.96,0.28)*S+vec2(5.1,8.9),11.3,0.05+clamp(lum*2.0,0.0,0.18),px,0.4));',
+'    if(uDisk>0.5)col=col*0.55+disk(b,1.0)*1.25;',
+'  }',
+'  float ring=exp(-pow((r-sh-0.07)/0.09,2.0))*0.85+0.22*exp(-pow((r-sh-0.18)/0.3,2.0));',
+'  col+=vec3(1.0,0.88,0.72)*ring*(uDisk>0.5?1.1:0.45);',
+'  if(uDisk>0.5)col+=disk(p,0.0);',
+'  float a=r<sh?1.0:smoothstep(uReach,uReach*0.55,r);',
+'  col=vec3(1.0)-exp(-col*1.25);',
+'  gl_FragColor=vec4(col*a,a)*uA;',
+'}'].join('\n');
+function glBgTexture(){
+  // 2048×1024 sky (4× the detail of before). Stars are drawn crisp: a sharp core + soft glow, sized in real pixels.
+  var TW=2048,TH=1024,c=document.createElement('canvas');c.width=TW;c.height=TH;var g=c.getContext('2d'),r=dsoRand(9001);
+  g.fillStyle='#020309';g.fillRect(0,0,TW,TH);
+  var band=function(x){return TH/2+Math.sin(x/TW*Math.PI*2)*70+Math.sin(x/TW*Math.PI*6+1.3)*18;};   // joins up at the edges: no seam
+  // the Milky Way band: many soft clouds, warmer toward the middle, with pink star-forming patches
+  g.globalCompositeOperation='lighter';
+  for(var i=0;i<2600;i++){var x=r()*TW,y=band(x)+(r()-0.5)*(140+120*r()),s=10+r()*70,w=r();
+    var gr=g.createRadialGradient(x,y,0,x,y,s);gr.addColorStop(0,'rgba('+(160+70*w|0)+','+(145+55*w|0)+','+(170+50*(1-w)|0)+',0.035)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-s,y-s,2*s,2*s);}
+  for(var k=0;k<34;k++){var x2=r()*TW,y2=band(x2)+(r()-0.5)*150,s2=14+r()*48;var gn=g.createRadialGradient(x2,y2,0,x2,y2,s2);gn.addColorStop(0,'rgba(255,95,140,0.16)');gn.addColorStop(0.5,'rgba(230,80,130,0.06)');gn.addColorStop(1,'rgba(255,90,140,0)');g.fillStyle=gn;g.fillRect(x2-s2,y2-s2,2*s2,2*s2);}
+  // dust lanes: thin dark filaments threading the band
+  g.globalCompositeOperation='source-over';
+  for(var j=0;j<620;j++){var x3=r()*TW,y3=band(x3)+(r()-0.5)*60;g.fillStyle='rgba(0,0,0,'+(0.08+0.22*r())+')';g.beginPath();g.ellipse(x3,y3,14+r()*60,2.5+r()*9,0.18+(r()-0.5)*0.3,0,7);g.fill();}
+  // faint background star dust (unresolved stars) — makes the band look grainy and real
+  // soft grain: small round puffs at free (non-grid) positions — nothing lines up, so no mesh appears when lensed
+  g.globalCompositeOperation='lighter';
+  for(var q=0;q<9000;q++){var x5=r()*TW,y5=band(x5)+(r()+r()+r()-1.5)*220,s5=1.6+r()*3.2,v=0.05+r()*0.09;
+    var gq=g.createRadialGradient(x5,y5,0,x5,y5,s5);gq.addColorStop(0,'rgba(225,218,235,'+v+')');gq.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gq;g.fillRect(x5-s5,y5-s5,2*s5,2*s5);}
+  // stars are no longer painted here: the shader draws them as true points at any zoom (v1.1.0 最上級くっきり)
+  // wrap: copy a strip from each side to the other so the join is invisible
+  var c2=document.createElement('canvas');c2.width=TW;c2.height=TH;var g2=c2.getContext('2d');g2.drawImage(c,0,0);
+  var F=96;for(var e=0;e<F;e++){var k2=e/F;g2.globalAlpha=0.5*(1-k2);g2.drawImage(c,TW-1-e,0,1,TH,e,0,1,TH);g2.drawImage(c,e,0,1,TH,TW-1-e,0,1,TH);}
+  return c2;
+}
+function glInit(){
+  if(GLH.ok!==null)return GLH.ok;
+  GLH.ok=false;
+  try{
+    var c=document.createElement('canvas'),g=c.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,alpha:true,antialias:false})||c.getContext('experimental-webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true});
+    if(!g)return false;
+    function sh(type,src){var s=g.createShader(type);g.shaderSource(s,src);g.compileShader(s);if(!g.getShaderParameter(s,g.COMPILE_STATUS)){console.warn('MeridiStars WebGL:',g.getShaderInfoLog(s));return null;}return s;}
+    var vs=sh(g.VERTEX_SHADER,GL_VS),fs=sh(g.FRAGMENT_SHADER,GL_FS);if(!vs||!fs)return false;
+    var p=g.createProgram();g.attachShader(p,vs);g.attachShader(p,fs);g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return false;
+    g.useProgram(p);
+    var buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);
+    var al=g.getAttribLocation(p,'a');g.enableVertexAttribArray(al);g.vertexAttribPointer(al,2,g.FLOAT,false,0,0);
+    ['uBg','uRes','uC','uPan','uRs','uT','uDisk','uReach','uA'].forEach(function(n){GLH.u[n]=g.getUniformLocation(p,n);});
+    var t=g.createTexture();g.bindTexture(g.TEXTURE_2D,t);g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,glBgTexture());
+    g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_S,g.REPEAT);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_WRAP_T,g.REPEAT);
+    g.generateMipmap(g.TEXTURE_2D);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MIN_FILTER,g.LINEAR_MIPMAP_LINEAR);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MAG_FILTER,g.LINEAR);
+    g.uniform1i(GLH.u.uBg,0);
+    c.addEventListener('webglcontextlost',function(e){e.preventDefault();GLH.ok=false;},false);
+    GLH.c=c;GLH.g=g;GLH.p=p;GLH.ok=true;
+  }catch(e){GLH.ok=false;}
+  return GLH.ok;
+}
+function useGL(){return !lite&&glInit();}
+// cx,cy,rs in screen pixels (rs = shadow radius / 1.25, same meaning as the canvas version)
+function drawGLHole(cx,cy,rs,a,disk,reach){
+  if(!useGL())return false;
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,s=1,w=Math.max(2,Math.round(W*s)),h=Math.max(2,Math.round(H*s)),c=GLH.c,g=GLH.g;
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  g.viewport(0,0,w,h);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);
+  var u=GLH.u,t=performance.now()*0.001;
+  g.uniform2f(u.uRes,w,h);g.uniform2f(u.uC,cx*s,(H-cy)*s);g.uniform1f(u.uRs,Math.max(0.5,rs*1.25/2.6*s));
+  g.uniform2f(u.uPan,0.31+t*0.0025,0.47);g.uniform1f(u.uT,t);g.uniform1f(u.uDisk,disk?1:0);g.uniform1f(u.uReach,reach);g.uniform1f(u.uA,Math.max(0,Math.min(1,a)));
+  g.drawArrays(g.TRIANGLES,0,3);
+  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,w,h,0,0,W,H);ctx.restore();
+  return true;
+}
+
 function animate(){
   var nowT=performance.now();
+  if(lite&&nowT-lastDraw<31){requestAnimationFrame(animate);return;}
+  lastDraw=nowT;
   if(!lastFrame)lastFrame=nowT;
   var dtms=Math.min(250,nowT-lastFrame);lastFrame=nowT;
   if(!timePaused)obsDate=new Date(obsDate.getTime()+dtms*timeSpeed);
-  if(mode==='sky'&&nowT-lastUI>200){updateTimeUI();lastUI=nowT;}
+  if(mode==='sky'&&nowT-lastUI>200){updateTimeUI();lastUI=nowT;if(cam_.on)camWarnUI();}
   if(mode==='sky'){
     stepFly();
     drawNightSky();
     var where=horizonMode?(fmtJST(obsDate)+' | Az '+Math.round(viewAz)+'° Alt '+Math.round(viewAlt)+'°'):('Center RA '+fmtRA(viewRA)+' Dec '+fmtDec(viewDec));
     document.getElementById('hud').textContent='View: '+Math.round(fov)+'° | '+where
-      +' | Stars: '+(drawNightSky.shown||0)+' / '+realStars.length+' | '+(timePaused?'⏸ paused':'×'+timeSpeed)+(horizonMode?' | Sun alt '+sunAlt.toFixed(0)+'°':'');
+      +' | Stars: '+(drawNightSky.shown||0)+' / '+realStars.length+(dsoMode!=='off'?' | Deep sky: '+dsoShown:'')+(lite?' | 🪶':'')+' | '+(timePaused?'⏸ paused':'×'+timeSpeed)+(horizonMode?' | Sun alt '+sunAlt.toFixed(0)+'°':'');
+  }else if(trip){
+    stepTrip();drawTrip();
+    document.getElementById('hud').textContent=fmtTripLy(tripLy(trip.t))+(trip.state==='paused'?' | ⏸ paused':'')+' | Space ⏯'+(lite?' | 🪶':'')+(GLH.ok?' | 🌀 WebGL':'');
   }else{
     drawSolarSystem();
-    document.getElementById('hud').textContent='Zoom: '+zoom.toFixed(1)+'x | Speed: '+document.getElementById('speedSlider').value;
+    document.getElementById('hud').textContent='Zoom: '+zoom.toFixed(1)+'x | Speed: '+document.getElementById('speedSlider').value+(solarPaused?' | ⏸ paused':'')+' | Space ⏯';
   }
   requestAnimationFrame(animate);
 }
@@ -1743,7 +2639,5 @@ function animate(){
 window.addEventListener('DOMContentLoaded',init);
 </script>
 
-<!-- GoatCounter -->
-<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-  
+
 </body></html>
