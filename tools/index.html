@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meridi Tools — 広告なしの小さな道具箱（割り勘・タイマー・QR） | Ad-free Little Tools</title>
-<meta name="description" content="広告なし・登録なし・通信なしの小さな道具箱。割り勘・精算＆チップ計算、大きなタイマーとスコアボード、テキスト整形、TRPG のダイス、期限切れにならない QR コード、写真の位置情報を消す道具。A free, ad-free toolbox — split bill & tip calculator, timer & scoreboard, text cleaner, TRPG dice, direct QR codes and photo location remover. Nothing is uploaded.">
+<title>Meridi Tools — 広告なしの小さな道具箱（割り勘・勤怠・タイマー・QR） | Ad-free Little Tools</title>
+<meta name="description" content="広告なし・登録なし・通信なしの小さな道具箱。割り勘・精算＆チップ計算、勤怠と時給計算（Punch）、大きなタイマーとスコアボード、テキスト整形、TRPG のダイス、期限切れにならない QR コード、写真の位置情報を消す道具。A free, ad-free toolbox — split bill & tip calculator, timecard & pay calculator (Punch), timer & scoreboard, text cleaner, TRPG dice, direct QR codes and photo location remover. Nothing is uploaded.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
 <style>
 :root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120acc;--acc:#39ff14}
@@ -64,7 +64,7 @@ footer{text-align:center;padding:16px;font:11px 'Courier New',monospace;color:va
 <header>
   <a class="home" href="https://meridibrand.com/">← Meridi Brand</a>
   <span class="sp"></span>
-  <button class="tg" id="tInfo">v1.1.0</button>
+  <button class="tg" id="tInfo">v1.2.0</button>
   <button class="tg" id="tLang"></button>
   <button class="tg" id="tTheme"></button>
 </header>
@@ -98,12 +98,12 @@ footer{text-align:center;padding:16px;font:11px 'Courier New',monospace;color:va
   </div>
 </main>
 <div class="info" id="info"><div class="ibox">
-  <div class="ih"><b>🧰 Meridi Tools</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <div class="ih"><b>🧰 Meridi Tools</b><span>v1.2.0</span><button class="tg" id="iClose">✕</button></div>
   <div class="mani" id="mani"></div>
   <div class="itag">No Ads. No Subscriptions. Just Tools.</div>
   <div class="icl" id="iCl"></div>
 </div></div>
-<footer>© 2026 Meridi Brand · Meridi Tools v1.0.0 · 🐾 Built by one person and three cats</footer>
+<footer>© 2026 Meridi Brand · Meridi Tools v1.2.0 · 🐾 Built by one person and three cats</footer>
 
 <script>
 (() => {
@@ -135,6 +135,9 @@ const TOOLS = [
   { ic:'📍', url:'photo/', name:['写真の位置情報を消す','Photo Location Remover'],
     d:['写真に残っている撮影場所や機種の情報を一覧で見せて、ボタン 1 つで消します。写真は端末の外に一切出しません。','See the GPS location and camera info hidden in your photos, then remove it with one click. Photos never leave your device.'],
     chips:['EXIF','GPS','Privacy'], k:'exif gps photo location privacy metadata remove strip 位置情報 写真 画像 撮影場所' },
+  { ic:'📇', url:'punch/', name:['Punch — 勤怠と時給計算','Punch — Timecard & Pay'],
+    d:['時給と働いた日・時間を入れるだけで、深夜・残業・休日出勤の割増を分けて、今月の給料の目安を出します。シフト表が出たら Shift＋クリックでまとめて予定、仕事が終わったら「✅ 予定どおり」を 1 回押すだけ。掛け持ちも、世界の 32 通貨も。','Enter your wage and the hours you work — night, overtime and holiday premiums are split out and you see this month’s pay at a glance. Shift-click to plan a whole rota, then one tap when you clock out. Multiple jobs, 32 currencies.'],
+    chips:['1 tap','🇯🇵 JP / Custom','32 💱','CSV'], k:'punch timecard time card timesheet hourly wage pay calculator shift overtime night premium holiday multiple jobs currency 勤怠 時給 給料 計算 深夜 残業 休日出勤 シフト 掛け持ち バイト パート' },
 ];
 
 function render(){
@@ -143,7 +146,7 @@ function render(){
   $('tTheme').textContent = theme === 'light' ? t('🌙 ダーク', '🌙 Dark') : t('☀️ ノーマル', '☀️ Normal');
   $('lead').innerHTML = t('広告なし・登録なし・通信なしの、小さな道具箱。<br>アプリが有料になったり、広告だらけになったりして困った人のための道具を、少しずつ詰めていきます。', 'A little toolbox with no ads, no sign-up and no uploads.<br>Simple tools for anyone tired of apps that went paid or got buried in ads — added one by one.');
   $('mani').innerHTML = t('<span class="dare">月額 980 円の電卓。<br>3 回押すと出てくる広告。<br>×ボタンが見つからない画面。</span><br><b class="no">— もう、いりません。</b><br>広告なし・登録なし・通信なし。買い切りでも、月額でもなく、<b>ずっと無料</b>の道具を、ひとつずつ詰めていきます。', '<span class="dare">A $9.99/month calculator.<br>An ad every third tap.<br>A close button you can never find.</span><br><b class="no">— Enough.</b><br>No ads. No sign-up. No uploads. Not a trial, not a subscription — <b>free tools that stay free</b>, added one by one.');
-  $('iCl').innerHTML = '📜 <b>v1.1.0 — 2026-11-17</b><br>' + t('・💸 割り勘・精算＆チップを足しました（6 本目）', '• Added 💸 Split Bill & Tip (tool #6)') + '<br><br>📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・道具箱を開きました：⏱ タイマー＆スコアボード、✂️ テキスト整形、🎲 TRPG ダイス、🔳 QR コードを作る、📍 写真の位置情報を消す', '• Toolbox opened: ⏱ Timer & Scoreboard, ✂️ Text Cleaner, 🎲 TRPG Dice, 🔳 QR Code Maker, 📍 Photo Location Remover');
+  $('iCl').innerHTML = '📜 <b>v1.2.0 — 2026-11-24</b><br>' + t('・📇 Punch（勤怠と時給計算）を足しました（7 本目）', '• Added 📇 Punch — Timecard & Pay (tool #7)') + '<br>' + t('・お知らせ欄の見出しと一番下の版の表記が v1.0.0 のままだったのを直しました', '• Fixed: the version shown in this panel and the footer was still v1.0.0') + '<br><br>📜 <b>v1.1.0 — 2026-11-17</b><br>' + t('・💸 割り勘・精算＆チップを足しました（6 本目）', '• Added 💸 Split Bill & Tip (tool #6)') + '<br><br>📜 <b>v1.0.0 — 2026-11-16</b><br>' + t('・道具箱を開きました：⏱ タイマー＆スコアボード、✂️ テキスト整形、🎲 TRPG ダイス、🔳 QR コードを作る、📍 写真の位置情報を消す', '• Toolbox opened: ⏱ Timer & Scoreboard, ✂️ Text Cleaner, 🎲 TRPG Dice, 🔳 QR Code Maker, 📍 Photo Location Remover');
   $('q').placeholder = t('🔍 道具を探す（例：住所、d20、タバタ）', '🔍 Find a tool (e.g. d20, tabata, zero-width)');
   const q = $('q').value.trim().toLowerCase();
   const g = $('grid'); g.innerHTML = '';
