@@ -90,7 +90,8 @@ footer a:hover{color:var(--acc)}
   <div><a href="https://meridibrand.com/">🏠 Meridi Brand</a> · <a href="https://meridibrand.com/meet/">🗓 Meet</a> · <a href="https://meridibrand.com/lingo/">🔤 Lingo</a> · <a href="https://meridibrand.com/stars/">🌌 Stars</a> · <a href="https://github.com/meridi-support/meridi-square/discussions" target="_blank" rel="noopener">💬 Feedback</a></div>
   <div><a href="https://github.com/meridi-support" target="_blank" rel="noopener">🐱 GitHub</a> · <a href="https://meridistore.booth.pm/" target="_blank" rel="noopener">🛒 BOOTH</a> · <a href="https://meridius4.gumroad.com/" target="_blank" rel="noopener">🛒 Gumroad</a> · <a href="mailto:meridisupport@gmail.com">✉️ Contact</a></div>
   <div id="footP"></div>
-  <div>MeridiPlay v1.0.0 · © 2026 Meridi Brand</div>
+  <div><a href="#" id="verL" style="color:inherit">MeridiPlay v1.0.1</a> · © 2026 Meridi Brand</div>
+  <div id="verBox" style="display:none;max-width:640px;margin:10px auto 0;text-align:left;font-size:.82rem;line-height:1.7;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--card)"></div>
 </footer>
 <div class="toast" id="toast"></div>
 
@@ -114,24 +115,24 @@ const CATS = [
   { id:'table', ic:'🎴', ja:'日本と世界の遊び', en:'Table Games', lj:'家でもパブでも遊ばれてきた定番', le:'Classics from homes and pubs' }
 ];
 const GAMES = [
-  { id:'tournament', c:'decide', ic:'🏆', ja:'チーム分け＆トーナメント', en:'Teams & Tournament', dj:'チーム分け、予選リーグ、トーナメント表まで。名前を入れるだけ。', de:'Shuffle teams, run a league, build a bracket.', t:['1〜','JA/EN'] },
+  { id:'tournament', c:'decide', ic:'🏆', ja:'チーム分け＆トーナメント', en:'Teams & Tournament', dj:'チーム分け、予選リーグ、⚽ リーグ戦、トーナメント表まで。名前を入れるだけ。', de:'Shuffle teams, run a group stage or a full league, build a bracket.', t:['1〜','JA/EN'], n:1 },
   { id:'roulette', c:'decide', ic:'🎡', ja:'ルーレット', en:'Roulette Wheel', dj:'項目を入れて回すだけ。重み付けや、当たったら消すモードも。', de:'Spin a custom wheel with weights and elimination.', t:['1〜'] },
   { id:'cointoss', c:'decide', ic:'🪙', ja:'コイントス', en:'Coin Toss', dj:'力をためて弾く、物理のコイン。猫のメリディと 5 番勝負も。', de:'Physics coin flip — or best of five vs the cat.', t:['1〜'] },
   { id:'bingo', c:'decide', ic:'🎱', ja:'ビンゴ', en:'Bingo', dj:'75 球のガラガラと読み上げ。カードは 6 枚まで。', de:'75-ball cage, caller voice, up to 6 cards.', t:['1〜','🗣'] },
   { id:'casino21', c:'casino', ic:'🂡', ja:'Casino 21', en:'Casino 21', dj:'6 デッキの本格ブラックジャック。戦略トレーナー付き。', de:'Six-deck blackjack with a strategy trainer.', t:['1','🎓'] },
-  { id:'baccarat', c:'casino', ic:'🎴', ja:'バカラ', en:'Baccarat', dj:'カードを指で絞る。3 枚目のルールも毎回説明。', de:'Squeeze the cards. Third-card rules explained.', t:['1','🎓'], n:1 },
-  { id:'videopoker', c:'casino', ic:'📺', ja:'ビデオポーカー', en:'Video Poker', dj:'4 台・最大 10 手。32 通りの期待値を計算するトレーナー。', de:'4 machines, up to 10 hands, exact EV trainer.', t:['1','🎓'], n:1 },
-  { id:'bigsix', c:'casino', ic:'🎰', ja:'Big Six', en:'Big Six Wheel', dj:'カタカタ鳴るラスベガスのマネーホイール。', de:'The clacking Vegas money wheel.', t:['1','🗣'], n:1 },
-  { id:'sicbo', c:'casino', ic:'🎲', ja:'シックボー（大小）', en:'Sic Bo', dj:'マカオで人気の 3 つのサイコロ。大か小か、ゾロ目か。', de:'Three dice, Macau style. Big, Small or a triple?', t:['1','🎓'], n:1 },
+  { id:'baccarat', c:'casino', ic:'🎴', ja:'バカラ', en:'Baccarat', dj:'カードを指で絞る。3 枚目のルールも毎回説明。', de:'Squeeze the cards. Third-card rules explained.', t:['1','🎓'] },
+  { id:'videopoker', c:'casino', ic:'📺', ja:'ビデオポーカー', en:'Video Poker', dj:'4 台・最大 10 手。32 通りの期待値を計算するトレーナー。', de:'4 machines, up to 10 hands, exact EV trainer.', t:['1','🎓'] },
+  { id:'bigsix', c:'casino', ic:'🎰', ja:'Big Six', en:'Big Six Wheel', dj:'カタカタ鳴るラスベガスのマネーホイール。', de:'The clacking Vegas money wheel.', t:['1','🗣'] },
+  { id:'sicbo', c:'casino', ic:'🎲', ja:'シックボー（大小）', en:'Sic Bo', dj:'マカオで人気の 3 つのサイコロ。大か小か、ゾロ目か。', de:'Three dice, Macau style. Big, Small or a triple?', t:['1','🎓'] },
   { id:'chohan', c:'casino', ic:'🏮', ja:'丁半', en:'Cho-Han', dj:'壺を振って、丁か半か。江戸の賭場の雰囲気で。', de:'Odd or even — an Edo-period dice house.', t:['1'] },
   { id:'highlow', c:'casino', ic:'⬆️', ja:'HIGH & LOW', en:'High & Low', dj:'次のカードは上か下か。倍々で積み上げる。', de:'Higher or lower? Double up the pot.', t:['1'] },
   { id:'omikuji', c:'fortune', ic:'⛩️', ja:'御神籤', en:'Omikuji', dj:'夜の千本鳥居。二礼二拍手一礼から、和歌の籤まで。', de:'A night shrine, the bow-and-clap rite, a waka fortune.', t:['1','JA/EN'] },
   { id:'tarot', c:'fortune', ic:'🐈', ja:'猫タロット', en:'Cat Tarot', dj:'浮世絵の猫 22 枚の大アルカナ。ケルト十字まで。', de:'22 ukiyo-e cat Major Arcana, up to Celtic Cross.', t:['1'] },
   { id:'mahjong', c:'fortune', ic:'🀄', ja:'麻雀牌占い', en:'Mahjong Oracle', dj:'牌を洗って、3 枚を引く。役ができたら大吉。', de:'Wash the tiles, draw three, read the yaku.', t:['1'] },
-  { id:'10yen', c:'dagashi', ic:'🪙', ja:'10円ゲーム', en:'10-Yen Game', dj:'レバーで 10 円玉をはじいてゴールへ。台は 4 種類。', de:'Flick a 10-yen coin across the rails. 4 machines.', t:['1'], n:1 },
-  { id:'janken', c:'dagashi', ic:'✊', ja:'猫じゃんけん', en:'Cat Jan-Ken', dj:'勝ったらランプが回ってメダル。三匹の猫には癖がある。', de:'Win and the lamps spin for medals. Each cat has a habit.', t:['1','🗣'], n:1 },
-  { id:'concentration', c:'table', ic:'🃏', ja:'神経衰弱', en:'Concentration', dj:'トランプか猫タロットで。CPU の猫ミャオと記憶勝負。', de:'Playing cards or Cat Tarot, vs Miao the cat.', t:['1〜2'], n:1 },
-  { id:'shutthebox', c:'table', ic:'📦', ja:'Shut the Box', en:'Shut the Box', dj:'イギリスのパブの定番。最善手を計算するトレーナー付き。', de:'A British pub classic with an exact-solve trainer.', t:['1〜4','🎓'], n:1 }
+  { id:'10yen', c:'dagashi', ic:'🪙', ja:'10円ゲーム', en:'10-Yen Game', dj:'レバーで 10 円玉をはじいてゴールへ。新台 4 台が入って全 8 台。バネで打ち上げる台も。', de:'Flick a 10-yen coin across the rails. 8 machines — 4 new, some with a spring launcher.', t:['1'], n:1 },
+  { id:'janken', c:'dagashi', ic:'✊', ja:'猫じゃんけん', en:'Cat Jan-Ken', dj:'勝ったらランプが回ってメダル。三匹の猫には癖がある。', de:'Win and the lamps spin for medals. Each cat has a habit.', t:['1','🗣'] },
+  { id:'concentration', c:'table', ic:'🃏', ja:'神経衰弱', en:'Concentration', dj:'トランプか猫タロットで。CPU の猫ミャオと記憶勝負。', de:'Playing cards or Cat Tarot, vs Miao the cat.', t:['1〜2'] },
+  { id:'shutthebox', c:'table', ic:'📦', ja:'Shut the Box', en:'Shut the Box', dj:'イギリスのパブの定番。最善手を計算するトレーナー付き。', de:'A British pub classic with an exact-solve trainer.', t:['1〜4','🎓'] }
 ];
 
 const UI = {
@@ -144,8 +145,25 @@ const UI = {
 };
 const T = k => UI[lang][k];
 
+
+/* ===== 版のお知らせ（各ゲームの版はここだけに書く） ===== */
+const VER = {
+  ja: '<b>📜 MeridiPlay v1.0.1 — 2026-11-24</b><ul style="margin:6px 0 0 18px">'
+    + '<li>🪙 10円ゲーム v3「新装開店」：新台 4 台（山越え・汽車ポッポ・サーカス・ホームラン）で全 8 台。バネで打ち上げ、銀色のレバー、スマホで台をなぞっても 10 円が入らないように</li>'
+    + '<li>🏆 チーム分け＆トーナメント v14：⚽ リーグ戦（1 回／ホーム＆アウェー・表彰台・CSV）、総当たりの上位からトーナメントへ、🔰 使い方</li>'
+    + '<li>ページの名前を「MeridiPlay — 日本語 | English」にそろえ、ゲーム画面の見出しから版番号を外しました（版はここで確かめられます）</li>'
+    + '</ul><div style="margin-top:6px;opacity:.8">各ゲームの版：トーナメント v14・ルーレット v4・コイントス v2・ビンゴ v2・カジノ21 v7・丁半 v5・ハイ＆ロー v4・御神籤 v2・猫タロット v1.0.0・10円ゲーム v3</div>',
+  en: '<b>📜 MeridiPlay v1.0.1 — 2026-11-24</b><ul style="margin:6px 0 0 18px">'
+    + '<li>🪙 10-Yen Game v3 “Grand Reopening”: 4 new machines (Mountain Pass, Steam Train, Circus, Home Run) for 8 in total — spring launcher, silver levers, and no accidental coins when scrolling on phones</li>'
+    + '<li>🏆 Teams & Tournament v14: ⚽ full league (single / home & away, podium, CSV), top teams from a round robin into a bracket, 🔰 quick guide</li>'
+    + '<li>Page titles now read “MeridiPlay — Japanese | English”, and version numbers were removed from game headers (check them here)</li>'
+    + '</ul><div style="margin-top:6px;opacity:.8">Game versions: Tournament v14 · Roulette v4 · Coin Toss v2 · Bingo v2 · Casino 21 v7 · Cho-Han v5 · High & Low v4 · Omikuji v2 · Cat Tarot v1.0.0 · 10-Yen Game v3</div>'
+};
+document.getElementById('verL').addEventListener('click', e => { e.preventDefault(); const b = document.getElementById('verBox'); b.innerHTML = VER[lang] || VER.en; b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
+
 function render(){
   document.documentElement.lang = lang;
+  { const b = document.getElementById('verBox'); if (b && b.style.display !== 'none') b.innerHTML = VER[lang] || VER.en; }
   document.body.classList.toggle('light', theme === 'light');
   $('tLang').textContent = lang === 'ja' ? '🌐 EN' : '🌐 日本語';
   $('tTheme').textContent = T('theme')(theme);
