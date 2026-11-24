@@ -26,6 +26,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | 🐾🪄 **MeridiLingo** | 760+ expressions & AI prompts — Language Evolution Explorer | **Free** | [meridibrand.com/lingo](https://meridibrand.com/lingo) |
 | 💻 **MeridiSync** | High-speed snippet manager for Windows | ¥1,000 / &#36;8 | [Try Demo](https://meridi-support.github.io/meridisync-demo/) |
 | 🌌 **MeridiStars** | Planetarium — 88 constellations, 150 deep-sky objects, camera mode & a journey to the black hole | **Free** | [meridibrand.com/stars](https://meridibrand.com/stars) |
+| ☁️ **MeridiSkies** | Sky & weather explorer — clouds, lightning, aurora, sky colors & an 11-tab lab | **Free** | [meridibrand.com/skies](https://meridibrand.com/skies) |
 | 🪨 **MeridiGround** | From the sky to Earth's core — rock layers, volcanoes, plate tectonics & 11 world stages | **Free** | [meridibrand.com/ground](https://meridibrand.com/ground) |
 | 🌊 **MeridiDepths** | Dive to the deepest ocean — 230+ sea creatures, shipwrecks & records, 11 deep places | **Free** | [meridibrand.com/depths](https://meridibrand.com/depths) |
 | 🎮 **MeridiPlay** | 18 browser games — casino, fortune-telling, retro candy-shop machines | **Free** | [meridibrand.com/play](https://meridibrand.com/play) |
@@ -55,6 +56,7 @@ Every tool is a vessel. What you fill it with is up to you.
 | [meridilingo](https://github.com/meridi-support/meridilingo) | 🐾🪄 MeridiLingo — Language Evolution Explorer |
 | [meridisync-demo](https://github.com/meridi-support/meridisync-demo) | 💻 MeridiSync — Free demo |
 | [meridistars](https://github.com/meridi-support/meridistars) | 🌌 MeridiStars — Browser Planetarium |
+| [meridiskies](https://github.com/meridi-support/meridiskies) | ☁️ MeridiSkies — Sky & Weather Explorer |
 | [meridiground](https://github.com/meridi-support/meridiground) | 🪨 MeridiGround — From the Sky to Earth's Core |
 | [merididepths](https://github.com/meridi-support/merididepths) | 🌊 MeridiDepths — Deep-Sea Explorer |
 | [meridiplay](https://github.com/meridi-support/meridiplay) | 🎮 MeridiPlay — Free Browser Games |
