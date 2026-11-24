@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridi Punch — 1回押すだけの勤怠と時給計算 | One-tap Timecard & Pay Calculator</title>
+<meta name="description" content="📇 Punch：時給と働いた日・時間を入れるだけで、深夜割増・残業割増を自動で分けて、1か月の給料の目安を計算。掛け持ちもOK。世界の32通貨に対応。広告なし・登録なし・通信なし。📇 Punch: an ad-free one-tap timecard & pay calculator with night and overtime premiums, in 32 currencies. Nothing is uploaded.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📇</text></svg>">
+<style>
+:root{--E:cubic-bezier(.22,1,.36,1);--bg:#030805;--ink:#d8ffd0;--sub:#8fbf8a;--line:#39ff1433;--card:#06120acc;--acc:#39ff14;--warn:#ffcf5a;--night:#7fa8ff;--ot:#ff9a6a}
+body.light{--bg:#f2efe8;--ink:#1f2a20;--sub:#5a6a58;--line:#2a6a3e33;--card:#ffffffdd;--acc:#1f7a3a;--warn:#a86a00;--night:#2f56b8;--ot:#b8502a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;min-height:100vh;transition:background .6s var(--E),color .6s var(--E)}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:7px;padding:10px 16px;flex-wrap:wrap}
+.home{font:12px 'Courier New',monospace;opacity:.7;color:inherit;text-decoration:none}.home:hover{opacity:1;color:var(--acc)}
+.sp{margin-right:auto}
+.tg{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 11px;font:12px 'Courier New',monospace;cursor:pointer;white-space:nowrap;transition:border-color .3s}
+.tg:hover{border-color:var(--acc)}
+h1{text-align:center;font:bold clamp(22px,4.4vw,34px) 'Courier New',monospace;letter-spacing:5px;color:var(--acc);margin-top:10px}
+.lead{text-align:center;color:var(--sub);font-size:13px;line-height:1.8;margin:6px 16px 0}
+.wrap{max-width:980px;margin:16px auto 40px;padding:0 12px;display:grid;grid-template-columns:1fr 340px;gap:14px}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;backdrop-filter:blur(6px)}
+.panel h2{font:bold 13px 'Courier New',monospace;letter-spacing:3px;color:var(--acc);margin-bottom:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+label.s{font-size:11px;color:var(--sub);min-width:62px}
+input[type=text],input[type=number],input[type=time],select{background:transparent;border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-size:14px;outline:none;transition:border-color .3s}
+input:focus,select:focus{border-color:var(--acc)}
+select option{background:var(--bg);color:var(--ink)}
+input[type=number]{width:96px}
+.btn{background:transparent;border:1px solid var(--acc);color:var(--acc);border-radius:10px;padding:7px 13px;cursor:pointer;font-size:13px;transition:all .3s var(--E)}
+.btn:hover{background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.btn.solid{background:var(--acc);color:var(--bg);font-weight:bold}
+.btn.ghost{border-color:var(--line);color:var(--sub)}
+.btn.del{border-color:#ff6a6a66;color:#ff8a8a}
+/* jobs */
+.jobs{display:flex;flex-direction:column;gap:8px}
+.job{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}
+.job .dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid #0004}
+.job .nm{display:flex;flex-direction:column;gap:5px}
+.job .nm input[type=text]{width:100%}
+.wage{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wage select{min-width:118px}
+/* calendar */
+.calh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.calh b{font:bold 18px 'Courier New',monospace;letter-spacing:2px;flex:1;text-align:center}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow{font:11px 'Courier New',monospace;text-align:center;color:var(--sub);padding:2px 0}
+.dow.sun{color:#ff8a8a}.dow.sat{color:var(--night)}
+.day{min-height:62px;border:1px solid var(--line);border-radius:9px;padding:4px;cursor:pointer;position:relative;transition:border-color .25s,transform .25s var(--E);display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.day:hover{border-color:var(--acc);transform:translateY(-1px)}
+.day.out{opacity:.25;pointer-events:none}
+.day.today{box-shadow:inset 0 0 0 1px var(--acc)}
+.day.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.day .n{font:12px 'Courier New',monospace}
+.day.sun .n{color:#ff8a8a}.day.sat .n{color:var(--night)}
+.day .tag{font-size:9px;border-radius:5px;padding:1px 3px;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day .moon{position:absolute;right:4px;top:3px;font-size:9px}
+.day.msel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:inset 0 0 0 1px var(--acc)}
+.day .tag.plan{opacity:.45;border:1px dashed #0006}
+.day .hw{position:absolute;left:3px;bottom:2px;font-size:9px}
+.multibar{display:none;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;padding:8px;border:1px dashed var(--acc);border-radius:10px;animation:fi .4s var(--E)}
+.multibar.on{display:flex}
+.multibar b{font-size:12px;margin-right:4px}
+.tg.on{border-color:var(--acc);color:var(--acc)}
+.today{margin-top:12px;border:1px solid var(--acc);border-radius:12px;padding:10px;display:none;animation:fi .5s var(--E)}
+.today.on{display:block}
+.today h3{font-size:13px;margin-bottom:6px;color:var(--acc)}
+.today .ent{margin-bottom:6px}
+.btn.big{font-size:16px;padding:10px 18px}
+.chk{display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer}
+.sum .two{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.sum .two .s2{font:bold 16px 'Courier New',monospace;color:var(--sub)}
+@media (max-width:520px){.day{min-height:48px}.day .tag{font-size:8px}}
+/* editor */
+.ed{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;display:none}
+.ed.on{display:block;animation:fi .5s var(--E)}
+@keyframes fi{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ed h3{font-size:14px;margin-bottom:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 11px;cursor:pointer;font-size:12px;color:var(--sub)}
+.seg button.on{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--ink)}
+.entries{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.ent{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:12px}
+.ent .c{width:10px;height:10px;border-radius:50%}
+.ent .t{flex:1}
+.ent .y{font:bold 13px 'Courier New',monospace}
+.split{font:11px 'Courier New',monospace;color:var(--sub);margin-top:4px;line-height:1.7}
+.split .nt{color:var(--night)}.split .ov{color:var(--ot)}
+/* shifts */
+.shifts{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chip{border:1px solid var(--line);border-radius:14px;padding:4px 10px;font-size:12px;cursor:pointer;background:transparent}
+.chip:hover{border-color:var(--acc)}
+.chip i{font-style:normal;opacity:.55;margin-left:4px;cursor:pointer}
+/* summary */
+.sum .big{font:bold 34px 'Courier New',monospace;color:var(--acc);letter-spacing:1px}
+.sum .big small{font-size:14px;margin-left:4px;color:var(--sub)}
+.sum table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.sum td{padding:5px 2px;border-bottom:1px dashed var(--line)}
+.sum td:last-child{text-align:right;font-family:'Courier New',monospace}
+.sum .jobsum{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.sum .js{display:flex;align-items:center;gap:6px;font-size:12px}
+.sum .js .c{width:10px;height:10px;border-radius:50%}
+.sum .js b{margin-left:auto;font-family:'Courier New',monospace}
+.note{font-size:11px;color:var(--sub);line-height:1.8;margin-top:10px}
+.note b{color:var(--warn)}
+details{margin-top:8px}
+summary{cursor:pointer;font-size:12px;color:var(--sub)}
+.rates{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;margin-top:8px;font-size:12px}
+.rates input{width:70px}
+.proj .ptwrap{max-height:340px;overflow:auto;margin-top:6px;border:1px solid var(--line);border-radius:10px}
+.pt{width:100%;border-collapse:collapse;font-size:12px}
+.pt th{position:sticky;top:0;background:var(--bg);font-weight:normal;color:var(--sub);padding:6px 6px;text-align:right;border-bottom:1px solid var(--line)}
+.pt th:first-child,.pt td:first-child{text-align:left}
+.pt td{padding:6px 6px;text-align:right;font-family:'Courier New',monospace;border-bottom:1px dashed var(--line)}
+.pt tr.yr td{font-weight:bold;color:var(--acc)}
+.pt .up{color:var(--acc)}.pt .dn{color:#ff8a8a}
+.pnote{font-size:11px;color:var(--warn);line-height:1.7;margin-top:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--card);border:1px solid var(--acc);padding:9px 18px;border-radius:20px;font-size:13px;opacity:0;transition:all .5s var(--E);pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.info{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .45s var(--E)}
+.info.show{opacity:1;pointer-events:auto}
+.ibox{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--bg);border:1px solid var(--acc);border-radius:16px;padding:18px 20px;transform:translateY(12px);transition:transform .5s var(--E)}
+.info.show .ibox{transform:none}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:6px}.ih b{font:bold 16px 'Courier New',monospace;color:var(--acc)}.ih span{margin-right:auto;font:12px 'Courier New',monospace;color:var(--sub)}
+.ilead{font-size:13px;line-height:1.9;color:var(--ink);margin:8px 0 10px}
+.itag{text-align:center;font:bold 13px 'Courier New',monospace;color:var(--acc);letter-spacing:2px;margin-bottom:12px}
+.icl{font-size:12px;color:var(--sub);line-height:1.8;border-top:1px solid var(--line);padding-top:10px}
+.exbar{position:fixed;left:50%;top:10px;transform:translate(-50%,-80px);z-index:45;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--warn);color:var(--ink);border-radius:20px;padding:6px 8px 6px 16px;font-size:13px;transition:transform .6s var(--E);backdrop-filter:blur(6px)}
+.exbar.on{transform:translate(-50%,0)}
+body.ex .wrap{outline:2px dashed color-mix(in srgb,var(--warn) 55%,transparent);outline-offset:8px;border-radius:14px}
+footer{text-align:center;font:11px 'Courier New',monospace;color:var(--sub);padding:20px 10px 30px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="../">← Meridi Tools</a><span class="sp"></span>
+  <button class="tg" id="tInfo">v1.0.0</button>
+  <button class="tg" id="tEx">🔰</button>
+  <button class="tg" id="tLang">🌐 EN</button>
+  <button class="tg" id="tTheme">☀️</button>
+</header>
+<h1>📇 <span id="tTitle"></span></h1>
+<p class="lead" id="tLead"></p>
+
+<div class="wrap">
+  <div>
+    <div class="panel">
+      <h2 id="hJobs"></h2>
+      <div class="row"><label class="s" id="lCur"></label><select id="eCur"></select></div>
+      <div class="jobs" id="jobs"></div>
+      <div class="row" style="margin-top:8px"><button class="btn" id="bAddJob"></button></div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <div class="calh">
+        <button class="btn ghost" id="bPrev">◀</button>
+        <b id="mLabel"></b>
+        <button class="btn ghost" id="bNext">▶</button>
+        <button class="btn ghost" id="bToday"></button>
+      </div>
+      <div class="row" style="margin:-2px 0 6px;justify-content:flex-end"><button class="tg" id="bMulti"></button><span style="font-size:10px;color:var(--sub)" id="multiHint"></span></div>
+      <div class="cal" id="cal"></div>
+      <div class="multibar" id="multibar">
+        <b id="mbCount"></b>
+        <button class="btn ghost" id="mbNoWeekend"></button>
+        <button class="btn ghost" id="mbWeekday"></button>
+        <button class="btn ghost" id="mbWeekend"></button>
+        <span class="sp"></span>
+        <button class="btn ghost" id="mbClear"></button>
+      </div>
+      <div class="today" id="todayBox"><h3 id="tdTitle"></h3><div id="tdList"></div></div>
+
+      <div class="ed" id="ed">
+        <h3 id="edTitle"></h3>
+        <div class="entries" id="entries"></div>
+        <div class="row" id="rJob"><label class="s" id="lJob"></label><select id="eJob"></select></div>
+        <div class="row"><label class="s" id="lKind"></label>
+          <div class="seg"><button id="kDone" class="on"></button><button id="kPlan"></button></div>
+          <label class="chk"><input type="checkbox" id="eHol"><span id="lHol"></span></label></div>
+        <div class="row"><label class="s" id="lMode"></label>
+          <div class="seg"><button id="mTime" class="on"></button><button id="mHours"></button></div>
+        </div>
+        <div id="fTime">
+          <div class="row"><label class="s" id="lStart"></label><input type="time" id="eStart" value="09:00">
+            <label class="s" id="lEnd" style="min-width:auto"></label><input type="time" id="eEnd" value="18:00"></div>
+          <div class="row"><label class="s" id="lBreak"></label><input type="number" id="eBreak" value="60" min="0" step="5"><span class="s" id="lMin" style="font-size:12px"></span></div>
+          <div class="shifts" id="shifts"></div>
+        </div>
+        <div id="fHours" style="display:none">
+          <div class="row"><label class="s" id="lHours"></label><input type="number" id="eHours" value="6" min="0" step=".25"><span style="font-size:12px" id="lH1"></span></div>
+          <div class="row"><label class="s" id="lNightH"></label><input type="number" id="eNightH" value="0" min="0" step=".25"><span style="font-size:12px" id="lH2"></span></div>
+        </div>
+        <div class="split" id="preview"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn solid" id="bSave"></button>
+          <button class="btn ghost" id="bSaveShift"></button>
+          <button class="btn ghost" id="bClose"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel sum">
+      <h2 id="hSum"></h2>
+      <div class="two"><div class="big"><span id="sTotal">0</span><small id="sYen"></small></div><div class="s2" id="sPlan"></div></div>
+      <div style="font-size:11px;color:var(--sub)" id="sMeta"></div>
+      <table id="sTable"></table>
+      <div class="jobsum" id="sJobs"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="bCsv"></button>
+        <button class="btn ghost" id="bClearM"></button>
+      </div>
+      <div class="row" style="margin-top:14px"><label class="s" id="lRule"></label>
+        <div class="seg"><button id="ruleJP"></button><button id="ruleC"></button></div></div>
+      <div class="rates" id="ratesJP"></div>
+      <details id="dC">
+        <summary id="sRates"></summary>
+        <div class="rates">
+          <span id="lrNW"></span><span><input type="time" id="rNS" style="width:96px"> 〜 <input type="time" id="rNE" style="width:96px"></span>
+          <span id="lrN"></span><span><input type="number" id="rN" min="0" step="1"> %</span>
+          <span id="lrB"></span><span><select id="rB"></select></span>
+          <span id="lrLim"></span><span id="limBox"><input type="number" id="rDay" min="0" step=".5"><input type="number" id="rWk" min="0" step="1"> h</span>
+          <span id="lrWs"></span><span id="wsBox"><select id="rWs"></select></span>
+          <span id="lrO"></span><span><input type="number" id="rO" min="0" step="1"> %</span>
+          <span id="lrH"></span><span><input type="number" id="rH" min="0" step="1"> %</span>
+          <span id="lrHd"></span><span><select id="rHd"></select></span>
+        </div>
+      </details>
+      <div class="row" id="rowJPHd" style="margin-top:6px"><label class="s" id="lJPHd" style="min-width:auto"></label><select id="rJPHd"></select></div>
+      <p class="note" id="sNote"></p>
+    </div>
+    <div class="panel proj" style="margin-top:14px">
+      <h2 id="hProj"></h2>
+      <div class="row"><label class="s" id="lNew" style="min-width:auto"></label>
+        <div class="seg"><button id="nMonthly"></button><button id="nHourly"></button></div></div>
+      <div class="row" id="rNewM"><span id="lNewCur" style="font-size:12px;white-space:nowrap"></span><input type="number" id="nMonth" min="0" step="1000" style="flex:1;min-width:150px"></div>
+      <div class="row" id="rNewH" style="display:none"><input type="number" id="nWage" min="0" step="1" style="width:110px"><span id="lNewCur2" style="font-size:12px"></span>
+        <span style="font-size:12px">×</span><input type="number" id="nHrs" min="0" step="1" style="width:70px"><span id="lNewH" style="font-size:12px"></span></div>
+      <div class="ptwrap"><table class="pt" id="pTable"></table></div>
+      <p class="pnote" id="pNote"></p>
+      <details id="dP"><summary id="sP"></summary>
+        <div class="rates">
+          <span id="lpStep"></span><span><select id="pStep"></select></span>
+          <span id="lpLen"></span><span><select id="pLen"></select></span>
+          <span id="lpBase"></span><span><select id="pBase"></select></span>
+          <span id="lpMH"></span><span><input type="number" id="nMH" min="0" step="1" style="width:80px"> h</span>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+<div class="info" id="info"><div class="ibox">
+  <div class="ih"><b>📇 Meridi Punch</b><span>v1.0.0</span><button class="tg" id="iClose">✕</button></div>
+  <p class="ilead" id="iLead"></p>
+  <div class="itag">No Ads. No Sign-up. Just Punch.</div>
+  <div class="icl" id="iCl"></div>
+</div></div>
+<div class="info" id="exBox"><div class="ibox">
+  <div class="ih"><b id="exT"></b><span></span><button class="tg" id="exClose">✕</button></div>
+  <p class="ilead" id="exLead"></p>
+  <div class="row" style="margin-top:12px;justify-content:center"><button class="btn solid" id="exGo"></button><button class="btn ghost" id="exNo"></button></div>
+</div></div>
+<div class="exbar" id="exBar"><span id="exBarT"></span><button class="btn solid" id="exBack"></button></div>
+<div class="toast" id="toast"></div>
+<footer>© 2026 Meridi Brand · <span id="fVer">Meridi Punch v1.0.0</span> · 🐾 Built by one person and three cats</footer>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+const LS = 'meridi_punch_v1';
+const COLORS = ['#39ff14','#5ac8ff','#ffb347','#ff6ad5','#b28cff','#ffe066','#6affc4','#ff7a7a'];
+let lang = lsGet('meridiplay_lang') || ((navigator.language || 'en').startsWith('ja') ? 'ja' : 'en');
+let theme = lsGet('meridiplay_theme') === 'light' ? 'light' : 'dark';
+const J = () => lang === 'ja';
+const t = (ja, en) => J() ? ja : en;
+
+let D = { jobs:[{ id:1, name:'', wage:1200, color:COLORS[0] }], days:{}, shifts:[], rates:{ night:0, ot:0, otBasis:'day', day:8, week:40, wkStart:0, hol:0, holDow:-1, nS:'22:00', nE:'05:00' }, rule:null, cur:null, nextId:2 };
+try { const s = JSON.parse(lsGet(LS) || 'null'); if (s && s.jobs) D = Object.assign(D, s); } catch(e){}
+D.rates = Object.assign({ night:0, ot:0, otBasis:'day', day:8, week:40, wkStart:0, hol:0, holDow:-1, nS:'22:00', nE:'05:00' }, D.rates || {});
+/* 🇯🇵 JP = Labor Standards Act minimums (fixed). Custom = whatever the user enters. */
+const JP = { night:25, ot:25, ot60:50, otBasis:'day', day:8, hol:35, nS:'22:00', nE:'05:00' };
+const RR = () => D.rule === 'jp' ? Object.assign({}, D.rates, JP, { holDow:D.rates.jpHolDow == null ? 0 : D.rates.jpHolDow }) : D.rates;
+/* currencies: [code, ja name, en name, preset min, max, step] */
+const CUR = [
+  ['JPY','日本円','Japanese yen',900,3000,50], ['USD','米ドル','US dollar',7.25,50,.25], ['EUR','ユーロ','Euro',8,45,.25], ['GBP','英ポンド','British pound',8,40,.25],
+  ['CAD','カナダドル','Canadian dollar',12,50,.25], ['AUD','豪ドル','Australian dollar',18,60,.5], ['NZD','NZドル','New Zealand dollar',18,55,.5], ['CHF','スイスフラン','Swiss franc',18,60,.5],
+  ['SEK','スウェーデンクローナ','Swedish krona',100,400,5], ['NOK','ノルウェークローネ','Norwegian krone',150,450,5], ['DKK','デンマーククローネ','Danish krone',110,400,5], ['PLN','ポーランドズウォティ','Polish zloty',25,120,1],
+  ['CZK','チェココルナ','Czech koruna',100,600,10], ['TRY','トルコリラ','Turkish lira',90,600,5], ['ILS','イスラエルシェケル','Israeli shekel',30,150,1], ['BRL','ブラジルレアル','Brazilian real',7,80,.5],
+  ['MXN','メキシコペソ','Mexican peso',35,300,5], ['ARS','アルゼンチンペソ','Argentine peso',1000,12000,100], ['KRW','韓国ウォン','Korean won',10000,40000,500], ['TWD','台湾ドル','New Taiwan dollar',190,800,10],
+  ['HKD','香港ドル','Hong Kong dollar',42,200,1], ['CNY','人民元','Chinese yuan',15,120,1], ['SGD','シンガポールドル','Singapore dollar',8,50,.5], ['THB','タイバーツ','Thai baht',45,400,5],
+  ['PHP','フィリピンペソ','Philippine peso',60,500,5], ['MYR','マレーシアリンギット','Malaysian ringgit',7,60,.5], ['IDR','インドネシアルピア','Indonesian rupiah',20000,150000,1000], ['VND','ベトナムドン','Vietnamese dong',20000,150000,1000],
+  ['INR','インドルピー','Indian rupee',50,1500,10], ['AED','UAEディルハム','UAE dirham',15,150,1], ['SAR','サウジリヤル','Saudi riyal',15,150,1], ['ZAR','南アフリカランド','South African rand',28,250,1]
+];
+const REGION = { US:'USD', CA:'CAD', GB:'GBP', AU:'AUD', NZ:'NZD', CH:'CHF', SE:'SEK', NO:'NOK', DK:'DKK', PL:'PLN', CZ:'CZK', TR:'TRY', IL:'ILS', BR:'BRL', MX:'MXN', AR:'ARS', KR:'KRW', TW:'TWD', HK:'HKD', CN:'CNY', SG:'SGD', TH:'THB', PH:'PHP', MY:'MYR', ID:'IDR', VN:'VND', IN:'INR', AE:'AED', SA:'SAR', ZA:'ZAR', JP:'JPY',
+  DE:'EUR', FR:'EUR', NL:'EUR', ES:'EUR', IT:'EUR', IE:'EUR', AT:'EUR', BE:'EUR', FI:'EUR', PT:'EUR', GR:'EUR', SI:'EUR', LV:'EUR', LT:'EUR', EE:'EUR', SK:'EUR', LU:'EUR', HR:'EUR', MC:'EUR' };
+const FIRST = !D.cur;
+if (!D.cur){ const loc = navigator.language || 'en-US', rg = (loc.split('-')[1] || '').toUpperCase(); D.cur = REGION[rg] || (loc.startsWith('ja') ? 'JPY' : loc.startsWith('ko') ? 'KRW' : loc.startsWith('de') || loc.startsWith('fr') || loc.startsWith('es') || loc.startsWith('it') || loc.startsWith('nl') ? 'EUR' : 'USD'); }
+if (!D.rule) D.rule = D.cur === 'JPY' ? 'jp' : 'custom';
+const curInfo = () => CUR.find(c => c[0] === D.cur) || CUR[1];
+const decs = () => { try { return new Intl.NumberFormat('en', { style:'currency', currency:D.cur }).resolvedOptions().maximumFractionDigits; } catch(e){ return 2; } };
+const money = n => { try { return new Intl.NumberFormat(J() ? 'ja-JP' : 'en-US', { style:'currency', currency:D.cur, maximumFractionDigits:decs() }).format(n); } catch(e){ return D.cur + ' ' + (+n).toFixed(2); } };
+const presets = () => { if (D.cur !== 'JPY') return []; const o = []; for (let w = 900; w <= 3000; w += 50) o.push(w); return o; };
+const defWage = () => { if (D.cur === 'JPY') return 1200; const c = curInfo(), s = decs() ? .25 : 1; return Math.round(c[3] * 1.5 / s) * s; };
+const wStep = () => D.cur === 'JPY' ? 1 : (decs() ? .25 : 1);
+if (FIRST) D.jobs[0].wage = defWage();
+let PJ = Object.assign({ step:'std', len:12, base:'avg', nmode:'month', nmonth:0, nwage:0, nhrs:0, mh:160 }, (D.proj || {}));
+const savePJ = () => { D.proj = PJ; save(); };
+let EX = null; // holds the user's real data while the example is shown
+const save = () => { if (!EX) lsSet(LS, JSON.stringify(D)); };
+
+const now = new Date();
+let Y = now.getFullYear(), M = now.getMonth(), SEL = null, MODE = 'time', KIND = 'done', MULTI = new Set(), ANCHOR = null, MTOG = false;
+const key = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+const yen = n => (+n).toLocaleString(J() ? 'ja-JP' : 'en-US', { maximumFractionDigits:decs(), minimumFractionDigits:0 });
+const hrs = m => (Math.round(m / 60 * 100) / 100).toLocaleString('ja-JP', { maximumFractionDigits:2 });
+const job = id => D.jobs.find(j => j.id === id) || D.jobs[0];
+const toMin = s => { const [h, m] = (s || '0:0').split(':').map(Number); return h * 60 + m; };
+
+const dowOf = k => { const [a, b, c] = k.split('-').map(Number); return new Date(a, b - 1, c).getDay(); };
+
+/* ---- split one shift into normal / night minutes ----
+   night = 22:00–05:00 (legal default). Break is taken out of normal time first, then night. */
+function splitShift(e){
+  if (e.mode === 'hours'){ const tot = Math.max(0, (+e.hours || 0) * 60), n = Math.min(tot, Math.max(0, (+e.nightH || 0) * 60)); return { work:tot, night:n, day:tot - n }; }
+  let s = toMin(e.start), en = toMin(e.end); if (en <= s) en += 1440;
+  const rr = RR(), ns = toMin(rr.nS), ne = toMin(rr.nE), inN = x => ns <= ne ? (x >= ns && x < ne) : (x >= ns || x < ne);
+  let night = 0; for (let m = s; m < en; m++) if (inN(m % 1440)) night++;
+  const span = en - s, br = Math.min(span, Math.max(0, +e.brk || 0)), work = span - br;
+  let dayMin = span - night; const takeDay = Math.min(dayMin, br); dayMin -= takeDay; night -= (br - takeDay);
+  return { work, night:Math.max(0, night), day:Math.max(0, dayMin) };
+}
+/* ---- month calculation (per job) ---- */
+function calcMonth(){
+  const r = RR(), jp = D.rule === 'jp', per = {}, mk = () => ({ days:new Set(), work:0, night:0, ot:0, ot60:0, hol:0, base:0, nightPay:0, otPay:0, holPay:0, total:0 });
+  const tot = mk(), all = mk(), pre = `${Y}-${String(M + 1).padStart(2, '0')}-`;
+  // weekly overtime needs the days of the week that fall in the previous month too
+  const first = new Date(Y, M, 1), from = new Date(first); from.setDate(1 - ((first.getDay() - (+r.wkStart || 0) + 7) % 7));
+  const lo = key(from.getFullYear(), from.getMonth(), from.getDate()), hi = key(Y, M, new Date(Y, M + 1, 0).getDate());
+  const keys = Object.keys(D.days).filter(k => k >= lo && k <= hi).sort();
+  const weekOf = k => { const [a, b, c] = k.split('-').map(Number), d = new Date(a, b - 1, c); d.setDate(d.getDate() - ((d.getDay() - (+r.wkStart || 0) + 7) % 7)); return key(d.getFullYear(), d.getMonth(), d.getDate()); };
+  [[tot, false], [all, true]].forEach(([T, withPlan]) => {
+    let otRun = 0; const wk = {};
+    keys.forEach(k => (D.days[k] || []).forEach(e => {
+      if (e.plan && !withPlan) return;
+      const inMonth = k.startsWith(pre), j = job(e.job), w = +j.wage || 0, sp = splitShift(e), hw = !!e.hol;
+      let ot = 0;
+      if (r.otBasis === 'week'){
+        // weekly basis (Custom): hours past the weekly limit become overtime
+        const wkKey = weekOf(k), used = wk[wkKey] || 0, lim = (+r.week || 40) * 60;
+        ot = Math.max(0, used + sp.work - Math.max(lim, used)); wk[wkKey] = used + sp.work;
+      } else if (!(jp && hw)) ot = Math.max(0, sp.work - (+r.day || 8) * 60);
+      if (!inMonth) return;
+      // 🇯🇵 JP: legal-holiday hours are not overtime; overtime past 60 h in the month is +50%
+      const ot60 = jp ? Math.max(0, Math.min(ot, otRun + ot - 3600)) : 0; otRun += ot;
+      const base = sp.work / 60 * w, nightPay = sp.night / 60 * w * (+r.night / 100), holPay = hw ? sp.work / 60 * w * (+r.hol / 100) : 0;
+      const otPay = (ot - ot60) / 60 * w * (+r.ot / 100) + ot60 / 60 * w * ((+r.ot60 || 0) / 100), sum = base + nightPay + otPay + holPay;
+      T.days.add(k); T.work += sp.work; T.night += sp.night; T.ot += ot; T.ot60 += ot60; T.hol += hw ? sp.work : 0;
+      T.base += base; T.nightPay += nightPay; T.otPay += otPay; T.holPay += holPay; T.total += sum;
+      if (!withPlan){ const p = per[j.id] = per[j.id] || { days:new Set(), work:0, total:0 }; p.days.add(k); p.work += sp.work; p.total += sum; }
+    }));
+  });
+  return { per, tot, all };
+}
+
+/* ---- UI text ---- */
+function texts(){
+  document.documentElement.lang = lang;
+  $('tLang').textContent = J() ? '🌐 EN' : '🌐 日本語';
+  $('tTheme').textContent = theme === 'light' ? '🌙' : '☀️';
+  $('tTitle').textContent = 'PUNCH';
+  $('tLead').innerHTML = t('時給と、働いた日・時間を入れるだけ。深夜と残業の割増を自動で分けて、今月の給料の目安を出します。', 'Enter your hourly wage and the days and hours you worked. Night and overtime premiums are split out automatically.');
+  $('iLead').innerHTML = t('記録はこの端末の中だけ。広告なし・登録なし。<br>シフト表が出たら、まとめて予定。仕事が終わったら、1回押すだけ。', 'Everything stays on this device. No ads, no sign-up.<br>Plan your whole rota at once — then one tap when you clock out.');
+  $('iCl').innerHTML = '📜 <b>v1.0.0 — 2026-11-24</b><br>' + t('・道具箱の 7 本目として公開しました<br>・カレンダーで記録（時刻 か 合計時間）、日をまたぐ勤務、⭐ シフト登録<br>・Ctrl／Shift でまとめて選ぶ、🚫 土日を外す・平日だけ・土日だけ<br>・📅 予定 → ✅ 1回押すだけで確定<br>・掛け持ち（8 か所まで）、世界の 32 通貨<br>・割増は 🇯🇵 JP（日本の法定の最低）か ✏️ Custom（1日／1週の残業も）<br>・📈 このまま働くと（1・3・6・12か月後、⚖️ 転職先とのくらべ）<br>・CSV で保存、日英、ライト・ダーク、🔰 記入例', '• Released as tool #7<br>• Calendar records (clock times or total hours), overnight shifts, ⭐ saved shifts<br>• Ctrl/Shift multi-select, drop weekends / weekdays / weekends only<br>• 📅 plan → ✅ one tap to confirm<br>• Up to 8 jobs, 32 currencies<br>• Premiums: 🇯🇵 JP (Japan legal minimums) or ✏️ Custom (per-day or per-week overtime)<br>• 📈 Projection (1 · 3 · 6 · 12 months, ⚖️ compare with a new job)<br>• CSV export, JA/EN, light/dark, 🔰 example');
+  $('tEx').title = t('記入例を見る', 'See an example');
+  $('exT').textContent = t('🔰 記入例を見る', '🔰 See an example');
+  $('exLead').innerHTML = t('掛け持ち（コンビニ・倉庫）のひと月分の見本を出します。予定・深夜・休日出勤・シフト登録も入っています。<br>見本を見ている間は、あなたの記録は<b>そのまま保存されていて、見本は保存されません</b>。「見本をとじる」で元に戻ります。', 'Shows a sample month with two jobs, including plans, night shifts, holiday work and a saved shift.<br>Your own records <b>stay saved and untouched</b>, and nothing in the sample is saved. Tap “Close sample” to go back.');
+  $('exGo').textContent = t('🔰 見本を出す', '🔰 Show sample'); $('exNo').textContent = t('やめる', 'Cancel');
+  $('exBarT').textContent = t('🔰 記入例を表示中（保存されません）', '🔰 Showing a sample (not saved)'); $('exBack').textContent = t('見本をとじる', 'Close sample');
+  $('hJobs').textContent = t('💼 職場と時給', '💼 JOBS & WAGES');
+  $('lCur').textContent = t('💱 通貨', '💱 Currency');
+  $('eCur').innerHTML = CUR.map(c => `<option value="${c[0]}">${c[0]} — ${J() ? c[1] : c[2]}</option>`).join(''); $('eCur').value = D.cur;
+  $('bAddJob').textContent = t('＋ 職場を追加（掛け持ち）', '+ Add a job');
+  $('bToday').textContent = t('今月', 'This month');
+  $('lJob').textContent = t('職場', 'Job'); $('lMode').textContent = t('入れ方', 'Entry');
+  $('mTime').textContent = t('🕐 時刻', '🕐 Clock times'); $('mHours').textContent = t('⏱ 合計時間', '⏱ Total hours');
+  $('lStart').textContent = t('開始', 'Start'); $('lEnd').textContent = t('〜 終了', '– End'); $('lBreak').textContent = t('休憩', 'Break'); $('lMin').textContent = t('分', 'min');
+  $('lHours').textContent = t('働いた時間', 'Hours'); $('lNightH').textContent = t('うち深夜', 'of which night'); $('lH1').textContent = $('lH2').textContent = t('時間', 'h');
+  $('bSave').textContent = MULTI.size > 1 ? t(`＋ 選んだ ${MULTI.size} 日に入れる`, `+ Add to ${MULTI.size} days`) : t('＋ この日に記録', '+ Add to this day'); $('bSaveShift').textContent = t('⭐ シフトとして登録', '⭐ Save as shift'); $('bClose').textContent = t('閉じる', 'Close');
+  $('hSum').textContent = t('📊 今月の目安（✅ 働いた分）', '📊 THIS MONTH (worked, estimate)'); $('sYen').textContent = D.cur;
+  $('bCsv').textContent = t('⬇ CSV で保存', '⬇ Save as CSV'); $('bClearM').textContent = t('この月を消す', 'Clear this month');
+const dn = J() ? ['日','月','火','水','木','金','土'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], hdOpts = [t('なし', 'None'), ...dn].map((n, i) => `<option value="${i - 1}">${n}</option>`).join('');
+  $('lRule').textContent = t('⚖️ 割増', '⚖️ Premiums'); $('ruleJP').textContent = '🇯🇵 JP'; $('ruleC').textContent = '✏️ Custom';
+  $('ruleJP').classList.toggle('on', D.rule === 'jp'); $('ruleC').classList.toggle('on', D.rule !== 'jp');
+  $('ratesJP').style.display = D.rule === 'jp' ? '' : 'none'; $('dC').style.display = D.rule === 'jp' ? 'none' : ''; $('rowJPHd').style.display = D.rule === 'jp' ? '' : 'none';
+  $('ratesJP').innerHTML = [[t('🌙 深夜（22時〜翌5時）', '🌙 Night (22:00–5:00)'), '+25%'], [t('⏱ 残業（1日8時間をこえた分）', '⏱ Overtime (over 8 h/day)'), '+25%'], [t('⏱ 残業のうち月60時間をこえた分', '⏱ Overtime beyond 60 h/month'), '+50%'], [t('🏖 法定休日の出勤（残業には数えない）', '🏖 Legal holiday (not overtime)'), '+35%']].map(([a, b]) => `<span>${a}</span><span style="font-family:'Courier New',monospace">${b}</span>`).join('');
+  $('lJPHd').textContent = t('🏖 法定休日の曜日（自動でチェック）', '🏖 Legal holiday (auto-check)'); $('rJPHd').innerHTML = hdOpts; $('rJPHd').value = D.rates.jpHolDow == null ? 0 : D.rates.jpHolDow;
+  $('sRates').textContent = t('✏️ 割増を自分で決める（お勤め先・国や州の決まりに合わせて）', '✏️ Set your own premiums (match your workplace or local law)');
+  $('lrB').textContent = t('⏱ 残業の数え方', '⏱ Overtime basis'); $('rB').innerHTML = `<option value="day">${t('1日で数える', 'Per day')}</option><option value="week">${t('1週で数える', 'Per week')}</option>`; $('rB').value = D.rates.otBasis;
+  $('lrLim').textContent = D.rates.otBasis === 'week' ? t('　この時間をこえたら残業（1週）', '　Overtime after (per week)') : t('　この時間をこえたら残業（1日）', '　Overtime after (per day)');
+  $('rDay').style.display = D.rates.otBasis === 'week' ? 'none' : ''; $('rWk').style.display = D.rates.otBasis === 'week' ? '' : 'none'; $('rWk').value = D.rates.week;
+  $('lrWs').textContent = t('　週の始まり', '　Week starts on'); $('rWs').innerHTML = `<option value="0">${dn[0]}</option><option value="1">${dn[1]}</option>`; $('rWs').value = D.rates.wkStart;
+  $('lrWs').style.display = $('wsBox').style.display = D.rates.otBasis === 'week' ? '' : 'none';
+  $('lrNW').textContent = t('🌙 深夜の時間帯', '🌙 Night hours'); $('lrN').textContent = t('🌙 深夜の割増', '🌙 Night premium'); $('rNS').value = D.rates.nS; $('rNE').value = D.rates.nE; $('lrO').textContent = t('⏱ 残業の割増', '⏱ Overtime premium');
+  
+  $('sNote').innerHTML = t('<b>⚠️ 額面の目安です。</b>税金・社会保険・交通費・手当は入っていません。実際の給料は、お勤め先の決まり（端数の扱い・変形労働時間制など）で変わります。<br>🇯🇵 JP は、日本の労働基準法の最低の割増率（深夜25%以上・残業25%以上・月60時間をこえる残業50%以上・法定休日35%以上）です。法定休日に働いた時間は残業には数えず、深夜にかかった分は深夜割増も足します。週40時間をこえた分の残業は計算しません。<br>✏️ Custom は、割増の決まりが国や州・お勤め先でちがう方のための設定です。', '<b>⚠️ Gross estimate only.</b> Tax, social insurance, transport and allowances are not included, and your workplace rules may differ.<br>🇯🇵 JP uses the Japanese legal minimums (night +25%, overtime +25%, overtime beyond 60 h/month +50%, legal holiday +35%; holiday hours are not counted as overtime).<br>✏️ Custom is for everyone else — overtime and night rules vary by country, state and employer, so enter yours (per-day or per-week overtime).');
+  $('fVer').textContent = 'Meridi Punch v1.0.0';
+  $('bMulti').textContent = t('☑ まとめて選ぶ', '☑ Select several'); $('bMulti').classList.toggle('on', MTOG);
+  $('multiHint').textContent = t('　Ctrl（⌘）＋クリックで追加、Shift＋クリックで範囲', '  Ctrl/⌘+click to add, Shift+click for a range');
+  $('mbNoWeekend').textContent = t('🚫 土日を外す', '🚫 Drop weekends'); $('mbWeekday').textContent = t('平日だけ', 'Weekdays only'); $('mbWeekend').textContent = t('土日だけ', 'Weekends only');
+  $('mbClear').textContent = t('選ぶのをやめる', 'Clear');
+  $('lKind').textContent = t('種類', 'Type'); $('kDone').textContent = t('✅ 働いた', '✅ Worked'); $('kPlan').textContent = t('📅 予定', '📅 Planned');
+  $('lHol').textContent = t('🏖 休日出勤', '🏖 Holiday work');
+  $('lrH').textContent = t('🏖 休日出勤の割増', '🏖 Holiday-work premium'); $('lrHd').textContent = t('　休日の曜日（自動でチェック）', '　Holiday weekday (auto-check)');
+  $('rH').value = D.rates.hol; $('rHd').innerHTML = hdOpts; $('rHd').value = D.rates.holDow;
+  $('hProj').textContent = t('📈 このまま働くと', '📈 IF YOU KEEP WORKING LIKE THIS');
+  $('lNew').textContent = t('⚖️ 転職先とくらべる', '⚖️ Compare with a new job'); $('nMonthly').textContent = t('💴 月給', '💴 Monthly'); $('nHourly').textContent = t('⏱ 時給×時間', '⏱ Hourly × hours');
+  $('nMonth').placeholder = D.cur === 'JPY' ? t('例：250000', 'e.g. 250000') : t('例：3200', 'e.g. 3200'); $('nWage').placeholder = D.cur === 'JPY' ? t('例：1500', 'e.g. 1500') : t('例：18', 'e.g. 18'); $('nHrs').placeholder = t('例：80', 'e.g. 80');
+  $('lNewCur').textContent = t('月給 ', 'Monthly ') + D.cur; $('lNewCur2').textContent = D.cur; $('lNewH').textContent = t('時間 ／ 月', 'h / month');
+  $('nMonth').value = PJ.nmonth || ''; $('nWage').value = PJ.nwage || ''; $('nHrs').value = PJ.nhrs || ''; $('nMH').value = PJ.mh;
+  $('sP').textContent = t('✏️ Custom：期間・間隔・もとにするもの', '✏️ Custom: span, interval, basis');
+  $('lpStep').textContent = t('間隔', 'Interval'); $('pStep').innerHTML = `<option value="std">${t('1・3・6・12か月（いつもの）', '1 · 3 · 6 · 12 months (standard)')}</option><option value="m">${t('毎月', 'Every month')}</option><option value="q">${t('四半期ごと（3か月おき）', 'Every quarter (3 months)')}</option>`; $('pStep').value = PJ.step;
+  $('lpLen').textContent = t('何か月先まで', 'How far ahead'); $('pLen').innerHTML = [12, 24, 36, 60].map(n => `<option value="${n}">${n}${t('か月', ' months')}（${n / 12}${t('年', ' yr')}）</option>`).join(''); $('pLen').value = PJ.len;
+  $('lpBase').textContent = t('見込みのもと', 'Based on'); $('pBase').innerHTML = `<option value="avg">${t('📊 記録した月の平均', '📊 Average of recorded months')}</option><option value="this">${t('📅 今月の分', '📅 This month')}</option>`; $('pBase').value = PJ.base;
+  $('lpMH').textContent = t('転職先の月の勤務時間（月給を時給に直すとき）', 'New job hours / month (to compare per hour)');
+  $('rN').value = D.rates.night; $('rO').value = D.rates.ot; $('rDay').value = D.rates.day;
+}
+
+/* ---- jobs ---- */
+$('eCur').addEventListener('change', () => { D.cur = $('eCur').value;
+  D.jobs.forEach(j => { j.wage = defWage(); });
+  save(); renderAll(); toast(t(`💱 ${D.cur} にしました。時給を入れ直してください`, `💱 Switched to ${D.cur}. Please set your wages again`)); });
+function renderJobs(){
+  const box = $('jobs'); box.replaceChildren();
+  D.jobs.forEach((j, i) => {
+    const el = document.createElement('div'); el.className = 'job';
+    const WAGES = presets(), preset = WAGES.some(w => Math.abs(w - j.wage) < 1e-9), st = wStep(), jpy = D.cur === 'JPY';
+    el.innerHTML = `<span class="dot" style="background:${j.color}" title="${t('色を変える', 'Change color')}"></span>
+      <div class="nm">
+        <input type="text" maxlength="20" placeholder="${t('職場の名前（なくてもOK）', 'Job name (optional)')}" value="${(j.name || '').replace(/"/g, '&quot;')}">
+        <div class="wage"><span style="font-size:11px;color:var(--sub)">${t('時給', 'Wage')}</span>
+          <select style="display:${jpy ? '' : 'none'}">${WAGES.map(w => `<option value="${w}" ${preset && Math.abs(+j.wage - w) < 1e-9 ? 'selected' : ''}>${money(w)}</option>`).join('')}<option value="custom" ${preset ? '' : 'selected'}>${t('✏️ 自分で入力', '✏️ Custom')}</option></select>
+          <input type="number" min="0" step="${st}" value="${j.wage}" style="display:${jpy && preset ? 'none' : ''}"><span style="font-size:11px">${D.cur}${jpy ? '' : ` <span style="color:var(--sub)">（${t('▲▼で', '▲▼ ')}${st}${t(' ずつ', ' steps')}）</span>`}</span></div>
+      </div>
+      ${D.jobs.length > 1 ? `<button class="btn del" title="${t('この職場を消す', 'Remove')}">✕</button>` : '<span></span>'}`;
+    const [nm] = el.querySelectorAll('input[type=text]'), sel = el.querySelector('select'), num = el.querySelector('input[type=number]');
+    nm.oninput = () => { j.name = nm.value; save(); renderEditor(); renderSum(); renderCal(); };
+    sel.onchange = () => { if (sel.value === 'custom'){ num.style.display = ''; num.focus(); } else { num.style.display = 'none'; j.wage = +sel.value; num.value = j.wage; save(); renderAll(); } };
+    num.oninput = () => { j.wage = Math.max(0, +num.value || 0); save(); renderSum(); renderEditor(); };
+    num.onchange = () => { if (!jpy){ j.wage = Math.max(0, Math.round((+num.value || 0) / st) * st); num.value = j.wage; save(); renderSum(); renderEditor(); } };
+    el.querySelector('.dot').onclick = () => { j.color = COLORS[(COLORS.indexOf(j.color) + 1) % COLORS.length]; save(); renderAll(); };
+    const del = el.querySelector('.del'); if (del) del.onclick = () => {
+      const used = Object.values(D.days).some(l => l.some(e => e.job === j.id));
+      if (used && !confirm(t('この職場の記録も消えます。よろしいですか？', 'Records for this job will also be deleted. OK?'))) return;
+      D.jobs.splice(i, 1); Object.keys(D.days).forEach(k => { D.days[k] = D.days[k].filter(e => e.job !== j.id); if (!D.days[k].length) delete D.days[k]; });
+      D.shifts = D.shifts.filter(s => s.job !== j.id); save(); renderAll(); };
+    box.append(el);
+  });
+}
+$('bAddJob').onclick = () => { if (D.jobs.length >= 8) return toast(t('職場は8つまでです', 'Up to 8 jobs')); D.jobs.push({ id:D.nextId++, name:'', wage:defWage(), color:COLORS[D.jobs.length % COLORS.length] }); save(); renderAll(); };
+
+/* ---- calendar ---- */
+function renderCal(){
+  $('mLabel').textContent = J() ? `${Y}年 ${M + 1}月` : new Date(Y, M, 1).toLocaleDateString('en-US', { year:'numeric', month:'long' });
+  const cal = $('cal'); cal.replaceChildren();
+  const dn = J() ? ['日','月','火','水','木','金','土'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  dn.forEach((d, i) => { const e = document.createElement('div'); e.className = 'dow' + (i === 0 ? ' sun' : i === 6 ? ' sat' : ''); e.textContent = d; cal.append(e); });
+  const first = new Date(Y, M, 1).getDay(), days = new Date(Y, M + 1, 0).getDate(), tk = key(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let i = 0; i < first; i++){ const e = document.createElement('div'); e.className = 'day out'; cal.append(e); }
+  for (let d = 1; d <= days; d++){
+    const k = key(Y, M, d), w = (first + d - 1) % 7, list = D.days[k] || [];
+    const e = document.createElement('div');
+    e.className = 'day' + (w === 0 ? ' sun' : w === 6 ? ' sat' : '') + (k === tk ? ' today' : '') + (MULTI.has(k) ? (MULTI.size > 1 ? ' msel' : ' sel') : '');
+    let html = `<span class="n">${d}</span>`, hasNight = false, hasHol = false;
+    list.forEach(x => { const j = job(x.job), sp = splitShift(x); if (sp.night) hasNight = true; if (x.hol) hasHol = true; html += `<span class="tag${x.plan ? ' plan' : ''}" style="background:${j.color}">${x.plan ? '📅' : ''}${hrs(sp.work)}h</span>`; });
+    if (hasNight) html += '<span class="moon">🌙</span>'; if (hasHol) html += '<span class="hw">🏖</span>';
+    e.innerHTML = html;
+    e.onclick = ev => pick(k, ev);
+    cal.append(e);
+  }
+  renderMultibar(); renderToday();
+}
+function monthKeys(){ const n = new Date(Y, M + 1, 0).getDate(), o = []; for (let d = 1; d <= n; d++) o.push(key(Y, M, d)); return o; }
+function pick(k, ev){
+  const add = ev && (ev.ctrlKey || ev.metaKey) || MTOG, range = ev && ev.shiftKey && ANCHOR;
+  if (range){ const ks = monthKeys(), a = ks.indexOf(ANCHOR), b = ks.indexOf(k); if (a >= 0 && b >= 0){ if (!add && !MTOG) MULTI.clear(); ks.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(x => MULTI.add(x)); } else { MULTI = new Set([k]); } }
+  else if (add){ MULTI.has(k) ? MULTI.delete(k) : MULTI.add(k); ANCHOR = k; }
+  else { MULTI = new Set([k]); ANCHOR = k; }
+  SEL = MULTI.size ? [...MULTI].sort()[0] : null;
+  if (MULTI.size > 1) KIND = 'plan';
+  renderCal(); renderEditor(); texts();
+  if (SEL) setTimeout(() => $('ed').scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+}
+function renderMultibar(){
+  const on = MULTI.size > 1; $('multibar').classList.toggle('on', on);
+  if (on) $('mbCount').textContent = t(`📅 ${MULTI.size} 日を選んでいます`, `📅 ${MULTI.size} days selected`);
+}
+function filt(fn){ MULTI = new Set([...MULTI].filter(fn)); SEL = MULTI.size ? [...MULTI].sort()[0] : null; renderCal(); renderEditor(); texts(); }
+const isWE = k => { const w = dowOf(k); return w === 0 || w === 6; };
+$('mbNoWeekend').onclick = () => filt(k => !isWE(k));
+$('mbWeekday').onclick = () => filt(k => !isWE(k));
+$('mbWeekend').onclick = () => filt(k => isWE(k));
+$('mbClear').onclick = () => { MULTI.clear(); SEL = null; ANCHOR = null; MTOG = false; renderAll(); };
+$('bMulti').onclick = () => { MTOG = !MTOG; if (!MTOG && MULTI.size > 1){ MULTI = new Set([SEL]); } renderAll(); toast(MTOG ? t('☑ タップした日がどんどん足されます', '☑ Each tap adds a day') : t('1日ずつ選ぶに戻しました', 'Back to one day')); };
+
+/* ---- today: one tap to confirm ---- */
+function renderToday(){
+  const tk = key(now.getFullYear(), now.getMonth(), now.getDate()), list = (D.days[tk] || []), box = $('todayBox'), plans = list.map((e, i) => [e, i]).filter(([e]) => e.plan);
+  if (!plans.length || !(Y === now.getFullYear() && M === now.getMonth())){ box.classList.remove('on'); return; }
+  box.classList.add('on'); $('tdTitle').textContent = t('🕐 今日の予定（終わったら押すだけ）', "🕐 Today's plan (tap when you finish)");
+  const l = $('tdList'); l.replaceChildren();
+  plans.forEach(([e, i]) => { const j = job(e.job), el = document.createElement('div'); el.className = 'ent';
+    el.innerHTML = `<span class="c" style="background:${j.color}"></span><span class="t">${D.jobs.length > 1 ? `<b>${j.name || t('職場', 'Job')}</b> · ` : ''}${descr(e)}</span><button class="btn solid big">${t('✅ 予定どおり', '✅ As planned')}</button><button class="btn ghost">${t('✏️ 直す', '✏️ Edit')}</button>`;
+    const [ok, fix] = el.querySelectorAll('button');
+    ok.onclick = () => { delete e.plan; save(); renderAll(); toast(t('✅ お疲れさまでした！記録しました', '✅ Nice work! Recorded')); };
+    fix.onclick = () => { MULTI = new Set([tk]); SEL = tk; ANCHOR = tk; KIND = 'done';
+      if (e.mode === 'time'){ $('eStart').value = e.start; $('eEnd').value = e.end; $('eBreak').value = e.brk; setMode('time'); } else { $('eHours').value = e.hours; $('eNightH').value = e.nightH; setMode('hours'); }
+      D.days[tk].splice(i, 1); if (!D.days[tk].length) delete D.days[tk]; save(); renderAll(); $('eJob').value = e.job; $('eHol').checked = !!e.hol; preview(); toast(t('時刻を直して「＋ この日に記録」を押してください', 'Fix the times, then tap "+ Add to this day"')); };
+    l.append(el); });
+}
+
+$('bPrev').onclick = () => { M--; if (M < 0){ M = 11; Y--; } SEL = null; MULTI.clear(); renderAll(); };
+$('bNext').onclick = () => { M++; if (M > 11){ M = 0; Y++; } SEL = null; MULTI.clear(); renderAll(); };
+$('bToday').onclick = () => { Y = now.getFullYear(); M = now.getMonth(); SEL = null; MULTI.clear(); renderAll(); };
+
+/* ---- editor ---- */
+function curEntry(){
+  const e = MODE === 'time' ? { job:+$('eJob').value || D.jobs[0].id, mode:'time', start:$('eStart').value, end:$('eEnd').value, brk:+$('eBreak').value || 0 }
+                            : { job:+$('eJob').value || D.jobs[0].id, mode:'hours', hours:+$('eHours').value || 0, nightH:+$('eNightH').value || 0 };
+  if ($('eHol').checked) e.hol = true; if (KIND === 'plan') e.plan = true; return e;
+}
+function setKind(k){ KIND = k; $('kDone').classList.toggle('on', k === 'done'); $('kPlan').classList.toggle('on', k === 'plan'); }
+$('kDone').onclick = () => setKind('done'); $('kPlan').onclick = () => setKind('plan');
+$('eHol').addEventListener('change', () => preview());
+function descr(e){
+  const sp = splitShift(e);
+  return (e.mode === 'time' ? `${e.start}〜${toMin(e.end) <= toMin(e.start) ? t('翌', 'next day ') : ''}${e.end}・${t('休憩', 'break')}${e.brk}${t('分', 'min')}` : `${t('合計', 'total')} ${e.hours}${t('時間', 'h')}`)
+    + ` → ${hrs(sp.work)}h` + (sp.night ? `（${t('深夜', 'night')} ${hrs(sp.night)}h）` : '');
+}
+function renderEditor(){
+  const ed = $('ed'); if (!SEL){ ed.classList.remove('on'); return; } ed.classList.add('on');
+  const [y, m, d] = SEL.split('-').map(Number), w = new Date(y, m - 1, d).getDay();
+  $('edTitle').textContent = MULTI.size > 1 ? t(`📅 ${MULTI.size} 日にまとめて入れる（${[...MULTI].sort().map(k => +k.slice(8)).join('・')}日）`, `📅 Add to ${MULTI.size} days`)
+    : (J() ? `${m}月${d}日（${'日月火水木金土'[w]}）` : new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }));
+  setKind(KIND);
+  $('eHol').checked = MULTI.size <= 1 && RR().holDow >= 0 && w === +RR().holDow;
+  const box = $('entries'); box.replaceChildren();
+  (MULTI.size > 1 ? [] : (D.days[SEL] || [])).forEach((e, i) => {
+    const j = job(e.job), el = document.createElement('div'); el.className = 'ent';
+    el.innerHTML = `<span class="c" style="background:${j.color}"></span><span class="t">${e.plan ? '📅 ' : '✅ '}${e.hol ? '🏖 ' : ''}${D.jobs.length > 1 ? `<b>${j.name || t('職場', 'Job') + ' ' + (D.jobs.indexOf(j) + 1)}</b> · ` : ''}${descr(e)}</span>${e.plan ? `<button class="btn solid" style="padding:3px 8px">${t('✅ 確定', '✅ Confirm')}</button>` : ''}<button class="btn del" style="padding:3px 8px">✕</button>`;
+    if (e.plan) el.querySelector('.solid').onclick = () => { delete e.plan; save(); renderAll(); toast(t('✅ 確定しました', '✅ Confirmed')); };
+    el.querySelector('.del').onclick = () => { D.days[SEL].splice(i, 1); if (!D.days[SEL].length) delete D.days[SEL]; save(); renderAll(); };
+    box.append(el);
+  });
+  const sj = $('eJob'), keep = sj.value; sj.innerHTML = D.jobs.map((j, i) => `<option value="${j.id}">${j.name || t('職場', 'Job') + ' ' + (i + 1)} ・ ${money(+j.wage)}</option>`).join('');
+  if (keep && D.jobs.some(j => String(j.id) === keep)) sj.value = keep;
+  $('rJob').style.display = D.jobs.length > 1 ? '' : 'none';
+  renderShifts(); preview();
+}
+function preview(){
+  const r = RR(), e = curEntry(), sp = splitShift(e), j = job(e.job), w = +j.wage || 0, dl = (+r.day || 8) * 60, ot = r.otBasis === 'week' ? 0 : Math.max(0, sp.work - dl);
+  const hw = !!e.hol, otx = hw && D.rule === 'jp' ? 0 : ot;
+  const pay = sp.work / 60 * w + sp.night / 60 * w * r.night / 100 + otx / 60 * w * r.ot / 100 + (hw ? sp.work / 60 * w * r.hol / 100 : 0);
+  $('preview').innerHTML = `${t('ふつう', 'Day')} ${hrs(sp.day)}h ／ <span class="nt">🌙 ${t('深夜', 'Night')} ${hrs(sp.night)}h</span>` + (otx ? ` ／ <span class="ov">⏱ ${t('残業', 'Overtime')} ${hrs(otx)}h</span>` : '') + (hw ? ` ／ <span class="ov">🏖 ${t('休日', 'Holiday')} +${r.hol}%</span>` : '') + (r.otBasis === 'week' ? `<br><span style="opacity:.7">${t('※ 残業は1週の合計で数えるので、月の合計に出ます', '※ Weekly overtime shows in the monthly total')}</span>` : '') + `<br>${t('この日の目安', 'Estimate for this shift')}：<b>${money(pay)}</b>`;
+}
+['eStart','eEnd','eBreak','eHours','eNightH','eJob'].forEach(id => $(id).addEventListener('input', preview));
+function setMode(m){ MODE = m; $('mTime').classList.toggle('on', m === 'time'); $('mHours').classList.toggle('on', m === 'hours'); $('fTime').style.display = m === 'time' ? '' : 'none'; $('fHours').style.display = m === 'hours' ? '' : 'none'; preview(); }
+$('mTime').onclick = () => setMode('time'); $('mHours').onclick = () => setMode('hours');
+$('bSave').onclick = () => {
+  const e = curEntry(); if (splitShift(e).work <= 0) return toast(t('働いた時間が0です', 'No working time'));
+  if (e.mode === 'hours' && e.nightH > e.hours) return toast(t('深夜の時間が、合計より長くなっています', 'Night hours exceed total'));
+  const targets = MULTI.size > 1 ? [...MULTI].sort() : [SEL], auto = MULTI.size > 1 && RR().holDow >= 0;
+  targets.forEach(k => { const x = Object.assign({}, e); if (auto){ if (dowOf(k) === +RR().holDow) x.hol = true; else delete x.hol; } (D.days[k] = D.days[k] || []).push(x); });
+  save(); const n = targets.length; if (n > 1){ MULTI.clear(); SEL = null; MTOG = false; KIND = 'done'; }
+  renderAll(); toast(n > 1 ? t(`📅 ${n} 日に${e.plan ? '予定を' : ''}入れました`, `📅 Added to ${n} days`) : t(e.plan ? '📅 予定を入れました' : '✅ 記録しました', e.plan ? '📅 Planned' : '✅ Added'));
+};
+$('bClose').onclick = () => { SEL = null; MULTI.clear(); MTOG = false; renderAll(); };
+function renderShifts(){
+  const box = $('shifts'); box.replaceChildren();
+  D.shifts.forEach((s, i) => {
+    const el = document.createElement('button'); el.className = 'chip';
+    el.innerHTML = `⭐ ${s.start}〜${s.end}${D.jobs.length > 1 ? ' · ' + (job(s.job).name || t('職場', 'Job')) : ''}<i title="${t('消す', 'Remove')}">✕</i>`;
+    el.onclick = ev => { if (ev.target.tagName === 'I'){ D.shifts.splice(i, 1); save(); renderShifts(); return; }
+      $('eStart').value = s.start; $('eEnd').value = s.end; $('eBreak').value = s.brk; if (D.jobs.some(j => j.id === s.job)) $('eJob').value = s.job; setMode('time');
+      if (SEL){ $('bSave').click(); } };
+    box.append(el);
+  });
+}
+$('bSaveShift').onclick = () => { if (MODE !== 'time') return toast(t('シフトは「時刻」の入れ方で登録できます', 'Shifts use clock times')); const e = curEntry();
+  if (D.shifts.length >= 8) return toast(t('シフトは8つまでです', 'Up to 8 shifts'));
+  D.shifts.push({ job:e.job, start:e.start, end:e.end, brk:e.brk }); save(); renderShifts(); toast(t('⭐ 登録しました。次からは押すだけで記録できます', '⭐ Saved. Tap it to add in one go')); };
+
+/* ---- summary ---- */
+/* ---- 📈 projection: "if you keep working like this" ---- */
+function monthTotal(y, m){ const keepY = Y, keepM = M; Y = y; M = m; const r = calcMonth(); Y = keepY; M = keepM; return r; }
+function baseMonth(){
+  // average of months that have worked records (up to the last 12), or this month only
+  if (PJ.base === 'this'){ const r = monthTotal(Y, M); return { pay:r.tot.total, hrs:r.tot.work / 60, n:r.tot.days.size ? 1 : 0, label:t('今月の分', 'this month') }; }
+  const ms = [...new Set(Object.keys(D.days).filter(k => (D.days[k] || []).some(e => !e.plan)).map(k => k.slice(0, 7)))].sort().slice(-12);
+  if (!ms.length) return { pay:0, hrs:0, n:0, label:t('記録した月の平均', 'average of recorded months') };
+  let p = 0, h = 0; ms.forEach(s => { const [a, b] = s.split('-').map(Number), r = monthTotal(a, b - 1); p += r.tot.total; h += r.tot.work / 60; });
+  return { pay:p / ms.length, hrs:h / ms.length, n:ms.length, label:t(`記録した ${ms.length} か月の平均`, `average of ${ms.length} recorded month${ms.length > 1 ? 's' : ''}`) };
+}
+function projSteps(){
+  const L = +PJ.len || 12;
+  if (PJ.step === 'm') return Array.from({ length:L }, (_, i) => i + 1);
+  if (PJ.step === 'q') return Array.from({ length:Math.floor(L / 3) }, (_, i) => (i + 1) * 3);
+  return [1, 3, 6, 12, 24, 36, 60].filter(n => n <= L);
+}
+function newMonthly(){ return PJ.nmode === 'month' ? (+PJ.nmonth || 0) : (+PJ.nwage || 0) * (+PJ.nhrs || 0); }
+function renderProj(){
+  const b = baseMonth(), nm = newMonthly(), has = nm > 0;
+  $('rNewM').style.display = PJ.nmode === 'month' ? '' : 'none'; $('rNewH').style.display = PJ.nmode === 'hour' ? '' : 'none';
+  $('nMonthly').classList.toggle('on', PJ.nmode === 'month'); $('nHourly').classList.toggle('on', PJ.nmode === 'hour');
+  const lenOK = n => n === 12 ? t('（年収の目安）', ' (yearly)') : n % 12 === 0 ? t(`（${n / 12}年）`, ` (${n / 12} yr)`) : '';
+  let html = `<tr><th>${t('先', 'Ahead')}</th><th>${t('今の働き方', 'Current')}</th>${has ? `<th>${t('転職先', 'New job')}</th><th>${t('差', 'Difference')}</th>` : ''}</tr>`;
+  if (!b.n && !(PJ.base === 'this')){
+    html += `<tr><td colspan="${has ? 4 : 2}" style="text-align:left;color:var(--sub);font-family:inherit">${t('「✅ 働いた」記録を入れると、見込みが出ます。🔰 の見本でも試せます。', 'Add some ✅ worked records to see the projection — or try the 🔰 sample.')}</td></tr>`;
+  } else projSteps().forEach(n => {
+    const cur = b.pay * n, nw = nm * n, d = nw - cur;
+    html += `<tr class="${n % 12 === 0 ? 'yr' : ''}"><td>${n}${t('か月', n > 1 ? ' months' : ' month')}<span style="font-size:10px;opacity:.7">${lenOK(n)}</span></td><td>${money(cur)}</td>${has ? `<td>${money(nw)}</td><td class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : '−'}${money(Math.abs(d))}</td>` : ''}</tr>`;
+  });
+  $('pTable').innerHTML = html;
+  let hr = '';
+  if (has && b.hrs > 0){
+    const mh = PJ.nmode === 'month' ? (+PJ.mh || 0) : (+PJ.nhrs || 0);
+    if (mh > 0){ const nh = nm / mh, ch = b.pay / b.hrs; hr = '<br>' + t(`時給に直すと：今 ${money(ch)} ／ 転職先 ${money(nh)}（月 ${mh} 時間として）`, `Per hour: now ${money(ch)} / new job ${money(nh)} (at ${mh} h/month)`); }
+  }
+  $('pNote').innerHTML = t('⚠️ 額面（税引き前）の目安です。税金・社会保険料は引かれていません。ボーナス・昇給・手当も入っていません。', '⚠️ Gross (before tax) estimate. Tax and social insurance are not deducted. Bonuses, raises and allowances are not included.')
+    + '<br>' + t(`もとにしたもの：${b.label}（1か月 ${money(b.pay)}・${Math.round(b.hrs * 10) / 10} 時間）`, `Based on: ${b.label} (${money(b.pay)} · ${Math.round(b.hrs * 10) / 10} h per month)`)
+    + (has ? '<br>' + t('転職先は、エージェントさんや求人票（JD）の情報をもとに、ご自身で入れた金額です。', 'The new job figure is what you entered from the recruiter or job description.') : '') + hr;
+}
+function renderSum(){ renderSum0(); try { renderProj(); } catch(e){} }
+function renderSum0(){
+  const { per, tot, all } = calcMonth();
+  animateNum($('sTotal'), Math.round(tot.total * 10 ** decs()) / 10 ** decs());
+  $('sPlan').textContent = all.total > tot.total + .5 ? t(`予定も入れると ${money(all.total)}`, `with plans ${money(all.total)}`) : '';
+  $('sMeta').textContent = t(`${tot.days.size}日 ・ ${hrs(tot.work)}時間（うち深夜 ${hrs(tot.night)}時間）`, `${tot.days.size} days · ${hrs(tot.work)} h (night ${hrs(tot.night)} h)`);
+  const r = RR();
+  $('sTable').innerHTML = `<tr><td>${t('基本（時給×時間）', 'Base (wage × hours)')}</td><td>${money(tot.base)}</td></tr>
+    <tr><td>🌙 ${t('深夜割増', 'Night premium')}（${r.night}%）</td><td>${money(tot.nightPay)}</td></tr>
+    <tr><td>🏖 ${t('休日出勤の割増', 'Holiday premium')}（${r.hol}%・${hrs(tot.hol)}h）</td><td>${money(tot.holPay)}</td></tr>
+    <tr><td>⏱ ${t('残業割増', 'Overtime premium')}（${r.ot}%・${hrs(tot.ot)}h${tot.ot60 ? t('・うち60h超 ', ' · over 60h ') + hrs(tot.ot60) + 'h' : ''}）</td><td>${money(tot.otPay)}</td></tr>`;
+  const js = $('sJobs'); js.replaceChildren();
+  if (D.jobs.length > 1) D.jobs.forEach((j, i) => { const p = per[j.id]; const el = document.createElement('div'); el.className = 'js';
+    el.innerHTML = `<span class="c" style="background:${j.color}"></span>${j.name || t('職場', 'Job') + ' ' + (i + 1)}<span style="color:var(--sub)">${p ? `${p.days.size}${t('日', 'd')}・${hrs(p.work)}h` : '—'}</span><b>${money(p ? p.total : 0)}</b>`; js.append(el); });
+}
+function animateNum(el, to){ const from = +(el.dataset.v || 0), t0 = performance.now(); el.dataset.v = to;
+  const st = n => { const k = Math.min(1, (n - t0) / 600), e = 1 - Math.pow(1 - k, 3); el.textContent = yen(Math.round((from + (to - from) * e) * 10 ** decs()) / 10 ** decs()); if (k < 1) requestAnimationFrame(st); }; requestAnimationFrame(st); }
+[['rNS','nS'],['rNE','nE']].forEach(([id, k]) => $(id).addEventListener('change', () => { D.rates[k] = $(id).value || D.rates[k]; save(); renderAll(); }));
+$('rHd').addEventListener('change', () => { D.rates.holDow = +$('rHd').value; save(); renderEditor(); });
+$('ruleJP').onclick = () => { D.rule = 'jp'; save(); renderAll(); toast(t('🇯🇵 日本の法定の最低で計算します', '🇯🇵 Using Japan legal minimums')); };
+$('ruleC').onclick = () => { D.rule = 'custom'; save(); renderAll(); $('dC').open = true; toast(t('✏️ 割増を自分で決められます', '✏️ Enter your own premiums')); };
+$('rJPHd').addEventListener('change', () => { D.rates.jpHolDow = +$('rJPHd').value; save(); renderEditor(); });
+$('rB').addEventListener('change', () => { D.rates.otBasis = $('rB').value; save(); renderAll(); });
+$('rWs').addEventListener('change', () => { D.rates.wkStart = +$('rWs').value; save(); renderSum(); });
+[['rN','night'],['rO','ot'],['rDay','day'],['rWk','week'],['rH','hol']].forEach(([id, k]) => $(id).addEventListener('input', () => { D.rates[k] = Math.max(0, +$(id).value || 0); save(); renderSum(); preview(); }));
+$('bClearM').onclick = () => { if (EX) return toast(t('🔰 見本の間は消せません', '🔰 Not available in the sample')); const pre = `${Y}-${String(M + 1).padStart(2, '0')}-`; if (!confirm(t('この月の記録をすべて消します。よろしいですか？', 'Delete all records for this month?'))) return;
+  Object.keys(D.days).forEach(k => { if (k.startsWith(pre)) delete D.days[k]; }); SEL = null; save(); renderAll(); };
+$('bCsv').onclick = () => { if (EX) return toast(t('🔰 見本の間は保存できません', '🔰 Not available in the sample'));
+  const pre = `${Y}-${String(M + 1).padStart(2, '0')}-`, rows = [[t('日付', 'Date'), t('職場', 'Job'), t('時給', 'Wage'), t('開始', 'Start'), t('終了', 'End'), t('休憩(分)', 'Break(min)'), t('勤務(時間)', 'Work(h)'), t('深夜(時間)', 'Night(h)'), t('休日出勤', 'Holiday'), t('種類', 'Type')]];
+  Object.keys(D.days).filter(k => k.startsWith(pre)).sort().forEach(k => D.days[k].forEach(e => { const j = job(e.job), sp = splitShift(e);
+    rows.push([k, j.name || '', j.wage, e.mode === 'time' ? e.start : '', e.mode === 'time' ? e.end : '', e.mode === 'time' ? e.brk : '', (sp.work / 60).toFixed(2), (sp.night / 60).toFixed(2), e.hol ? '○' : '', e.plan ? t('予定', 'Plan') : t('働いた', 'Worked')]); }));
+  const { tot } = calcMonth(); rows.push([]); rows.push([t('合計の目安', 'Estimated total'), '', '', '', '', '', (tot.work / 60).toFixed(2), (tot.night / 60).toFixed(2), Math.round(tot.total)]);
+  const csv = '\ufeff' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' })); a.download = `meridi-punch-${Y}-${String(M + 1).padStart(2, '0')}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+
+/* ---- misc ---- */
+let tt = null; function toast(m){ const el = $('toast'); el.textContent = m; el.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => el.classList.remove('show'), 2200); }
+$('tLang').onclick = () => { lang = J() ? 'en' : 'ja'; lsSet('meridiplay_lang', lang); renderAll(); };
+$('tTheme').onclick = () => { theme = theme === 'light' ? 'dark' : 'light'; lsSet('meridiplay_theme', theme); document.body.classList.toggle('light', theme === 'light'); texts(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ $('info').classList.remove('show'); $('exBox').classList.remove('show'); } if (e.key === 'Escape' && (MULTI.size || SEL)){ MULTI.clear(); SEL = null; MTOG = false; renderAll(); } });
+function sample(){
+  const y = now.getFullYear(), m = now.getMonth(), k = d => key(y, m, d), jpy = D.cur === 'JPY', w1 = jpy ? 1200 : defWage(), w2 = jpy ? 1350 : Math.round(defWage() * 1.12 / wStep()) * wStep();
+  const S = { jobs:[{ id:1, name:t('コンビニ', 'Corner shop'), wage:w1, color:COLORS[0] }, { id:2, name:t('倉庫', 'Warehouse'), wage:w2, color:COLORS[1] }],
+    days:{}, shifts:[{ job:1, start:'18:00', end:'01:00', brk:60 }], rates:Object.assign({}, D.rates), rule:D.rule, cur:D.cur, nextId:3 };
+  const n = new Date(y, m + 1, 0).getDate(), today = now.getDate();
+  for (let d = 1; d <= n; d++){ const w = new Date(y, m, d).getDay(), past = d <= today;
+    if (w === 1 || w === 3 || w === 5) S.days[k(d)] = [Object.assign({ job:1, mode:'time', start:'18:00', end:'01:00', brk:60 }, past ? {} : { plan:true })];
+    else if (w === 6) S.days[k(d)] = [Object.assign({ job:2, mode:'time', start:'09:00', end:'18:00', brk:60 }, past ? {} : { plan:true })];
+    else if (w === 0 && d > 7 && d <= 14) S.days[k(d)] = [Object.assign({ job:2, mode:'time', start:'09:00', end:'18:00', brk:60, hol:true }, past ? {} : { plan:true })];
+  }
+  if (!S.days[k(today)]) S.days[k(today)] = [{ job:1, mode:'time', start:'18:00', end:'01:00', brk:60, plan:true }];
+  return S;
+}
+function exOn(){ if (EX) return; EX = JSON.parse(JSON.stringify(D)); EX.__pj = JSON.parse(JSON.stringify(PJ)); PJ = Object.assign({}, PJ, { nmode:'month', nmonth:D.cur === 'JPY' ? 250000 : 3200 }); Y = now.getFullYear(); M = now.getMonth(); D = sample(); SEL = null; MULTI.clear(); document.body.classList.add('ex'); $('exBar').classList.add('on'); $('exBox').classList.remove('show'); renderAll(); }
+function exOff(){ if (!EX) return; PJ = EX.__pj || PJ; delete EX.__pj; D = EX; EX = null; SEL = null; MULTI.clear(); document.body.classList.remove('ex'); $('exBar').classList.remove('on'); renderAll(); toast(t('元の記録に戻りました', 'Back to your records')); }
+$('tEx').onclick = () => EX ? exOff() : $('exBox').classList.add('show');
+$('exGo').onclick = exOn; $('exNo').onclick = $('exClose').onclick = () => $('exBox').classList.remove('show'); $('exBack').onclick = exOff;
+$('tInfo').onclick = () => $('info').classList.add('show'); $('iClose').onclick = () => $('info').classList.remove('show');
+['info', 'exBox'].forEach(id => $(id).addEventListener('pointerdown', e => { if (e.target === $(id)) $(id).classList.remove('show'); }));
+$('nMonthly').onclick = () => { PJ.nmode = 'month'; savePJ(); renderProj(); };
+$('nHourly').onclick = () => { PJ.nmode = 'hour'; savePJ(); renderProj(); };
+[['nMonth','nmonth'],['nWage','nwage'],['nHrs','nhrs'],['nMH','mh']].forEach(([id, k]) => $(id).addEventListener('input', () => { PJ[k] = Math.max(0, +$(id).value || 0); savePJ(); renderProj(); }));
+[['pStep','step'],['pLen','len'],['pBase','base']].forEach(([id, k]) => $(id).addEventListener('change', () => { PJ[k] = k === 'len' ? +$(id).value : $(id).value; savePJ(); renderProj(); }));
+function renderAll(){ texts(); renderJobs(); renderCal(); renderEditor(); renderSum(); renderProj(); }
+document.body.classList.toggle('light', theme === 'light');
+renderAll();
+})();
+</script>
+<!-- GoatCounter -->
+<script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
