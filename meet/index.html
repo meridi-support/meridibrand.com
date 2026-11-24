@@ -289,9 +289,9 @@ body.light .slot-row.kb-focus{outline-color:#16a34a}
         </div>
     </div>
 
-    <!-- Footer (v2.0.2) -->
+    <!-- Footer (v2.0.3) -->
     <div class="premium-ad-bar">
-        MeridiMeet <span class="version-clickable" onclick="document.getElementById('changelogOverlay').classList.add('active');">v2.0.2</span> |
+        MeridiMeet <span class="version-clickable" onclick="document.getElementById('changelogOverlay').classList.add('active');">v2.0.3</span> |
         <span class="ad-tag">▲ Presented by</span> |
         🌐 <a href="https://meridibrand.com" target="_blank">Meridi Brand</a> ·
         📖 <a href="https://meridibrand.com/lingo" target="_blank">MeridiLingo</a> ·
@@ -321,6 +321,8 @@ body.light .slot-row.kb-focus{outline-color:#16a34a}
         }
         function closeCustomAlert() {
             document.getElementById('customModal').classList.remove('active');
+            var f = window._afterAlertClose; window._afterAlertClose = null;
+            if (typeof f === 'function') f();
         }
 
         function toggleCustomCategory() {
@@ -496,9 +498,10 @@ body.light .slot-row.kb-focus{outline-color:#16a34a}
                         true
                     );
                 }
-                setTimeout(function() {
-                    window.location.href = finalURL;
-                }, 3000);
+                // v2.0.3: 2秒で集計ボードへ。OK を押したらすぐに移る
+                var goBoard = function() { if (goBoard.done) return; goBoard.done = true; window.location.href = finalURL; };
+                window._afterAlertClose = goBoard;
+                setTimeout(goBoard, 2000);
             }).catch(function(err) {
                 showCustomAlert("Error", "Firebase save failed: " + err.message, false);
             });
@@ -811,6 +814,11 @@ body.light .slot-row.kb-focus{outline-color:#16a34a}
   <div class="changelog-box" style="position:relative;">
     <button class="changelog-close" onclick="document.getElementById('changelogOverlay').classList.remove('active');">&times;</button>
     <h2>📜 CHANGELOG</h2>
+    <h3>☕ v2.0.3 — 2026-11-24</h3>
+    <ul>
+      <li>Changed: after your link is created, the message now stays 2 s (was 3 s) before opening the board / リンクを作ったあとのお知らせを 3 秒 → 2 秒に</li>
+      <li>Changed: press OK to go to the board right away — no more waiting / OK を押すと、待たずにすぐ集計ボードへ</li>
+    </ul>
     <h3>🏆 v2.0.2 — 2026-11-24</h3>
     <ul>
       <li>New: open with <code>?title=</code> and <code>?desc=</code> to pre-fill the event name and description (e.g. from a tournament bracket) / リンクでイベント名と説明を入れた状態で開けるように</li>
