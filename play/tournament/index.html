@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MeridiPlay — トーナメント表・リーグ戦・チーム分け | Tournament Bracket Maker</title>
-<meta name="description" content="無料のトーナメント表メーカー。チーム分け、予選リーグ（総当たり）、勝ち上がり表、3位決定戦まで。登録なし・広告なし。Free bracket, round-robin and team shuffle.">
+<title>MeridiPlay — トーナメント表・リーグ戦 | Tournament & League</title>
 <style>
 :root{
   --g:#00ff00; --gd:#00ff0030; --gm:#00ff0066;
@@ -150,6 +149,26 @@ table{border-collapse:collapse;font-size:13px}
 [hidden]{display:none!important}
 
 /* ===== NORMAL (light) THEME ===== */
+
+/* ===== v14: LEAGUE + GUIDE ===== */
+.guideBtn{margin-left:auto}
+.guide h3{font-size:15px;letter-spacing:2px;margin-bottom:10px}
+.gdList{display:grid;gap:8px}
+.gdRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--gd);border-radius:10px;padding:8px 12px}
+.gdRow .q{flex:1;min-width:220px}
+.gdRow .q small{display:block;opacity:.65;font-size:11px;margin-top:2px}
+.mx td.home{background:#00ff0008}
+.mx .ha{font-size:10px;opacity:.55;display:block}
+.podium{display:flex;gap:12px;justify-content:center;align-items:flex-end;margin:16px 0 6px;flex-wrap:wrap}
+.podium .pl{border:1px solid var(--gd);border-radius:12px;padding:10px 16px;text-align:center;min-width:120px;animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both}
+.podium .pl b{display:block;font-size:26px}
+.podium .pl .n{font-weight:bold;word-break:break-all}
+.podium .pl small{opacity:.65;font-size:11px}
+.podium .p1{border-color:var(--gold);padding-top:22px}
+.podium .p2{border-color:var(--silver)}
+.podium .p3{border-color:var(--bronze)}
+.sep{flex:1}
+@media(max-width:600px){.guideBtn{margin-left:0}.podium .pl{min-width:90px}}
 body.light{--g:#1d4ed8;--gd:#1d4ed830;--gm:#1d4ed866;--r:#dc2626;--rd:#dc262622;--bg:#f6f7f9;--panel:#ffffff;--gold:#b7791f;--silver:#6b7280;--bronze:#a0522d;--cyan:#0891b2;
   color:#1f2937;font-family:'Segoe UI','Hiragino Sans','Yu Gothic UI',system-ui,sans-serif}
 body.light h1{text-shadow:none;color:#111827}
@@ -204,7 +223,7 @@ body.light .s3 .bar{background:linear-gradient(#fed7aa,#fff7ed)}
 </head>
 <body>
 <header>
-  <h1>MERIDIPLAY</h1><span class="sub">TEAM SHUFFLE &amp; TOURNAMENT v13</span>
+  <h1>MERIDIPLAY</h1><span class="sub">TEAM SHUFFLE &amp; TOURNAMENT</span>
   <button id="langBtn">🌐 EN</button>
   <button id="themeBtn"></button>
 </header>
@@ -212,8 +231,15 @@ body.light .s3 .bar{background:linear-gradient(#fed7aa,#fff7ed)}
   <nav class="tabs">
     <button class="tab active" data-mode="pod" data-i18n="tabPod"></button>
     <button class="tab" data-mode="group" data-i18n="tabGroup"></button>
+    <button class="tab" data-mode="league" data-i18n="tabLeague"></button>
     <button class="tab" data-mode="bracket" data-i18n="tabBracket"></button>
+    <button class="tab guideBtn" id="guideBtn" data-i18n="guideBtn"></button>
   </nav>
+  <section class="card guide" id="guide" hidden>
+    <h3 data-i18n="gdT"></h3>
+    <div class="gdList" id="gdList"></div>
+    <p class="hint" data-i18n="gdNote"></p>
+  </section>
 
   <section class="card">
     <label class="l" data-i18n="nameLabel"></label>
@@ -258,7 +284,7 @@ body.light .s3 .bar{background:linear-gradient(#fed7aa,#fff7ed)}
       <div class="row" style="margin-top:8px">
         <button class="big" id="gMake" data-i18n="gMake"></button>
         <label class="l" data-i18n="gAutoN"></label>
-        <select id="gAutoCount"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option></select>
+        <select id="gAutoCount"><option value="1">1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option></select>
         <button id="gAuto" data-i18n="gAuto"></button>
       </div>
     </details>
@@ -266,11 +292,44 @@ body.light .s3 .bar{background:linear-gradient(#fed7aa,#fff7ed)}
       <button class="big red" id="toBracket" data-i18n="toBracket"></button>
       <button id="gClear" data-i18n="gClear"></button>
       <label class="l" data-i18n="qualify"></label>
-      <select id="qualN"><option value="1">1</option><option value="2" selected>2</option></select>
+      <select id="qualN"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="8">8</option></select>
+      <label class="l" id="pairL" data-i18n="pairL" hidden></label>
+      <select id="pairStyle" hidden><option value="std" data-i18n="pairStd"></option><option value="near" data-i18n="pairNear"></option></select>
     </div>
     <p class="msg" id="gMsg"></p>
+    <p class="hint" id="pairPrev"></p>
     <div class="hint" data-i18n="gHint"></div>
     <div class="groups" id="groups"></div>
+  </section>
+
+  <!-- ===== LEAGUE (v14) ===== -->
+  <section id="leagueMode" class="card" hidden>
+    <div class="row">
+      <button class="big" id="lgMake" data-i18n="lgMake"></button>
+      <label class="l" data-i18n="lgLegs"></label>
+      <select id="lgLegs"><option value="1" data-i18n="lgLeg1"></option><option value="2" data-i18n="lgLeg2"></option></select>
+      <label class="l" data-i18n="lgTie"></label>
+      <select id="lgTie"><option value="gd" data-i18n="lgTieGD"></option><option value="h2h" data-i18n="lgTieH2H"></option></select>
+    </div>
+    <p class="hint" data-i18n="lgHint"></p>
+    <p class="msg" id="lgMsg"></p>
+    <div class="grp" id="lgBox" hidden>
+      <h3><span data-i18n="lgTitle"></span> <small id="lgProg"></small></h3>
+      <div class="scroll"><table class="mx" id="lgMx"></table></div>
+      <table class="st" id="lgSt"></table>
+    </div>
+    <div class="podium" id="lgPodium" hidden></div>
+    <div class="row" id="lgTools" hidden>
+      <button id="lgCsv" data-i18n="lgCsv"></button>
+      <button id="lgClear" data-i18n="gClear"></button>
+      <span class="sep"></span>
+      <button class="big red" id="lgToBracket" data-i18n="lgToBracket"></button>
+      <label class="l" data-i18n="qualify"></label>
+      <select id="lgQual"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option></select>
+      <label class="l" id="lgPairL" data-i18n="pairL" hidden></label>
+      <select id="lgPair" hidden><option value="std" data-i18n="pairStd"></option><option value="near" data-i18n="pairNear"></option></select>
+    </div>
+    <p class="hint" id="lgPrev"></p>
   </section>
 
   <!-- ===== BRACKET ===== -->
@@ -308,6 +367,14 @@ body.light .s3 .bar{background:linear-gradient(#fed7aa,#fff7ed)}
 const DICT = {
   ja: {
     tabPod:'🏆 ポッド式', tabGroup:'📋 予選リーグ', tabBracket:'⚔️ トーナメント',
+    tabLeague:'⚽ リーグ戦', guideBtn:'🔰 使い方',
+    gdT:'🔰 こんなときは、このタブ', gdNote:'どのタブも、名前はいちばん上の欄で共通です。記録はこの端末の中だけ。広告なし・登録なし。', gdGo:'開く →',
+    gd1:'🎲 チームを公平に分けたい', gd1s:'くじ引きのように名前をシャッフルして、チームに分けます', gd2:'⚽ 全員と戦って順位を決めたい', gd2s:'総当たり（1回 or ホーム＆アウェー）。🥇🥈🥉 の最終順位、上位でプレーオフも', gd3:'🌍 グループで予選 → 決勝トーナメント', gd3s:'W杯のように、各組の上位が勝ち上がります', gd4:'⚔️ すぐに勝ち抜き戦', gd4s:'名前からトーナメント表を作ります（☆ でシード）', gd5:'📅 試合の日時を決めたい', gd5s:'海外の人とも時差なしで（MeridiMeet）',
+    lgMake:'⚽ この名前でリーグ戦を始める', lgLegs:'対戦', lgLeg1:'1回ずつ（総当たり）', lgLeg2:'2回ずつ（ホーム＆アウェー）', lgTie:'同じ勝点なら', lgTieGD:'得失点差 → 総得点 → 直接対決', lgTieH2H:'直接対決 → 得失点差 → 総得点',
+    lgHint:'いちばん上の名前で、グループなしの総当たり戦を作ります。マスに「自分 - 相手」のスコアを入れると、順位表が自動で更新（勝3・分1・敗0）。ホーム＆アウェーでは、行のチームがホームです。',
+    lgTitle:'⚽ LEAGUE', lgNoTeams:'名前を 2 つ以上入れてから「⚽ この名前でリーグ戦を始める」を押してください。', lgConfirm:'今のリーグ戦の結果は消えます。新しく作りますか？', lgNeedDone:'まだ入っていない試合があります。今の順位で進めますか？',
+    lgCsv:'📄 順位表を CSV で保存', lgToBracket:'🏆 上位でプレーオフ（トーナメントへ）', lgFinal:'🏆 最終順位', lgNow:'📊 今の順位（全試合が終わると 🥇🥈🥉）', home:'ホーム', away:'アウェー', ptsU:'勝点',
+    
     nameLabel:'👤 名前 / チーム名（Enter で追加・カンマ区切りで一括追加）', add:'＋ 追加', clearAll:'全削除', sample:'｜サンプル:',
     seedHint:'☆ をクリック → シード指定（★1, ★2… の順。トーナメントで不戦勝を優先で受けます）', count:n=>`${n} 件`,
     teamCount:'チーム数', shuffle:'▶ SHUFFLE', stop:'■ STOP', reset:'↺ RESET', toGroup:'📋 このポッドで予選リーグ',
@@ -319,6 +386,7 @@ const DICT = {
     gNeed:'各グループに2チーム以上入れてください', gConfirm:'今の予選リーグの結果は消えます。新しく作りますか？',
     gProg:(d,t)=>`消化 ${d}/${t} 試合`, gAll:(d,t)=>`全 ${t} 試合中 ${d} 試合 終了`,
     notDone:n=>`未入力の試合が ${n} 試合あります。現時点の順位でトーナメントを作りますか？`,
+    pairL:'組み合わせ', pairStd:'上位 vs 下位（3位-6位・4位-5位）', pairNear:'近い順位（3位-5位・4位-6位）', prev:'🏆 組み合わせ：', bye:'シード', vs:' vs ', winOf:(a,b)=>`(${a}-${b} の勝者)`, rkN:k=>`${k}位`, onlyMulti:'（グループが2つ以上のときは、各組の上位を交互に並べます）',
     rk:'順位', tm:'チーム', P:'試', W:'勝', D:'分', L:'敗', GF:'得', GA:'失', GD:'差', Pts:'勝点',
     gen:'⚡ 抽選＆生成', undo:'↶ 1つ戻す', clearRes:'↺ 結果リセット', edit:'✎ 配置編集', layout:'表示',
     layAuto:'自動（9チーム以上で左右）', laySingle:'片側', laySplit:'左右（W杯式）',
@@ -331,6 +399,14 @@ const DICT = {
   },
   en: {
     tabPod:'🏆 Pods', tabGroup:'📋 Group Stage', tabBracket:'⚔️ Tournament',
+    tabLeague:'⚽ League', guideBtn:'🔰 Guide',
+    gdT:'🔰 Which tab do I need?', gdNote:'All tabs share the names at the top. Saved only on this device. No ads, no sign-up.', gdGo:'Open →',
+    gd1:'🎲 Split people into fair teams', gd1s:'Shuffle names like a lottery and split them into teams', gd2:'⚽ Everyone plays everyone, then rank', gd2s:'Round-robin (single or home & away). 🥇🥈🥉 final table, playoffs for the top teams', gd3:'🌍 Group stage → knockout', gd3s:'Like the World Cup: top teams from each group go through', gd4:'⚔️ Straight knockout', gd4s:'Build a bracket from the names (☆ for seeds)', gd5:'📅 Pick a match time', gd5s:'Across time zones (MeridiMeet)',
+    lgMake:'⚽ Start a league with these names', lgLegs:'Matches', lgLeg1:'Once each (round-robin)', lgLeg2:'Twice each (home & away)', lgTie:'If points are level', lgTieGD:'Goal diff → goals → head-to-head', lgTieH2H:'Head-to-head → goal diff → goals',
+    lgHint:'Uses the names at the top to make one round-robin with no groups. Type "own - opponent" scores; the table updates itself (W 3 · D 1 · L 0). In home & away, the row team is at home.',
+    lgTitle:'⚽ LEAGUE', lgNoTeams:'Add at least 2 names, then press "⚽ Start a league with these names".', lgConfirm:'This clears the current league results. Start a new one?', lgNeedDone:'Some matches have no score yet. Continue with the current table?',
+    lgCsv:'📄 Save table as CSV', lgToBracket:'🏆 Playoffs for the top teams', lgFinal:'🏆 Final standings', lgNow:'📊 Current table (🥇🥈🥉 when all matches are done)', home:'Home', away:'Away', ptsU:'pts',
+    
     nameLabel:'👤 Names / Teams (Enter to add, comma-separated for bulk)', add:'＋ Add', clearAll:'Clear all', sample:'| Samples:',
     seedHint:'Click ☆ to set seeds (★1, ★2… in order). Seeds get byes first in the tournament.', count:n=>`${n} entries`,
     teamCount:'Teams', shuffle:'▶ SHUFFLE', stop:'■ STOP', reset:'↺ RESET', toGroup:'📋 Start Group Stage',
@@ -342,6 +418,7 @@ const DICT = {
     gNeed:'Each group needs at least 2 teams', gConfirm:'Current group results will be cleared. Create new groups?',
     gProg:(d,t)=>`${d}/${t} played`, gAll:(d,t)=>`${d} of ${t} matches completed`,
     notDone:n=>`${n} matches have no score yet. Build the tournament from current standings?`,
+    pairL:'Pairing', pairStd:'Top vs bottom (3-6 · 4-5)', pairNear:'Nearby ranks (3-5 · 4-6)', prev:'🏆 Bracket: ', bye:'bye', vs:' vs ', winOf:(a,b)=>`(winner ${a}-${b})`, rkN:k=>`#${k}`, onlyMulti:'(With 2+ groups, top teams from each group are mixed.)',
     rk:'#', tm:'Team', P:'P', W:'W', D:'D', L:'L', GF:'GF', GA:'GA', GD:'GD', Pts:'Pts',
     gen:'⚡ Draw & Build', undo:'↶ Undo', clearRes:'↺ Reset results', edit:'✎ Edit slots', layout:'Layout',
     layAuto:'Auto (split at 9+)', laySingle:'Single side', laySplit:'Split (World Cup)',
@@ -419,10 +496,12 @@ function setMode(m){
   $('#podMode').hidden = m !== 'pod';
   $('#groupMode').hidden = m !== 'group';
   $('#bracketMode').hidden = m !== 'bracket';
+  $('#leagueMode').hidden = m !== 'league';
   if (m === 'group') renderGroups();
+  if (m === 'league') renderLeague();
   if (m === 'bracket' && !B.root) generate();
 }
-$$('.tab').forEach(t => t.onclick = () => setMode(t.dataset.mode));
+$$('.tab').forEach(t => { if (t.dataset.mode) t.onclick = () => { $('#guide').hidden = true; setMode(t.dataset.mode); }; });
 
 /* ================= POD MODE ================= */
 const P = { timer: null, running: false, k: 4, per: 1, result: null };
@@ -544,6 +623,7 @@ function renderGroups(){
     refreshGroup(g, true);
   });
   gMsg();
+  pairUI();
 }
 function mkInput(g, i, j, who){
   const inp = H('input', 'gs'); inp.inputMode = 'numeric'; inp.maxLength = 3;
@@ -617,8 +697,27 @@ $('#gAuto').onclick = () => {
   $('#gText').value = out.map(g => g.join('\n')).join('\n\n');
 };
 $('#gText').addEventListener('keydown', e => e.stopPropagation());
-$('#qualN').onchange = () => G.groups.forEach((_, g) => refreshGroup(g, true));
+$('#qualN').onchange = () => { G.groups.forEach((_, g) => refreshGroup(g, true)); pairUI(); };
 $('#gClear').onclick = () => { G.res = G.groups.map(() => ({})); saveG(); renderGroups(); };
+// v14: 1グループ（総当たり）から上位をトーナメントへ。並びは seedOrder（1位-4位・2位-3位／6チームは1位・2位シード）
+function singleOrder(q, style){
+  let Sz = 1; while (Sz < q) Sz *= 2;
+  if (q === 6 && style === 'near') return [1, null, 4, 6, 2, null, 3, 5];   // 1位・2位シード、3位-5位・4位-6位（1位は 4-6 の勝者と）
+  return seedOrder(Sz).map(s => s <= q ? s : null);
+}
+function pairUI(){
+  const one = G.groups.length === 1, q = +$('#qualN').value, show = one && q === 6;
+  $('#pairL').hidden = !show; $('#pairStyle').hidden = !show;
+  const pv = $('#pairPrev'); if (!pv) return;
+  if (!G.groups.length || q < 2){ pv.textContent = ''; return; }
+  if (!one){ pv.textContent = T('onlyMulti'); return; }
+  const n = Math.min(q, G.groups[0].teams.length), ord = singleOrder(n, $('#pairStyle').value), R = T('rkN'), parts = [];
+  for (let i = 0; i < ord.length; i += 2){ const a = ord[i], b = ord[i + 1];
+    if (a && b) parts.push(R(a) + T('vs') + R(b)); else if (a || b) parts.push(R(a || b) + ' ' + T('bye')); }
+  pv.textContent = T('prev') + parts.join(' ／ ');
+}
+$('#pairStyle').onchange = () => { try { localStorage.setItem('meridiplay_pair', $('#pairStyle').value); } catch(e){} pairUI(); };
+try { const ps = localStorage.getItem('meridiplay_pair'); if (ps) $('#pairStyle').value = ps; } catch(e){}
 $('#toBracket').onclick = () => {
   if (!G.groups.length) return;
   const { d, t } = gProgress();
@@ -629,7 +728,11 @@ $('#toBracket').onclick = () => {
   tables.forEach((rows, g) => rows.slice(0, q).forEach((n, k) => label[n] = L(g) + (k + 1)));
   let order;
   const pow2 = x => (x & (x - 1)) === 0;
-  if (q === 2 && nG % 2 === 0 && pow2(nG * 2)){
+  if (nG === 1){
+    const rows = tables[0], n = Math.min(q, rows.length);
+    rows.slice(0, n).forEach((nm, k) => label[nm] = T('rkN', k + 1));
+    order = singleOrder(n, $('#pairStyle').value).map(s => s ? rows[s - 1] : null);
+  } else if (q === 2 && nG % 2 === 0 && pow2(nG * 2)){
     // W杯式クロス: 上半分 A1-B2, C1-D2… / 下半分 B1-A2, D1-C2…（同組は決勝まで当たらない）
     const top = [], bot = [];
     for (let g = 0; g < nG; g += 2){
@@ -647,6 +750,138 @@ $('#toBracket').onclick = () => {
   setMode('bracket');
   generate(order, label);
 };
+
+
+/* ================= LEAGUE (v14) ================= */
+// グループなしの総当たり戦。予選リーグ（G）とは別に保存。legs=2 はホーム＆アウェー（行のチームがホーム）
+const LG = { teams: [], legs: 1, tie: 'gd', res: {} };
+try { const d = JSON.parse(localStorage.getItem('meridiplay_league') || 'null'); if (d){ Object.assign(LG, d); } } catch(e){}
+const saveLG = () => { try { localStorage.setItem('meridiplay_league', JSON.stringify(LG)); } catch(e){} };
+// 1回ずつ：キーは小さい番号-大きい番号（G と同じ）。2回ずつ：キーは「ホーム>アウェー」
+const lgKey = (i, j) => LG.legs === 2 ? `${i}>${j}` : pk(i, j);
+function lgSc(i, j){ const r = LG.res[lgKey(i, j)]; return r ? [r[i], r[j]] : [null, null]; }
+function lgMatches(){ const out = [], n = LG.teams.length; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){ if (i === j) continue; if (LG.legs === 1 && j < i) continue; out.push([i, j]); } return out; }
+function lgH2H(i, j){ // i から見た直接対決：勝点の差 → 得失点差
+  let pi = 0, pj = 0, gd = 0;
+  const legs = LG.legs === 2 ? [[i, j], [j, i]] : [[i, j]];
+  legs.forEach(([h, a]) => { const r = LG.res[lgKey(h, a)]; if (!r) return; const x = r[i], y = r[j]; if (!isNum(x) || !isNum(y)) return;
+    gd += x - y; if (x > y) pi += 3; else if (x < y) pj += 3; else { pi++; pj++; } });
+  return (pi - pj) || gd;
+}
+function lgStandings(){
+  const rows = LG.teams.map((n, i) => ({ i, n, P:0, W:0, D:0, L:0, GF:0, GA:0, GD:0, Pts:0 }));
+  let done = 0; const ms = lgMatches();
+  ms.forEach(([i, j]) => { const [a, b] = lgSc(i, j); if (!isNum(a) || !isNum(b)) return; done++;
+    const A = rows[i], Bq = rows[j]; A.P++; Bq.P++; A.GF += a; A.GA += b; Bq.GF += b; Bq.GA += a;
+    if (a > b){ A.W++; Bq.L++; A.Pts += 3; } else if (a < b){ Bq.W++; A.L++; Bq.Pts += 3; } else { A.D++; Bq.D++; A.Pts++; Bq.Pts++; } });
+  rows.forEach(r => r.GD = r.GF - r.GA);
+  const h = (x, y) => Math.sign(lgH2H(y.i, x.i));
+  rows.sort(LG.tie === 'h2h'
+    ? (x, y) => y.Pts - x.Pts || h(x, y) || y.GD - x.GD || y.GF - x.GF || x.n.localeCompare(y.n)
+    : (x, y) => y.Pts - x.Pts || y.GD - x.GD || y.GF - x.GF || h(x, y) || x.n.localeCompare(y.n));
+  return { rows, done, total: ms.length };
+}
+function lgInput(i, j, who){
+  const inp = H('input', 'gs'); inp.inputMode = 'numeric'; inp.maxLength = 3; inp.dataset.lk = lgKey(i, j); inp.dataset.w = who;
+  const r = LG.res[lgKey(i, j)]; const v = r ? r[who] : null; inp.value = isNum(v) ? v : '';
+  inp.addEventListener('focus', () => inp.select());
+  inp.addEventListener('input', () => { inp.value = inp.value.replace(/[^0-9]/g, '');
+    const k = lgKey(i, j), rr = LG.res[k] || {}; rr[who] = inp.value === '' ? null : +inp.value; LG.res[k] = rr; saveLG(); lgRefresh(); });
+  return inp;
+}
+function renderLeague(){
+  $('#lgLegs').value = String(LG.legs); $('#lgTie').value = LG.tie;
+  const has = LG.teams.length >= 2;
+  $('#lgBox').hidden = !has; $('#lgTools').hidden = !has; $('#lgMsg').textContent = has ? '' : T('lgNoTeams');
+  if (!has){ $('#lgPodium').hidden = true; $('#lgPrev').textContent = ''; return; }
+  const tb = $('#lgMx'); tb.replaceChildren();
+  const hr = H('tr'); hr.append(H('td', 'corner')); LG.teams.forEach(n => { const th = H('th', '', short(n, 12)); th.title = n; hr.append(th); }); tb.append(hr);
+  LG.teams.forEach((rn, i) => {
+    const tr = H('tr'); const th = H('th', 'rowh', short(rn, 12)); th.title = rn; tr.append(th);
+    LG.teams.forEach((cn, j) => {
+      if (i === j){ tr.append(H('td', 'diag')); return; }
+      const td = H('td', LG.legs === 2 ? 'home' : ''); const mk = H('span', 'mk'); mk.id = `lmk-${i}-${j}`; td.append(mk);
+      if (LG.legs === 2) td.append(H('span', 'ha', T('home') + ' ' + short(rn, 8)));
+      const pair = H('div', 'pair'); pair.append(lgInput(i, j, i), H('span', '', '-'), lgInput(i, j, j)); td.append(pair); tr.append(td);
+    });
+    tb.append(tr);
+  });
+  lgRefresh(true);
+}
+function lgRefresh(first){
+  const n = LG.teams.length;
+  $$('#lgMx input.gs').forEach(inp => { if (document.activeElement === inp) return; const r = LG.res[inp.dataset.lk]; const v = r ? r[inp.dataset.w] : null; inp.value = isNum(v) ? v : ''; });
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){ if (i === j) continue;
+    const mk = document.getElementById(`lmk-${i}-${j}`); if (!mk) continue; const [a, b] = lgSc(i, j);
+    let s = '', c = 'mk'; if (isNum(a) && isNum(b)){ s = a > b ? '○' : a < b ? '●' : '△'; c += a > b ? ' w' : a < b ? ' l' : ' d'; }
+    if (mk.textContent !== s){ mk.textContent = s; mk.className = c; if (!first && s){ void mk.offsetWidth; mk.classList.add('bump'); } } }
+  const { rows, done, total } = lgStandings(), q = +$('#lgQual').value;
+  const st = $('#lgSt'); st.replaceChildren();
+  const hr = H('tr'); ['rk','tm','P','W','D','L','GF','GA','GD','Pts'].forEach(k => hr.append(H('th', '', T(k)))); st.append(hr);
+  const medal = ['🥇', '🥈', '🥉'];
+  rows.forEach((r, idx) => { const tr = H('tr', idx < q ? 'q' : '');
+    tr.append(H('td', 'rk', (done === total && idx < 3 ? medal[idx] + ' ' : '') + (idx + 1)), H('td', 'nm', r.n));
+    [r.P, r.W, r.D, r.L, r.GF, r.GA, (r.GD > 0 ? '+' : '') + r.GD].forEach(v => tr.append(H('td', '', v))); tr.append(H('td', 'pts', r.Pts)); st.append(tr); });
+  $('#lgProg').textContent = T('gProg', done, total);
+  // 🏆 全試合が終わったら表彰台
+  const pod = $('#lgPodium'); pod.replaceChildren();
+  if (done === total && total > 0){
+    const h = H('div', 'hint', T('lgFinal')); h.style.width = '100%'; h.style.textAlign = 'center'; pod.append(h);
+    [1, 0, 2].forEach(k => { if (!rows[k]) return; const d = H('div', 'pl p' + (k + 1)); d.style.animationDelay = (k * 0.12) + 's';
+      d.append(H('b', '', medal[k]), H('div', 'n', rows[k].n), H('small', '', rows[k].Pts + ' ' + T('ptsU') + ' · ' + (rows[k].GD > 0 ? '+' : '') + rows[k].GD)); pod.append(d); });
+    pod.hidden = false;
+  } else pod.hidden = true;
+  lgPairUI();
+}
+function lgPairUI(){
+  const q = Math.min(+$('#lgQual').value, LG.teams.length), show = q === 6;
+  $('#lgPairL').hidden = !show; $('#lgPair').hidden = !show;
+  if (LG.teams.length < 2){ $('#lgPrev').textContent = ''; return; }
+  const ord = singleOrder(q, $('#lgPair').value), Rk = k => T('rkN', k), parts = [];
+  for (let i = 0; i < ord.length; i += 2){ const a = ord[i], b = ord[i + 1]; if (a && b) parts.push(Rk(a) + T('vs') + Rk(b)); else if (a || b) parts.push(Rk(a || b) + ' ' + T('bye')); }
+  $('#lgPrev').textContent = T('prev') + parts.join(' ／ ');
+}
+$('#lgMake').onclick = () => {
+  const names = S.names.slice();
+  if (names.length < 2){ $('#lgMsg').textContent = T('lgNoTeams'); return; }
+  if (Object.keys(LG.res).length && !confirm(T('lgConfirm'))) return;
+  LG.teams = names; LG.res = {}; LG.legs = +$('#lgLegs').value; LG.tie = $('#lgTie').value; saveLG(); renderLeague();
+};
+$('#lgLegs').onchange = () => { const v = +$('#lgLegs').value; if (v === LG.legs) return;
+  if (Object.keys(LG.res).length && !confirm(T('lgConfirm'))){ $('#lgLegs').value = String(LG.legs); return; }
+  LG.legs = v; LG.res = {}; saveLG(); renderLeague(); };
+$('#lgTie').onchange = () => { LG.tie = $('#lgTie').value; saveLG(); lgRefresh(true); };
+$('#lgQual').onchange = () => lgRefresh(true);
+$('#lgPair').onchange = () => { try { localStorage.setItem('meridiplay_pair', $('#lgPair').value); } catch(e){} lgPairUI(); };
+try { const ps = localStorage.getItem('meridiplay_pair'); if (ps) $('#lgPair').value = ps; } catch(e){}
+$('#lgClear').onclick = () => { if (!confirm(T('lgConfirm'))) return; LG.res = {}; saveLG(); renderLeague(); };
+$('#lgCsv').onclick = () => {
+  const { rows } = lgStandings(), cols = ['rk','tm','P','W','D','L','GF','GA','GD','Pts'].map(k => T(k));
+  const DQ = String.fromCharCode(34), esc = v => { const s = String(v); return (s.indexOf(DQ) >= 0 || s.indexOf(',') >= 0 || s.indexOf('\n') >= 0) ? DQ + s.split(DQ).join(DQ + DQ) + DQ : s; };
+  const lines = [cols.join(',')].concat(rows.map((r, i) => [i + 1, r.n, r.P, r.W, r.D, r.L, r.GF, r.GA, r.GD, r.Pts].map(esc).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'meridiplay_league.csv'; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+};
+$('#lgToBracket').onclick = () => {
+  const { rows, done, total } = lgStandings(); if (rows.length < 2) return;
+  if (done < total && !confirm(T('lgNeedDone'))) return;
+  const n = Math.min(+$('#lgQual').value, rows.length), label = {};
+  rows.slice(0, n).forEach((r, k) => label[r.n] = T('rkN', k + 1));
+  const order = singleOrder(n, $('#lgPair').value).map(s => s ? rows[s - 1].n : null);
+  setMode('bracket'); generate(order, label);
+};
+
+/* ================= GUIDE (v14) ================= */
+function renderGuide(){
+  const box = $('#gdList'); box.replaceChildren();
+  [['gd1', 'gd1s', 'pod'], ['gd2', 'gd2s', 'league'], ['gd3', 'gd3s', 'group'], ['gd4', 'gd4s', 'bracket'], ['gd5', 'gd5s', 'meet']].forEach(([a, b, m]) => {
+    const row = H('div', 'gdRow'), q = H('div', 'q', T(a)); q.append(H('small', '', T(b))); row.append(q);
+    const go = H('button', '', T('gdGo'));
+    go.onclick = () => { if (m === 'meet'){ window.open('https://meridibrand.com/meet/', '_blank', 'noopener'); return; } $('#guide').hidden = true; setMode(m); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    row.append(go); box.append(row);
+  });
+}
+$('#guideBtn').onclick = () => { const g = $('#guide'); g.hidden = !g.hidden; if (!g.hidden){ renderGuide(); g.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } };
 
 /* ================= BRACKET MODE ================= */
 const C = { nameW: 128, boxH: 26, rowH: 34, colW: 50, pad: 24 };
@@ -993,6 +1228,8 @@ function applyLang(){
   renderTags(); podLabel();
   $$('.pod h3').forEach((h, t) => h.textContent = T('pod') + ' ' + L(t));
   if (mode === 'group') renderGroups();
+  if (mode === 'league') renderLeague();
+  if (!$('#guide').hidden) renderGuide();
   if (B.root){ const keep = B.anim; if (!keep) render(); }
 }
 $('#themeBtn').onclick = () => { THEME = THEME === 'light' ? 'dark' : 'light'; document.body.classList.toggle('light', THEME === 'light'); LSset('meridiplay_theme', THEME); applyLang(); };
