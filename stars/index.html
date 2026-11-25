@@ -5,7 +5,7 @@
 <title>MeridiStars — Planetarium</title>
 <meta name="description" content="MeridiStars: a single-file planetarium — 9,096 real stars, 88 constellations, Milky Way, Sun, Moon and planets as seen from 119 places around the world.">
 <!--
-  MeridiStars v1.1.0 (World edition): Real stars (Yale Bright Star Catalog, 5th ed., public domain) + stereographic dome projection
+  MeridiStars v1.2.0 (World edition): Real stars (Yale Bright Star Catalog, 5th ed., public domain) + stereographic dome projection
   Eclipse Predictions by Fred Espenak, NASA's GSFC (eclipse list 2026–2035)
   Moon: Meeus, Astronomical Algorithms ch.47 main terms
   Sun/planet positions: NASA JPL 'Approximate Positions of the Planets' (Standish), Moon: Astronomical Almanac low-precision formulae
@@ -147,6 +147,7 @@ canvas.grabbing{cursor:grabbing;}
   <button class="ctrl-btn" id="orbitBtn" onclick="toggleOrbits()">Orbits: ON</button>
   <button class="ctrl-btn" id="plabelBtn" onclick="togglePLabels()">Labels: ON</button>
   <button class="ctrl-btn active" id="tripBtn" onclick="document.getElementById('tripPick').classList.add('show')">🕳 Journey to the black hole / ブラックホールへ</button>
+  <button class="ctrl-btn" id="bbBtn" onclick="document.getElementById('bbPick').classList.add('show')">💥 Big Bang / ビッグバンへ</button>
 </div>
 <canvas id="mainCanvas"></canvas>
 <div class="trip-pick" id="tripPick"><div class="tp-box">
@@ -156,6 +157,21 @@ canvas.grabbing{cursor:grabbing;}
   <button class="ctrl-btn tp-btn" onclick="startTrip('stops')">🚉 With a stop / 途中停車あり<br><small>Gaia BH1 — the nearest black hole · いちばん近いブラックホールに停まります</small></button>
   <button class="ctrl-btn tp-btn" onclick="startTrip('express')">🚄 Express / 寄り道なし<br><small>Straight to the centre · まっすぐ中心へ</small></button>
 </div></div>
+<div class="trip-pick" id="bbPick"><div class="tp-box">
+  <span class="close" onclick="document.getElementById('bbPick').classList.remove('show')">✕</span>
+  <h3>💥 From the Big Bang to today<br><span style="font-size:0.8em;color:#ccc">ビッグバンから今へ</span></h3>
+  <p>13.8 billion years in about 3 minutes, in 7 scenes — from a point of light to our Milky Way.<br>138億年を約3分・7つの場面で。光の点から、私たちの天の川銀河まで。</p>
+  <p style="font-size:0.85em;color:#aaa">💥 → 🔥 Quark soup / クォークのスープ → ⚛️ First nuclei / 最初の原子核 → 🌫 The sky clears / 晴れ上がり → 🌟 First stars / 最初の星 → 🌀 Monster black hole / 怪物ブラックホール → 🌌 Cosmic web / 宇宙の網</p>
+  <button class="ctrl-btn tp-btn" onclick="document.getElementById('bbPick').classList.remove('show');startBB()">▶ Start / はじめる<br><small>Jump to any scene from the bar below · 下のバーで好きな場面へ</small></button>
+</div></div>
+<style>#bbBar{width:max-content}#bbBar:not(.show){visibility:hidden;transition:transform .5s,visibility 0s .5s}@media (max-width:700px){#bbBar{width:94vw}}.bbScenes{white-space:nowrap}@media (max-width:640px){.bbScenes{display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;width:100%;white-space:normal}.bbScenes .ctrl-btn{margin:0;padding:4px 7px;font-size:12px}}</style>
+<div class="trip-bar" id="bbBar">
+  <span class="bbScenes"><small>Scene / 場面</small> <button class="ctrl-btn bbSc" data-sc="1" onclick="bbGo(1)">1 💥</button><button class="ctrl-btn bbSc" data-sc="2" onclick="bbGo(2)">2 🔥</button><button class="ctrl-btn bbSc" data-sc="3" onclick="bbGo(3)">3 ⚛️</button><button class="ctrl-btn bbSc" data-sc="4" onclick="bbGo(4)">4 🌫</button><button class="ctrl-btn bbSc" data-sc="5" onclick="bbGo(5)">5 🌟</button><button class="ctrl-btn bbSc" data-sc="6" onclick="bbGo(6)">6 🌀</button><button class="ctrl-btn bbSc" data-sc="7" onclick="bbGo(7)">7 🌌</button></span>
+  <button class="ctrl-btn" onclick="showBBInfo()">ℹ️ Details / 詳細</button>
+  <button class="ctrl-btn active" id="bbPauseBtn" onclick="bbPause()">⏸ Pause / 一時停止</button>
+  <span id="bbDone" style="display:none"><button class="ctrl-btn active" onclick="startBB()">↻ Again / もう一度</button> <button class="ctrl-btn" onclick="bbEnd();document.getElementById('tripPick').classList.add('show')">🕳 Black hole trip / ブラックホールの旅へ</button></span>
+  <button class="ctrl-btn" onclick="bbEnd()">✕ Back / 戻る</button> <button class="ctrl-btn tripLite" onclick="toggleLite()" title="F">🪶 Lite</button>
+</div>
 <div class="trip-bar" id="tripBar">
   <span id="tripRun"><button class="ctrl-btn active" id="tripPauseBtn" onclick="tripPause()">⏸ Pause / 一時停止</button> <button class="ctrl-btn" onclick="tripEnd()">✕ Back / 戻る</button> <button class="ctrl-btn tripLite" onclick="toggleLite()" title="F">🪶 Lite</button></span>
   <span id="tripStop" style="display:none">🚉 <b>Gaia BH1</b> — ~1,560 ly · <button class="ctrl-btn" onclick="showGaiaInfo(true)">ℹ️ Details / 詳細</button> <button class="ctrl-btn active" onclick="tripGo()">▶ Continue / 進む</button></span>
@@ -205,7 +221,7 @@ canvas.grabbing{cursor:grabbing;}
   <div class="ev-src">Eclipse Predictions by Fred Espenak, NASA's GSFC</div>
 </div>
 <div class="hud" id="hud">Drag to look around · Scroll / pinch to zoom · Click or tap a star</div>
-<div class="hud2">MeridiStars v1.1.0 🐾</div>
+<div class="hud2">MeridiStars v1.2.0 🐾</div>
 <div id="toast" style="position: fixed; top: 120px; left: 50%; transform: translateX(-50%); background: rgba(20, 20, 50, 0.92); border: 1px solid rgb(255, 215, 0); color: rgb(255, 215, 0); padding: 8px 16px; border-radius: 8px; font-size: 0.85em; z-index: 40; opacity: 0; transition: opacity 0.4s; pointer-events: none;"></div>
 
 <script>
@@ -1721,7 +1737,7 @@ function closePanel(){document.getElementById('infoPanel').classList.remove('ope
 // CONTROLS
 // ============================================
 function setMode(m){
-  mode=m;if(m!=='solar'&&trip)tripEnd();
+  mode=m;if(m!=='solar'&&trip)tripEnd();if(m!=='solar'&&bb)bbEnd();
   var cb=document.getElementById('camBar');if(cb)cb.classList.toggle('show',cam_.on&&m==='sky');   // the camera settings belong to the night sky only
   document.getElementById('skyTab').classList.toggle('active',m==='sky');
   document.getElementById('solarTab').classList.toggle('active',m==='solar');
@@ -1825,7 +1841,7 @@ function setLang(v){labelLang=v;if(cam_.on)camUI();document.getElementById('lang
 var lastPlanet=null,lastInfo=null;
 function refreshInfo(){                              // the open panel follows the language switch
   if(!lastInfo||!document.getElementById('infoPanel').classList.contains('open'))return;
-  var f={showStarInfo:showStarInfo,showDSOInfo:showDSOInfo,showConstellationInfo:showConstellationInfo,showBodyInfo:showBodyInfo,showPlanetInfo:showPlanetInfo,showGaiaInfo:showGaiaInfo,showSgrInfo:showSgrInfo}[lastInfo[0]];
+  var f={showStarInfo:showStarInfo,showDSOInfo:showDSOInfo,showConstellationInfo:showConstellationInfo,showBodyInfo:showBodyInfo,showPlanetInfo:showPlanetInfo,showGaiaInfo:showGaiaInfo,showSgrInfo:showSgrInfo,showBBInfo:showBBInfo}[lastInfo[0]];
   if(f){var keepSel=selectedC;f(lastInfo[1]);if(lastInfo[0]!=='showConstellationInfo')selectedC=keepSel;}
 }
 function starLabel(s){
@@ -2193,6 +2209,7 @@ function fmtTripLy(ly){
 }
 function J_(){return labelLang!=='en';}
 function startTrip(plan){
+  if(typeof bb!=='undefined'&&bb)bbEnd();
   document.getElementById('tripPick').classList.remove('show');
   trip={t:0,plan:plan,state:'run',t0:performance.now(),stopAt:plan==='stops'?TRIP_SEG[3]:2,stopped:false,seed:Math.random()*1000};
   closePanel();document.getElementById('tripBar').classList.add('show');tripUI();
@@ -2612,6 +2629,423 @@ function drawGLHole(cx,cy,rs,a,disk,reach){
   return true;
 }
 
+
+// ============================================
+// 💥 TO THE BIG BANG (v1.2.0, in progress) — scene 6: a monster black hole with jets (a quasar), ~600 million years after the Big Bang
+// The black hole is real lensing: each pixel's ray is traced back through curved space (Schwarzschild, u''+u=3u²).
+// ============================================
+var bb=null,QG={ok:null,c:null,g:null,u:{}};
+var QG_FS="#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nuniform vec2 uRes;\nfloat sq(float x){return x*x;}uniform float uT,uA,uIncl,uSteps;\nconst float PI=3.14159265;\nfloat h1(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}\nfloat vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);\n return mix(mix(h1(i),h1(i+vec2(1.0,0.0)),f.x),mix(h1(i+vec2(0.0,1.0)),h1(i+vec2(1.0,1.0)),f.x),f.y);}\nfloat fb(vec2 p){float s=0.0,a=0.5;for(int k=0;k<5;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.96875;}\nfloat fb6(vec2 p){float s=0.0,a=0.5;for(int k=0;k<6;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.984375;}\nfloat up(float a,float b,float x){return smoothstep(a,b,x);}\nfloat dn(float a,float b,float x){return 1.0-smoothstep(a,b,x);}\nvec3 stars(vec2 fc){\n vec3 c=vec3(0.0);\n for(int L=0;L<2;L++){float cell=L==0?7.0:13.0;vec2 S=fc+vec2(float(L)*37.0,float(L)*11.0);\n  vec2 id=floor(S/cell),f=S-id*cell;float h=h1(id+float(L)*9.1);\n  if(h<(L==0?0.10:0.22)){vec2 pos=(vec2(h1(id+17.1),h1(id+43.7))*0.8+0.1)*cell;float d=length(f-pos);\n   float m=pow(h1(id+91.3),4.0);vec3 cc=h1(id+7.7)<0.5?vec3(1.0,0.9,0.8):vec3(0.8,0.9,1.1);\n   c+=cc*(0.25+1.4*m)*exp(-d*d/0.8);}}\n return c;}\nvec3 diskC(float r,float px,float ph,float alpha,float n,float T,out float I){\n float rin=6.0,rout=30.0;\n float az=atan(cos(ph),px)+T*0.25*pow(6.0/max(r,6.0),1.5);\n float temp=pow(rin/max(r,rin),0.9);\n float v=clamp(sqrt(1.0/max(r-2.0,1e-3)),0.0,0.7)*0.6;\n float los=-px*cos(uIncl);\n float boost=clamp(pow(1.0/(1.0-v*los+1e-3),3.0),0.25,3.0);\n float stri=0.6+0.4*fb(vec2(cos(az),sin(az))*3.0+vec2(r*1.4,0.0));\n float edge=up(rin,rin+0.6,r)*dn(rout*0.5,rout,r);\n I=edge*temp*stri*boost*(n<0.5?1.0:0.5);\n return vec3(1.0,0.35+0.6*temp,0.08+0.75*pow(temp,2.2))*I;}\nvoid main(){\n vec2 fc=gl_FragCoord.xy,c=uRes*0.5;float H=min(uRes.x,uRes.y*1.0)*(uRes.x<uRes.y?1.4:1.0),T=uT;\n vec2 X=(fc-c)/H;X.y=-X.y;\n float ct=cos(-0.42),st=sin(-0.42);\n float Uu=X.x*ct+X.y*st,Vv=-X.x*st+X.y*ct;\n vec3 img=stars(fc);\n // host galaxy: pink and blue spiral strands\n float q=0.45,Rg=sqrt(Uu*Uu+(Vv/q)*(Vv/q))+1e-4,th=atan(Vv/q,Uu),s=th-log(Rg)*2.4+T*0.012;\n float wx=fb(vec2(cos(s)*2.0+3.0,sin(s)*2.0+Rg*4.0)),wy=fb(vec2(cos(s)*2.0+8.0,sin(s)*2.0+Rg*4.0+5.0));\n vec2 cs=vec2(cos(s),sin(s));float a1=fb6(cs*2.6+vec2(wx*2.2,Rg*9.0+wy*2.2)),strand=up(0.52,0.78,a1),hue=up(0.38,0.72,fb(cs*1.4+vec2(wy*1.5+11.0,Rg*4.0+wx*1.5)));\n float env=exp(-Rg*2.2)*up(0.06,0.22,Rg)*dn(0.75,1.05,Rg);\n vec3 colg=mix(vec3(1.15,0.32,0.78),vec3(0.30,0.62,1.25),hue);\n img+=env*(0.18+strand)*colg*1.7+env*up(0.82,0.95,a1)*0.6*vec3(1.0,0.85,0.95);\n img*=1.0-clamp(up(0.58,0.8,fb(cs*3.2+vec2(wx*3.0+20.0,Rg*12.0+wy*3.0)))*env*2.6,0.0,0.8);\n // jets: soft core, blue sheath, bright knots flowing outward\n for(int j=0;j<2;j++){float sg=j==0?1.0:-1.0;\n  float t=max(-sg*Vv,0.0),w=0.004+t*0.07+0.25*t*t,dx=Uu-0.012*sin(t*30.0+sg+T)*t;\n  float core=exp(-sq(dx/(w*0.6)))*exp(-t*1.8)*(0.55+0.45*fb(vec2(t*20.0-T*2.0,dx*60.0)));\n  float sheath=exp(-sq(dx/w))*exp(-t*0.9);\n  float kp=fract(t*9.0-T*0.35),knot=exp(-sq((kp-0.5)/0.14));\n  float turb=0.65+0.55*fb(vec2(t*10.0-T*0.5,dx*25.0)),g=up(0.04,0.09,t);\n  img+=core*(0.55+0.7*knot)*g*vec3(0.9,0.97,1.2)*1.5;\n  img+=sheath*turb*(0.8+0.5*knot)*g*vec3(0.30,0.55,1.25)*1.4;\n  img+=exp(-sq(dx/(w*3.5)))*exp(-t*1.8)*0.16*g*vec3(0.4,0.6,1.1);}\n // the black hole: trace each ray back through curved space (u''+u=3u^2, M=1)\n float scale=H/52.0;vec2 p=(fc-c)/scale;\n float xs=p.x*ct-p.y*st,ys=p.x*st+p.y*ct;\n float b=length(vec2(xs,ys))+1e-6,alpha=atan(ys,xs),io=PI*0.5-uIncl,bc=5.196152;\n float phi0=mod(atan(-cos(io),sin(io)*sin(alpha)),PI);\n vec3 col=vec3(0.0);float acc=0.0;\n if(b<60.0){\n  float u=0.0,w=1.0/b,ph=0.0,dp=3.2*PI/uSteps,nt=0.0,tg=phi0;\n  for(int k=0;k<160;k++){\n   if(float(k)>=uSteps)break;\n   float u0=u;\n   float k1u=w,k1w=3.0*u*u-u;\n   float ua=u+0.5*dp*k1u,wa=w+0.5*dp*k1w;float k2u=wa,k2w=3.0*ua*ua-ua;\n   float ub=u+0.5*dp*k2u,wb=w+0.5*dp*k2w;float k3u=wb,k3w=3.0*ub*ub-ub;\n   float uc=u+dp*k3u,wc=w+dp*k3w;float k4u=wc,k4w=3.0*uc*uc-uc;\n   u+=dp/6.0*(k1u+2.0*k2u+2.0*k3u+k4u);w+=dp/6.0*(k1w+2.0*k2w+2.0*k3w+k4w);ph+=dp;\n   if(nt<2.5&&ph>=tg){\n    float uu=mix(u0,u,clamp((tg-(ph-dp))/dp,0.0,1.0));\n    if(uu>0.0&&uu<0.5){float r=1.0/uu;\n     if(r>=6.0&&r<=30.0){float px=sin(tg)*cos(alpha),I;vec3 cc=diskC(r,px,tg,alpha,nt,T,I);\n      float a=clamp(I*2.2,0.0,1.0);col+=cc*(1.0-acc);acc+=a*(1.0-acc);}}\n    nt+=1.0;tg=phi0+nt*PI;}\n   if(u>=0.5||u<0.0)break;}\n }\n float cap=b<bc?1.0:0.0,ring=exp(-sq((b-bc)/0.05));\n img=img*(1.0-cap)*(1.0-acc)+col*2.4+vec3(1.0,0.92,0.8)*ring*0.9*(1.0-acc)+exp(-sq(b/14.0))*vec3(1.0,0.75,0.5)*0.12*(1.0-cap);\n img=vec3(1.0)-exp(-img*1.1);\n gl_FragColor=vec4(img*uA,1.0)+ (h1(fc)-0.5)/255.0;\n}";
+function qgInit(){
+  if(QG.ok!==null)return QG.ok;QG.ok=false;
+  try{var c=document.createElement('canvas'),g=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false})||c.getContext('experimental-webgl');if(!g)return false;
+    function sh(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);if(!g.getShaderParameter(s,g.COMPILE_STATUS)){console.warn('MeridiStars quasar:',g.getShaderInfoLog(s));return null;}return s;}
+    var vs=sh(g.VERTEX_SHADER,GL_VS),fs=sh(g.FRAGMENT_SHADER,QG_FS);if(!vs||!fs)return false;
+    var p=g.createProgram();g.attachShader(p,vs);g.attachShader(p,fs);g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return false;g.useProgram(p);
+    var buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);
+    var al=g.getAttribLocation(p,'a');g.enableVertexAttribArray(al);g.vertexAttribPointer(al,2,g.FLOAT,false,0,0);
+    ['uRes','uT','uA','uIncl','uSteps'].forEach(function(n){QG.u[n]=g.getUniformLocation(p,n);});
+    c.addEventListener('webglcontextlost',function(e){e.preventDefault();QG.ok=false;},false);
+    QG.c=c;QG.g=g;QG.ok=true;
+  }catch(e){QG.ok=false;}
+  return QG.ok;
+}
+function bbIncl(){return 10;}
+function startBB(){
+  if(trip)tripEnd();closePanel();
+  bb={t0:performance.now(),T:0,last:performance.now(),state:'run',scene:1};
+  var dn=document.getElementById('bbDone');if(dn){dn.style.display='none';document.getElementById('bbPauseBtn').style.display='';}
+  document.getElementById('bbBar').classList.add('show');bbUI();
+}
+
+var BB_INFO={
+ 1:['💥 The Big Bang','ビッグバン','About 13.8 billion years ago','約138億年前',
+    [['Age of the universe','宇宙の年齢','~13.8 billion years','約138億年'],['Temperature','温度','beyond measure','計り知れない']],
+    'The whole universe we can see today was once smaller, hotter and denser than anything we know. The Big Bang was not an explosion in space — space itself began to expand everywhere at once.','いま見えている宇宙全体が、かつては想像できないほど小さく、熱く、ぎゅっと詰まっていました。ビッグバンは「宇宙の中のどこかで起きた爆発」ではなく、空間そのものが、あらゆる場所でいっせいに広がり始めたことです。'],
+ 2:['🔥 Quark soup','クォークのスープ','Until ~10 microseconds','約10万分の1秒まで',
+    [['Temperature','温度','> 2 trillion °C','2兆℃以上'],['Made of','中身','quarks & gluons','クォークとグルーオン']],
+    'Too hot for protons to exist: quarks and the gluons that hold them together swam freely as a liquid-like plasma. Particle colliders (RHIC, LHC) recreate tiny drops of it — it flows like an almost perfect liquid. Quarks carry a "colour" charge (shown here as red, green, blue); three of different colours make a proton or neutron.','熱すぎて陽子もまだ形になれず、クォークと、それをつなぐグルーオンが液体のようなスープ（プラズマ）になって自由に動いていました。加速器（RHIC・LHC）で小さなしずくを作ると、ほとんど粘りのない液体のように流れます。クォークには「色」と呼ばれる性質（ここでは赤・緑・青）があり、違う色の3つが集まると陽子や中性子になります。'],
+ 3:['⚛️ The first nuclei','最初の原子核','~1 second to ~20 minutes','約1秒〜約20分',
+    [['Helium','ヘリウム','~25% by mass','重さで約25%'],['Ratio (number)','数の割合','1 He : ~12 H','He 1 : H 約12']],
+    'As the universe cooled to about a billion degrees, protons and neutrons stuck together. Almost all the helium in the universe was made in these few minutes, plus a little deuterium and lithium. Heavier elements had to wait for stars.','宇宙が約10億℃まで冷えると、陽子と中性子がくっつき始めました。宇宙のヘリウムのほとんどは、この数分で作られたものです（ほかに少しの重水素とリチウム）。もっと重い元素は、星ができるまで待つことになります。'],
+ 4:['🌫 The sky clears','宇宙の晴れ上がり','~380,000 years','約38万年',
+    [['Temperature','温度','~3,000 K','約3,000 K'],['Today','今は','2.7 K (CMB)','2.7 K（宇宙背景放射）']],
+    'Before this, light kept bumping into free electrons, like light in fog. When electrons were caught by nuclei to make atoms, light could travel straight for the first time. That light still fills the sky as the cosmic microwave background — the blotchy pattern mapped by COBE, WMAP and Planck.','それまでの光は、霧の中のように自由な電子にぶつかってばかりでした。電子が原子核につかまって原子になると、光は初めてまっすぐ進めるようになります。そのときの光は今も「宇宙背景放射」として空いっぱいに届いていて、COBE・WMAP・Planck がそのまだら模様を地図にしました。'],
+ 5:['🌟 The first stars','最初の星','~100–200 million years','約1〜2億年',
+    [['Before','それまで','the dark ages','暗黒時代'],['Made of','中身','hydrogen & helium only','水素とヘリウムだけ']],
+    'Gas fell along threads of dark matter until the first stars lit up — probably huge and short-lived. Their ultraviolet light split atoms apart again, blowing bubbles of ionised gas (reionisation). Their explosions made the first heavier elements. They have not been seen directly yet; JWST is searching.','暗黒物質の筋に沿ってガスが集まり、最初の星が灯りました。とても大きく、短い一生だったと考えられています。強い紫外線が原子をふたたびばらばらにし、電離した泡を広げていきました（宇宙の再電離）。星の爆発が、初めて重い元素を作りました。まだ直接は見つかっておらず、JWST が探しています。'],
+ 6:['🌀 A monster black hole','怪物ブラックホール','~600 million years','約6億年',
+    [['Mass','重さ','~1 billion ☉ or more','約10億 ☉ 以上'],['Brightness','明るさ','> a whole galaxy','銀河まるごと以上']],
+    'Quasars — gas falling into giant black holes — already existed when the universe was only a few hundred million years old. How they grew so big so fast is still an open question. The bending of the background light is worked out pixel by pixel (gravitational lensing) on WebGL devices.','巨大ブラックホールにガスが落ちこんで光る「クエーサー」は、宇宙が数億歳のころにはもうありました。どうしてそんなに早く大きくなれたのかは、まだ分かっていません。WebGL が使える端末では、うしろの光が重力で曲がる様子（重力レンズ）を、点ごとに計算して描いています。'],
+ 7:['🌌 The cosmic web → today','宇宙の網 → 今','Billions of years → 13.8 billion years','数十億年 → 約138億年',
+    [['Galaxies','銀河の数','~200 billion – 2 trillion (estimates)','約2,000億〜2兆（推定）'],['Our place','私たちの場所','Milky Way · Local Group','天の川銀河・局所銀河群']],
+    'From far away a quasar looks like a single star — hence "quasi-stellar object". Galaxies gathered along strands of dark matter into a web: clusters where strands meet, huge empty voids between. One ordinary galaxy in that web is our Milky Way, home of the Sun.','遠くから見るとクエーサーは1つの星のように見えます。これが「準恒星（クエーサー）」という名前の由来です。銀河は暗黒物質の筋に沿って集まり、網の目のような「宇宙の大規模構造」になりました。筋が交わる所に銀河団があり、間には大きな空洞（ボイド）があります。その網の中の、ごくふつうの1つの銀河が、太陽のある天の川銀河です。']
+};
+function showBBInfo(){
+  var n=bb?bbScene():1,d=BB_INFO[n];lastInfo=['showBBInfo',null];
+  var g='';d[4].forEach(function(x){g+='<div class="info-item"><div class="lbl">'+LB(x[0],x[1])+'</div><div class="val">'+LT(x[2],x[3])+'</div></div>';});
+  document.getElementById('infoContent').innerHTML='<h2>'+d[0]+' <span style="font-size:0.8em;color:#ccc">'+d[1]+'</span></h2><div class="sub">'+LT(d[2],d[3])+'</div>'
+   +'<div class="info-grid">'+g+'</div><div class="myth">'+LT(d[5],d[6])
+   +'<br><br>'+LT('The pictures are a simplified illustration to show how it works; the numbers follow current measurements.','絵は、しくみを分かりやすくした再現です。数字は今の観測にもとづいています。')
+   +'<br><br><span style="font-size:0.8em;color:#888">Age & CMB: Planck Collaboration (2018) · Nuclei: Big Bang nucleosynthesis · Quarks: RHIC / LHC</span></div>';
+  document.getElementById('infoPanel').classList.add('open');
+}
+function bbEnd(){bb=null;document.getElementById('bbBar').classList.remove('show');}
+function bbPause(){if(!bb)return;bb.state=bb.state==='run'?'paused':'run';bbUI();}
+function bbUI(){var sc=bb?bbScene():0;document.querySelectorAll('.bbSc').forEach(function(b){b.classList.toggle('active',+b.dataset.sc===sc);});var b=document.getElementById('bbPauseBtn');if(b&&bb)b.textContent=bb.state==='paused'?'▶ Play / 再開':'⏸ Pause / 一時停止';}
+function bbSetIncl(v){localStorage.setItem('ms_bbIncl',v);document.getElementById('bbInclV').textContent=v+'°';}
+
+// 💥 scenes 1–2: the Big Bang (a point of light bursts) and the quark soup (quark–gluon plasma, until ~10 microseconds)
+// The liquid is computed per pixel (WebGL); the quarks (red/green/blue) and the gluon springs are drawn on top.
+var BG={ok:null,c:null,g:null,u:{}},BB_FS="#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nuniform vec2 uRes;uniform float uT,uS,uK,uA,uWh;\nfloat h1(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}\nfloat vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);\n return mix(mix(h1(i),h1(i+vec2(1.0,0.0)),f.x),mix(h1(i+vec2(0.0,1.0)),h1(i+vec2(1.0,1.0)),f.x),f.y);}\nfloat fb(vec2 p){float s=0.0,a=0.5;for(int k=0;k<5;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.96875;}\nfloat fb4(vec2 p){float s=0.0,a=0.5;for(int k=0;k<4;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.9375;}\nfloat sq(float x){return x*x;}\nvoid main(){\n vec2 fc=gl_FragCoord.xy,c=uRes*0.5;float H=min(uRes.x,uRes.y),T=uT;\n vec2 X=(fc-c)/H;float R=length(X)+1e-5;vec2 cs=X/R;\n vec3 img=vec3(0.0);\n if(uS<1.5){                                   // 1: a point of light bursts and fills everything\n  float k=uK,rad=0.02+k*k*1.2;\n  img+=vec3(1.0)*exp(-sq(R/(0.01+0.05*k)))*8.0;\n  img+=exp(-sq((R-rad)/(0.03+0.12*k)))*(0.7+0.6*fb(cs*4.0+vec2(R*10.0,-k*5.0)))*vec3(1.0,0.85,1.15)*1.6;\n  img+=pow(0.5+0.5*fb(cs*6.0+vec2(k*3.0,0.0)),3.0)*exp(-R/(rad+0.05))*2.2*vec3(0.9,0.9,1.2);\n  img+=(1.0-smoothstep(rad*0.3,rad,R))*(0.6+0.4*fb(X*8.0+vec2(-k*4.0,0.0)))*1.2*(0.4+k)*vec3(1.0,0.95,1.0);\n  img=vec3(1.0)-exp(-img*1.2);\n }else{                                        // 2: the quark soup, a hot swirling liquid\n  vec2 q=X*2.2;\n  float w1=fb4(q+vec2(T*0.15,0.0)),w2=fb4(q+vec2(5.2,1.3-T*0.12));\n  vec2 q2=q+vec2(w1,w2)*2.2;\n  float flow=fb(q2*1.4+vec2(T*0.1,0.0));\n  float vein=1.0-smoothstep(0.0,0.10,abs(fb(q2*2.2+vec2(0.0,-T*0.1))-0.5));\n  float core=exp(-sq(R/0.42)),edge=1.0-smoothstep(0.35,0.95,R);\n  float hh=clamp((0.15+0.8*flow*flow)*(0.25+1.1*core)*edge+vein*0.35*(0.3+core),0.0,1.6);\n  vec3 c0=vec3(0.0,0.0,0.01),c1=vec3(0.40,0.03,0.10),c2=vec3(1.0,0.35,0.08),c3=vec3(1.0,0.9,0.65);\n  img=hh<0.35?mix(c0,c1,hh/0.35):(hh<0.85?mix(c1,c2,(hh-0.35)/0.5):mix(c2,c3,clamp((hh-0.85)/0.6,0.0,1.0)));\n  img=mix(img,vec3(1.0,0.98,0.94)+img*0.25,uWh);\n }\n gl_FragColor=vec4(img*uA+(h1(fc)-0.5)/255.0,1.0);\n}";
+function bgInit(){
+  if(BG.ok!==null)return BG.ok;BG.ok=false;
+  try{var c=document.createElement('canvas'),g=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false})||c.getContext('experimental-webgl');if(!g)return false;
+    function sh(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);if(!g.getShaderParameter(s,g.COMPILE_STATUS)){console.warn('MeridiStars bigbang:',g.getShaderInfoLog(s));return null;}return s;}
+    var vs=sh(g.VERTEX_SHADER,GL_VS),fs=sh(g.FRAGMENT_SHADER,BB_FS);if(!vs||!fs)return false;
+    var p=g.createProgram();g.attachShader(p,vs);g.attachShader(p,fs);g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return false;g.useProgram(p);
+    var buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);
+    var al=g.getAttribLocation(p,'a');g.enableVertexAttribArray(al);g.vertexAttribPointer(al,2,g.FLOAT,false,0,0);
+    ['uRes','uT','uS','uK','uA','uWh'].forEach(function(n){BG.u[n]=g.getUniformLocation(p,n);});
+    c.addEventListener('webglcontextlost',function(e){e.preventDefault();BG.ok=false;},false);
+    BG.c=c;BG.g=g;BG.ok=true;
+  }catch(e){BG.ok=false;}
+  return BG.ok;
+}
+var QK=null;
+function sq_(x){return x*x;}
+function qkSprites(){
+  var cols=[[255,56,52],[64,240,90],[80,128,255]],out=[];
+  cols.forEach(function(cc){var s=64,c=document.createElement('canvas');c.width=c.height=s;var g=c.getContext('2d'),im=g.createImageData(s,s);
+    for(var y=0;y<s;y++)for(var x=0;x<s;x++){var dx=(x-31.5)/30,dy=(y-31.5)/30,d2=dx*dx+dy*dy,i=(y*s+x)*4;if(d2>=1)continue;
+      var nz=Math.sqrt(1-d2),lam=Math.max(0,-dx*0.45-dy*0.55+nz*0.7),sp=Math.pow(lam,30),rim=1-nz,aa=Math.min(1,(1-Math.sqrt(d2))*30);
+      im.data[i]=Math.min(255,cc[0]*(0.12+lam)+sp*230+rim*76);im.data[i+1]=Math.min(255,cc[1]*(0.12+lam)+sp*230+rim*42);im.data[i+2]=Math.min(255,cc[2]*(0.12+lam)+sp*230+rim*19);im.data[i+3]=255*aa;}
+    g.putImageData(im,0,0);out.push(c);});
+  return out;
+}
+function qkInit(){
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,N=coarse?210:330,P=[],r=dsoRand(4242),rad=0.019;
+  while(P.length<N){var x=(r()-0.5)*2.2,y=(r()-0.5)*1.3,rr=Math.hypot(x,y);if(r()>Math.exp(-sq_(rr/0.55))+0.08)continue;P.push({o:P.length,x:x,y:y,c:P.length%3,d:0.55+0.45*r(),ph:r()*6.28,b:0.15+Math.pow(r(),0.8)*2.6});}
+  for(var g=0;g<N/3;g++){var a=P[g*3];for(var m=0;m<3;m++){var an=m*2.094+g*1.7;P[g*3+m].gx=a.x+Math.cos(an)*rad*1.25;P[g*3+m].gy=a.y+Math.sin(an)*rad*1.25;}}
+  for(var it=0;it<25;it++)for(var g=0;g<N/3;g++)for(var h=g+1;h<N/3;h++){
+    var ax=(P[g*3].gx+P[g*3+1].gx+P[g*3+2].gx)/3,ay=(P[g*3].gy+P[g*3+1].gy+P[g*3+2].gy)/3,bx=(P[h*3].gx+P[h*3+1].gx+P[h*3+2].gx)/3,by=(P[h*3].gy+P[h*3+1].gy+P[h*3+2].gy)/3,d=Math.hypot(bx-ax,by-ay)+1e-4,mn=rad*4.2;
+    if(d<mn){var px=(bx-ax)/d*(mn-d)/2,py=(by-ay)/d*(mn-d)/2;for(var m=0;m<3;m++){P[g*3+m].gx-=px;P[g*3+m].gy-=py;P[h*3+m].gx+=px;P[h*3+m].gy+=py;}}}
+  var nb=[];
+  for(var i=0;i<N;i++){var b1=-1,b2=-1,d1=1e9,d2=1e9;for(var j=0;j<N;j++){if(j===i)continue;var d=Math.hypot(P[j].x-P[i].x,P[j].y-P[i].y);if(d<d1){d2=d1;b2=b1;d1=d;b1=j;}else if(d<d2){d2=d;b2=j;}}
+    if(b1>i&&d1<rad*3.5)nb.push([P[i],P[b1],d1]);if(b2>i&&d2<rad*3.5&&i%2===0)nb.push([P[i],P[b2],d2]);}
+  var grp=[];for(var g=0;g<N/3;g++)grp.push([P[g*3],P[g*3+1],P[g*3+2]]);
+  P.sort(function(a,b){return a.d-b.d;});
+  QK={P:P,nb:nb,grp:grp,rad:rad,spr:qkSprites()};
+}
+function drawQuarks(k,T,a,shrink,age){shrink=shrink||0;if(age===undefined)age=99;
+  if(!QK)qkInit();
+  var P=QK.P,S=Math.min(W,H),cx=W/2,cy=H/2,rad=QK.rad;
+  for(var i=0;i<P.length;i++){var p=P[i],x=p.x+(p.gx-p.x)*k+0.008*Math.sin(T*1.3+p.ph*3),y=p.y+(p.gy-p.y)*k+0.008*Math.cos(T*1.1+p.ph*2);p.sx=cx+x*S;p.sy=cy+y*S;}
+  if(shrink>0)QK.grp.forEach(function(G){var mx=(G[0].sx+G[1].sx+G[2].sx)/3,my=(G[0].sy+G[1].sy+G[2].sy)/3;G.forEach(function(p){p.sx+=(mx-p.sx)*shrink;p.sy+=(my-p.sy)*shrink;});});
+  ctx.save();ctx.lineWidth=Math.max(1.2,S*0.0035);
+  function spring(A,B,al){var x1=A.sx,y1=A.sy,x2=B.sx,y2=B.sy,d=Math.hypot(x2-x1,y2-y1);if(d<1||al<=0.01)return;var nx=-(y2-y1)/d,ny=(x2-x1)/d,amp=S*0.0045;
+    ctx.globalAlpha=a;ctx.strokeStyle='rgba(255,232,160,'+al.toFixed(3)+')';ctx.beginPath();
+    for(var n=0;n<=20;n++){var t=n/20,o=amp*Math.sin(t*Math.PI*5+T*6),X=x1+(x2-x1)*t+nx*o,Y=y1+(y2-y1)*t+ny*o;n===0?ctx.moveTo(X,Y):ctx.lineTo(X,Y);}ctx.stroke();}
+  function born(p){return Math.max(0,Math.min(1,(age-p.b-0.35)/0.6));}   // a gluon appears only once both quarks are born
+  if(k<0.99)QK.nb.forEach(function(e){spring(e[0],e[1],0.85*(1-k)*(1-e[2]/(rad*3.5))*Math.min(born(e[0]),born(e[1])));});
+  if(k>0.01)QK.grp.forEach(function(G){for(var m=0;m<3;m++)spring(G[m],G[(m+1)%3],0.9*k);});
+  for(var i=0;i<P.length;i++){var p=P[i],g=Math.max(0,Math.min(1,(age-p.b)/0.7));if(g<=0)continue;var ge=1-Math.pow(1-g,3);   // born one by one out of the light
+    var rr=rad*S*p.d*(1-0.6*shrink)*(0.15+0.85*ge),loc=Math.exp(-sq_(Math.hypot(p.sx-cx,p.sy-cy)/S/0.5));
+    ctx.globalAlpha=a*Math.min(1,0.35+0.4*p.d+0.45*loc)*Math.min(1,g*2.5);ctx.drawImage(QK.spr[p.c],p.sx-rr,p.sy-rr,rr*2,rr*2);
+    if(g<1){var sp=1-g,sr=rad*S*(1.2+2.2*g);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*sp*0.9;   // a small spark of light at birth
+      var gr=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,sr);gr.addColorStop(0,'rgba(255,255,250,1)');gr.addColorStop(0.35,'rgba(255,240,215,0.55)');gr.addColorStop(1,'rgba(255,220,180,0)');
+      ctx.fillStyle=gr;ctx.beginPath();ctx.arc(p.sx,p.sy,sr,0,7);ctx.fill();ctx.globalCompositeOperation='source-over';}}
+  ctx.restore();
+}
+
+// ⚛️ scene 3: ~3 minutes — protons and neutrons stick together into helium nuclei (Big Bang nucleosynthesis).
+// By number about 1 helium nucleus for every ~12 hydrogen nuclei (≈ 1/4 of the mass); a little deuterium too.
+var NK=null;
+function nkSprite(cc){var s=64,c=document.createElement('canvas');c.width=c.height=s;var g=c.getContext('2d'),im=g.createImageData(s,s);
+  for(var y=0;y<s;y++)for(var x=0;x<s;x++){var dx=(x-31.5)/30,dy=(y-31.5)/30,d2=dx*dx+dy*dy,i=(y*s+x)*4;if(d2>=1)continue;
+    var nz=Math.sqrt(1-d2),lam=Math.max(0,-dx*0.45-dy*0.55+nz*0.7),sp=Math.pow(lam,30),rim=1-nz,aa=Math.min(1,(1-Math.sqrt(d2))*30);
+    im.data[i]=Math.min(255,cc[0]*(0.14+lam)+sp*230+rim*60);im.data[i+1]=Math.min(255,cc[1]*(0.14+lam)+sp*230+rim*36);im.data[i+2]=Math.min(255,cc[2]*(0.14+lam)+sp*230+rim*20);im.data[i+3]=255*aa;}
+  g.putImageData(im,0,0);return c;}
+function nkInit(){
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,r=dsoRand(777),occ=[],It=[],He=[];
+  function place(m){for(var n=0;n<500;n++){var x=(r()-0.5)*1.9,y=(r()-0.5)*1.05;if(r()>Math.exp(-sq_(Math.hypot(x,y)/0.65))+0.2)continue;
+    var ok=true;for(var i=0;i<occ.length;i++)if(Math.hypot(x-occ[i][0],y-occ[i][1])<m+occ[i][2]){ok=false;break;}if(ok){occ.push([x,y,m]);return [x,y];}}return [(r()-0.5)*1.9,(r()-0.5)*1.05];}
+  var rb=0.026,nHe=coarse?7:10,nH=coarse?60:85;
+  for(var j=0;j<nHe;j++){var c=place(rb*3.4),cols=[0,1,0,1].sort(function(){return r()-0.5;}),offs=[[0,-0.95,0.35],[-0.9,0.5,0.55],[0.9,0.5,0.65],[0,0.1,1]];
+    He.push({x:c[0],y:c[1],fl:0.45+0.04*j+0.05*r()});
+    offs.forEach(function(o,m){var a=r()*6.28,d=rb*(5+7*r());It.push({fx:c[0]+Math.cos(a)*d,fy:c[1]+Math.sin(a)*d,gx:c[0]+o[0]*rb*1.0,gy:c[1]+o[1]*rb*1.0,c:cols[m],z:0.75+0.25*o[2],rr:rb,ph:r()*6.28});});}
+  for(var j=0;j<(coarse?3:4);j++){var c=place(rb*2.6);[[-0.55,0],[0.55,1]].forEach(function(o){var a=r()*6.28,d=rb*(4+5*r());It.push({fx:c[0]+Math.cos(a)*d,fy:c[1]+Math.sin(a)*d,gx:c[0]+o[0]*rb*1.1,gy:c[1],c:o[1],z:1,rr:rb,ph:r()*6.28});});}
+  for(var j=0;j<nH;j++){var c=place(rb*1.5);It.push({fx:c[0],fy:c[1],gx:c[0],gy:c[1],c:0,z:0.6+0.4*r(),rr:rb*0.8,ph:r()*6.28,h1:true});}
+  if(!QK)qkInit();var C=QK.grp.map(function(G){return [(G[0].gx+G[1].gx+G[2].gx)/3,(G[0].gy+G[1].gy+G[2].gy)/3];});
+  for(var i=C.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),t=C[i];C[i]=C[j];C[j]=t;}
+  It.forEach(function(p,i){var c=C[i%C.length],o=i<C.length?0:0.02;p.fx=c[0]+o*(r()-0.5);p.fy=c[1]+o*(r()-0.5);});   // each nucleon starts where a group of three quarks was
+  It.sort(function(a,b){return a.z-b.z;});
+  NK={It:It,He:He,spr:[nkSprite([255,64,56]),nkSprite([200,214,236])]};
+}
+function drawNuclei(k,T,a){
+  if(!NK)nkInit();
+  var S=Math.min(W,H),cx=W/2,cy=H/2,kk=k*k*(3-2*k);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  NK.He.forEach(function(h){var x=cx+h.x*S,y=cy+h.y*S,rr=S*0.026*2.6;   // soft glow around each helium nucleus, and a gentle flash when it forms
+    var fl=Math.exp(-sq_((k-h.fl)/0.07)),g=ctx.createRadialGradient(x,y,0,x,y,rr);
+    g.addColorStop(0,'rgba(255,230,180,'+(0.30*kk+0.55*fl).toFixed(3)+')');g.addColorStop(1,'rgba(255,170,90,0)');ctx.fillStyle=g;ctx.globalAlpha=a;ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.fill();});
+  ctx.globalCompositeOperation='source-over';
+  NK.It.forEach(function(p){var x=p.fx+(p.gx-p.fx)*kk+0.006*Math.sin(T*1.2+p.ph*3)*(1-0.7*kk),y=p.fy+(p.gy-p.fy)*kk+0.006*Math.cos(T*1.0+p.ph*2)*(1-0.7*kk),rr=p.rr*S*(0.75+0.3*p.z);
+    p.sx=cx+x*S;p.sy=cy+y*S;ctx.globalAlpha=a*Math.min(1,0.45+0.55*p.z);ctx.drawImage(NK.spr[p.c],cx+x*S-rr,cy+y*S-rr,rr*2,rr*2);});
+  ctx.restore();
+}
+
+// 🌫 scene 4: ~380,000 years — recombination. Electrons are caught by nuclei, the glowing fog clears,
+// and light can finally travel straight (that light is the cosmic microwave background we still see today).
+var RC=null,BB4={fog:0};
+function rcNoise(w,h,seed,sc,col,lo,hi){
+  var c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d'),im=g.createImageData(w,h);
+  function hs(x,y){var s=Math.sin(x*127.1+y*311.7+seed*17.3)*43758.5453;return s-Math.floor(s);}
+  function vn(x,y){var i=Math.floor(x),j=Math.floor(y),f=x-i,u=y-j;f=f*f*(3-2*f);u=u*u*(3-2*u);var a=hs(i,j),b=hs(i+1,j),cc=hs(i,j+1),d=hs(i+1,j+1);return a+(b-a)*f+(cc-a)*u+(a-b-cc+d)*f*u;}
+  for(var y=0;y<h;y++)for(var x=0;x<w;x++){var s=0,a=0.5,px=x/w*sc,py=y/h*sc*h/w;for(var o=0;o<5;o++){s+=a*vn(px,py);px=px*2.03+1.7;py=py*2.03+4.1;a*=0.5;}s/=0.96875;
+    var v=lo+(hi-lo)*s,i=(y*w+x)*4;im.data[i]=Math.min(255,col[0]*v);im.data[i+1]=Math.min(255,col[1]*v);im.data[i+2]=Math.min(255,col[2]*v);im.data[i+3]=255;}
+  g.putImageData(im,0,0);return c;
+}
+function rcInit(){
+  if(!NK)nkInit();var r=dsoRand(3801),E=[],Ph=[];
+  NK.He.forEach(function(h){for(var e=0;e<2;e++)E.push({n:h,he:true,a0:r()*6.28,fa:r()*6.28,fd:0.04+0.07*r(),dl:r()*0.5,sp:1.6+r()});});
+  NK.It.forEach(function(p){if(p.h1)E.push({n:p,he:false,a0:r()*6.28,fa:r()*6.28,fd:0.03+0.06*r(),dl:r()*0.5,sp:2+r()});});
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches;
+  for(var i=0;i<(coarse?36:60);i++)Ph.push({x:r()*2-1,y:r()*2-1,a:r()*6.28,tr:[]});
+  var es=document.createElement('canvas');es.width=es.height=24;var eg=es.getContext('2d'),gr=eg.createRadialGradient(12,12,0,12,12,12);
+  gr.addColorStop(0,'rgba(235,245,255,1)');gr.addColorStop(0.3,'rgba(140,190,255,0.8)');gr.addColorStop(1,'rgba(80,130,255,0)');eg.fillStyle=gr;eg.fillRect(0,0,24,24);
+  RC={E:E,Ph:Ph,es:es,fogT:rcNoise(320,180,1,4,[255,140,56],0.55,1.15),cmbT:rcNoise(320,180,2,10,[255,120,80],0.0,0.5),r:r};
+}
+function drawRecomb(tt,T,dt){
+  if(!RC)rcInit();
+  if(tt>3000&&S5.ok===null&&!lite)s5Init();
+  var S=Math.min(W,H),cx=W/2,cy=H/2,run=bb.state==='run';
+  var fin=Math.min(1,tt/2500),k=Math.max(0,Math.min(1,(tt-8000)/8000));k=k*k*(3-2*k);fin=fin*fin*(3-2*fin);
+  var fog=fin*(1-k);BB4.fog=fog;
+  ctx.fillStyle='rgba(0,0,6,'+(0.65+0.35*k).toFixed(3)+')';ctx.fillRect(0,0,W,H);
+  drawNuclei(1,T,1);
+  ctx.save();ctx.imageSmoothingEnabled=true;
+  if(k>0){ctx.globalAlpha=0.55*k;ctx.drawImage(RC.cmbT,0,0,W,H);}            // faint warm ripples: the afterglow
+  if(fog>0){ctx.globalAlpha=0.82*fog;var ox=Math.sin(T*0.05)*W*0.03;ctx.drawImage(RC.fogT,-W*0.05+ox,-H*0.05,W*1.1,H*1.1);}  // the glowing fog (~3,000 °C)
+  // photons: in the fog they bounce off electrons at once; when it clears they fly straight
+  ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+  var step=(dt||16)/1000,spd=S*(0.12+0.25*k),turn=fog*0.9;
+  RC.Ph.forEach(function(p){
+    if(run){if(RC.r()<turn*step*14)p.a=RC.r()*6.28;p.x+=Math.cos(p.a)*spd*step/S;p.y+=Math.sin(p.a)*spd*step/S;
+      var lx=W/S*0.55,ly=H/S*0.55;if(p.x>lx){p.x=-lx;p.tr=[];}if(p.x<-lx){p.x=lx;p.tr=[];}if(p.y>ly){p.y=-ly;p.tr=[];}if(p.y<-ly){p.y=ly;p.tr=[];}
+      p.tr.push([p.x,p.y]);var mx=Math.round(10+26*k);while(p.tr.length>mx)p.tr.shift();}
+    for(var i=1;i<p.tr.length;i++){var w=i/p.tr.length;ctx.strokeStyle='rgba(255,246,220,'+(0.7*w*w).toFixed(3)+')';ctx.lineWidth=Math.max(1,S*0.003*w);
+      ctx.beginPath();ctx.moveTo(cx+p.tr[i-1][0]*S,cy+p.tr[i-1][1]*S);ctx.lineTo(cx+p.tr[i][0]*S,cy+p.tr[i][1]*S);ctx.stroke();}
+    var hr=S*0.009;ctx.globalAlpha=1;ctx.drawImage(RC.es,cx+p.x*S-hr,cy+p.y*S-hr,hr*2,hr*2);
+  });
+  // electrons: free and darting about → caught, circling their nucleus
+  RC.E.forEach(function(e){var n=e.n,nx=e.he?cx+n.x*S:n.sx,ny=e.he?cy+n.y*S:n.sy;if(nx===undefined)return;
+    var ke=Math.max(0,Math.min(1,(k-e.dl*0.6)/0.4));ke=ke*ke*(3-2*ke);
+    var orb=S*(e.he?0.05:0.04),oa=e.a0+T*e.sp,tx=nx+Math.cos(oa)*orb,ty=ny+Math.sin(oa)*orb*0.55;
+    var fa=e.fa+T*0.7,fx=nx+Math.cos(fa)*e.fd*S+Math.sin(T*3+e.a0)*S*0.01,fy=ny+Math.sin(fa*1.3)*e.fd*S;
+    var x=fx+(tx-fx)*ke,y=fy+(ty-fy)*ke,er=S*0.011;
+    if(ke>0.3){ctx.globalAlpha=0.16*ke;ctx.strokeStyle='rgb(120,170,255)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(nx,ny,orb,orb*0.55,0,0,7);ctx.stroke();}
+    ctx.globalAlpha=0.6+0.4*(1-fog*0.5);ctx.drawImage(RC.es,x-er,y-er,er*2,er*2);});
+  ctx.restore();
+}
+
+// 🌟 scene 5: the dark ages → the first stars (~100–200 million years). Gas gathers along invisible dark-matter strands;
+// the first stars (tens to hundreds of Suns) light up and their ultraviolet light makes the gas around them glow.
+var S5={ok:null,c:null,g:null,u:{}},S5_FS="#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nuniform vec2 uRes;uniform float uT,uK,uLift;\nfloat h1(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}\nfloat vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);\n return mix(mix(h1(i),h1(i+vec2(1.0,0.0)),f.x),mix(h1(i+vec2(0.0,1.0)),h1(i+vec2(1.0,1.0)),f.x),f.y);}\nfloat fb(vec2 p){float s=0.0,a=0.5;for(int k=0;k<5;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.96875;}\nfloat fb4(vec2 p){float s=0.0,a=0.5;for(int k=0;k<4;k++){s+=a*vn(p);p=p*2.03+vec2(1.7,4.1);a*=0.5;}return s/0.9375;}\nfloat sq(float x){return x*x;}\nfloat ss(float a,float b,float x){return smoothstep(a,b,x);}\nfloat rs(float a,float b,float x){return 1.0-smoothstep(b,a,x);}\nvoid main(){\n vec2 fc=gl_FragCoord.xy,c=uRes*0.5;float H=min(uRes.x,uRes.y)*(uRes.x<uRes.y?1.25:1.0),k=uK,T=uT;\n vec2 X=(fc-c)/H;X.y=-X.y;\n vec2 q=X*2.4;float w1=fb4(q+vec2(3.0,T*0.01)),w2=fb4(q+vec2(0.0,7.0-T*0.01));\n float web=ss(0.6,0.97,1.0-abs(fb(q+vec2(w1,w2)*1.2)-0.5)*2.0);\n float fine=fb(X*10.0+vec2(T*0.02,0.0));\n float pk=ss(0.0,0.6,k),pull=0.25+0.75*pk;\n float gas=web*(0.55+0.45*fine)*0.55;\n vec2 C0=vec2(0.0,0.0),C1=vec2(-0.55,-0.22),C2=vec2(0.5,0.28);\n float sz=0.25*(1.0-0.8*pk)+0.03;\n gas+=1.0*exp(-pow(length(X-C0)/sz,1.5))*(0.6+0.4*fine)*pull*1.8;\n gas+=0.6*exp(-pow(length(X-C1)/sz,1.5))*(0.6+0.4*fine)*pull*1.8;\n gas+=0.5*exp(-pow(length(X-C2)/sz,1.5))*(0.6+0.4*fine)*pull*1.8;\n vec3 img=gas*vec3(0.40,0.33,0.52)*(0.5+uLift)+vec3(0.003,0.003,0.008);\n img+=fb(X*9.0+vec2(3.0,1.0))*0.025*vec3(0.9,0.45,0.3)*(1.0-ss(0.4,0.7,k));\n for(int j=0;j<3;j++){\n  float fj=float(j);vec2 Cj=j==0?C0:(j==1?C1:C2);float s=j==0?1.0:(j==1?0.6:0.5);\n  float ig=j==0?ss(0.55,0.75,k):ss(0.72+0.08*fj,0.92+0.04*fj,k);\n  if(ig<=0.0)continue;\n  vec2 d0=X-Cj;\n  // the bubble edge ripples slowly like gas (warped distance that drifts with time)\n  float wx=fb4(X*3.5+vec2(fj*5.0+T*0.05,T*0.03))-0.5,wy=fb4(X*3.5+vec2(T*0.04,fj*5.0+2.0-T*0.05))-0.5;\n  float d=length(d0+vec2(wx,wy)*0.11);\n  float br=0.04+0.21*ig*s*(1.0+0.03*sin(T*0.4+fj));\n  float dn=d/br;\n  float inner=rs(0.3,1.05,dn)*(0.5+0.5*fb(X*7.0+vec2(fj+T*0.03,0.0)));\n  float rim=exp(-sq((dn-0.98)/0.22))*(0.45+0.75*fb(X*8.0+vec2(fj*3.0,T*0.04)));\n  float wisp=exp(-sq((dn-1.15)/0.35))*ss(0.55,0.8,fb(X*14.0+vec2(fj,T*0.05)))*0.6;   // torn wisps just outside the edge\n  float dd=length(d0);\n  float star=exp(-sq(dd/0.005))*7.0+exp(-sq(dd/0.025))*1.4+exp(-sq(dd/0.09))*0.25;\n  img+=ig*(star*vec3(0.72,0.85,1.35)+inner*vec3(0.20,0.24,0.62)*0.6*s+(rim+wisp)*vec3(0.95,0.32,0.52)*0.5*s);\n  img+=ig*gas*exp(-dd/0.3)*0.9*s*vec3(0.40,0.46,0.95);\n }\n img=vec3(1.0)-exp(-img*1.6);\n gl_FragColor=vec4(img+(h1(fc)-0.5)/255.0,1.0);\n}";
+function s5Init(){
+  if(S5.ok!==null)return S5.ok;S5.ok=false;
+  try{var c=document.createElement('canvas'),g=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false})||c.getContext('experimental-webgl');if(!g)return false;
+    function sh(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);if(!g.getShaderParameter(s,g.COMPILE_STATUS)){console.warn('MeridiStars first stars:',g.getShaderInfoLog(s));return null;}return s;}
+    var vs=sh(g.VERTEX_SHADER,GL_VS),fs=sh(g.FRAGMENT_SHADER,S5_FS);if(!vs||!fs)return false;
+    var p=g.createProgram();g.attachShader(p,vs);g.attachShader(p,fs);g.linkProgram(p);if(!g.getProgramParameter(p,g.LINK_STATUS))return false;g.useProgram(p);
+    var buf=g.createBuffer();g.bindBuffer(g.ARRAY_BUFFER,buf);g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);
+    var al=g.getAttribLocation(p,'a');g.enableVertexAttribArray(al);g.vertexAttribPointer(al,2,g.FLOAT,false,0,0);
+    ['uRes','uT','uK','uLift'].forEach(function(n){S5.u[n]=g.getUniformLocation(p,n);});
+    c.addEventListener('webglcontextlost',function(e){e.preventDefault();S5.ok=false;},false);
+    S5.c=c;S5.g=g;S5.ok=true;
+  }catch(e){S5.ok=false;}
+  return S5.ok;
+}
+var BB5={k:0};
+function drawFirstStars(tt,T,dt){
+  if(tt>3000&&QG.ok===null&&!lite)qgInit();
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches;
+  var mix=Math.min(1,tt/4000);mix=mix*mix*(3-2*mix);                     // atoms from scene 4 slowly melt into the gas
+  var k=Math.max(0,Math.min(1,(tt-3000)/24000));BB5.k=k;
+  if(mix<1)drawRecomb(99999,T,0);
+  if(!lite&&s5Init()){
+    var s=coarse?0.5:0.75,w=Math.max(2,Math.round(W*s)),h=Math.max(2,Math.round(H*s)),c=S5.c,g=S5.g,u=S5.u;
+    if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+    g.viewport(0,0,w,h);g.uniform2f(u.uRes,w,h);g.uniform1f(u.uT,T);g.uniform1f(u.uK,k);g.uniform1f(u.uLift,coarse?0.45:0.2);   // a little brighter on phones so the dark ages can still be seen
+    g.drawArrays(g.TRIANGLES,0,3);ctx.save();ctx.globalAlpha=mix;ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,w,h,0,0,W,H);ctx.restore();
+  }else{
+    ctx.save();ctx.globalAlpha=mix;ctx.fillStyle='#020206';ctx.fillRect(0,0,W,H);var S=Math.min(W,H),cx=W/2,cy=H/2;
+    [[0,0,1,0.55],[-0.55,-0.22,0.6,0.8],[0.5,0.28,0.5,0.85]].forEach(function(p){var ig=Math.max(0,Math.min(1,(k-p[3])/0.15)),x=cx+p[0]*S,y=cy+p[1]*S;
+      var gr=ctx.createRadialGradient(x,y,0,x,y,S*(0.05+0.2*ig*p[2]));gr.addColorStop(0,'rgba(200,215,255,'+(0.15+0.85*ig)+')');gr.addColorStop(0.15,'rgba(90,100,200,'+(0.1+0.4*ig)+')');gr.addColorStop(0.85,'rgba(230,80,140,'+(0.25*ig)+')');gr.addColorStop(1,'rgba(230,80,140,0)');
+      ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,S*(0.05+0.2*ig*p[2]),0,7);ctx.fill();});
+    ctx.restore();
+  }
+}
+
+// 🌌 scene 7: pulling back from the quasar to the cosmic web, then home to the Milky Way today (~13.8 billion years)
+// Up close a quasar is a glowing disk with jets; from far away it is just a star-like point with spikes, as in telescope photos.
+var CW=null;
+function cwH(x,y){var s=Math.sin(x*127.1+y*311.7)*43758.5453;return s-Math.floor(s);}
+function cwVn(x,y){var i=Math.floor(x),j=Math.floor(y),f=x-i,u=y-j;f=f*f*(3-2*f);u=u*u*(3-2*u);var a=cwH(i,j),b=cwH(i+1,j),c=cwH(i,j+1),d=cwH(i+1,j+1);return a+(b-a)*f+(c-a)*u+(a-b-c+d)*f*u;}
+function cwFb(x,y){var s=0,a=0.5;for(var o=0;o<3;o++){s+=a*cwVn(x,y);x=x*2.03+1.7;y=y*2.03+4.1;a*=0.5;}return s/0.875;}
+function cwD(x,y){var w1=cwFb(x*0.6+3,y*0.6),w2=cwFb(x*0.6,y*0.6+7);var a=1-Math.abs(cwFb(x*0.9+w1*1.1,y*0.9+w2*1.1)-0.5)*2,b=1-Math.abs(cwFb(x*1.9+5+w2,y*1.9+w1)-0.5)*2;return Math.max(a,b*0.93);}
+function cwEase(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}
+function cwLog(a,b,k){return Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*k);}
+function cwSprite(){var s=128,c=document.createElement('canvas');c.width=c.height=s;var g=c.getContext('2d'),im=g.createImageData(s,s);
+  for(var y=0;y<s;y++)for(var x=0;x<s;x++){var u=(x-63.5)/63,v=(y-63.5)/63,rr=Math.hypot(u,v)+1e-4,i=(y*s+x)*4;im.data[i+3]=255;if(rr>1)continue;
+    var th=Math.atan2(v,u),arm=0;for(var k=0;k<2;k++){var dp=th-(Math.log(rr*8+0.6)*2.6+k*Math.PI);dp=Math.atan2(Math.sin(dp),Math.cos(dp));arm+=Math.exp(-dp*dp/0.25);}
+    var disk=Math.exp(-rr/0.25)*Math.max(0,Math.min(1,(0.95-rr)/0.35)),core=Math.exp(-rr*rr/0.014),bl=arm*disk*1.1+disk*0.15;
+    im.data[i]=Math.min(255,bl*160+core*255);im.data[i+1]=Math.min(255,bl*190+core*215);im.data[i+2]=Math.min(255,bl*255+core*150);}
+  g.putImageData(im,0,0);return c;}
+function cwGlow(r,g_,b){var c=document.createElement('canvas');c.width=c.height=64;var x=c.getContext('2d'),gr=x.createRadialGradient(32,32,0,32,32,32),cc=r+','+g_+','+b;
+  gr.addColorStop(0,'rgba('+cc+',1)');gr.addColorStop(0.3,'rgba('+cc+',0.35)');gr.addColorStop(1,'rgba('+cc+',0)');x.fillStyle=gr;x.fillRect(0,0,64,64);return c;}
+function cwInit(){
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,N=lite?2500:(coarse?3500:6500),r=dsoRand(1381),G=[],tries=0,best=[0,0,-1],home=[0,0,-1];
+  for(var gx=-1;gx<=1.001;gx+=0.05)for(var gy=-1;gy<=1.001;gy+=0.05){var d=cwD(gx,gy);if(d>best[2])best=[gx,gy,d];}
+  for(var an=0;an<6.283;an+=0.05)for(var rad=2.0;rad<=3.0;rad+=0.1){var hx=best[0]+Math.cos(an)*rad,hy=best[1]+Math.sin(an)*rad*0.6,dh=cwD(hx,hy);if(dh>home[2])home=[hx,hy,dh];}
+  while(G.length<N&&tries<300000){tries++;var px=best[0]+(r()-0.5)*13,py=best[1]+(r()-0.5)*13,dp=cwD(px,py);
+    if(r()<Math.exp(-sq_((1-dp)/0.07))*(0.35+0.65*r())){var qx=px+(r()-0.5)*0.04,qy=py+(r()-0.5)*0.04;
+      if(Math.hypot(qx-best[0],qy-best[1])<0.04||Math.hypot(qx-home[0],qy-home[1])<0.04)continue;
+      G.push({x:qx,y:qy,s:0.003+0.013*r(),a:r()*6.28,w:r()<0.5,d:dp});}}
+  for(var i=0;i<40;i++){var ox=(r()-0.5)*0.25,oy=(r()-0.5)*0.16;if(Math.hypot(ox,oy)<0.045)continue;G.push({x:best[0]+ox,y:best[1]+oy,s:0.003+0.007*r(),a:r()*6.28,w:r()<0.5,d:0.95});}
+  var nodes=G.filter(function(g){return g.d>0.993;}).slice(0,90);
+  CW={G:G,nodes:nodes,Q:{x:best[0],y:best[1]},M:{x:home[0],y:home[1]},spr:cwSprite(),glowW:cwGlow(255,205,150),glowB:cwGlow(120,155,255)};
+}
+function bbQuasarGL(a,T){                              // scene 6's picture, for the cross-fade into scene 7
+  if(lite||!qgInit())return;
+  var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,s=coarse?0.6:1,w=Math.max(2,Math.round(W*s)),h=Math.max(2,Math.round(H*s)),c=QG.c,g=QG.g,u=QG.u;
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  g.viewport(0,0,w,h);g.uniform2f(u.uRes,w,h);g.uniform1f(u.uT,T);g.uniform1f(u.uA,1);g.uniform1f(u.uIncl,bbIncl()*Math.PI/180);g.uniform1f(u.uSteps,coarse?72:110);
+  g.drawArrays(g.TRIANGLES,0,3);ctx.save();ctx.globalAlpha=a;ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,w,h,0,0,W,H);ctx.restore();
+}
+function cwYr(y){return J_()?('ビッグバンから 約'+Math.round(y/1e8)+'億年'):('About '+(y>=1e9?(y/1e9).toFixed(1)+' billion':Math.round(y/1e6)+' million')+' years after the Big Bang');}
+function drawCosmos(tt,T){
+  if(!CW)cwInit();
+  var S=Math.min(W,H),cx=W/2,cy=H/2,zoom,CX=CW.Q.x,CY=CW.Q.y;
+  if(tt<16000)zoom=cwLog(0.05,1.2,cwEase(tt/16000));
+  else if(tt<26000)zoom=cwLog(1.2,6,cwEase((tt-16000)/10000));
+  else{var kp=cwEase((tt-26000)/3500);zoom=cwLog(6,0.05,cwEase((tt-26000)/6000));CX+=(CW.M.x-CW.Q.x)*kp;CY+=(CW.M.y-CW.Q.y)*kp;}
+  var sc=S/zoom,Qb=1-cwEase((tt-11000)/4500)*0.92;          // the quasar runs out of gas and goes quiet
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  var nv=cwEase((zoom-0.8)/2);                               // warm glow where strands meet: clusters of galaxies
+  if(nv>0)CW.nodes.forEach(function(n){var x=cx+(n.x-CX)*sc,y=cy+(n.y-CY)*sc,rr=0.12*sc;if(x<-rr||x>W+rr||y<-rr||y>H+rr)return;ctx.globalAlpha=0.16*nv;ctx.drawImage(CW.glowW,x-rr,y-rr,rr*2,rr*2);});
+  var big=[];
+  for(var pass=0;pass<2;pass++){ctx.fillStyle=pass?'rgb(255,214,160)':'rgb(176,200,255)';
+    for(var i=0;i<CW.G.length;i++){var g=CW.G[i];if(g.w!==(pass===1))continue;var x=cx+(g.x-CX)*sc,y=cy+(g.y-CY)*sc;if(x<-40||x>W+40||y<-40||y>H+40)continue;var rr=g.s*sc;
+      if(rr>3){big.push([x,y,rr,g.a]);continue;}
+      var p=Math.max(1,rr*1.2);ctx.globalAlpha=Math.min(1,0.35+rr*0.4);ctx.fillRect(x-p/2,y-p/2,p,p);}}
+  big.forEach(function(b){ctx.save();ctx.translate(b[0],b[1]);ctx.rotate(b[3]);ctx.scale(1,0.5);ctx.globalAlpha=0.9;ctx.drawImage(CW.spr,-b[2]*1.3,-b[2]*1.3,b[2]*2.6,b[2]*2.6);ctx.restore();});
+  // the quasar's galaxy
+  var qx=cx+(CW.Q.x-CX)*sc,qy=cy+(CW.Q.y-CY)*sc,qr=0.03*sc;
+  if(qx>-qr*3&&qx<W+qr*3&&qy>-qr*3&&qy<H+qr*3){
+    ctx.save();ctx.translate(qx,qy);ctx.rotate(-0.42);
+    if(qr>1.5){ctx.save();ctx.scale(1,0.45);ctx.globalAlpha=1;ctx.drawImage(CW.spr,-qr*1.3,-qr*1.3,qr*2.6,qr*2.6);ctx.restore();}
+    var jl=0.022*sc*Qb;                                       // jets at right angles to the disk, knots of light flowing outward
+    if(jl>2)for(var sg=-1;sg<=1;sg+=2){var gr=ctx.createLinearGradient(0,0,0,sg*jl);gr.addColorStop(0,'rgba(205,222,255,'+(0.85*Qb).toFixed(3)+')');gr.addColorStop(0.4,'rgba(110,150,255,'+(0.4*Qb).toFixed(3)+')');gr.addColorStop(1,'rgba(80,120,255,0)');
+      var w0=Math.max(0.8,jl*0.012),w1=Math.max(2,jl*0.09);ctx.globalAlpha=1;ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(-w0,0);ctx.lineTo(w0,0);ctx.lineTo(w1,sg*jl);ctx.lineTo(-w1,sg*jl);ctx.closePath();ctx.fill();
+      for(var n=0;n<4;n++){var f=(n*0.25+T*0.12)%1,kr=Math.max(1.5,jl*0.03*(1+f));ctx.globalAlpha=Qb*(1-f)*0.8;ctx.drawImage(CW.glowB,-kr,sg*jl*f*0.9-kr,kr*2,kr*2);}}
+    ctx.restore();
+    var cr=Math.max(3,Math.min(0.12*S,0.006*sc))*(0.4+0.6*Qb);ctx.globalAlpha=Qb;ctx.drawImage(CW.glowW,qx-cr*2,qy-cr*2,cr*4,cr*4);
+    ctx.fillStyle='rgba(255,255,255,'+Qb.toFixed(3)+')';ctx.beginPath();ctx.arc(qx,qy,Math.max(1.5,S*0.004)*(0.5+0.5*Qb),0,7);ctx.fill();
+    var sp=cwEase((zoom-0.15)/0.45)*Qb;                       // from far away: a star-like point with spikes, as in telescope photos
+    if(sp>0.01){var L=S*0.12*sp;ctx.globalAlpha=0.85*sp;ctx.lineWidth=1;
+      var g1=ctx.createLinearGradient(qx-L,qy,qx+L,qy);g1.addColorStop(0,'rgba(230,240,255,0)');g1.addColorStop(0.5,'rgba(240,246,255,1)');g1.addColorStop(1,'rgba(230,240,255,0)');ctx.strokeStyle=g1;ctx.beginPath();ctx.moveTo(qx-L,qy);ctx.lineTo(qx+L,qy);ctx.stroke();
+      var g2=ctx.createLinearGradient(qx,qy-L,qx,qy+L);g2.addColorStop(0,'rgba(230,240,255,0)');g2.addColorStop(0.5,'rgba(240,246,255,1)');g2.addColorStop(1,'rgba(230,240,255,0)');ctx.strokeStyle=g2;ctx.beginPath();ctx.moveTo(qx,qy-L);ctx.lineTo(qx,qy+L);ctx.stroke();}
+  }
+  // home: the Milky Way
+  var mx=cx+(CW.M.x-CX)*sc,my=cy+(CW.M.y-CY)*sc,mr=0.03*sc,mwA=cwEase((tt-30000)/2500);
+  if(mr>1.5&&mwA<1){ctx.save();ctx.translate(mx,my);ctx.rotate(-0.35);ctx.scale(1,0.38);ctx.globalAlpha=1-mwA;ctx.drawImage(CW.spr,-mr*1.3,-mr*1.3,mr*2.6,mr*2.6);ctx.restore();}
+  else if(mr<=1.5){ctx.globalAlpha=1;ctx.fillStyle='rgb(255,214,160)';ctx.fillRect(mx-1,my-1,2,2);}
+  ctx.restore();
+  var ha=cwEase((tt-22500)/1500)*(1-cwEase((tt-28500)/1500));   // "the Milky Way is here" while we look at the web
+  if(ha>0){var hr=Math.max(9,mr*1.6);ctx.save();ctx.globalAlpha=ha;ctx.strokeStyle='#ffd700';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(mx,my,hr,0,7);ctx.stroke();
+    ctx.fillStyle='#ffd700';ctx.font='12px "Segoe UI",sans-serif';ctx.textAlign='left';ctx.fillText(J_()?'🌌 天の川銀河はここ':'🌌 The Milky Way is here',mx+hr+6,my+4);ctx.restore();}
+  if(mwA>0)drawGalaxyView(mx,my,2*mr,mwA,0);
+  if(tt<2500)bbQuasarGL(1-cwEase(tt/2500),20+tt/1000);         // cross-fade from scene 6
+  if(document.body.classList.contains('viewonly'))return;
+  var yr=tt<26000?cwLog(6e8,1e10,cwEase(tt/26000)):cwLog(1e10,1.38e10,cwEase((tt-26000)/6000)),t1=cwYr(yr),t2;
+  if(tt<6000)t2=J_()?'クエーサーから引いていくと、銀河の真ん中が強く光っている':'Pulling back: the centre of the galaxy blazes with light';
+  else if(tt<11000)t2=J_()?'遠くからは星のように見える — だから「準恒星（クエーサー）」':'From far away it looks like a star — hence "quasi-stellar object" (quasar)';
+  else if(tt<16000)t2=J_()?'燃料のガスを使い切ると、クエーサーは静かになる':'When it runs out of gas, the quasar goes quiet';
+  else if(tt<26000)t2=J_()?'銀河が集まり、宇宙の網ができる — 交わる所は銀河団、間は空洞（ボイド）':'Galaxies gather into the cosmic web — clusters where strands meet, empty voids between';
+  else if(tt<31000)t2=J_()?'網の中の一つの銀河へ — 私たちの天の川銀河':'Into one galaxy of the web — our Milky Way';
+  else{t1=J_()?'ビッグバンから 約138億年 — 今':'About 13.8 billion years after the Big Bang — today';t2=J_()?'私たちの天の川銀河 — 138億年の旅の終わり':'Our Milky Way — the end of a 13.8-billion-year journey';}
+  ctx.textAlign='center';ctx.fillStyle='rgba(255,215,0,0.95)';bbFit(t1,22,'bold ');ctx.fillText(t1,W/2,64);
+  ctx.fillStyle='rgba(230,230,255,0.9)';bbFit(t2,14,'');bbText2(t2,W/2,88);
+}
+var BB_SCENE_MS=[0,7000,24000,22000,26000,32000,18000,34000];                  // scene 1 ≈ 7 s, scene 2 ≈ 24 s (soup, then groups of three from 12 s)
+function bbScene(){return bb&&bb.scene||1;}
+function bbGo(n){if(!bb)return;bb.scene=n;bb.T=0;bb.t0=performance.now();var ip=document.getElementById('infoPanel');if(ip&&ip.classList.contains('open')&&lastInfo&&lastInfo[0]==='showBBInfo')showBBInfo();var dn=document.getElementById('bbDone');if(dn&&n!==7){dn.style.display='none';document.getElementById('bbPauseBtn').style.display='';}bbUI();}
+
+function bbFit(s,px,w){var f=px;ctx.font=w+f+'px "Segoe UI",sans-serif';while(f>(px>16?13:10)&&ctx.measureText(s).width>W-24){f--;ctx.font=w+f+'px "Segoe UI",sans-serif';}return f;}
+function bbText2(s,x,y){                              // the second line wraps onto two lines on narrow screens
+  if(ctx.measureText(s).width<=W-24){ctx.fillText(s,x,y);return;}
+  var cut=s.search(/ — |（| \(/);if(cut<0)cut=Math.floor(s.length/2);
+  var a=s.slice(0,cut),b=s.slice(cut).replace(/^ — /,'');ctx.fillText(a,x,y);ctx.fillText(b,x,y+18);
+}
+function drawBB(){
+  var now=performance.now(),dt=Math.min(100,now-bb.last);bb.last=now;if(bb.state==='run'){bb.T+=dt*0.001;bb.G=(bb.G||0)+dt*0.001;}
+  var fade=Math.min(1,(now-bb.t0)/1500);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  
+  if(bbScene()<6){
+    var sc=bbScene(),tt=bb.T*1000;
+    if(sc===1&&tt>=BB_SCENE_MS[1]){bbGo(2);sc=2;tt=0;}
+    if(sc===2&&tt>=BB_SCENE_MS[2]){bbGo(3);sc=3;tt=0;}
+    if(sc===3&&tt>=BB_SCENE_MS[3]){bbGo(4);sc=4;tt=0;}
+    if(sc===4&&tt>=BB_SCENE_MS[4]){bbGo(5);sc=5;tt=0;}
+    if(sc===5&&tt>=BB_SCENE_MS[5]){bbGo(6);}
+    var k1=Math.min(1,tt/BB_SCENE_MS[sc]),gather=sc===2?Math.max(0,Math.min(1,(tt-12000)/8000)):0;gather=gather*gather*(3-2*gather);
+    var wh=sc===2?Math.pow(Math.max(0,1-tt/3200),1.6):0;
+    if(!lite&&bgInit()){
+      var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,s=coarse?0.5:0.75,w=Math.max(2,Math.round(W*s)),h=Math.max(2,Math.round(H*s)),c=BG.c,g=BG.g,u=BG.u;
+      if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+      g.viewport(0,0,w,h);g.uniform2f(u.uRes,w,h);g.uniform1f(u.uT,bb.G||0);g.uniform1f(u.uS,sc===1?1:2);g.uniform1f(u.uK,k1);g.uniform1f(u.uA,1);g.uniform1f(u.uWh,wh);
+      g.drawArrays(g.TRIANGLES,0,3);ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,w,h,0,0,W,H);
+    }else{
+      var cx=W/2,cy=H/2,Rr=Math.max(W,H),gr;
+      if(sc===1){var rr=Math.max(3,Rr*k1*k1*0.8);gr=ctx.createRadialGradient(cx,cy,0,cx,cy,rr);gr.addColorStop(0,'#fff');gr.addColorStop(0.7,'rgba(255,240,255,0.8)');gr.addColorStop(1,'rgba(200,180,255,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);}
+      else{gr=ctx.createRadialGradient(cx,cy,0,cx,cy,Rr*0.6);gr.addColorStop(0,'#ffd9a0');gr.addColorStop(0.35,'#ff5a14');gr.addColorStop(0.7,'#5a0814');gr.addColorStop(1,'#000');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);if(wh>0){ctx.fillStyle='rgba(255,248,235,'+wh+')';ctx.fillRect(0,0,W,H);}}
+    }
+    if(sc===2)drawQuarks(gather,bb.G||0,1,0,tt/1000);
+    if(sc===3){var cool=Math.min(1,tt/6000);ctx.fillStyle='rgba(0,0,6,'+(0.65*cool*cool*(3-2*cool)).toFixed(3)+')';ctx.fillRect(0,0,W,H);var mo=Math.min(1,tt/2500);mo=mo*mo*(3-2*mo);if(mo<1)drawQuarks(1,bb.G||0,1-mo,mo);drawNuclei(Math.min(1,Math.max(0,(tt-2500)/12000)),bb.G||0,mo);}
+    if(sc===4)drawRecomb(tt,bb.G||0,dt);
+    if(sc===5)drawFirstStars(tt,bb.G||0,dt);
+    if(sc===5){var ex=Math.max(0,Math.min(1,(tt-(BB_SCENE_MS[5]-3500))/3500));if(ex>0){ex=ex*ex*(3-2*ex);var S_=Math.min(W,H),gr=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,S_*(0.05+1.2*ex));gr.addColorStop(0,'rgba(210,225,255,'+(0.9*ex*(1-ex)*2).toFixed(3)+')');gr.addColorStop(0.5,'rgba(60,40,120,'+(0.5*ex).toFixed(3)+')');gr.addColorStop(1,'rgba(0,0,0,'+ex.toFixed(3)+')');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(0,0,0,'+(ex*ex).toFixed(3)+')';ctx.fillRect(0,0,W,H);}}
+    if(document.body.classList.contains('viewonly'))return;
+    var t1=sc===5?(J_()?'ビッグバンから 約1〜2億年 — 最初の星':'About 100–200 million years after the Big Bang — the first stars'):sc===4?(J_()?'ビッグバンから 約38万年 — 宇宙の晴れ上がり':'About 380,000 years after the Big Bang — the universe becomes clear'):sc===3?(J_()?'ビッグバンから 約3分':'About 3 minutes after the Big Bang'):sc===1?(J_()?'ビッグバン — 約138億年前':'The Big Bang — about 13.8 billion years ago'):(J_()?'ビッグバンから 約10万分の1秒まで':'Up to ~10 microseconds after the Big Bang');
+    var t2=sc===5?(BB5.k<0.55?(J_()?'まだ何も光っていない、宇宙の暗黒時代 — ガスが少しずつ集まる':'Nothing shines yet: the dark ages — gas slowly gathers'):(J_()?'ガスが集まって、太陽よりずっと大きな最初の星が灯る':'The gas gathers and the first stars light up, far bigger than the Sun')):sc===4?(BB4.fog>0.35?(J_()?'光は電子にぶつかって、まっすぐ進めない（光る霧の宇宙）':'Light keeps bouncing off electrons and cannot travel straight (a glowing fog)'):(J_()?'電子が原子核につかまり、光がまっすぐ進めるようになった — 今も届く宇宙マイクロ波背景放射':'Electrons are caught by nuclei and light flies straight — we still see it as the cosmic microwave background')):sc===3?(J_()?'陽子（赤）と中性子（銀）がくっついて、ヘリウムの原子核ができる':'Protons (red) and neutrons (silver) stick together into helium nuclei'):sc===1?(J_()?'小さな光の点がはじけて、宇宙が始まる':'A tiny point of light bursts — the universe begins'):(gather<0.5?(J_()?'クォークのスープ（クォーク・グルーオン・プラズマ）— 太陽の中心の数十万倍の熱さ':'The quark soup (quark–gluon plasma) — hundreds of thousands of times hotter than the Sun\'s core'):(J_()?'冷えて、クォークが3つずつ集まる → 陽子・中性子':'Cooling down: quarks group in threes → protons and neutrons'));
+    var bright=(sc===1&&k1>0.6)||(sc===2&&wh>0.4)||(sc===4&&BB4.fog>0.45);
+    if(bright){ctx.shadowColor='rgba(255,250,235,0.9)';ctx.shadowBlur=10;}
+    ctx.textAlign='center';ctx.fillStyle=bright?'rgba(70,35,0,1)':'rgba(255,215,0,0.95)';bbFit(t1,22,'bold ');ctx.fillText(t1,W/2,64);
+    ctx.fillStyle=bright?'rgba(40,20,20,1)':'rgba(230,230,255,0.9)';bbFit(t2,14,'');bbText2(t2,W/2,88);ctx.shadowBlur=0;
+    return;
+  }
+  if(bbScene()===6&&bb.T*1000>=BB_SCENE_MS[6])bbGo(7);
+  if(bbScene()===7){if(bb.T*1000>BB_SCENE_MS[7])bb.T=BB_SCENE_MS[7]/1000;var dn=document.getElementById('bbDone'),fin=bb.T*1000>=BB_SCENE_MS[7]-1;if(dn&&(dn.style.display==='none')===fin){dn.style.display=fin?'':'none';document.getElementById('bbPauseBtn').style.display=fin?'none':'';}drawCosmos(bb.T*1000,bb.G||0);return;}
+  if(!lite&&qgInit()){
+    var coarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches,s=coarse?0.6:1,w=Math.max(2,Math.round(W*s)),h=Math.max(2,Math.round(H*s)),c=QG.c,g=QG.g,u=QG.u;
+    if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+    g.viewport(0,0,w,h);g.uniform2f(u.uRes,w,h);g.uniform1f(u.uT,bb.T);g.uniform1f(u.uA,fade);g.uniform1f(u.uIncl,bbIncl()*Math.PI/180);g.uniform1f(u.uSteps,coarse?72:110);
+    g.drawArrays(g.TRIANGLES,0,3);ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,w,h,0,0,W,H);
+  }else{                                              // light version: a glow, a shadow and two jets
+    var cx=W/2,cy=H/2,R=Math.min(W,H);ctx.save();ctx.globalAlpha=fade;ctx.translate(cx,cy);ctx.rotate(-0.42);ctx.globalCompositeOperation='lighter';
+    for(var sg=-1;sg<=1;sg+=2){var jg=ctx.createLinearGradient(0,0,0,sg*R*0.5);jg.addColorStop(0,'rgba(170,200,255,0.9)');jg.addColorStop(1,'rgba(60,110,255,0)');ctx.fillStyle=jg;ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(3,0);ctx.lineTo(R*0.05,sg*R*0.5);ctx.lineTo(-R*0.05,sg*R*0.5);ctx.fill();}
+    var dg=ctx.createRadialGradient(0,0,0,0,0,R*0.3);dg.addColorStop(0,'rgba(255,220,150,0.9)');dg.addColorStop(0.3,'rgba(255,130,60,0.5)');dg.addColorStop(1,'rgba(255,60,120,0)');ctx.fillStyle=dg;ctx.save();ctx.scale(1,0.25);ctx.beginPath();ctx.arc(0,0,R*0.3,0,7);ctx.fill();ctx.restore();
+    ctx.globalCompositeOperation='source-over';ctx.fillStyle='#000';ctx.beginPath();ctx.arc(0,0,R*0.045,0,7);ctx.fill();ctx.restore();
+  }
+  if(document.body.classList.contains('viewonly'))return;
+  ctx.textAlign='center';ctx.fillStyle='rgba(255,215,0,0.95)';ctx.font='bold 22px "Segoe UI",sans-serif';
+  ctx.fillText(J_()?'ビッグバンから 約6億年':'About 600 million years after the Big Bang',W/2,64);
+  ctx.font='14px "Segoe UI",sans-serif';ctx.fillStyle='rgba(230,230,255,0.85)';
+  ctx.fillText(J_()?'ジェットを噴く怪物ブラックホール（クエーサー）':'A monster black hole blowing jets (a quasar)',W/2,88);
+}
 function animate(){
   var nowT=performance.now();
   if(lite&&nowT-lastDraw<31){requestAnimationFrame(animate);return;}
@@ -2626,6 +3060,9 @@ function animate(){
     var where=horizonMode?(fmtJST(obsDate)+' | Az '+Math.round(viewAz)+'° Alt '+Math.round(viewAlt)+'°'):('Center RA '+fmtRA(viewRA)+' Dec '+fmtDec(viewDec));
     document.getElementById('hud').textContent='View: '+Math.round(fov)+'° | '+where
       +' | Stars: '+(drawNightSky.shown||0)+' / '+realStars.length+(dsoMode!=='off'?' | Deep sky: '+dsoShown:'')+(lite?' | 🪶':'')+' | '+(timePaused?'⏸ paused':'×'+timeSpeed)+(horizonMode?' | Sun alt '+sunAlt.toFixed(0)+'°':'');
+  }else if(bb){
+    drawBB();
+    document.getElementById('hud').textContent=(bbScene()===1?'💥 The Big Bang':bbScene()===2?'🔥 Quark soup':bbScene()===3?'⚛️ ~3 minutes: helium nuclei':bbScene()===4?'🌫 ~380,000 years: the fog clears':bbScene()===5?'🌟 ~100–200 Myr: the first stars':bbScene()===7?'🌌 The cosmic web → today':'🌀 ~600 Myr after the Big Bang')+(bb.state==='paused'?' | ⏸ paused':'')+(lite?' | 🪶':'')+(QG.ok?' | 🌀 WebGL':'');
   }else if(trip){
     stepTrip();drawTrip();
     document.getElementById('hud').textContent=fmtTripLy(tripLy(trip.t))+(trip.state==='paused'?' | ⏸ paused':'')+' | Space ⏯'+(lite?' | 🪶':'')+(GLH.ok?' | 🌀 WebGL':'');
