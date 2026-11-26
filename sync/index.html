@@ -74,6 +74,24 @@ body.ja [data-l="ja"]{display:revert}
 .lane .done.on{opacity:1;transform:scale(1)}
 .lane .flashbg{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(57,255,20,.25),transparent 60%);opacity:0;pointer-events:none;transition:opacity .6s}
 .lane .flashbg.on{opacity:1;transition:opacity .05s}
+
+.stepDemo{position:relative;background:#05050f;border:1px solid #00d4ff;border-radius:10px;padding:12px;box-shadow:0 0 22px rgba(0,212,255,.12);min-height:300px}
+.stepDemo .app{background:#000;border:1px solid #1a2a3a;border-radius:6px;padding:10px;font-family:Consolas,"Courier New",monospace;font-size:.9em;color:#e8ffe8;white-space:pre-wrap;min-height:230px;line-height:1.55}
+.stepDemo .app .hl{background:rgba(57,255,20,.18);border-radius:3px}
+.stepDemo .apptitle{font-size:.8em;color:#9aa8b8;margin-bottom:6px}
+.stepWin{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) scale(.9);width:min(340px,88%);background:#1a1a2e;border:1px solid #00d4ff;border-radius:8px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+.stepWin.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.stepWin .sh{display:flex;justify-content:space-between;font-size:.82em;color:#9aa8b8;margin-bottom:6px}
+.stepWin .dots{display:flex;gap:5px;margin-bottom:8px}
+.stepWin .dots i{flex:1;height:4px;border-radius:2px;background:#2a3a4a;transition:background .25s}
+.stepWin .dots i.on{background:#00d4ff}
+.stepWin .lbl{color:#fff;font-weight:bold;margin-bottom:4px}
+.stepWin .inp{background:#000;border:1px solid #00d4ff;border-radius:4px;padding:6px 8px;font-family:inherit;color:#e8ffe8;min-height:1.9em}
+.stepWin .btns{display:flex;justify-content:space-between;margin-top:10px}
+.stepWin .btns span{border:1px solid #2a4a5a;border-radius:5px;padding:3px 12px;font-size:.85em;color:#b8c8d8;transition:background .15s,color .15s}
+.stepWin .btns span.press{background:#00d4ff;color:#0a0a1e;border-color:#00d4ff}
+.stepCap{text-align:center;margin-top:10px;font-size:.95em;color:#d8e0e8;min-height:1.5em}
+.stepCap b{color:#00d4ff}
 .raceLangs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 10px}
 .raceLangs button{background:#111;border:1px solid #2a4a2a;color:#b8e8b8;padding:3px 12px;border-radius:14px;cursor:pointer;font-size:.88em;transition:background .2s,color .2s}
 .raceLangs button.on{background:#39ff14;color:#0a0a1e;border-color:#39ff14;font-weight:bold}
@@ -122,6 +140,24 @@ body.ja [data-l="ja"]{display:revert}
 </div>
 <div class="raceSum" id="rSum"></div>
 <div class="raceCtl"><button onclick="raceStart(true)">↻ <span data-l="en">Watch again</span><span data-l="ja">もう一度</span></button></div>
+
+
+<h2 data-l="en">✍️ Fill it in, step by step — <code>{step:}</code></h2><h2 data-l="ja">✍️ 順番に書き込む — <code>{step:}</code></h2>
+<p data-l="en" style="color:#9aa8b8;font-size:.92em">One trigger opens a small wizard. Type each part, go <b>Back</b> to fix anything, and the finished text appears — the part most expanders can't do.</p>
+<p data-l="ja" style="color:#9aa8b8;font-size:.92em">トリガー1つで小さな入力窓が開きます。1つずつ書き込み、<b>戻る</b>で直すこともでき、最後に完成した文が出ます。ほかのツールにはあまりない機能です。</p>
+<div class="stepDemo" id="stepDemo">
+  <div class="apptitle" id="sApp">✉️ Mail — New message</div>
+  <div class="app" id="sText"></div>
+  <div class="stepWin" id="sWin">
+    <div class="sh"><span>🐾 MeridiSync</span><span id="sNum">1 / 3</span></div>
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div class="lbl" id="sLbl"></div>
+    <div class="inp" id="sInp"></div>
+    <div class="btns"><span id="sBack">← Back</span><span id="sNext">Next →</span></div>
+  </div>
+</div>
+<div class="stepCap" id="sCap"></div>
+<div class="raceCtl"><button onclick="stepStart(true)">↻ <span data-l="en">Watch again</span><span data-l="ja">もう一度</span></button></div>
 
 <h2 data-l="en">▶ Try it here</h2><h2 data-l="ja">▶ ここで試す</h2>
 <div class="demo">
@@ -230,7 +266,7 @@ body.ja [data-l="ja"]{display:revert}
 var L='en';
 function setL(l){L=l;document.body.classList.toggle('ja',l==='ja');document.documentElement.lang=l;
   document.getElementById('bEn').classList.toggle('on',l==='en');document.getElementById('bJa').classList.toggle('on',l==='ja');
-  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();RL=l;raceButtons();if(window.RACE&&RACE.run)raceStart(false);}
+  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();RL=l;raceButtons();if(window.RACE&&RACE.run)raceStart(false);if(window.STEP&&STEP.run)stepStart(false);}
 function pad2(n){return(n<10?'0':'')+n;}
 function ymd(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
 var WD_EN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],WD_JA=['日','月','火','水','木','金','土'];
@@ -310,6 +346,58 @@ function raceStart(manual){
     el=document.getElementById('race');
     if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)go();});},{threshold:.35}).observe(el);}else go();
   });
+})();
+
+var STEP={run:0,tid:[]};
+function stepData(){return L==='ja'?{
+  app:'✉️ メール — 新規作成',trig:'.report',
+  labels:['件名','担当者','期限'],
+  vals:['見積書の送付について','山田','12月3日（木）'],wrong:'山本',
+  back:'← 戻る',next:'次へ →',ok:'OK ✔',
+  out:function(v){return '件名：'+v[0]+'\n\n'+v[1]+'様\n\nいつもお世話になっております。\n'+v[0]+'、ご確認をお願いいたします。\nお手数ですが、'+v[2]+'までにご返信いただけますと幸いです。\n\nよろしくお願いいたします。';},
+  cap:['<b>.report</b> と打つと、入力窓が開く','1つずつ書き込んで「次へ」','名前を間違えた？ <b>← 戻る</b> で直せる','完成！ 1つのトリガーで、全部埋まったメールに']
+}:{
+  app:'✉️ Mail — New message',trig:'.report',
+  labels:['Subject','Name','Due date'],
+  vals:['Quote for your order','Sam','Thu, Dec 3'],wrong:'Sal',
+  back:'← Back',next:'Next →',ok:'OK ✔',
+  out:function(v){return 'Subject: '+v[0]+'\n\nHi '+v[1]+',\n\nThanks for your patience.\nPlease find the '+v[0].toLowerCase()+' attached.\nCould you reply by '+v[2]+'?\n\nBest regards,';},
+  cap:['Type <b>.report</b> — a small wizard opens','Fill in each part, then Next','Typo in the name? Go <b>← Back</b> and fix it','Done! One trigger, one finished email']
+};}
+function stepClear(){STEP.tid.forEach(clearTimeout);STEP.tid=[];}
+function stepStart(manual){
+  stepClear();var run=++STEP.run,D=stepData(),$=function(i){return document.getElementById(i);};
+  var t=0,at=function(d,f){t+=d;var tt=t;STEP.tid.push(setTimeout(function(){if(run===STEP.run)f();},tt));};
+  var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');},cur='<span class="cur"></span>';
+  var txt=$('sText'),win=$('sWin'),inp=$('sInp'),cap=$('sCap'),dots=win.querySelectorAll('.dots i');
+  $('sApp').textContent=D.app;txt.innerHTML=cur;win.classList.remove('on');cap.innerHTML='';
+  $('sBack').textContent=D.back;$('sNext').textContent=D.next;
+  var show=function(i,val){$('sNum').textContent=(i+1)+' / 3';$('sLbl').textContent=D.labels[i];inp.innerHTML=esc(val)+cur;dots.forEach(function(d,k){d.classList.toggle('on',k<=i);});$('sNext').textContent=i===2?D.ok:D.next;};
+  var typeIn=function(s){for(let k=1;k<=s.length;k++){let p=s.slice(0,k);at(L==='ja'?120:85,function(){inp.innerHTML=esc(p)+cur;});}};
+  var press=function(id){at(350,function(){$(id).classList.add('press');});at(180,function(){$(id).classList.remove('press');});};
+  var v=D.vals.slice();
+  // type the trigger
+  at(300,function(){cap.innerHTML=D.cap[0];});
+  for(let k=1;k<=D.trig.length;k++){let p=D.trig.slice(0,k);at(130,function(){txt.innerHTML='<span class="hl">'+esc(p)+'</span>'+cur;});}
+  at(350,function(){win.classList.add('on');show(0,'');});
+  at(500,function(){cap.innerHTML=D.cap[1];});
+  typeIn(v[0]);press('sNext');
+  at(10,function(){show(1,'');});typeIn(D.wrong);press('sNext');
+  at(10,function(){show(2,'');});
+  at(400,function(){cap.innerHTML=D.cap[2];});
+  press('sBack');at(10,function(){show(1,D.wrong);});
+  at(500,function(){});
+  for(let k=D.wrong.length-1;k>=1;k--){let p=D.wrong.slice(0,k);at(110,function(){inp.innerHTML=esc(p)+cur;});}
+  at(150,function(){});typeIn(v[1].slice(D.wrong.length-1));
+  press('sNext');at(10,function(){show(2,'');});
+  typeIn(v[2]);press('sNext');
+  at(200,function(){win.classList.remove('on');txt.innerHTML=esc(D.out(v))+cur;cap.innerHTML=D.cap[3];});
+  if(!manual)at(7000,function(){stepStart(false);});
+}
+(function(){var started=false;
+  document.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('stepDemo');
+    var go=function(){if(!started){started=true;stepStart(false);}};
+    if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)go();});},{threshold:.35}).observe(el);}else go();});
 })();
 </script>
 <script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
