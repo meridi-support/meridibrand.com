@@ -92,6 +92,44 @@ body.ja [data-l="ja"]{display:revert}
 .stepWin .btns span.press{background:#00d4ff;color:#0a0a1e;border-color:#00d4ff}
 .stepCap{text-align:center;margin-top:10px;font-size:.95em;color:#d8e0e8;min-height:1.5em}
 .stepCap b{color:#00d4ff}
+
+.desk{position:relative;height:340px;border-radius:10px;overflow:hidden;border:1px solid #2a3a4a;background:radial-gradient(ellipse at 30% 20%,#1b2a4a,#0a0f1e 70%)}
+@media (max-width:640px){.desk{height:300px}}
+.desk .win{position:absolute;width:min(440px,86%);background:#11141f;border:1px solid #2a3a4a;border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.55);filter:brightness(.42) saturate(.5);transform:scale(.94);transition:filter .4s,transform .4s,box-shadow .4s}
+.desk .win.front{filter:none;transform:scale(1);border-color:#39ff14;box-shadow:0 14px 34px rgba(0,0,0,.7),0 0 0 1px rgba(57,255,20,.35);z-index:5}
+.desk .win .tb{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:#1a1f2e;border-radius:8px 8px 0 0;font-size:.8em;color:#b8c8d8}
+.desk .win .tb i{font-style:normal;color:#667}
+.desk .win .bd{padding:9px 11px;min-height:120px;font-family:Consolas,"Courier New",monospace;font-size:.86em;color:#e8ffe8;white-space:pre-wrap;line-height:1.5}
+.desk .win .bd .hl{background:rgba(57,255,20,.2);border-radius:3px}
+.desk .w0{left:4%;top:6%}.desk .w1{left:22%;top:14%}.desk .w2{left:9%;top:26%}.desk .w3{left:28%;top:34%}
+@media (max-width:640px){.desk .w0,.desk .w1,.desk .w2,.desk .w3{left:5%}.desk .w1{top:12%}.desk .w2{top:20%}.desk .w3{top:28%}}
+.desk .grid{display:grid;grid-template-columns:28px 1fr 1fr;font-size:.92em}
+.desk .grid div{border:1px solid #1f2a36;padding:2px 6px;min-height:1.5em}
+.desk .grid .h{background:#1a1f2e;color:#778;text-align:center}
+.desk .grid .sel{outline:2px solid #39ff14;outline-offset:-2px}
+.desk .task{position:absolute;left:0;right:0;bottom:0;height:34px;background:rgba(10,12,20,.92);border-top:1px solid #2a3a4a;display:flex;justify-content:center;align-items:center;gap:6px;z-index:9}
+.desk .task span{padding:3px 10px;border-radius:6px;font-size:.8em;color:#b8c8d8;border-bottom:2px solid transparent;transition:background .3s,border-color .3s}
+.desk .task span.on{background:#1f2a36;border-color:#39ff14;color:#fff}
+.desk .tray{position:absolute;right:10px;bottom:7px;font-size:.78em;color:#39ff14;z-index:10}
+.deskCap{text-align:center;margin-top:10px;font-size:.95em;color:#d8e0e8;min-height:1.5em}
+.deskCap b{color:#39ff14}
+
+.calc{background:#05050f;border:1px solid #ffd700;border-radius:10px;padding:16px;box-shadow:0 0 22px rgba(255,215,0,.10)}
+.calc .row{margin:6px 0 14px}
+.calc .lab{font-size:.92em;color:#d8e0e8;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.calc .lab b{color:#ffd700;font-variant-numeric:tabular-nums}
+.calc input[type=range]{width:100%;accent-color:#ffd700}
+.calc .seg{display:flex;gap:6px;flex-wrap:wrap}
+.calc .seg button{flex:1;min-width:90px;background:#111;border:1px solid #4a4a2a;color:#e8e0b8;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.88em;line-height:1.3}
+.calc .seg button small{display:block;color:#9aa8b8;font-size:.82em}
+.calc .seg button.on{background:#ffd700;color:#0a0a1e;border-color:#ffd700}
+.calc .seg button.on small{color:#3a3a1a}
+.calc .res{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+@media (max-width:640px){.calc .res{grid-template-columns:1fr}}
+.calc .res div{background:#10102a;border:1px solid #2a2a4a;border-radius:8px;padding:12px;text-align:center}
+.calc .res span{display:block;font-size:.85em;color:#9aa8b8}
+.calc .res b{display:block;font-size:1.55em;color:#ffd700;margin-top:4px;font-variant-numeric:tabular-nums;transition:opacity .2s}
+.calc .note{font-size:.8em;color:#7a8898;margin-top:10px;line-height:1.6}
 .raceLangs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 10px}
 .raceLangs button{background:#111;border:1px solid #2a4a2a;color:#b8e8b8;padding:3px 12px;border-radius:14px;cursor:pointer;font-size:.88em;transition:background .2s,color .2s}
 .raceLangs button.on{background:#39ff14;color:#0a0a1e;border-color:#39ff14;font-weight:bold}
@@ -159,6 +197,44 @@ body.ja [data-l="ja"]{display:revert}
 <div class="stepCap" id="sCap"></div>
 <div class="raceCtl"><button onclick="stepStart(true)">↻ <span data-l="en">Watch again</span><span data-l="ja">もう一度</span></button></div>
 
+
+<h2 data-l="en">🪟 Works in every app</h2><h2 data-l="ja">🪟 どのアプリでも動く</h2>
+<p data-l="en" style="color:#9aa8b8;font-size:.92em">MeridiSync lives in your system tray, not in one app. The same triggers work in mail, chat, spreadsheets and plain text — tested in Excel, Slack and Notepad.</p>
+<p data-l="ja" style="color:#9aa8b8;font-size:.92em">MeridiSync は1つのアプリの中ではなく、画面右下のトレイで待っています。メール・チャット・表計算・メモ帳で、同じトリガーがそのまま使えます（Excel・Slack・メモ帳で確認済み）。</p>
+<div class="desk" id="desk">
+  <div class="win w0" id="dw0"><div class="tb"><span>✉️ Mail</span><i>— ☐ ✕</i></div><div class="bd" id="db0"></div></div>
+  <div class="win w1" id="dw1"><div class="tb"><span>💬 Chat</span><i>— ☐ ✕</i></div><div class="bd" id="db1"></div></div>
+  <div class="win w2" id="dw2"><div class="tb"><span>📊 Sheet</span><i>— ☐ ✕</i></div><div class="bd" style="padding:6px"><div class="grid" id="db2"></div></div></div>
+  <div class="win w3" id="dw3"><div class="tb"><span>📝 Notepad</span><i>— ☐ ✕</i></div><div class="bd" id="db3"></div></div>
+  <div class="task" id="dtask"><span>✉️ Mail</span><span>💬 Chat</span><span>📊 Sheet</span><span>📝 Notepad</span></div>
+  <div class="tray">🐾</div>
+</div>
+<div class="deskCap" id="dCap"></div>
+<div class="raceCtl"><button onclick="deskStart(true)">↻ <span data-l="en">Watch again</span><span data-l="ja">もう一度</span></button></div>
+
+
+<h2 data-l="en">⏱ How much time could it give back?</h2><h2 data-l="ja">⏱ どれくらい時間が浮く？</h2>
+<div class="calc" id="calc">
+  <div class="row">
+    <div class="lab"><span data-l="en">Times a day you type the same kind of text</span><span data-l="ja">1日に同じような文を打つ回数</span><b id="cN">10</b></div>
+    <input type="range" id="cRange" min="1" max="50" value="10" aria-label="times per day">
+  </div>
+  <div class="row">
+    <div class="lab"><span data-l="en">How long is the part that stays the same each time?</span><span data-l="ja">毎回同じになる部分の長さは？</span></div>
+    <div class="seg" id="cSeg">
+      <button data-c="40"><span data-l="en">Short</span><span data-l="ja">短い</span><small data-l="en">~40 characters · greeting, sign-off</small><small data-l="ja">約40字・あいさつ・お礼</small></button>
+      <button data-c="150" class="on"><span data-l="en">Medium</span><span data-l="ja">ふつう</span><small data-l="en">~150 characters · a set email reply</small><small data-l="ja">約150字・定型のメール</small></button>
+      <button data-c="250"><span data-l="en">Long</span><span data-l="ja">長い</span><small data-l="en">~250 characters · the fixed part of a report or ticket</small><small data-l="ja">約250字・日報や起票の決まった部分</small></button>
+    </div>
+  </div>
+  <div class="res">
+    <div><span data-l="en">⏱ Per day</span><span data-l="ja">⏱ 1日に</span><b id="cDay">—</b></div>
+    <div><span data-l="en">📅 Per year</span><span data-l="ja">📅 1年で</span><b id="cYear">—</b></div>
+  </div>
+  <p class="note" data-l="en">A rough guide, not a promise — it depends on how fast you type and how you use it. Only the fixed part is counted — what you fill in yourself is not. Worked out for a fast typist (about 300 characters a minute) and a relaxed one (about 150), with 240 working days a year.</p>
+  <p class="note" data-l="ja">打つ速さや使い方で変わる、おおよその目安です。毎回同じになる部分だけを数え、自分で書き足す部分は数えていません。速く打つ人（1分に約300文字）とゆっくりの人（約150文字）の両方で計算し、働く日は年240日にしています。</p>
+</div>
+
 <h2 data-l="en">▶ Try it here</h2><h2 data-l="ja">▶ ここで試す</h2>
 <div class="demo">
   <p class="hint" data-l="en">Type one of the triggers below into the box (or click one). This is a small in-browser preview — the real app works in every Windows app.</p>
@@ -196,13 +272,13 @@ body.ja [data-l="ja"]{display:revert}
 <ul style="padding-left:22px" data-l="en">
   <li>Anyone who types the same email replies, greetings or sign-offs every day</li>
   <li>Support and office work — ticket replies, report headers, dated file names</li>
-  <li>Gamers and streamers — chat macros and stream messages without a cloud account</li>
+  <li>Gamers and streamers — guild and clan messages, raid calls and LFG posts in Discord or game chat, stream greetings — no cloud account needed</li>
   <li>Developers — code snippets, commit message templates, timestamps</li>
 </ul>
 <ul style="padding-left:22px" data-l="ja">
   <li>毎日同じメールの返事・あいさつ・署名を打っている人</li>
   <li>サポートや事務の仕事：問い合わせの返事、日報の見出し、日付入りのファイル名</li>
-  <li>ゲームや配信：チャットの定型文や配信のあいさつを、クラウドのアカウントなしで</li>
+  <li>ゲームや配信：Discord やゲーム内チャットで、ギルド・クランへの連絡、レイドの集合、募集の定型文、配信のあいさつを。クラウドのアカウントなしで</li>
   <li>開発：コードの決まり文句、コミットメッセージのひな形、時刻</li>
 </ul>
 
@@ -266,7 +342,7 @@ body.ja [data-l="ja"]{display:revert}
 var L='en';
 function setL(l){L=l;document.body.classList.toggle('ja',l==='ja');document.documentElement.lang=l;
   document.getElementById('bEn').classList.toggle('on',l==='en');document.getElementById('bJa').classList.toggle('on',l==='ja');
-  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();RL=l;raceButtons();if(window.RACE&&RACE.run)raceStart(false);if(window.STEP&&STEP.run)stepStart(false);}
+  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();RL=l;raceButtons();if(window.RACE&&RACE.run)raceStart(false);if(window.STEP&&STEP.run)stepStart(false);if(window.DESK&&DESK.run)deskStart(false);calcUpdate&&calcUpdate();}
 function pad2(n){return(n<10?'0':'')+n;}
 function ymd(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
 var WD_EN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],WD_JA=['日','月','火','水','木','金','土'];
@@ -399,6 +475,72 @@ function stepStart(manual){
     var go=function(){if(!started){started=true;stepStart(false);}};
     if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)go();});},{threshold:.35}).observe(el);}else go();});
 })();
+
+var DESK={run:0,tid:[]};
+function deskDate(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return{iso:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),jp:d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+'日月火水木金土'[d.getDay()]+'）'};}
+function deskData(){var D=deskDate();return L==='ja'?{
+  steps:[
+   {w:0,pre:'山田様\n\nお世話になっております。\n資料をお送りします。\n\n',trig:'.sig',out:'━━━━━━━━━━\nMeridi Brand　メリディ太郎\nmeridisupport@gmail.com\n━━━━━━━━━━',cap:'✉️ メールで <b>.sig</b> → 署名'},
+   {w:1,pre:'',trig:';report',out:'【日報】'+D.jp+'\n■ 本日の実績：\n■ 課題：\n■ 明日の予定：',cap:'💬 チャットで <b>;report</b> → 日報のひな形'},
+   {w:2,trig:'.today',out:D.iso,cap:'📊 表計算のマスで <b>.today</b> → 今日の日付'},
+   {w:3,pre:'メモ\n',trig:'.kyou',out:D.jp,cap:'📝 メモ帳で <b>.kyou</b> → 日本語の日付'}],
+  head:['','日付','内容'],row:'見積書の送付',fin:'同じトリガーが、<b>どのアプリでも</b>。'
+}:{
+  steps:[
+   {w:0,pre:'Hi Sam,\n\nPlease find the files attached.\n\n',trig:'.sig',out:'Best regards,\nTaro Meridi — Meridi Brand\nmeridisupport@gmail.com',cap:'✉️ In mail: <b>.sig</b> → your signature'},
+   {w:1,pre:'',trig:';report',out:'Daily report — '+D.iso+'\n• Done today:\n• Blockers:\n• Tomorrow:',cap:'💬 In chat: <b>;report</b> → a report template'},
+   {w:2,trig:'.today',out:D.iso,cap:'📊 In a spreadsheet cell: <b>.today</b> → today\'s date'},
+   {w:3,pre:'Notes\n',trig:'.now',out:D.iso+' '+(function(){var d=new Date(),p=function(n){return(n<10?'0':'')+n;};return p(d.getHours())+':'+p(d.getMinutes());})(),cap:'📝 In Notepad: <b>.now</b> → date & time'}],
+  head:['','Date','Task'],row:'Send the quote',fin:'Same triggers, <b>every app</b>.'
+};}
+function deskClear(){DESK.tid.forEach(clearTimeout);DESK.tid=[];}
+function deskStart(manual){
+  deskClear();var run=++DESK.run,D=deskData(),$=function(i){return document.getElementById(i);};
+  var t=0,at=function(d,f){t+=d;var tt=t;DESK.tid.push(setTimeout(function(){if(run===DESK.run)f();},tt));};
+  var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');},cur='<span class="cur"></span>';
+  var tasks=$('dtask').querySelectorAll('span'),cap=$('dCap');
+  var grid=function(cell){var h=D.head,g='<div class="h"></div><div class="h">A</div><div class="h">B</div>';
+    g+='<div class="h">1</div><div>'+h[1]+'</div><div>'+h[2]+'</div>';
+    g+='<div class="h">2</div><div class="sel">'+cell+'</div><div>'+esc(D.row)+'</div>';
+    g+='<div class="h">3</div><div></div><div></div>';return g;};
+  $('db0').innerHTML='';$('db1').innerHTML='';$('db3').innerHTML='';$('db2').innerHTML=grid('');cap.innerHTML='';
+  var front=function(w){for(var k=0;k<4;k++){$('dw'+k).classList.toggle('front',k===w);tasks[k].classList.toggle('on',k===w);}};
+  front(-1);
+  D.steps.forEach(function(s){
+    var body=s.w===2?null:$('db'+s.w),pre=s.pre||'';
+    at(700,function(){front(s.w);cap.innerHTML=s.cap;if(body)body.innerHTML=esc(pre)+cur;else $('db2').innerHTML=grid(cur);});
+    for(let k=1;k<=s.trig.length;k++){let p=s.trig.slice(0,k);at(k===1?500:120,function(){var x='<span class="hl">'+esc(p)+'</span>'+cur;if(body)body.innerHTML=esc(pre)+x;else $('db2').innerHTML=grid(x);});}
+    at(260,function(){if(body)body.innerHTML=esc(pre+s.out)+cur;else $('db2').innerHTML=grid(esc(s.out));});
+    at(1500,function(){});
+  });
+  at(300,function(){front(-1);cap.innerHTML=D.fin;});
+  if(!manual)at(6000,function(){deskStart(false);});
+}
+(function(){var started=false;
+  document.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('desk');
+    var go=function(){if(!started){started=true;deskStart(false);}};
+    if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)go();});},{threshold:.35}).observe(el);}else go();});
+})();
+
+var CALC={c:150};
+function calcRound(x,step){return Math.max(step,Math.round(x/step)*step);}
+function calcUpdate(){
+  var $=function(i){return document.getElementById(i);};if(!$('calc'))return;
+  var n=+$('cRange').value,c=CALC.c;$('cN').textContent=n;
+  var trig=2/60; // about 2 seconds to type a trigger
+  var lo=Math.max(0,c/300-trig)*n, hi=Math.max(0,c/150-trig)*n; // minutes per day
+  var ds=hi<10?1:5, dLo=calcRound(lo,ds), dHi=Math.max(dLo,calcRound(hi,ds));
+  var yLo=lo*240/60, yHi=hi*240/60, ys=yHi<10?1:(yHi<100?5:10), yl=calcRound(yLo,ys), yh=Math.max(yl,calcRound(yHi,ys));
+  var J=L==='ja',rng=function(a,b){return a===b?String(a):a+'〜'+b;};
+  $('cDay').textContent=hi<1?(J?'1分未満':'under 1 min'):(J?('約 '+rng(dLo,dHi)+' 分'):('about '+rng(dLo,dHi).replace('〜','–')+' min'));
+  $('cYear').textContent=yHi<1?(J?'1時間未満':'under 1 hour'):(J?('約 '+rng(yl,yh)+' 時間'):('about '+rng(yl,yh).replace('〜','–')+' hours'));
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var r=document.getElementById('cRange');if(!r)return;
+  r.addEventListener('input',calcUpdate);
+  document.querySelectorAll('#cSeg button').forEach(function(b){b.onclick=function(){CALC.c=+b.dataset.c;document.querySelectorAll('#cSeg button').forEach(function(x){x.classList.toggle('on',x===b);});calcUpdate();};});
+  calcUpdate();
+});
 </script>
 <script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
