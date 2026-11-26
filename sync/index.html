@@ -57,6 +57,31 @@ footer a{color:#8aa}
 [data-l="ja"]{display:none}
 body.ja [data-l="en"]{display:none}
 body.ja [data-l="ja"]{display:revert}
+
+.race{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+@media (max-width:640px){.race{grid-template-columns:1fr}}
+.lane{background:#05050f;border:1px solid #2a3a4a;border-radius:10px;padding:12px;position:relative;overflow:hidden}
+.lane.sync{border-color:#39ff14;box-shadow:0 0 22px rgba(57,255,20,.15)}
+.lane h3{font-size:.95em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.lane.hand h3{color:#b8c8d8}.lane.sync h3{color:#39ff14}
+.lane .scr{background:#000;border:1px solid #1a2a3a;border-radius:6px;min-height:150px;padding:10px;font-family:Consolas,"Courier New",monospace;font-size:.9em;color:#e8ffe8;white-space:pre-wrap;word-break:break-word;line-height:1.55}
+.lane .cur{display:inline-block;width:7px;height:1em;background:#39ff14;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.lane .meter{display:flex;justify-content:space-between;margin-top:8px;font-size:.85em;color:#9aa8b8}
+.lane .meter b{color:#fff;font-variant-numeric:tabular-nums}
+.lane.sync .meter b{color:#39ff14}
+.lane .done{position:absolute;top:10px;right:12px;background:#39ff14;color:#0a0a1e;font-weight:bold;font-size:.8em;padding:2px 10px;border-radius:12px;opacity:0;transform:scale(.6);transition:opacity .35s,transform .35s cubic-bezier(.2,1.6,.4,1)}
+.lane .done.on{opacity:1;transform:scale(1)}
+.lane .flashbg{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(57,255,20,.25),transparent 60%);opacity:0;pointer-events:none;transition:opacity .6s}
+.lane .flashbg.on{opacity:1;transition:opacity .05s}
+.raceLangs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 10px}
+.raceLangs button{background:#111;border:1px solid #2a4a2a;color:#b8e8b8;padding:3px 12px;border-radius:14px;cursor:pointer;font-size:.88em;transition:background .2s,color .2s}
+.raceLangs button.on{background:#39ff14;color:#0a0a1e;border-color:#39ff14;font-weight:bold}
+.raceSum{text-align:center;margin-top:12px;font-size:1.05em;color:#fff;min-height:1.6em;opacity:0;transition:opacity .5s}
+.raceSum.on{opacity:1}
+.raceSum b{color:#39ff14}
+.raceCtl{text-align:center;margin-top:8px}
+.raceCtl button{background:#111;border:1px solid #39ff14;color:#39ff14;padding:4px 14px;border-radius:14px;cursor:pointer;font-size:.85em}
 </style>
 </head>
 <body>
@@ -80,6 +105,23 @@ body.ja [data-l="ja"]{display:revert}
     <span>🪟 Windows 10 / 11</span>
   </div>
 </section>
+
+
+<h2 data-l="en">🏁 Typing by hand vs MeridiSync</h2><h2 data-l="ja">🏁 手で打つ vs MeridiSync</h2>
+<div class="raceLangs" id="raceLangs"></div>
+<div class="race" id="race">
+  <div class="lane hand"><h3><span data-l="en">⌨️ By hand</span><span data-l="ja">⌨️ 手で打つ</span></h3>
+    <div class="scr" id="rHand"></div>
+    <div class="meter"><span><span data-l="en">Keys</span><span data-l="ja">打った数</span> <b id="rHandK">0</b></span><span>⏱ <b id="rHandT">0.0</b>s</span></div>
+  </div>
+  <div class="lane sync"><div class="flashbg" id="rFlash"></div><span class="done" id="rDone">✔ DONE</span>
+    <h3><span>💻 MeridiSync</span><code style="font-size:.85em">.ty</code></h3>
+    <div class="scr" id="rSync"></div>
+    <div class="meter"><span><span data-l="en">Keys</span><span data-l="ja">打った数</span> <b id="rSyncK">0</b></span><span>⏱ <b id="rSyncT">0.0</b>s</span></div>
+  </div>
+</div>
+<div class="raceSum" id="rSum"></div>
+<div class="raceCtl"><button onclick="raceStart(true)">↻ <span data-l="en">Watch again</span><span data-l="ja">もう一度</span></button></div>
 
 <h2 data-l="en">▶ Try it here</h2><h2 data-l="ja">▶ ここで試す</h2>
 <div class="demo">
@@ -188,7 +230,7 @@ body.ja [data-l="ja"]{display:revert}
 var L='en';
 function setL(l){L=l;document.body.classList.toggle('ja',l==='ja');document.documentElement.lang=l;
   document.getElementById('bEn').classList.toggle('on',l==='en');document.getElementById('bJa').classList.toggle('on',l==='ja');
-  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();}
+  try{localStorage.setItem('msync_lang',l);}catch(e){}buildTrig();RL=l;raceButtons();if(window.RACE&&RACE.run)raceStart(false);}
 function pad2(n){return(n<10?'0':'')+n;}
 function ymd(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
 var WD_EN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],WD_JA=['日','月','火','水','木','金','土'];
@@ -211,6 +253,64 @@ document.addEventListener('DOMContentLoaded',function(){
   var l='en';try{l=localStorage.getItem('msync_lang')||((navigator.language||'').indexOf('ja')===0?'ja':'en');}catch(e){}
   setL(l);var p=document.getElementById('pad');p.addEventListener('input',function(){check(p);});
 });
+
+var RACE={run:0,tid:[]};
+// keys per character when typing by hand (kept on the low side): IME languages need extra keys
+var RACE_LANGS=[
+ {k:'en',n:'English',pk:1,t:'Hi! Thanks so much for reaching out.\nI\'ve received your message and will get back to you later today.\nHave a great day!'},
+ {k:'ja',n:'日本語',pk:1.6,t:'お問い合わせいただき、ありがとうございます。\n内容を確認のうえ、本日中にご連絡いたします。\n今後ともよろしくお願いいたします。'},
+ {k:'ko',n:'한국어',pk:2.3,t:'문의해 주셔서 감사합니다.\n내용을 확인한 후 오늘 중으로 연락드리겠습니다.\n좋은 하루 보내세요!'},
+ {k:'zh',n:'中文',pk:3,t:'感谢您的来信。\n我们确认内容后，今天之内会回复您。\n祝您生活愉快！'},
+ {k:'es',n:'Español',pk:1.05,t:'¡Hola! Muchas gracias por escribirnos.\nHe recibido tu mensaje y te responderé hoy mismo.\n¡Que tengas un buen día!'},
+ {k:'ar',n:'العربية',pk:1,rtl:true,t:'مرحباً! شكراً جزيلاً على تواصلك معنا.\nلقد استلمنا رسالتك وسنرد عليك اليوم.\nنتمنى لك يوماً سعيداً!'},
+ {k:'th',n:'ไทย',pk:1,t:'สวัสดีครับ ขอบคุณที่ติดต่อเรามานะครับ\nได้รับข้อความแล้ว จะติดต่อกลับภายในวันนี้ครับ\nขอให้เป็นวันที่ดีครับ'}
+];
+var RL='en';
+function raceLang(){for(var i=0;i<RACE_LANGS.length;i++)if(RACE_LANGS[i].k===RL)return RACE_LANGS[i];return RACE_LANGS[0];}
+function raceText(){return raceLang().t;}
+function raceButtons(){var b=document.getElementById('raceLangs');if(!b)return;b.innerHTML='';
+  RACE_LANGS.forEach(function(x){var e=document.createElement('button');e.textContent=x.n;e.lang=x.k;if(x.k===RL)e.className='on';
+    e.onclick=function(){RL=x.k;raceButtons();raceStart(true);};b.appendChild(e);});}
+function raceClear(){RACE.tid.forEach(clearTimeout);RACE.tid=[];}
+function raceAt(ms,f){RACE.tid.push(setTimeout(f,ms));}
+function raceStart(manual){
+  raceClear();var run=++RACE.run,txt=raceText(),$=function(i){return document.getElementById(i);};
+  var hand=$('rHand'),sync=$('rSync'),cur='<span class="cur"></span>';
+  hand.innerHTML=cur;sync.innerHTML=cur;$('rHandK').textContent=0;$('rSyncK').textContent=0;$('rHandT').textContent='0.0';$('rSyncT').textContent='0.0';
+  $('rDone').classList.remove('on');$('rSum').classList.remove('on');
+  var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+  var t0=performance.now(),syncDone=0,handDone=0;
+  // hand: ~ 9 keys/sec with small pauses; Japanese needs conversion keystrokes (~1.6 keys per char)
+  var LG=raceLang(),perKey=LG.pk,keys=0,ms=0;
+  hand.dir=sync.dir=LG.rtl?'rtl':'ltr';
+  for(let i=1;i<=txt.length;i++){
+    var ch=txt[i-1];ms+=(ch==='\n'?420:(/[、。，,.!！]/.test(ch)?260:perKey*(80+Math.random()*45)));
+    keys+=perKey;let k=Math.round(keys),s=txt.slice(0,i);
+    raceAt(ms,function(){if(run!==RACE.run)return;hand.innerHTML=esc(s)+cur;$('rHandK').textContent=k;});
+  }
+  var handEnd=ms;
+  // sync: type ".ty" then instant expansion
+  var trig='.ty';
+  for(let i=1;i<=3;i++){let s=trig.slice(0,i);raceAt(140*i,function(){if(run!==RACE.run)return;sync.innerHTML=esc(s)+cur;$('rSyncK').textContent=i;});}
+  raceAt(560,function(){if(run!==RACE.run)return;sync.innerHTML=esc(txt)+cur;syncDone=performance.now()-t0;$('rSyncT').textContent=(syncDone/1000).toFixed(1);
+    $('rFlash').classList.add('on');setTimeout(function(){$('rFlash').classList.remove('on');},90);$('rDone').classList.add('on');});
+  // clocks
+  var tick=function(){if(run!==RACE.run)return;var t=performance.now()-t0;$('rHandT').textContent=(Math.min(t,handEnd)/1000).toFixed(1);if(t<handEnd)requestAnimationFrame(tick);};requestAnimationFrame(tick);
+  raceAt(handEnd+300,function(){if(run!==RACE.run)return;
+    var hk=Math.round(keys),saved=(handEnd-560)/1000;
+    $('rSum').innerHTML=L==='ja'?('⌨️ <b>'+hk+'</b> 回 → 💻 <b>3</b> 回。<b>'+saved.toFixed(1)+'</b> 秒の短縮。どの言語でも、右から読む文字でも。'):('⌨️ <b>'+hk+'</b> keys → 💻 <b>3</b> keys. <b>'+saved.toFixed(1)+' s</b> saved — in any language, even right-to-left.');
+    $('rSum').classList.add('on');
+    if(!manual)raceAt(6000,function(){if(run===RACE.run)raceStart(false);});
+  });
+}
+(function(){
+  var started=false,el=null;
+  function go(){if(started)return;started=true;raceStart(false);}
+  document.addEventListener('DOMContentLoaded',function(){
+    el=document.getElementById('race');
+    if('IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)go();});},{threshold:.35}).observe(el);}else go();
+  });
+})();
 </script>
 <script data-goatcounter="https://meridibrand.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
