@@ -1,0 +1,2721 @@
+# ============================================================
+# 🐾 MeridiSync v1.0.2 — Text Expansion Companion
+# ============================================================
+# Installation:
+# pip install pyperclip pynput pystray Pillow openpyxl
+# Run:
+# python "MeridiSync.py"
+# ============================================================
+
+import time
+import json
+import os
+import threading
+import sys
+import pyperclip
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog, filedialog
+from pynput.keyboard import Key, Listener, Controller
+
+# 画面の拡大（125%・150% など）でも文字がぼやけないように（v1.0.2）
+if sys.platform == "win32":
+    try:
+        import ctypes
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        except Exception:
+            ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+# 貼り付けのタイミング（秒）— v1.0.2
+PASTE_WAIT_BEFORE = 0.06    # トリガーを消してから貼るまで
+CLIPBOARD_RESTORE_WAIT = 0.35  # 貼ってから元のクリップボードに戻すまで（遅いアプリ向けに長め）
+
+# システムトレイ
+try:
+    TRAY_AVAILABLE = True
+    import pystray
+    from PIL import Image, ImageDraw, ImageTk
+except ImportError:
+    TRAY_AVAILABLE = False
+
+# ============================================================
+# ファイルパス & 定数
+# ============================================================
+
+VERSION = "1.0.2"
+# 保存場所：exe（または .py）と同じフォルダ（v1.0.1）
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SNIPPETS_FILE = os.path.join(BASE_DIR, "snippets_v3.json")
+STATS_FILE = os.path.join(BASE_DIR, "MeridiSync_stats.json")
+CONFIG_FILE = os.path.join(BASE_DIR, "MeridiSync_config.json")
+
+# ============================================================
+# 言語辞書（JP/EN）
+# ============================================================
+
+LANG_JP = {
+    "status_listening": "⚡ リスニング中",
+    "status_stopped": "⏸ 停止中",
+    "btn_stop": "停止",
+    "btn_start": "開始",
+    "btn_add": "追加",
+    "btn_edit": "編集",
+    "btn_delete": "削除",
+    "btn_search": "検索",
+    "btn_stats": "統計",
+    "btn_cat_manage": "カテゴリ管理",
+    "btn_theme_light": "ライトモード",
+    "btn_theme_dark": "ダークモード",
+    "btn_import": "📥 Import",
+    "btn_export": "📤 Export",
+    "btn_usage_hide": "回数非表示",
+    "btn_usage_show": "回数表示",
+    "cat_label": "📂 カテゴリ",
+    "cat_all": "すべて",
+    "cat_uncategorized": "未分類",
+    "col_trigger": "トリガー",
+    "col_category": "カテゴリ",
+    "col_text": "展開テキスト",
+    "col_count": "使用回数",
+    "dialog_add_title": "スニペット追加",
+    "dialog_edit_title": "スニペット編集",
+    "dialog_trigger": "トリガー:",
+    "dialog_category": "カテゴリ:",
+    "dialog_text": "展開テキスト:",
+    "dialog_save": "保存",
+    "dialog_cancel": "キャンセル",
+    "dialog_hint": "💡 動的変数: {date} {datetime} {time} {weekday} {date_jp}",
+    "msg_no_selection": "選択なし",
+    "msg_select_edit": "編集するスニペットを選択してください。",
+    "msg_select_delete": "削除するスニペットを選択してください。",
+    "msg_confirm": "確認",
+    "msg_delete_confirm": "「{trigger}」を削除しますか？",
+    "msg_search_title": "検索",
+    "msg_search_prompt": "検索キーワード:",
+    "msg_reset_single": "「{trigger}」の使用回数をリセットしますか？",
+    "msg_reset_all": "全スニペットの使用回数をリセットしますか？\nこの操作は元に戻せません。",
+    "msg_export_done": "エクスポートしました！\n{filepath}\n\n{count} 件のスニペット",
+    "msg_import_done": "インポート完了！\n新規追加: {new} 件\n重複: {dup} 件",
+    "msg_no_import_data": "インポートできるデータが見つかりませんでした。",
+    "msg_error": "エラー",
+    "msg_done": "完了",
+    "msg_warning": "注意",
+    "ctx_edit": "編集",
+    "ctx_delete": "削除",
+    "ctx_reset_single": "使用回数リセット（この項目）",
+    "ctx_reset_all": "使用回数リセット（全体）",
+    "stats_title": "📊 MeridiSync 統計",
+    "stats_total": "総展開回数:",
+    "stats_registered": "登録スニペット数:",
+    "stats_used": "使用済みスニペット:",
+    "stats_unused": "未使用スニペット:",
+    "stats_top10": "🏆 よく使う TOP 10:",
+    "stats_no_data": "（まだ使用データがありません）",
+    "stats_by_category": "📂 カテゴリ別:",
+    "stats_hint": "💡 ヒント:",
+    "stats_hint1": "• 右クリック → 個別リセット",
+    "stats_hint2": "• 右クリック → 全体リセット",
+    "stats_reset_all": "全体リセット",
+    "stats_close": "閉じる",
+    "cat_manage_title": "カテゴリ管理",
+    "cat_add_prompt": "新しいカテゴリ名:",
+    "cat_cannot_delete": "このカテゴリは削除できません。",
+    "cat_delete_confirm": "「{name}」を削除しますか？\n所属スニペットは「未分類」に移動します。",
+    "cat_add_jp_label": "日本語名 (JP):",
+    "cat_add_en_label": "英語名 (EN):",
+    "cat_btn_add": "追加",
+    "cat_btn_edit": "編集",
+    "cat_cannot_edit": "このカテゴリは編集できません。",
+    "cat_btn_delete": "削除",
+    "cat_btn_close": "閉じる",    
+    "reset_title": "初期化",
+    "reset_header": "⚠️ リセット設定",
+    "reset_desc": "リセットする項目を選択してください：",
+    "reset_snippets": "スニペット（全登録データ: {count}件）",
+    "reset_stats": "使用回数統計",
+    "reset_categories": "カテゴリ設定（カスタムカテゴリ）",
+    "reset_config": "アプリ設定（テーマ・言語など）",
+    "reset_quick_label": "⚡ クイックリセット:",
+    "reset_btn_all": "全リセット",
+    "reset_btn_snippets": "スニペットのみ",
+    "reset_btn_stats": "統計のみ",
+    "reset_btn_cancel": "キャンセル",
+    "reset_btn_execute": "リセット実行",
+    "reset_none_selected": "リセットする項目を1つ以上選択してください。",
+    "reset_confirm_title": "⚠️ 最終確認",
+    "reset_confirm_msg": """以下の項目をリセットします：
+{items}
+
+⚠️ この操作は取り消せません！
+
+本当にリセットしますか？""",
+    "reset_confirm_snippets": "  • スニペット（{count}件削除されます）",
+    "reset_confirm_stats": "  • 使用回数統計",
+    "reset_confirm_categories": "  • カテゴリ設定",
+    "reset_confirm_config": "  • アプリ設定（テーマ・言語）",
+    "reset_complete": "リセットが完了しました。",
+    "reset_btn_label": "🔄 初期化",
+
+    "input_error": "入力エラー",
+    "input_trigger_required": "トリガーを入力してください。",
+    "input_text_required": "展開テキストを入力してください。",
+    "input_trigger_duplicate": "このトリガーは既に使用されています。別のトリガーを入力してください。",
+    "import_dup_msg": "新規: {new} 件\n重複: {dup} 件\n\n重複分の処理を選択してください:\n• はい → 上書き\n• いいえ → スキップ",
+    "import_dup_title": "重複あり",
+    "cat_favorites": "お気に入り",
+    "ctx_pin": "⭐ ピン留め",
+    "ctx_unpin": "📌 ピン留め解除",
+    "cat_map": {
+        "すべて": "すべて",
+        "日付・時刻": "日付・時刻",
+        "挨拶・定型文": "挨拶・定型文",
+        "業務用語": "業務用語",
+        "自由形式": "自由形式",
+        "未分類": "未分類",
+    },
+}
+
+LANG_EN = {
+    "status_listening": "⚡ Listening",
+    "status_stopped": "⏸ Stopped",
+    "btn_stop": "Stop",
+    "btn_start": "Start",
+    "btn_add": "Add",
+    "btn_edit": "Edit",
+    "btn_delete": "Delete",
+    "btn_search": "Search",
+    "btn_stats": "Stats",
+    "btn_cat_manage": "Categories",
+    "btn_theme_light": "Light Mode",
+    "btn_theme_dark": "Dark Mode",
+    "btn_import": "📥 Import",
+    "btn_export": "📤 Export",
+    "btn_usage_hide": "Hide Count",
+    "btn_usage_show": "Show Count",
+    "cat_label": "📂 Categories",
+    "cat_all": "All",
+    "cat_uncategorized": "Uncategorized",
+    "col_trigger": "Trigger",
+    "col_category": "Category",
+    "col_text": "Expansion Text",
+    "col_count": "Usage Count",
+    "dialog_add_title": "Add Snippet",
+    "dialog_edit_title": "Edit Snippet",
+    "dialog_trigger": "Trigger:",
+    "dialog_category": "Category:",
+    "dialog_text": "Expansion Text:",
+    "dialog_save": "Save",
+    "dialog_cancel": "Cancel",
+    "dialog_hint": "💡 Variables: {date} {datetime} {time} {weekday} {date_jp}",
+    "msg_no_selection": "No Selection",
+    "msg_select_edit": "Please select a snippet to edit.",
+    "msg_select_delete": "Please select a snippet to delete.",
+    "msg_confirm": "Confirm",
+    "msg_delete_confirm": "Delete '{trigger}'?",
+    "msg_search_title": "Search",
+    "msg_search_prompt": "Search keyword:",
+    "msg_reset_single": "Reset usage count for '{trigger}'?",
+    "msg_reset_all": "Reset usage count for ALL snippets?\nThis cannot be undone.",
+    "msg_export_done": "Export complete!\n{filepath}\n\n{count} snippets",
+    "msg_import_done": "Import complete!\nNew: {new}\nDuplicate: {dup}",
+    "msg_no_import_data": "No importable data found.",
+    "msg_error": "Error",
+    "msg_done": "Done",
+    "msg_warning": "Warning",
+    "ctx_edit": "Edit",
+    "ctx_delete": "Delete",
+    "ctx_reset_single": "Reset Usage (this item)",
+    "ctx_reset_all": "Reset Usage (all)",
+    "stats_title": "📊 MeridiSync Statistics",
+    "stats_total": "Total Expansions:",
+    "stats_registered": "Registered Snippets:",
+    "stats_used": "Used Snippets:",
+    "stats_unused": "Unused Snippets:",
+    "stats_top10": "🏆 Top 10 Most Used:",
+    "stats_no_data": "(No usage data yet)",
+    "stats_by_category": "📂 By Category:",
+    "stats_hint": "💡 Hints:",
+    "stats_hint1": "• Right-click → Reset individual",
+    "stats_hint2": "• Right-click → Reset all",
+    "stats_reset_all": "Reset All",
+    "reset_title": "Reset",
+    "reset_header": "⚠️ Reset Settings",
+    "reset_desc": "Select items to reset:",
+    "reset_snippets": "Snippets (All data: {count} items)",
+    "reset_stats": "Usage Statistics",
+    "reset_categories": "Category Settings (Custom Categories)",
+    "reset_config": "App Settings (Theme, Language, etc.)",
+    "reset_quick_label": "⚡ Quick Reset:",
+    "reset_btn_all": "Reset All",
+    "reset_btn_snippets": "Snippets Only",
+    "reset_btn_stats": "Statistics Only",
+    "reset_btn_cancel": "Cancel",
+    "reset_btn_execute": "Execute Reset",
+    "reset_none_selected": "Please select at least one item to reset.",
+    "reset_confirm_title": "⚠️ Final Confirmation",
+    "reset_confirm_msg": """The following items will be reset:
+{items}
+
+⚠️ This action cannot be undone!
+
+Are you sure?""",
+    "reset_confirm_snippets": "  • Snippets ({count} items will be deleted)",
+    "reset_confirm_stats": "  • Usage Statistics",
+    "reset_confirm_categories": "  • Category Settings",
+    "reset_confirm_config": "  • App Settings (Theme, Language)",
+    "reset_complete": "Reset complete.",
+    "reset_btn_label": "🔄 Reset",
+    "stats_close": "Close",
+    "cat_manage_title": "Category Management",
+    "cat_add_prompt": "New category name:",
+    "cat_cannot_delete": "This category cannot be deleted.",
+    "cat_delete_confirm": "Delete '{name}'?\nSnippets will be moved to 'Uncategorized'.",
+    "cat_add_jp_label": "Japanese (JP):",
+    "cat_add_en_label": "English (EN):",
+    "cat_btn_add": "Add",
+    "cat_btn_edit": "Edit",
+    "cat_cannot_edit": "This category cannot be edited.",
+    "cat_btn_delete": "Delete",
+    "cat_btn_close": "Close",
+    "input_error": "Input Error",
+    "input_trigger_required": "Please enter a trigger.",
+    "input_text_required": "Please enter expansion text.",
+    "input_trigger_duplicate": "This trigger is already in use. Please enter a different trigger.",
+    "import_dup_msg": "New: {new}\nDuplicate: {dup}\n\nHow to handle duplicates:\n• Yes → Overwrite\n• No → Skip",
+    "import_dup_title": "Duplicates Found",
+    "cat_favorites": "Favorites",
+    "ctx_pin": "⭐ Pin",
+    "ctx_unpin": "📌 Unpin",
+    "cat_map": {
+        "すべて": "All",
+        "日付・時刻": "Date/Time",
+        "挨拶・定型文": "Greetings/Templates",
+        "業務用語": "Business Terms",
+        "自由形式": "Free Form",
+        "未分類": "Uncategorized",
+
+    },
+}
+
+# ============================================================
+# テーマカラー
+# ============================================================
+
+DARK_THEME = {
+    "bg": "#1e1e1e",
+    "fg": "#e0e0e0",
+    "accent": "#00c853",
+    "accent_dim": "#388e3c",
+    "panel_bg": "#252525",
+    "entry_bg": "#2d2d2d",
+    "entry_fg": "#e0e0e0",
+    "button_bg": "#333333",
+    "button_fg": "#e0e0e0",
+    "button_active": "#444444",
+    "tree_bg": "#1e1e1e",
+    "tree_fg": "#e0e0e0",
+    "tree_selected": "#2e7d32",
+    "header_bg": "#2d2d2d",
+    "border": "#3a3a3a",
+    "logo_fg": "#00c853",
+    "cat_dot": "#FF8C00",
+}
+
+LIGHT_THEME = {
+    "bg": "#f5f5f5",
+    "fg": "#212121",
+    "accent": "#2e7d32",
+    "accent_dim": "#81c784",
+    "panel_bg": "#eef2ef",
+    "entry_bg": "#ffffff",
+    "entry_fg": "#212121",
+    "button_bg": "#e0e0e0",
+    "button_fg": "#212121",
+    "button_active": "#bdbdbd",
+    "tree_bg": "#f8faf8",
+    "tree_fg": "#212121",
+    "tree_selected": "#a5d6a7",
+    "header_bg": "#e0e8e0",
+    "border": "#b8c8b8",
+    "logo_fg": "#2e7d32",
+    "cat_dot": "#FF8C00"
+}
+
+# ============================================================
+# デフォルトスニペット
+# ============================================================
+
+DEFAULT_SNIPPETS = [
+    {"trigger": ".today", "text": "{date}", "category": "日付・時刻"},
+    {"trigger": ".now", "text": "{datetime}", "category": "日付・時刻"},
+    {"trigger": ".week", "text": "{weekday}", "category": "日付・時刻"},
+    {"trigger": ".kyou", "text": "{date_jp}", "category": "日付・時刻"},
+]
+
+# ============================================================
+# カテゴリ定義
+# ============================================================
+
+DEFAULT_CATEGORIES = [
+    "すべて",
+    "日付・時刻",
+    "挨拶・定型文",
+    "業務用語",
+    "自由形式",
+    "未分類",
+]
+
+# ============================================================
+# MeridiSync メインクラス
+# ============================================================
+
+class MeridiSyncApp:
+    def __init__(self):
+        self.snippets = []
+        self.stats = {}
+        self.config = {"dark_mode": True, "show_usage_count": True, "language": "JP"}
+        self.categories = DEFAULT_CATEGORIES[:]
+        self.listening = False
+        self.current_input = ""
+        self.injecting = False   # Sync がキーを送っている間（v1.0.2）
+        self.keyboard_controller = Controller()
+        self.listener = None
+        self.tray_icon = None
+        self.theme = DARK_THEME
+
+        # ウィジェット参照リスト（テーマ切替用）
+        self.themed_widgets = []
+
+        # ファイル読み込み
+        self.load_snippets()
+        self.load_stats()
+        self.load_config()
+
+        # テーマ設定
+        self.theme = DARK_THEME if self.config.get("dark_mode", True) else LIGHT_THEME
+
+        # 言語設定
+        self.lang = LANG_JP if self.config.get("language", "JP") == "JP" else LANG_EN
+
+        # GUI
+        self.build_gui()
+
+    # ========================================================
+    # ファイル I/O
+    # ========================================================
+
+    def load_snippets(self):
+        if os.path.exists(SNIPPETS_FILE):
+            try:
+                with open(SNIPPETS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                self.snippets = data.get("snippets", [])
+                self.categories = data.get("categories", DEFAULT_CATEGORIES[:])
+                self.custom_cat_map = data.get("custom_cat_map", {})
+            except Exception:
+                self.snippets = DEFAULT_SNIPPETS[:]
+                self.categories = DEFAULT_CATEGORIES[:]
+                self.custom_cat_map = {}
+        else:
+            self.snippets = DEFAULT_SNIPPETS[:]
+            self.categories = DEFAULT_CATEGORIES[:]
+            self.custom_cat_map = {}
+
+        # カスタムcat_mapをLANG辞書に反映
+        for jp_name, en_name in self.custom_cat_map.items():
+            LANG_JP["cat_map"][jp_name] = jp_name
+            LANG_EN["cat_map"][jp_name] = en_name
+
+    def save_snippets(self):
+        data = {
+            "snippets": self.snippets,
+            "categories": self.categories,
+            "custom_cat_map": self.custom_cat_map,
+        }
+        with open(SNIPPETS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    def load_stats(self):
+        if os.path.exists(STATS_FILE):
+            try:
+                with open(STATS_FILE, "r", encoding="utf-8") as f:
+                    self.stats = json.load(f)
+            except Exception:
+                self.stats = {}
+        else:
+            self.stats = {}
+
+    def save_stats(self):
+        with open(STATS_FILE, "w", encoding="utf-8") as f:
+            json.dump(self.stats, f, ensure_ascii=False, indent=2)
+
+    def load_config(self):
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                    self.config = json.load(f)
+            except Exception:
+                pass
+
+    def save_config(self):
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(self.config, f, ensure_ascii=False, indent=2)
+
+
+
+    # ========================================================
+    # 動的変数の展開
+    # ========================================================
+
+    def _safe_paste(self):
+        try:
+            return pyperclip.paste() or ""
+        except Exception:
+            return ""
+
+    def expand_variables(self, text):
+        from datetime import datetime, timedelta
+        import re
+        now = datetime.now()
+        weekdays_jp = ["月", "火", "水", "木", "金", "土", "日"]
+
+        replacements = {
+            "{date}": now.strftime("%Y-%m-%d"),
+            "{datetime}": now.strftime("%Y-%m-%d %H:%M"),
+            "{time}": now.strftime("%H:%M"),
+            "{weekday}": now.strftime("%A"),
+            "{weekday_jp}": weekdays_jp[now.weekday()],
+            "{date_jp}": f"{now.year}年{now.month:02d}月{now.day:02d}日（{weekdays_jp[now.weekday()]}）",
+            "{year}": str(now.year),
+            "{month}": f"{now.month:02d}",
+            "{day}": f"{now.day:02d}",
+            "{clipboard}": self._safe_paste(),
+        }
+
+        for key, value in replacements.items():
+            text = text.replace(key, value)
+
+        # {date_jp+N} / {date_jp-N}
+        for match in re.findall(r"\{date_jp([+-]\d+)\}", text):
+            days = int(match)
+            result_date = now + timedelta(days=days)
+            wd = weekdays_jp[result_date.weekday()]
+            text = text.replace(f"{{date_jp{match}}}",
+                                f"{result_date.year}年{result_date.month:02d}月{result_date.day:02d}日（{wd}）")
+
+        # {date+N} / {date-N}
+        for match in re.findall(r"\{date([+-]\d+)\}", text):
+            days = int(match)
+            result_date = now + timedelta(days=days)
+            text = text.replace(f"{{date{match}}}", result_date.strftime("%Y-%m-%d"))
+
+        # {weekday_jp+N} / {weekday_jp-N}
+        for match in re.findall(r"\{weekday_jp([+-]\d+)\}", text):
+            target_days = int(match)
+            step = 1 if target_days > 0 else -1
+            added = 0
+            curr_date = now
+            while abs(added) < abs(target_days):
+                curr_date += timedelta(days=step)
+                if curr_date.weekday() < 5:
+                    added += step
+            wd_jp = weekdays_jp[curr_date.weekday()]
+            text = text.replace(f"{{weekday_jp{match}}}",
+                                f"{curr_date.year}年{curr_date.month:02d}月{curr_date.day:02d}日（{wd_jp}）")
+
+        # {weekday+N} / {weekday-N}
+        for match in re.findall(r"\{weekday([+-]\d+)\}", text):
+            target_days = int(match)
+            step = 1 if target_days > 0 else -1
+            added = 0
+            curr_date = now
+            while abs(added) < abs(target_days):
+                curr_date += timedelta(days=step)
+                if curr_date.weekday() < 5:
+                    added += step
+            text = text.replace(f"{{weekday{match}}}", curr_date.strftime("%Y-%m-%d"))
+
+        # {if:条件}...{else}...{endif} 条件分岐
+        weekdays_en = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        current_weekday_jp = weekdays_jp[now.weekday()]
+        current_weekday_en = weekdays_en[now.weekday()]
+        current_hour = now.hour
+        current_month = now.month
+        current_day = now.day
+
+        if_else_pattern = r"\{if:([^{}]+?)\}((?:(?!\{if:|\{else\}|\{endif\}).)*?)\{else\}((?:(?!\{if:|\{else\}|\{endif\}).)*?)\{endif\}"
+        if_only_pattern = r"\{if:([^{}]+?)\}((?:(?!\{if:|\{else\}|\{endif\}).)*?)\{endif\}"
+
+
+        def evaluate_condition(condition):
+            """条件を評価してTrue/Falseを返す"""
+            condition = condition.strip()
+
+            if condition.startswith("weekday="):
+                val = condition[8:]
+                return val == current_weekday_jp or val == current_weekday_en
+
+            if condition.startswith("weekday!="):
+                val = condition[9:]
+                return val != current_weekday_jp and val != current_weekday_en
+
+            if condition.startswith("month="):
+                val = int(condition[6:])
+                return current_month == val
+
+            if condition.startswith("month!="):
+                val = int(condition[7:])
+                return current_month != val
+
+            if condition.startswith("day="):
+                val = int(condition[4:])
+                return current_day == val
+
+            if condition.startswith("time>="):
+                val = int(condition[6:])
+                return current_hour >= val
+
+            if condition.startswith("time>"):
+                val = int(condition[5:])
+                return current_hour > val
+
+            if condition.startswith("time<="):
+                val = int(condition[6:])
+                return current_hour <= val
+
+            if condition.startswith("time<"):
+                val = int(condition[5:])
+                return current_hour < val
+
+            return False
+
+        while re.search(if_else_pattern, text):
+            match = re.search(if_else_pattern, text)
+            condition = match.group(1)
+            true_text = match.group(2)
+            false_text = match.group(3)
+
+            if evaluate_condition(condition):
+                text = text[:match.start()] + true_text + text[match.end():]
+            else:
+                text = text[:match.start()] + false_text + text[match.end():]
+
+        while re.search(if_only_pattern, text):
+            match = re.search(if_only_pattern, text)
+            condition = match.group(1)
+            true_text = match.group(2)
+
+            if evaluate_condition(condition):
+                text = text[:match.start()] + true_text + text[match.end():]
+            else:
+                text = text[:match.start()] + text[match.end():]
+
+        # {input:ラベル} フォーム入力
+        input_matches = re.findall(r"\{input:(.+?)\}", text)
+        if input_matches:
+            input_values = {}
+            input_win = tk.Toplevel(self.root)
+            input_win.title("\U0001f4dd Input")
+            input_win.configure(bg=self.theme["bg"])
+            input_win.attributes("-topmost", True)
+
+            entries = {}
+            for idx, label in enumerate(input_matches):
+                if label in entries:
+                    continue
+                tk.Label(input_win, text=f"{label}:", bg=self.theme["bg"],
+                         fg=self.theme["fg"], font=("", 10)).grid(
+                    row=idx, column=0, padx=10, pady=5, sticky=tk.W)
+                entry = tk.Entry(input_win, width=30, bg=self.theme["entry_bg"],
+                                 fg=self.theme["entry_fg"], insertbackground=self.theme["fg"])
+                entry.grid(row=idx, column=1, padx=10, pady=5)
+                entries[label] = entry
+
+            if entries:
+                first_entry = list(entries.values())[0]
+                # Sync は裏で動いているので、窓を前に出してから最初の欄にカーソルを置く（v1.0.2）
+                self._focus_window(input_win, first_entry)
+
+            confirmed = [False]
+
+            def on_ok():
+                for lbl, ent in entries.items():
+                    input_values[lbl] = ent.get()
+                confirmed[0] = True
+                input_win.destroy()
+
+            def on_cancel():
+                input_win.destroy()
+
+            btn_frame = tk.Frame(input_win, bg=self.theme["bg"])
+            btn_frame.grid(row=len(entries), column=0, columnspan=2, pady=10)
+
+            tk.Button(btn_frame, text="OK", command=on_ok,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=12, pady=4).pack(side=tk.LEFT, padx=5)
+            tk.Button(btn_frame, text=self.lang["dialog_cancel"], command=on_cancel,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=12, pady=4).pack(side=tk.LEFT, padx=5)
+
+            input_win.bind("<Return>", lambda e: on_ok())
+
+            input_win.grab_set()
+            input_win.wait_window()
+
+            if confirmed[0]:
+                for lbl, val in input_values.items():
+                    text = text.replace(f"{{input:{lbl}}}", val)
+            else:
+                return None  # キャンセル（v1.0.1）
+
+        # {time+Nh} / {time-Nh} 時間オフセット（時間単位）
+        for match in re.findall(r"\{time([+-]\d+)h\}", text):
+            hours = int(match)
+            result_time = now + timedelta(hours=hours)
+            text = text.replace(f"{{time{match}h}}", result_time.strftime("%H:%M"))
+
+        # {time+Nm} / {time-Nm} 時間オフセット（分単位）
+        for match in re.findall(r"\{time([+-]\d+)m\}", text):
+            minutes = int(match)
+            result_time = now + timedelta(minutes=minutes)
+            text = text.replace(f"{{time{match}m}}", result_time.strftime("%H:%M"))
+
+        # {datetime+Nh} / {datetime-Nh} 日時オフセット（時間単位）
+        for match in re.findall(r"\{datetime([+-]\d+)h\}", text):
+            hours = int(match)
+            result_time = now + timedelta(hours=hours)
+            text = text.replace(f"{{datetime{match}h}}", result_time.strftime("%Y-%m-%d %H:%M"))
+
+        # {step:ラベル} ステップ方式入力
+        step_matches = re.findall(r"\{step:(.+?)\}", text)
+        if step_matches:
+            seen = []
+            for label in step_matches:
+                if label not in seen:
+                    seen.append(label)
+            step_labels = seen
+
+            step_values = {}
+            current_step = [0]
+            cancelled = [False]
+
+            def show_step():
+                step_win = tk.Toplevel(self.root)
+                step_win.configure(bg=self.theme["bg"])
+                step_win.attributes("-topmost", True)
+
+                idx = current_step[0]
+                total = len(step_labels)
+                label = step_labels[idx]
+
+                step_win.title(f"Step {idx + 1}/{total}")
+
+                tk.Label(step_win, text=f"Step {idx + 1} / {total}",
+                         font=("", 9), bg=self.theme["bg"], fg="#888888").grid(
+                    row=0, column=0, columnspan=3, padx=10, pady=(10, 2))
+
+                tk.Label(step_win, text=f"\U0001f4dd {label}:", font=("", 11, "bold"),
+                         bg=self.theme["bg"], fg=self.theme["fg"]).grid(
+                    row=1, column=0, columnspan=3, padx=10, pady=(5, 5), sticky=tk.W)
+
+                entry = tk.Entry(step_win, width=35, font=("", 11),
+                                 bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                                 insertbackground=self.theme["fg"])
+                entry.grid(row=2, column=0, columnspan=3, padx=10, pady=5)
+                self._focus_window(step_win, entry)
+
+                if label in step_values:
+                    entry.insert(0, step_values[label])
+
+                btn_frame = tk.Frame(step_win, bg=self.theme["bg"])
+                btn_frame.grid(row=3, column=0, columnspan=3, pady=10)
+
+                btn_style = {"bg": self.theme["button_bg"], "fg": self.theme["button_fg"],
+                             "activebackground": self.theme["button_active"],
+                             "borderwidth": 0, "padx": 10, "pady": 4}
+
+                def go_back():
+                    step_values[label] = entry.get()
+                    current_step[0] -= 1
+                    step_win.destroy()
+
+                def go_next():
+                    step_values[label] = entry.get()
+                    current_step[0] += 1
+                    step_win.destroy()
+
+                def on_cancel():
+                    cancelled[0] = True
+                    step_win.destroy()
+
+                if idx > 0:
+                    tk.Button(btn_frame, text="\u2190 Back", command=go_back,
+                              **btn_style).pack(side=tk.LEFT, padx=5)
+
+                if idx < total - 1:
+                    tk.Button(btn_frame, text="Next \u2192", command=go_next,
+                              **btn_style).pack(side=tk.LEFT, padx=5)
+                    entry.bind("<Return>", lambda e: go_next())
+                else:
+                    tk.Button(btn_frame, text="\u2713 Done", command=go_next,
+                              **btn_style).pack(side=tk.LEFT, padx=5)
+                    entry.bind("<Return>", lambda e: go_next())
+
+                tk.Button(btn_frame, text="Cancel", command=on_cancel,
+                          **btn_style).pack(side=tk.LEFT, padx=5)
+
+                step_win.bind("<Escape>", lambda e: on_cancel())
+                step_win.grab_set()
+                step_win.wait_window()
+
+            while current_step[0] < len(step_labels) and not cancelled[0]:
+                show_step()
+
+            if cancelled[0]:
+                return None  # キャンセル（v1.0.1）
+
+            for lbl, val in step_values.items():
+                text = text.replace(f"{{step:{lbl}}}", val)
+
+        return text
+
+    # ========================================================
+    # クイックランチャー（Ctrl+Space）
+    # ========================================================
+
+    def show_quick_launcher(self):
+        """検索窓をポップアップして、スニペットを検索＆即挿入"""
+        launcher = tk.Toplevel(self.root)
+        launcher.title("🔍 Quick Launch")
+        launcher.geometry("450x320")
+        launcher.configure(bg=self.theme["bg"])
+        launcher.attributes("-topmost", True)
+        launcher.overrideredirect(True)
+
+        # 画面中央に配置
+        launcher.update_idletasks()
+        screen_w = launcher.winfo_screenwidth()
+        screen_h = launcher.winfo_screenheight()
+        x = (screen_w - 450) // 2
+        y = (screen_h - 320) // 2
+        launcher.geometry(f"450x320+{x}+{y}")
+
+        # 検索入力欄
+        search_frame = tk.Frame(launcher, bg=self.theme["bg"])
+        search_frame.pack(fill=tk.X, padx=10, pady=(10, 5))
+
+        tk.Label(search_frame, text="🔍", font=("", 14),
+                 bg=self.theme["bg"], fg=self.theme["fg"]).pack(side=tk.LEFT, padx=(5, 5))
+
+        search_var = tk.StringVar()
+        search_entry = tk.Entry(search_frame, textvariable=search_var, width=35,
+                                font=("", 12),
+                                bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                                insertbackground=self.theme["fg"], borderwidth=1)
+        search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        self._focus_window(launcher, search_entry)
+
+        # 結果リスト
+        list_frame = tk.Frame(launcher, bg=self.theme["bg"])
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        listbox = tk.Listbox(list_frame, font=("Consolas", 10),
+                             bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                             selectbackground=self.theme["tree_selected"],
+                             selectforeground="#ffffff",
+                             borderwidth=0, activestyle="none")
+        listbox.pack(fill=tk.BOTH, expand=True)
+
+        # 全スニペットを初期表示
+        filtered_snippets = []
+
+        def update_list(*args):
+            nonlocal filtered_snippets
+            query = search_var.get().lower()
+            listbox.delete(0, tk.END)
+            filtered_snippets = []
+
+            for snippet in self.snippets:
+                trigger = snippet["trigger"]
+                text = snippet["text"]
+                category = snippet.get("category", "")
+
+                if not query or (query in trigger.lower() or
+                                 query in text.lower() or
+                                 query in category.lower()):
+                    display = f"  {trigger:<12} \u2192 {text[:40]}"
+                    listbox.insert(tk.END, display)
+                    filtered_snippets.append(snippet)
+
+            if filtered_snippets:
+                listbox.selection_set(0)
+
+        def select_and_insert(event=None):
+            sel = listbox.curselection()
+            if not sel or not filtered_snippets:
+                return
+
+            snippet = filtered_snippets[sel[0]]
+            self.suspended = True
+            try:
+                expanded = self.expand_variables(snippet["text"])
+            finally:
+                self.suspended = False
+                self.current_input = ""
+
+            launcher.destroy()
+
+            if not expanded:
+                return
+
+            # クリップボード経由で確実に貼り付け（v1.0.2）
+            self.injecting = True
+            try:
+                time.sleep(0.1)
+                self._paste_text(expanded)
+            finally:
+                self.injecting = False
+                self.current_input = ""
+
+            # 統計更新
+            trigger = snippet["trigger"]
+            self.stats[trigger] = self.stats.get(trigger, 0) + 1
+            self.save_stats()
+            self.root.after(100, self.refresh_table)
+
+        def on_key_nav(event):
+            if event.keysym == "Down":
+                cur = listbox.curselection()
+                if cur and cur[0] < listbox.size() - 1:
+                    listbox.selection_clear(0, tk.END)
+                    listbox.selection_set(cur[0] + 1)
+                    listbox.see(cur[0] + 1)
+                return "break"
+            elif event.keysym == "Up":
+                cur = listbox.curselection()
+                if cur and cur[0] > 0:
+                    listbox.selection_clear(0, tk.END)
+                    listbox.selection_set(cur[0] - 1)
+                    listbox.see(cur[0] - 1)
+                return "break"
+
+        def on_escape(event=None):
+            launcher.destroy()
+
+        # イベントバインド
+        search_var.trace_add("write", update_list)
+        search_entry.bind("<Return>", select_and_insert)
+        search_entry.bind("<Down>", on_key_nav)
+        search_entry.bind("<Up>", on_key_nav)
+        search_entry.bind("<Escape>", on_escape)
+        listbox.bind("<Double-Button-1>", select_and_insert)
+        launcher.bind("<Escape>", on_escape)
+        launcher.bind("<FocusOut>", on_escape)
+
+        # 初期リスト表示
+        update_list()
+
+        launcher.grab_set()
+
+
+
+    # ========================================================
+    # キーボードリスナー
+    # ========================================================
+
+    MAX_BUFFER = 50  # 対策1: バッファ長制限
+
+    def on_key_press(self, key):
+        if not self.listening or getattr(self, "suspended", False):
+            return
+        # Sync が自分で送っているキー（Backspace・Ctrl+V）は数えない（v1.0.2）
+        if getattr(self, "injecting", False):
+            return
+
+        # Ctrlキー状態を追跡
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            self.ctrl_pressed = True
+            return
+
+        # Ctrl+Space でクイックランチャー
+        try:
+            if key == Key.space and self.ctrl_pressed:
+                self.root.after(0, self.show_quick_launcher)
+                self.current_input = ""
+                return
+        except Exception:
+            pass
+
+        try:
+            char = key.char
+            if char:
+                self.current_input += char
+                # 対策1: バッファが長くなりすぎたらトリミング
+                if len(self.current_input) > self.MAX_BUFFER:
+                    self.current_input = self.current_input[-self.MAX_BUFFER:]
+        except AttributeError:
+            if key == Key.space or key == Key.enter or key == Key.tab:
+                self.check_and_expand()
+                self.current_input = ""
+            elif key == Key.backspace:
+                self.current_input = self.current_input[:-1]
+            else:
+                self.current_input = ""
+                return
+
+        # トリガーチェックは、キーを「離したとき」に行う（v1.0.2）
+        # 押した瞬間だと、最後の文字がアプリに届く前に消し始めてしまい、文字が残ることがあった
+
+    def on_key_release(self, key):
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            self.ctrl_pressed = False
+            return
+        if not self.listening or getattr(self, "suspended", False) or getattr(self, "injecting", False):
+            return
+        if hasattr(key, 'char') and key.char and not self.ctrl_pressed:
+            self.check_and_expand()
+
+
+    def check_and_expand(self):
+        if not self.current_input:
+            return
+
+        # 対策2: プレフィルタリング（末尾文字 + 長さチェック）
+        input_len = len(self.current_input)
+        last_char = self.current_input[-1]
+
+        for snippet in self.snippets:
+            trigger = snippet["trigger"]
+
+            # 長さチェック: バッファがトリガーより短ければスキップ
+            if input_len < len(trigger):
+                continue
+
+            # 末尾文字チェック: トリガーの最後の文字と一致しなければスキップ
+            if trigger[-1] != last_char:
+                continue
+
+            if self.current_input.endswith(trigger):
+                # マッチしたらメインスレッドで展開処理を実行
+                self.current_input = ""
+                self.root.after(0, lambda t=trigger, s=snippet: self._do_expand(t, s))
+                break
+
+    def _do_expand(self, trigger, snippet):
+        """メインスレッドで展開処理を実行（スレッド安全）"""
+        # ① まず展開テキストを準備（{input:} ダイアログはここで表示）
+        self.suspended = True  # ダイアログ入力中は展開しない（v1.0.1）
+        try:
+            expanded = self.expand_variables(snippet["text"])
+        finally:
+            self.suspended = False
+            self.current_input = ""
+
+        # キャンセルされた場合：打ったトリガーだけ消す（v1.0.1）
+        if expanded is None:
+            self.root.after(150, lambda: self._delete_trigger(trigger))
+            return
+        if not expanded:
+            return
+
+        # ② ダイアログ完了後、少し待ってからキー操作開始
+        self.root.after(100, lambda: self._type_expanded(trigger, expanded))
+
+    def _focus_window(self, win, entry):
+        """小窓を一番前に出し、最初の入力欄ですぐ打てるようにする（v1.0.2）"""
+        def _do():
+            try:
+                win.deiconify()
+                win.lift()
+                win.focus_force()
+                entry.focus_force()
+                entry.icursor(tk.END)
+            except Exception:
+                pass
+        try:
+            win.update_idletasks()
+        except Exception:
+            pass
+        _do()
+        # Windows が前に出すのを遅らせることがあるので、少し後にもう一度
+        for ms in (60, 200):
+            try:
+                win.after(ms, _do)
+            except Exception:
+                pass
+
+    def _release_modifiers(self):
+        """押されたままの Shift・Alt・Ctrl・Win を離す（「v」だけ入るのを防ぐ — v1.0.2）"""
+        for k in (Key.shift, Key.shift_r, Key.alt_l, Key.alt_r, Key.ctrl_l, Key.ctrl_r, Key.cmd):
+            try:
+                self.keyboard_controller.release(k)
+            except Exception:
+                pass
+
+    def _backspaces(self, n):
+        for _ in range(n):
+            self.keyboard_controller.press(Key.backspace)
+            self.keyboard_controller.release(Key.backspace)
+            time.sleep(0.02)
+
+    def _paste_text(self, expanded):
+        """クリップボード経由で確実に貼り付け、元の中身に戻す（v1.0.2）"""
+        old_clipboard = ""
+        try:
+            old_clipboard = pyperclip.paste()
+        except Exception:
+            pass
+
+        pyperclip.copy(expanded)
+        # クリップボードに本当に入るまで待つ（最大 0.3 秒）
+        for _ in range(15):
+            try:
+                if pyperclip.paste() == expanded:
+                    break
+            except Exception:
+                pass
+            time.sleep(0.02)
+        time.sleep(PASTE_WAIT_BEFORE)
+
+        # Ctrl+V（キーの間に少し間をあけて、Ctrl が確実に効くように）
+        self._release_modifiers()
+        time.sleep(0.02)
+        self.keyboard_controller.press(Key.ctrl)
+        time.sleep(0.03)
+        self.keyboard_controller.press('v')
+        time.sleep(0.02)
+        self.keyboard_controller.release('v')
+        time.sleep(0.02)
+        self.keyboard_controller.release(Key.ctrl)
+
+        # 遅いアプリ（Excel・ブラウザ・Discord など）が貼り終わるまで待ってから戻す
+        time.sleep(CLIPBOARD_RESTORE_WAIT)
+        try:
+            pyperclip.copy(old_clipboard)
+        except Exception:
+            pass
+
+    def _delete_trigger(self, trigger):
+        """トリガー文字だけを消す（キャンセル時）"""
+        self.injecting = True
+        try:
+            self._release_modifiers()
+            time.sleep(0.03)
+            self._backspaces(len(trigger))
+        finally:
+            self.injecting = False
+            self.current_input = ""
+
+    def _type_expanded(self, trigger, expanded):
+        """トリガー削除 → 貼り付けを実行"""
+        self.injecting = True
+        try:
+            self._release_modifiers()
+            time.sleep(0.03)
+            # トリガー文字を削除
+            self._backspaces(len(trigger))
+            time.sleep(0.05)
+            self._paste_text(expanded)
+        finally:
+            self.injecting = False
+            self.current_input = ""
+
+        # 統計更新
+        self.stats[trigger] = self.stats.get(trigger, 0) + 1
+        self.save_stats()
+        self.refresh_table()
+
+    def start_listening(self):
+        self.listening = True
+        self.ctrl_pressed = False
+        self.listener = Listener(on_press=self.on_key_press, on_release=self.on_key_release)
+        self.listener.start()
+        self.status_label.config(text=self.lang["status_listening"], fg=self.theme["accent"])
+        self.btn_toggle.config(text=self.lang["btn_stop"])
+
+    def stop_listening(self):
+        self.listening = False
+        if self.listener:
+            self.listener.stop()
+            self.listener = None
+        self.status_label.config(text=self.lang["status_stopped"], fg="#ff5252")
+        self.btn_toggle.config(text=self.lang["btn_start"])
+
+    def toggle_listening(self):
+        if self.listening:
+            self.stop_listening()
+        else:
+            self.start_listening()
+
+
+
+    # ========================================================
+    # GUI 構築
+    # ========================================================
+
+    def build_gui(self):
+        self.root = tk.Tk()
+        self.root.title(f"MeridiSync v{VERSION}")
+        try:
+            _icon = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+            _draw = ImageDraw.Draw(_icon)
+            _draw.ellipse([8, 14, 24, 28], fill=(0, 200, 83))
+            _draw.ellipse([5, 6, 11, 12], fill=(0, 200, 83))
+            _draw.ellipse([13, 4, 19, 10], fill=(0, 200, 83))
+            _draw.ellipse([21, 6, 27, 12], fill=(0, 200, 83))
+            self._icon_photo = ImageTk.PhotoImage(_icon)
+            self.root.iconphoto(True, self._icon_photo)
+        except Exception:
+            pass    
+        # 起動時の大きさ：ボタンが全部見える幅、画面の中央（v1.0.1）
+        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        w, h = min(1240, sw - 40), min(660, sh - 80)
+        self.root.geometry(f"{w}x{h}+{(sw - w) // 2}+{max(0, (sh - h) // 2 - 20)}")
+        self.root.minsize(900, 480)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.configure(bg=self.theme["bg"])
+
+        # ウィジェット参照リストをクリア
+        self.themed_widgets = []
+
+        # --- メインコンテナ ---
+        main_container = tk.Frame(self.root, bg=self.theme["bg"])
+        main_container.pack(fill=tk.BOTH, expand=True)
+        self.themed_widgets.append(("frame_bg", main_container))
+
+        # === 左パネル（ロゴ + カテゴリ） ===
+        self.left_panel = tk.Frame(main_container, bg=self.theme["panel_bg"], width=210)
+        self.left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=(5, 0), pady=5)
+        self.left_panel.pack_propagate(False)
+        self.themed_widgets.append(("frame_panel", self.left_panel))
+
+        # ロゴ
+        logo_frame = tk.Frame(self.left_panel, bg=self.theme["panel_bg"])
+        logo_frame.pack(fill=tk.X, padx=10, pady=(15, 5))
+        self.themed_widgets.append(("frame_panel", logo_frame))
+
+        self.logo_icon = tk.Label(logo_frame, text="🐾", font=("Segoe UI Emoji", 14),
+                                  bg=self.theme["panel_bg"], fg=self.theme["logo_fg"])
+        self.logo_icon.pack(side=tk.LEFT, padx=(0, 4))
+        self.themed_widgets.append(("label_logo", self.logo_icon))
+
+        self.logo_text = tk.Label(logo_frame, text="MeridiSync", font=("Segoe UI", 13, "bold"),
+                                  bg=self.theme["panel_bg"], fg=self.theme["logo_fg"])
+        self.logo_text.pack(side=tk.LEFT, padx=(0, 0))
+        self.themed_widgets.append(("label_logo", self.logo_text))
+
+        self.version_label = tk.Label(self.left_panel, text=f"v{VERSION}", font=("", 9),
+                                      bg=self.theme["panel_bg"], fg="#888888")
+        self.version_label.pack(anchor=tk.W, padx=15)
+        self.themed_widgets.append(("label_version", self.version_label))
+
+        # 区切り線
+        self.separator = tk.Frame(self.left_panel, bg=self.theme["border"], height=1)
+        self.separator.pack(fill=tk.X, padx=10, pady=10)
+        self.themed_widgets.append(("separator", self.separator))
+
+        # カテゴリラベル
+        self.cat_label = tk.Label(self.left_panel, text=self.lang["cat_label"], font=("", 10, "bold"),
+                                  bg=self.theme["panel_bg"], fg=self.theme["fg"])
+        self.cat_label.pack(anchor=tk.W, padx=10, pady=(5, 5))
+        self.themed_widgets.append(("label_panel", self.cat_label))
+
+        # カテゴリリスト（Frame + Label 方式 — オレンジドット付き）
+        self.category_container = tk.Frame(self.left_panel, bg=self.theme["entry_bg"])
+        self.category_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        self.themed_widgets.append(("frame_entry", self.category_container))
+
+        self.category_labels = []
+        self.selected_category_idx = 0
+        self.build_category_labels()
+
+        # === 右パネル（メイン） ===
+        right_panel = tk.Frame(main_container, bg=self.theme["bg"])
+        right_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.themed_widgets.append(("frame_bg", right_panel))
+
+        # --- ヘッダー ---
+        header_frame = tk.Frame(right_panel, bg=self.theme["bg"])
+        header_frame.pack(fill=tk.X, pady=(5, 2))
+        self.themed_widgets.append(("frame_bg", header_frame))
+
+        self.status_label = tk.Label(header_frame, text=self.lang["status_listening"],
+                                     font=("", 11, "bold"),
+                                     bg=self.theme["bg"], fg=self.theme["accent"])
+        self.status_label.pack(side=tk.LEFT)
+        self.themed_widgets.append(("label_status", self.status_label))
+
+        # --- ボタンフレーム ---
+        btn_frame = tk.Frame(right_panel, bg=self.theme["bg"])
+        btn_frame.pack(fill=tk.X, pady=5)
+        self.themed_widgets.append(("frame_bg", btn_frame))
+
+        btn_style = {
+            "font": ("", 9),
+            "bg": self.theme["button_bg"],
+            "fg": self.theme["button_fg"],
+            "activebackground": self.theme["button_active"],
+            "activeforeground": self.theme["button_fg"],
+            "borderwidth": 0,
+            "padx": 8,
+            "pady": 4,
+        }
+
+        self.btn_toggle = tk.Button(btn_frame, text=self.lang["btn_stop"], command=self.toggle_listening, **btn_style)
+        self.btn_toggle.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_toggle))
+
+        self.btn_add = tk.Button(btn_frame, text=self.lang["btn_add"], command=self.add_snippet, **btn_style)
+        self.btn_add.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_add))
+
+        self.btn_edit = tk.Button(btn_frame, text=self.lang["btn_edit"], command=self.edit_snippet, **btn_style)
+        self.btn_edit.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_edit))
+
+        self.btn_delete = tk.Button(btn_frame, text=self.lang["btn_delete"], command=self.delete_snippet, **btn_style)
+        self.btn_delete.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_delete))
+
+        self.btn_search = tk.Button(btn_frame, text=self.lang["btn_search"], command=self.search_snippet, **btn_style)
+        self.btn_search.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_search))
+
+        self.btn_stats = tk.Button(btn_frame, text=self.lang["btn_stats"], command=self.show_stats, **btn_style)
+        self.btn_stats.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_stats))
+
+        self.btn_cat_manage = tk.Button(btn_frame, text=self.lang["btn_cat_manage"], command=self.manage_categories, **btn_style)
+        self.btn_cat_manage.pack(side=tk.LEFT, padx=2)
+        self.themed_widgets.append(("button", self.btn_cat_manage))
+
+        # 右側ボタン
+        theme_text = self.lang["btn_theme_light"] if self.config.get("dark_mode", True) else self.lang["btn_theme_dark"]
+        self.btn_theme = tk.Button(btn_frame, text=theme_text, command=self.toggle_theme, **btn_style)
+        self.btn_theme.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_theme))
+
+        # 言語切替ボタン
+        lang_label = "🌐 EN" if self.config.get("language", "JP") == "JP" else "🌐 JP"
+        self.btn_lang = tk.Button(btn_frame, text=lang_label, command=self.toggle_language, **btn_style)
+        self.btn_lang.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_lang))
+
+        self.btn_import = tk.Button(btn_frame, text="📥 Import", command=self.import_from_excel, **btn_style)
+        self.btn_import.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_import))
+
+        self.btn_export = tk.Button(btn_frame, text="📤 Export", command=self.export_to_excel, **btn_style)
+        self.btn_export.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_export))
+
+        usage_text = self.lang["btn_usage_hide"] if self.config.get("show_usage_count", True) else self.lang["btn_usage_show"]
+        self.btn_usage_toggle = tk.Button(btn_frame, text=usage_text, command=self.toggle_usage_display, **btn_style)
+        self.btn_usage_toggle.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_usage_toggle))
+
+        self.btn_reset = tk.Button(btn_frame, text=self.lang.get("reset_btn_label", "🔄 初期化"), command=self.show_reset_dialog, **btn_style)
+        self.btn_reset.pack(side=tk.RIGHT, padx=2)
+        self.themed_widgets.append(("button", self.btn_reset))
+
+
+        # --- テーブル ---
+        self.table_frame = tk.Frame(right_panel, bg=self.theme["bg"])
+        self.table_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        self.themed_widgets.append(("frame_bg", self.table_frame))
+
+        self.build_table()
+
+        # --- 右クリックメニュー ---
+        self.context_menu = tk.Menu(self.root, tearoff=0,
+                                    bg=self.theme["panel_bg"], fg=self.theme["fg"],
+                                    activebackground=self.theme["tree_selected"])
+        self.context_menu.add_command(label=self.lang["ctx_edit"], command=self.edit_snippet)
+        self.context_menu.add_command(label=self.lang["ctx_delete"], command=self.delete_snippet)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label=self.lang["ctx_pin"], command=self.toggle_pin)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label=self.lang["ctx_reset_single"], command=self.reset_usage_single)
+        self.context_menu.add_command(label=self.lang["ctx_reset_all"], command=self.reset_usage_all)
+
+        self.tree.bind("<Button-3>", self.show_context_menu)
+
+        # テーブル更新
+        self.refresh_table()
+
+    def build_table(self):
+        """テーブルを構築（ダークモード対応）"""
+        show_usage = self.config.get("show_usage_count", True)
+
+        if show_usage:
+            columns = ("trigger", "text", "category", "count")
+        else:
+            columns = ("trigger", "text", "category")
+
+        # 既存のウィジェットがあれば破棄
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # ttk スタイル設定
+        style = ttk.Style()
+        style.theme_use("clam")
+
+        style.configure("Dark.Treeview",
+                        background=self.theme["tree_bg"],
+                        foreground=self.theme["tree_fg"],
+                        fieldbackground=self.theme["tree_bg"],
+                        borderwidth=0,
+                        font=("", 10))
+        style.configure("Dark.Treeview.Heading",
+                        background=self.theme["header_bg"],
+                        foreground=self.theme["fg"],
+                        borderwidth=0,
+                        font=("", 10, "bold"))
+        style.map("Dark.Treeview",
+                  background=[("selected", self.theme["tree_selected"])],
+                  foreground=[("selected", "#ffffff")])
+
+        self.tree = ttk.Treeview(self.table_frame, columns=columns, show="headings",
+                                 selectmode="extended", style="Dark.Treeview")
+
+        self.tree.heading("trigger", text=self.lang["col_trigger"])
+        self.tree.heading("category", text=self.lang["col_category"])
+        self.tree.heading("text", text=self.lang["col_text"])
+
+        self.tree.column("trigger", width=100, minwidth=80)
+        self.tree.column("text", width=420, minwidth=200)
+        self.tree.column("category", width=120, minwidth=80)
+
+        if show_usage:
+            self.tree.heading("count", text=self.lang["col_count"])
+            self.tree.column("count", width=80, minwidth=60, anchor=tk.CENTER)
+
+        scrollbar = ttk.Scrollbar(self.table_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # 右クリック再バインド
+        self.tree.bind("<Button-3>", self.show_context_menu)
+
+        self.tree.bind("<Control-a>", self.select_all_snippets)
+        self.tree.bind("<Control-A>", self.select_all_snippets)
+
+    def on_category_select(self, event):
+        """カテゴリ選択時にテーブルを更新"""
+        self.refresh_table()
+
+    def refresh_table(self):
+        """テーブルを更新"""
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        selected_category = self.get_selected_category()
+        show_usage = self.config.get("show_usage_count", True)
+        cat_map = self.lang.get("cat_map", {})
+
+        for snippet in self.snippets:
+            if selected_category == "__favorites__":
+                if not snippet.get("pinned", False):
+                    continue
+            elif selected_category != "すべて" and snippet.get("category", "未分類") != selected_category:
+                continue
+
+            trigger = snippet["trigger"]
+            category = snippet.get("category", "未分類")
+            category_display = cat_map.get(category, category)
+            text = snippet["text"]
+            count = self.stats.get(trigger, 0)
+
+            if show_usage:
+                self.tree.insert("", tk.END, values=(trigger, text, category_display, count))
+            else:
+                self.tree.insert("", tk.END, values=(trigger, text, category_display))
+
+    def get_selected_category(self):
+        """左パネルで選択中のカテゴリを取得（内部名で返す）"""
+        if hasattr(self, 'display_categories') and self.selected_category_idx < len(self.display_categories):
+            return self.display_categories[self.selected_category_idx]
+        if self.selected_category_idx < len(self.categories):
+            return self.categories[self.selected_category_idx]
+        return "すべて"
+
+    def build_category_labels(self):
+        """カテゴリラベルを構築（オレンジドット付き + お気に入り）"""
+        for widget in self.category_container.winfo_children():
+            widget.destroy()
+        self.category_labels = []
+
+        cat_map = self.lang.get("cat_map", {})
+
+        # 表示用リスト：通常カテゴリ → 区切り → お気に入り（一番下）
+        display_list = list(self.categories) + ["__separator__", "__favorites__"]
+
+        self.display_categories = display_list
+
+        for i, cat in enumerate(display_list):
+            # 区切り線
+            if cat == "__separator__":
+                sep = tk.Frame(self.category_container, bg=self.theme["border"], height=1)
+                sep.pack(fill=tk.X, padx=10, pady=5)
+                self.category_labels.append((sep, sep, sep))
+                continue
+
+            if cat == "__favorites__":
+                display_name = self.lang.get("cat_favorites", "Favorites")
+            else:
+                display_name = cat_map.get(cat, cat)
+
+            row_frame = tk.Frame(self.category_container, bg=self.theme["entry_bg"],
+                                 cursor="hand2")
+            row_frame.pack(fill=tk.X, pady=1)
+
+            # ドット（お気に入りは⭐、それ以外はオレンジ●）
+            if cat == "__favorites__":
+                dot = tk.Label(row_frame, text="⭐", font=("", 7),
+                               fg=self.theme["cat_dot"], bg=self.theme["entry_bg"],
+                               cursor="hand2")
+            else:
+                dot = tk.Label(row_frame, text="●", font=("", 7),
+                               fg=self.theme["cat_dot"], bg=self.theme["entry_bg"],
+                               cursor="hand2")
+            dot.pack(side=tk.LEFT, padx=(10, 6), pady=4)
+
+            # カテゴリ名
+            label = tk.Label(row_frame, text=display_name, font=("BIZ UDGothic", 11),
+                             fg=self.theme["entry_fg"], bg=self.theme["entry_bg"],
+                             anchor=tk.W, cursor="hand2")
+            label.pack(side=tk.LEFT, fill=tk.X, expand=True, pady=4)
+
+            # クリックイベント
+            for widget in (row_frame, dot, label):
+                widget.bind("<Button-1>", lambda e, idx=i: self.select_category(idx))
+
+            self.category_labels.append((row_frame, dot, label))
+
+        # 初期選択
+        self.select_category(0)
+
+    def select_category(self, idx):
+        """カテゴリ選択のハイライト"""
+        # 区切り線はスキップ
+        if hasattr(self, 'display_categories') and self.display_categories[idx] == "__separator__":
+            return
+
+        for i, (frame, dot, label) in enumerate(self.category_labels):
+            if hasattr(self, 'display_categories') and self.display_categories[i] == "__separator__":
+                continue
+            if i == idx:
+                frame.config(bg=self.theme["tree_selected"])
+                dot.config(bg=self.theme["tree_selected"])
+                label.config(bg=self.theme["tree_selected"], fg="#ffffff")
+            else:
+                frame.config(bg=self.theme["entry_bg"])
+                dot.config(bg=self.theme["entry_bg"])
+                label.config(bg=self.theme["entry_bg"], fg=self.theme["entry_fg"])
+        self.selected_category_idx = idx
+        if hasattr(self, 'tree'):
+            self.refresh_table()
+
+    def refresh_category_list(self):
+        """カテゴリリストを再構築"""
+        self.build_category_labels()
+
+
+    def add_snippet(self):
+        existing = [s["trigger"] for s in self.snippets]
+        was_listening = self.listening
+        if was_listening:
+            self.stop_listening()
+
+        dialog = SnippetDialog(self.root, self.lang["dialog_add_title"],
+                               self.categories, theme=self.theme, lang=self.lang,
+                               existing_triggers=existing)
+        if dialog.result:
+            self.snippets.append(dialog.result)
+            self.save_snippets()
+            self.refresh_table()
+
+        if was_listening:
+            self.start_listening()
+
+    def edit_snippet(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning(self.lang["msg_no_selection"],
+                                   self.lang["msg_select_edit"])
+            return
+
+        item = self.tree.item(selected[0])
+        trigger = str(item["values"][0]) 
+
+        snippet_idx = None
+        for i, s in enumerate(self.snippets):
+            if str(s["trigger"]) == trigger:
+                snippet_idx = i
+                break
+
+        snippet = self.snippets[snippet_idx]
+        existing = [s["trigger"] for s in self.snippets]
+
+        was_listening = self.listening
+        if was_listening:
+            self.stop_listening()
+
+        dialog = SnippetDialog(self.root, self.lang["dialog_edit_title"],
+                               self.categories, snippet, theme=self.theme, lang=self.lang,
+                               existing_triggers=existing)
+        if dialog.result:
+            old_trigger = snippet["trigger"]
+            new_trigger = dialog.result["trigger"]
+            if old_trigger != new_trigger and old_trigger in self.stats:
+                self.stats[new_trigger] = self.stats.pop(old_trigger)
+                self.save_stats()
+
+            self.snippets[snippet_idx] = dialog.result
+            self.save_snippets()
+            self.refresh_table()
+
+        if was_listening:
+            self.start_listening()
+
+
+    def delete_snippet(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning(self.lang["msg_no_selection"],
+                                   self.lang["msg_select_delete"])
+            return
+
+        # 選択された全トリガーを取得
+        triggers_to_delete = []
+        for sel in selected:
+            item = self.tree.item(sel)
+            trigger = str(item["values"][0])
+            triggers_to_delete.append(trigger)
+
+        # 確認ダイアログ（件数に応じてメッセージ変更）
+        count = len(triggers_to_delete)
+        if count == 1:
+            msg = self.lang["msg_delete_confirm"].format(trigger=triggers_to_delete[0])
+        else:
+            head = (f"{count}件のスニペットを削除しますか？" if self.lang is LANG_JP
+                    else f"Delete {count} snippets?")
+            msg = head + "\n\n" + "\n".join(f"  • {t}" for t in triggers_to_delete)
+
+        if messagebox.askyesno(self.lang["msg_confirm"], msg):
+            self.snippets = [s for s in self.snippets if str(s["trigger"]) not in triggers_to_delete]
+
+            # 統計からも削除
+            for trigger in triggers_to_delete:
+                if trigger in self.stats:
+                    del self.stats[trigger]
+
+            self.save_snippets()
+            self.save_stats()
+            self.refresh_table()
+
+    def select_all_snippets(self, event=None):
+        """Ctrl+A で全行を選択"""
+        all_items = self.tree.get_children()
+        self.tree.selection_set(all_items)
+        return "break"
+
+    def search_snippet(self):
+        query = simpledialog.askstring(self.lang["msg_search_title"],
+                                       self.lang["msg_search_prompt"])
+        if not query:
+            return
+
+        query_lower = query.lower()
+
+        # カテゴリを「すべて」に
+        self.select_category(0)
+
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        show_usage = self.config.get("show_usage_count", True)
+
+        for snippet in self.snippets:
+            if (query_lower in snippet["trigger"].lower() or
+                query_lower in snippet["text"].lower() or
+                query_lower in snippet.get("category", "").lower()):
+
+                trigger = snippet["trigger"]
+                raw_cat = snippet.get("category", "未分類")
+                category = self.lang.get("cat_map", {}).get(raw_cat, raw_cat)
+                text = snippet["text"]
+                count = self.stats.get(trigger, 0)
+
+                if show_usage:
+                    self.tree.insert("", tk.END, values=(trigger, text, category, count))
+                else:
+                    self.tree.insert("", tk.END, values=(trigger, text, category))
+
+
+    # ========================================================
+    # ピン留め（お気に入り）
+    # ========================================================
+
+    def toggle_pin(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+        item = self.tree.item(selected[0])
+        trigger = str(item["values"][0])
+
+        # 該当スニペットを探してピン留め切替
+        for snippet in self.snippets:
+            if snippet["trigger"] == trigger:
+                snippet["pinned"] = not snippet.get("pinned", False)
+                break
+
+        self.save_snippets()
+        self.refresh_table()
+
+    # ========================================================
+    # 使用回数リセット
+    # ========================================================
+
+    def reset_usage_single(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+        item = self.tree.item(selected[0])
+        trigger = str(item["values"][0])
+
+        if messagebox.askyesno(self.lang["msg_confirm"],
+                               self.lang["msg_reset_single"].format(trigger=trigger)):
+            if trigger in self.stats:
+                self.stats[trigger] = 0
+                self.save_stats()
+                self.refresh_table()
+
+    def reset_usage_all(self):
+        if messagebox.askyesno(self.lang["msg_confirm"],
+                               self.lang["msg_reset_all"]):
+            self.stats = {}
+            self.save_stats()
+            self.refresh_table()
+
+
+    # ========================================================
+    # 初期化（リセット）機能
+    # ========================================================
+
+
+    def show_reset_dialog(self):
+        """初期化ダイアログを表示（JP/EN対応）"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title(self.lang.get("reset_title", "初期化"))
+        dialog.geometry("400x380")
+        dialog.resizable(False, False)
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # テーマ適用
+        dialog.configure(bg=self.theme["bg"])
+
+        # ヘッダー
+        header = tk.Label(dialog, text=self.lang.get("reset_header", "⚠️ リセット設定"),
+                         font=("", 14, "bold"),
+                         bg=self.theme["bg"], fg=self.theme["fg"])
+        header.pack(pady=(15, 5))
+
+        desc = tk.Label(dialog, text=self.lang.get("reset_desc", "リセットする項目を選択してください："),
+                       font=("", 10),
+                       bg=self.theme["bg"], fg=self.theme["fg"])
+        desc.pack(pady=(0, 10))
+
+        # チェックボックス変数
+        self.reset_snippets_var = tk.BooleanVar(value=False)
+        self.reset_stats_var = tk.BooleanVar(value=False)
+        self.reset_categories_var = tk.BooleanVar(value=False)
+        self.reset_config_var = tk.BooleanVar(value=False)
+
+        # チェックボックスフレーム
+        cb_frame = tk.Frame(dialog, bg=self.theme["bg"])
+        cb_frame.pack(padx=30, pady=5, fill=tk.X)
+
+        snippet_count = len(self.snippets)
+        cb1 = tk.Checkbutton(cb_frame,
+                            text=self.lang.get("reset_snippets", "スニペット（全登録データ: {count}件）").format(count=snippet_count),
+                            variable=self.reset_snippets_var,
+                            bg=self.theme["bg"], fg=self.theme["fg"],
+                            selectcolor=self.theme["tree_bg"],
+                            activebackground=self.theme["bg"],
+                            activeforeground=self.theme["fg"],
+                            font=("", 10))
+        cb1.pack(anchor=tk.W, pady=3)
+
+        cb2 = tk.Checkbutton(cb_frame,
+                            text=self.lang.get("reset_stats", "使用回数統計"),
+                            variable=self.reset_stats_var,
+                            bg=self.theme["bg"], fg=self.theme["fg"],
+                            selectcolor=self.theme["tree_bg"],
+                            activebackground=self.theme["bg"],
+                            activeforeground=self.theme["fg"],
+                            font=("", 10))
+        cb2.pack(anchor=tk.W, pady=3)
+
+        cb3 = tk.Checkbutton(cb_frame,
+                            text=self.lang.get("reset_categories", "カテゴリ設定（カスタムカテゴリ）"),
+                            variable=self.reset_categories_var,
+                            bg=self.theme["bg"], fg=self.theme["fg"],
+                            selectcolor=self.theme["tree_bg"],
+                            activebackground=self.theme["bg"],
+                            activeforeground=self.theme["fg"],
+                            font=("", 10))
+        cb3.pack(anchor=tk.W, pady=3)
+
+        cb4 = tk.Checkbutton(cb_frame,
+                            text=self.lang.get("reset_config", "アプリ設定（テーマ・言語など）"),
+                            variable=self.reset_config_var,
+                            bg=self.theme["bg"], fg=self.theme["fg"],
+                            selectcolor=self.theme["tree_bg"],
+                            activebackground=self.theme["bg"],
+                            activeforeground=self.theme["fg"],
+                            font=("", 10))
+        cb4.pack(anchor=tk.W, pady=3)
+
+        # 区切り線
+        separator = tk.Frame(dialog, height=1, bg=self.theme["fg"])
+        separator.pack(fill=tk.X, padx=30, pady=15)
+
+        # クイックリセットボタン
+        quick_label = tk.Label(dialog, text=self.lang.get("reset_quick_label", "⚡ クイックリセット:"),
+                              font=("", 10, "bold"),
+                              bg=self.theme["bg"], fg=self.theme["fg"])
+        quick_label.pack(pady=(0, 8))
+
+        quick_frame = tk.Frame(dialog, bg=self.theme["bg"])
+        quick_frame.pack(pady=5)
+
+        btn_all = tk.Button(quick_frame, text=self.lang.get("reset_btn_all", "全リセット"),
+                           command=lambda: self._quick_select(dialog, True, True, True, True),
+                           bg="#ff5252", fg="white", font=("", 9, "bold"),
+                           relief=tk.FLAT, padx=10, pady=3)
+        btn_all.pack(side=tk.LEFT, padx=5)
+
+        btn_snippets = tk.Button(quick_frame, text=self.lang.get("reset_btn_snippets", "スニペットのみ"),
+                                command=lambda: self._quick_select(dialog, True, False, False, False),
+                                bg=self.theme["accent"], fg="white", font=("", 9),
+                                relief=tk.FLAT, padx=10, pady=3)
+        btn_snippets.pack(side=tk.LEFT, padx=5)
+
+        btn_stats = tk.Button(quick_frame, text=self.lang.get("reset_btn_stats", "統計のみ"),
+                             command=lambda: self._quick_select(dialog, False, True, False, False),
+                             bg=self.theme["accent"], fg="white", font=("", 9),
+                             relief=tk.FLAT, padx=10, pady=3)
+        btn_stats.pack(side=tk.LEFT, padx=5)
+
+        # 区切り線
+        separator2 = tk.Frame(dialog, height=1, bg=self.theme["fg"])
+        separator2.pack(fill=tk.X, padx=30, pady=15)
+
+        # 実行・キャンセルボタン
+        btn_frame = tk.Frame(dialog, bg=self.theme["bg"])
+        btn_frame.pack(pady=10)
+
+        btn_cancel = tk.Button(btn_frame, text=self.lang.get("reset_btn_cancel", "キャンセル"),
+                              command=dialog.destroy,
+                              bg=self.theme["tree_bg"], fg=self.theme["fg"],
+                              font=("", 10), relief=tk.FLAT, padx=20, pady=5)
+        btn_cancel.pack(side=tk.LEFT, padx=10)
+
+        btn_execute = tk.Button(btn_frame, text=self.lang.get("reset_btn_execute", "リセット実行"),
+                               command=lambda: self._execute_reset(dialog),
+                               bg="#ff5252", fg="white",
+                               font=("", 10, "bold"), relief=tk.FLAT, padx=20, pady=5)
+        btn_execute.pack(side=tk.LEFT, padx=10)
+
+    def _quick_select(self, dialog, snippets, stats, categories, config):
+        """クイックリセットボタン — チェックを設定して即実行"""
+        self.reset_snippets_var.set(snippets)
+        self.reset_stats_var.set(stats)
+        self.reset_categories_var.set(categories)
+        self.reset_config_var.set(config)
+        self._execute_reset(dialog)
+
+    def _execute_reset(self, dialog):
+        """リセット実行（最終確認付き）"""
+        # 何も選択されていない場合
+        if not any([self.reset_snippets_var.get(),
+                    self.reset_stats_var.get(),
+                    self.reset_categories_var.get(),
+                    self.reset_config_var.get()]):
+            messagebox.showwarning(self.lang.get("msg_warning", "未選択"),
+                                   self.lang.get("reset_none_selected", "リセットする項目を1つ以上選択してください。"))
+            return
+
+        # 最終確認メッセージ作成
+        items = []
+        if self.reset_snippets_var.get():
+            items.append(self.lang.get("reset_confirm_snippets", "  • スニペット（{count}件削除されます）").format(count=len(self.snippets)))
+        if self.reset_stats_var.get():
+            items.append(self.lang.get("reset_confirm_stats", "  • 使用回数統計"))
+        if self.reset_categories_var.get():
+            items.append(self.lang.get("reset_confirm_categories", "  • カテゴリ設定"))
+        if self.reset_config_var.get():
+            items.append(self.lang.get("reset_confirm_config", "  • アプリ設定（テーマ・言語）"))
+
+        msg = self.lang.get("reset_confirm_msg", "以下の項目をリセットします：\n\n{items}\n\n⚠️ この操作は取り消せません！\n\n本当にリセットしますか？").format(items="\n".join(items))
+
+        if not messagebox.askyesno(self.lang.get("reset_confirm_title", "⚠️ 最終確認"), msg):
+            return
+
+        # リセット実行
+        if self.reset_snippets_var.get():
+            self.snippets = []
+            self.save_snippets()
+
+        if self.reset_stats_var.get():
+            self.stats = {}
+            self.save_stats()
+
+        if self.reset_categories_var.get():
+            self.categories = DEFAULT_CATEGORIES[:]
+            for jp_name in list(self.custom_cat_map.keys()):
+                LANG_JP["cat_map"].pop(jp_name, None)
+                LANG_EN["cat_map"].pop(jp_name, None)
+            self.custom_cat_map = {}
+            for s in self.snippets:
+                if s.get("category") not in self.categories:
+                    s["category"] = "未分類"
+            self.save_snippets()
+
+        if self.reset_config_var.get():
+            self.config = self._default_config()
+            self.save_config()
+
+        # UI更新
+        self.refresh_table()
+        if self.reset_categories_var.get():
+            self.build_category_labels()
+        if self.reset_config_var.get():
+            self.theme = DARK_THEME
+            self.lang = LANG_JP
+            self.btn_lang.config(text="🌐 EN")
+            self.apply_theme_to_all()
+            self.apply_language()
+
+        dialog.destroy()
+        messagebox.showinfo(self.lang.get("msg_confirm", "完了"),
+                           self.lang.get("reset_complete", "リセットが完了しました。"))
+
+    def _default_categories(self):
+        """デフォルトカテゴリを返す"""
+        return DEFAULT_CATEGORIES[:]
+
+    def _default_config(self):
+        """デフォルト設定を返す"""
+        return {
+            "dark_mode": True,
+            "language": "JP",
+            "show_usage_count": True,
+        }
+
+    # ========================================================
+    # 使用回数表示/非表示
+    # ========================================================
+
+
+    def toggle_usage_display(self):
+        current = self.config.get("show_usage_count", True)
+        self.config["show_usage_count"] = not current
+        self.save_config()
+
+        self.build_table()
+        self.refresh_table()
+
+        if self.config["show_usage_count"]:
+            self.btn_usage_toggle.config(text=self.lang["btn_usage_hide"])
+        else:
+            self.btn_usage_toggle.config(text=self.lang["btn_usage_show"])
+
+
+    # ========================================================
+    # Excel インポート / エクスポート
+    # ========================================================
+
+    def export_to_excel(self):
+        """スニペットを Excel (.xlsx) にエクスポート"""
+        L = self.lang
+        try:
+            from openpyxl import Workbook
+
+            filepath = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx")],
+                initialfile="MeridiSync_export.xlsx"
+            )
+            if not filepath:
+                return
+
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Snippets"
+
+            # ヘッダー
+            ws.append(["Trigger", "Category", "Text"])
+
+            # カテゴリ表示名マップを取得
+            cat_map = self.lang.get("cat_map", {})
+
+
+            # データ
+            for snippet in self.snippets:
+                raw_category = snippet.get("category", "未分類")
+                display_category = cat_map.get(raw_category, raw_category)
+                ws.append([
+                    snippet["trigger"],
+                    display_category,
+                    snippet["text"]
+                ])
+
+            wb.save(filepath)
+            messagebox.showinfo(L["msg_done"],
+                                L["msg_export_done"].format(filepath=filepath, count=len(self.snippets)))
+
+        except Exception as e:
+            messagebox.showerror(L["msg_error"], str(e))
+
+    def import_from_excel(self):
+        """Excel (.xlsx) からスニペットをインポート"""
+        L = self.lang
+        try:
+            from openpyxl import load_workbook
+
+            filepath = filedialog.askopenfilename(
+                filetypes=[("Excel files", "*.xlsx")]
+            )
+            if not filepath:
+                return
+
+            wb = load_workbook(filepath)
+            ws = wb.active
+
+            new_snippets = []
+            duplicates = []
+
+            existing_triggers = {s["trigger"] for s in self.snippets}
+
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                if not row or not row[0]:
+                    continue
+
+                trigger = str(row[0]).strip()
+                category = str(row[1]).strip() if len(row) > 1 and row[1] else "未分類"
+                # 英語で書き出したカテゴリ名を内部名（日本語）に戻す（v1.0.1）
+                for jp_key, en_name in LANG_EN["cat_map"].items():
+                    if category == en_name:
+                        category = jp_key
+                        break
+                text = str(row[2]).strip() if len(row) > 2 and row[2] else ""
+
+                if not trigger or not text:
+                    continue
+
+                snippet = {"trigger": trigger, "category": category, "text": text}
+
+                if trigger in existing_triggers:
+                    duplicates.append(snippet)
+                else:
+                    new_snippets.append(snippet)
+
+            if not new_snippets and not duplicates:
+                messagebox.showwarning(L["msg_warning"], L["msg_no_import_data"])
+                return
+
+            # 新規分を追加
+            self.snippets.extend(new_snippets)
+
+            # 重複処理
+            if duplicates:
+                result = messagebox.askyesnocancel(
+                    L["import_dup_title"],
+                    L["import_dup_msg"].format(new=len(new_snippets), dup=len(duplicates))
+                )
+                if result is True:  # 上書き
+                    for dup in duplicates:
+                        for i, s in enumerate(self.snippets):
+                            if s["trigger"] == dup["trigger"]:
+                                self.snippets[i] = dup
+                                break
+                elif result is None:  # キャンセル
+                    # 新規追加分も取り消し
+                    self.snippets = self.snippets[:-len(new_snippets)] if new_snippets else self.snippets
+                    return
+                # result is False → スキップ（何もしない）
+
+            self.save_snippets()
+            self.refresh_table()
+            self.refresh_category_list()
+
+            messagebox.showinfo(L["msg_done"],
+                                L["msg_import_done"].format(new=len(new_snippets), dup=len(duplicates)))
+
+        except Exception as e:
+            messagebox.showerror(L["msg_error"], str(e))
+
+
+    # ========================================================
+    # テーマ切替（スムーズ — ウィンドウ収縮なし）
+    # ========================================================
+
+    def toggle_theme(self):
+        """ウィンドウを破棄せずにテーマをスムーズに切り替え"""
+        self.config["dark_mode"] = not self.config.get("dark_mode", True)
+        self.save_config()
+        self.theme = DARK_THEME if self.config["dark_mode"] else LIGHT_THEME
+        self.apply_theme_to_all()
+        if self.config["dark_mode"]:
+            self.btn_theme.config(text=self.lang["btn_theme_light"])
+        else:
+            self.btn_theme.config(text=self.lang["btn_theme_dark"])
+
+    def apply_theme_to_all(self):
+        """登録済み全ウィジェットにテーマカラーを適用"""
+        self.root.configure(bg=self.theme["bg"])
+
+        for widget_type, widget in self.themed_widgets:
+            try:
+                if widget_type == "frame_bg":
+                    widget.config(bg=self.theme["bg"])
+                elif widget_type == "frame_panel":
+                    widget.config(bg=self.theme["panel_bg"])
+                elif widget_type == "frame_entry":
+                    widget.config(bg=self.theme["entry_bg"])
+                elif widget_type == "button":
+                    widget.config(bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                                  activebackground=self.theme["button_active"])
+                elif widget_type == "label_status":
+                    widget.config(bg=self.theme["bg"])
+                    if self.listening:
+                        widget.config(fg=self.theme["accent"])
+                    else:
+                        widget.config(fg="#ff5252")
+                elif widget_type == "label_panel":
+                    widget.config(bg=self.theme["panel_bg"], fg=self.theme["fg"])
+                elif widget_type == "label_logo":
+                    widget.config(bg=self.theme["panel_bg"], fg=self.theme["logo_fg"])
+                elif widget_type == "label_version":
+                    widget.config(bg=self.theme["panel_bg"])
+                elif widget_type == "separator":
+                    widget.config(bg=self.theme["border"])
+                elif widget_type == "listbox":
+                    widget.config(bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                                  selectbackground=self.theme["tree_selected"])
+            except Exception:
+                pass
+
+        # カテゴリラベルを再構築（テーマ反映）
+        self.build_category_labels()
+
+        # テーブル再構築
+        self.build_table()
+        self.refresh_table()
+
+        
+    # ========================================================
+    # 言語切替（JP/EN）
+    # ========================================================
+
+    def toggle_language(self):
+        """JP/EN を切り替え"""
+        current = self.config.get("language", "JP")
+        new_lang = "EN" if current == "JP" else "JP"
+        self.config["language"] = new_lang
+        self.save_config()
+
+        self.lang = LANG_JP if new_lang == "JP" else LANG_EN
+
+        # ボタンテキスト更新（切替先を表示）
+        self.btn_lang.config(text=f"🌐 {'EN' if new_lang == 'JP' else 'JP'}")
+
+        # UI全体に言語を適用
+        self.apply_language()
+
+    def apply_language(self):
+        """現在の言語設定をUI全体に反映"""
+        L = self.lang
+
+        # ステータスラベル
+        if self.listening:
+            self.status_label.config(text=L["status_listening"])
+        else:
+            self.status_label.config(text=L["status_stopped"])
+
+        # ボタン群
+        if self.listening:
+            self.btn_toggle.config(text=L["btn_stop"])
+        else:
+            self.btn_toggle.config(text=L["btn_start"])
+
+        self.btn_add.config(text=L["btn_add"])
+        self.btn_edit.config(text=L["btn_edit"])
+        self.btn_delete.config(text=L["btn_delete"])
+        self.btn_search.config(text=L["btn_search"])
+        self.btn_stats.config(text=L["btn_stats"])
+        self.btn_cat_manage.config(text=L["btn_cat_manage"])
+        self.btn_import.config(text=L["btn_import"])
+        self.btn_export.config(text=L["btn_export"])
+        self.btn_reset.config(text=L.get("reset_btn_label", "🔄 Reset"))
+
+        # テーマボタン
+        if self.config.get("dark_mode", True):
+            self.btn_theme.config(text=L["btn_theme_light"])
+        else:
+            self.btn_theme.config(text=L["btn_theme_dark"])
+
+        # 使用回数ボタン
+        if self.config.get("show_usage_count", True):
+            self.btn_usage_toggle.config(text=L["btn_usage_hide"])
+        else:
+            self.btn_usage_toggle.config(text=L["btn_usage_show"])
+
+        # カテゴリラベル
+        self.cat_label.config(text=L["cat_label"])
+
+        # 右クリックメニュー再構築
+        self.context_menu.delete(0, tk.END)
+        self.context_menu.add_command(label=L["ctx_edit"], command=self.edit_snippet)
+        self.context_menu.add_command(label=L["ctx_delete"], command=self.delete_snippet)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label=L["ctx_pin"], command=self.toggle_pin)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label=L["ctx_reset_single"], command=self.reset_usage_single)
+        self.context_menu.add_command(label=L["ctx_reset_all"], command=self.reset_usage_all)
+
+        # テーブルヘッダー更新
+        self.build_table()
+        self.refresh_table()
+
+        # カテゴリリスト更新
+        self.refresh_category_list()
+
+    # ========================================================
+    # 統計画面（強化版）
+    # ========================================================
+
+    def show_stats(self):
+        L = self.lang
+        stats_win = tk.Toplevel(self.root)
+        stats_win.title(L["stats_title"])
+        stats_win.geometry("520x620")
+        stats_win.configure(bg=self.theme["bg"])
+
+        text_widget = tk.Text(stats_win, font=("Consolas", 11), wrap=tk.WORD,
+                              padx=15, pady=15,
+                              bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                              insertbackground=self.theme["fg"],
+                              borderwidth=0)
+        text_widget.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # --- 統計データ集計 ---
+        total_count = sum(self.stats.values())
+        total_snippets = len(self.snippets)
+        active_snippets = len([t for t, c in self.stats.items() if c > 0])
+
+        sorted_stats = sorted(self.stats.items(), key=lambda x: x[1], reverse=True)
+        top10 = sorted_stats[:10]
+
+        category_stats = {}
+        for snippet in self.snippets:
+            cat = snippet.get("category", L["cat_uncategorized"])
+            trigger = snippet["trigger"]
+            count = self.stats.get(trigger, 0)
+            category_stats[cat] = category_stats.get(cat, 0) + count
+
+        sorted_categories = sorted(category_stats.items(), key=lambda x: x[1], reverse=True)
+
+        # --- 表示 ---
+        lines = []
+        lines.append(L["stats_title"])
+        lines.append("=" * 45)
+        lines.append("")
+        lines.append(f"  {L['stats_total']:<20} {total_count}")
+        lines.append(f"  {L['stats_registered']:<20} {total_snippets}")
+        lines.append(f"  {L['stats_used']:<20} {active_snippets}")
+        lines.append(f"  {L['stats_unused']:<20} {total_snippets - active_snippets}")
+        lines.append("")
+        lines.append("-" * 45)
+        lines.append("")
+        lines.append(L["stats_top10"])
+        lines.append("")
+
+        if top10:
+            for i, (trigger, count) in enumerate(top10, 1):
+                bar = "█" * min(count, 20)
+                lines.append(f"  {i:2d}. {trigger:<15} {count:>4}  {bar}")
+        else:
+            lines.append(f"  {L['stats_no_data']}")
+
+        lines.append("")
+        lines.append("-" * 45)
+        lines.append("")
+        lines.append(L["stats_by_category"])
+        lines.append("")
+
+        cat_map = L.get("cat_map", {})
+        if sorted_categories:
+            for cat, count in sorted_categories:
+                if count > 0:
+                    display_cat = cat_map.get(cat, cat)
+                    bar = "█" * min(count, 20)
+                    lines.append(f"  {display_cat:<15} {count:>4}  {bar}")
+
+        else:
+            lines.append(f"  {L['stats_no_data']}")
+
+        lines.append("")
+        lines.append("-" * 45)
+        lines.append("")
+        lines.append(L["stats_hint"])
+        lines.append(f"  {L['stats_hint1']}")
+        lines.append(f"  {L['stats_hint2']}")
+
+        text_widget.insert(tk.END, "\n".join(lines))
+        text_widget.config(state=tk.DISABLED)
+
+        # ボタン
+        btn_frame = tk.Frame(stats_win, bg=self.theme["bg"])
+        btn_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        btn_style = {"bg": self.theme["button_bg"], "fg": self.theme["button_fg"],
+                     "activebackground": self.theme["button_active"], "borderwidth": 0, "padx": 10, "pady": 4}
+
+        tk.Button(btn_frame, text=L["stats_reset_all"],
+                  command=lambda: [self.reset_usage_all(), stats_win.destroy()],
+                  **btn_style).pack(side=tk.RIGHT, padx=5)
+        tk.Button(btn_frame, text=L["stats_close"],
+                  command=stats_win.destroy, **btn_style).pack(side=tk.RIGHT, padx=5)
+
+
+    # ========================================================
+    # カテゴリ管理
+    # ========================================================
+
+    def manage_categories(self):
+        L = self.lang
+        cat_win = tk.Toplevel(self.root)
+        cat_win.title(L["cat_manage_title"])
+        cat_win.geometry("350x400")
+        cat_win.configure(bg=self.theme["bg"])
+
+        listbox = tk.Listbox(cat_win, font=("", 11),
+                             bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                             selectbackground=self.theme["tree_selected"],
+                             borderwidth=0)
+        listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        cat_map = L.get("cat_map", {})
+        for cat in self.categories:
+            if cat != "すべて" and cat != "All":
+                display_name = cat_map.get(cat, cat)
+                listbox.insert(tk.END, display_name)
+
+        btn_frame = tk.Frame(cat_win, bg=self.theme["bg"])
+        btn_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        btn_style = {"bg": self.theme["button_bg"], "fg": self.theme["button_fg"],
+                     "activebackground": self.theme["button_active"], "borderwidth": 0, "padx": 10, "pady": 4}
+
+        def add_category():
+            # カテゴリ追加ダイアログ（JP/EN両方入力）
+            add_win = tk.Toplevel(cat_win)
+            add_win.title(L["cat_btn_add"])
+            add_win.geometry("350x180")
+            add_win.configure(bg=self.theme["bg"])
+            add_win.transient(cat_win)
+            add_win.grab_set()
+
+            tk.Label(add_win, text=L["cat_add_jp_label"], bg=self.theme["bg"],
+                     fg=self.theme["fg"], font=("", 10)).grid(
+                row=0, column=0, padx=10, pady=(15, 5), sticky=tk.W)
+            entry_jp = tk.Entry(add_win, width=25, bg=self.theme["entry_bg"],
+                                fg=self.theme["entry_fg"], insertbackground=self.theme["fg"])
+            entry_jp.grid(row=0, column=1, padx=10, pady=(15, 5))
+
+            tk.Label(add_win, text=L["cat_add_en_label"], bg=self.theme["bg"],
+                     fg=self.theme["fg"], font=("", 10)).grid(
+                row=1, column=0, padx=10, pady=5, sticky=tk.W)
+            entry_en = tk.Entry(add_win, width=25, bg=self.theme["entry_bg"],
+                                fg=self.theme["entry_fg"], insertbackground=self.theme["fg"])
+            entry_en.grid(row=1, column=1, padx=10, pady=5)
+
+            def save_category():
+                name_jp = entry_jp.get().strip()
+                name_en = entry_en.get().strip()
+                if not name_jp:
+                    return
+                if not name_en:
+                    name_en = name_jp
+
+                if name_jp not in self.categories:
+                    self.categories.append(name_jp)
+                    listbox.insert(tk.END, name_jp)
+
+                    # cat_mapに登録
+                    LANG_JP["cat_map"][name_jp] = name_jp
+                    LANG_EN["cat_map"][name_jp] = name_en
+
+                    # 永続化用に保存
+                    self.custom_cat_map[name_jp] = name_en
+
+                    self.save_snippets()
+                    self.refresh_category_list()
+
+                add_win.destroy()
+
+            btn_f = tk.Frame(add_win, bg=self.theme["bg"])
+            btn_f.grid(row=2, column=0, columnspan=2, pady=15)
+
+            tk.Button(btn_f, text=L["dialog_save"], command=save_category,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=10, pady=4).pack(side=tk.LEFT, padx=5)
+            tk.Button(btn_f, text=L["dialog_cancel"], command=add_win.destroy,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=10, pady=4).pack(side=tk.LEFT, padx=5)
+
+        def edit_category():
+            sel = listbox.curselection()
+            if not sel:
+                return
+            display_name = listbox.get(sel[0])
+            if display_name in ("すべて", "未分類", "All", "Uncategorized"):
+                messagebox.showwarning(L["msg_warning"], L["cat_cannot_edit"])
+                return
+
+            # 表示名から内部名（日本語キー）を逆引き
+            cat_map_current = L.get("cat_map", {})
+            internal_name = None
+            for key, val in cat_map_current.items():
+                if val == display_name:
+                    internal_name = key
+                    break
+            if internal_name is None:
+                internal_name = display_name
+
+            # 現在のEN名を取得
+            current_en = LANG_EN["cat_map"].get(internal_name, internal_name)
+            current_jp = internal_name
+
+            # 編集ダイアログ
+            edit_win = tk.Toplevel(cat_win)
+            edit_win.title(L["cat_btn_edit"])
+            edit_win.geometry("350x180")
+            edit_win.configure(bg=self.theme["bg"])
+            edit_win.transient(cat_win)
+            edit_win.grab_set()
+
+            tk.Label(edit_win, text=L["cat_add_jp_label"], bg=self.theme["bg"],
+                     fg=self.theme["fg"], font=("", 10)).grid(
+                row=0, column=0, padx=10, pady=(15, 5), sticky=tk.W)
+            entry_jp = tk.Entry(edit_win, width=25, bg=self.theme["entry_bg"],
+                                fg=self.theme["entry_fg"], insertbackground=self.theme["fg"])
+            entry_jp.grid(row=0, column=1, padx=10, pady=(15, 5))
+            entry_jp.insert(0, current_jp)
+
+            tk.Label(edit_win, text=L["cat_add_en_label"], bg=self.theme["bg"],
+                     fg=self.theme["fg"], font=("", 10)).grid(
+                row=1, column=0, padx=10, pady=5, sticky=tk.W)
+            entry_en = tk.Entry(edit_win, width=25, bg=self.theme["entry_bg"],
+                                fg=self.theme["entry_fg"], insertbackground=self.theme["fg"])
+            entry_en.grid(row=1, column=1, padx=10, pady=5)
+            entry_en.insert(0, current_en)
+
+            def save_edit():
+                new_jp = entry_jp.get().strip()
+                new_en = entry_en.get().strip()
+                if not new_jp:
+                    return
+                if not new_en:
+                    new_en = new_jp
+
+                # カテゴリリスト更新
+                idx = self.categories.index(internal_name)
+                self.categories[idx] = new_jp
+
+                # スニペットのカテゴリ名を更新
+                for s in self.snippets:
+                    if s.get("category") == internal_name:
+                        s["category"] = new_jp
+
+                # cat_map更新（旧キー削除→新キー追加）
+                LANG_JP["cat_map"].pop(internal_name, None)
+                LANG_EN["cat_map"].pop(internal_name, None)
+                self.custom_cat_map.pop(internal_name, None)
+
+                LANG_JP["cat_map"][new_jp] = new_jp
+                LANG_EN["cat_map"][new_jp] = new_en
+                self.custom_cat_map[new_jp] = new_en
+
+                # リストボックス更新
+                cat_map_display = L.get("cat_map", {})
+                new_display = cat_map_display.get(new_jp, new_jp)
+                listbox.delete(sel[0])
+                listbox.insert(sel[0], new_display)
+
+                self.save_snippets()
+                self.refresh_category_list()
+                self.refresh_table()
+                edit_win.destroy()
+
+            btn_f = tk.Frame(edit_win, bg=self.theme["bg"])
+            btn_f.grid(row=2, column=0, columnspan=2, pady=15)
+
+            tk.Button(btn_f, text=L["dialog_save"], command=save_edit,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=10, pady=4).pack(side=tk.LEFT, padx=5)
+            tk.Button(btn_f, text=L["dialog_cancel"], command=edit_win.destroy,
+                      bg=self.theme["button_bg"], fg=self.theme["button_fg"],
+                      activebackground=self.theme["button_active"],
+                      borderwidth=0, padx=10, pady=4).pack(side=tk.LEFT, padx=5)
+
+        def delete_category():
+            sel = listbox.curselection()
+            if not sel:
+                return
+            display_name = listbox.get(sel[0])
+
+            if display_name in ("すべて", "未分類", "All", "Uncategorized"):
+                messagebox.showwarning(L["msg_warning"], L["cat_cannot_delete"])
+                return
+
+            cat_map_current = L.get("cat_map", {})
+            internal_name = None
+            for key, val in cat_map_current.items():
+                if val == display_name:
+                    internal_name = key
+                    break
+            if internal_name is None:
+                internal_name = display_name
+
+            if messagebox.askyesno(L["msg_confirm"],
+                                   L["cat_delete_confirm"].format(name=display_name)):
+                for s in self.snippets:
+                    if s.get("category") == internal_name:
+                        s["category"] = "未分類"
+
+                if internal_name in self.categories:
+                    self.categories.remove(internal_name)
+
+                LANG_JP["cat_map"].pop(internal_name, None)
+                LANG_EN["cat_map"].pop(internal_name, None)
+                self.custom_cat_map.pop(internal_name, None)
+
+                listbox.delete(sel[0])
+                self.save_snippets()
+                self.refresh_category_list()
+                self.refresh_table()
+
+        tk.Button(btn_frame, text=L["cat_btn_add"], command=add_category, **btn_style).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text=L["cat_btn_edit"], command=edit_category, **btn_style).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text=L["cat_btn_delete"], command=delete_category, **btn_style).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text=L["cat_btn_close"], command=cat_win.destroy, **btn_style).pack(side=tk.RIGHT, padx=5)
+
+    # ========================================================
+    # 右クリックメニュー
+    # ========================================================
+
+    def show_context_menu(self, event):
+        item = self.tree.identify_row(event.y)
+        if item:
+            self.tree.selection_set(item)
+
+            # ピン留めラベルを動的に切替
+            trigger = str(self.tree.item(item)["values"][0])
+            snippet = next((s for s in self.snippets if s["trigger"] == trigger), None)
+            if snippet and snippet.get("pinned", False):
+                pin_label = self.lang["ctx_unpin"]
+            else:
+                pin_label = self.lang["ctx_pin"]
+            self.context_menu.entryconfig(3, label=pin_label)
+
+            self.context_menu.post(event.x_root, event.y_root)
+
+    # ========================================================
+    # システムトレイ
+    # ========================================================
+
+    def create_tray_icon(self):
+        if not TRAY_AVAILABLE:
+            return
+
+        image = Image.new('RGB', (64, 64), color=(30, 30, 30))
+        draw = ImageDraw.Draw(image)
+        draw.ellipse([20, 28, 44, 52], fill=(0, 200, 83))
+        draw.ellipse([14, 16, 24, 26], fill=(0, 200, 83))
+        draw.ellipse([28, 12, 38, 22], fill=(0, 200, 83))
+        draw.ellipse([40, 16, 50, 26], fill=(0, 200, 83))
+
+        is_jp = self.config.get("language", "JP") == "JP"
+        menu = pystray.Menu(
+            pystray.MenuItem("表示" if is_jp else "Show",
+                             lambda: self.root.after(0, self.show_window), default=True),
+            pystray.MenuItem("終了" if is_jp else "Quit",
+                             lambda: self.root.after(0, self.quit_app)),
+        )
+
+        self.tray_icon = pystray.Icon("MeridiSync", image, f"MeridiSync v{VERSION}", menu)
+        threading.Thread(target=self.tray_icon.run, daemon=True).start()
+
+    def show_window(self):
+        self.root.deiconify()
+        self.root.lift()
+
+    def on_close(self):
+        if TRAY_AVAILABLE:
+            self.root.withdraw()
+        else:
+            self.quit_app()
+
+    def quit_app(self):
+        self.stop_listening()
+        if self.tray_icon:
+            self.tray_icon.stop()
+        self.root.destroy()
+
+    # ========================================================
+    # 実行
+    # ========================================================
+
+    def run(self):
+        self.create_tray_icon()
+        self.start_listening()
+        self.root.mainloop()
+
+
+    # ============================================================
+    # スニペット追加/編集ダイアログ
+    # ============================================================
+
+class SnippetDialog:
+    def __init__(self, parent, title, categories, snippet=None, theme=DARK_THEME, lang=LANG_JP, existing_triggers=None):
+        self.result = None
+        self.theme = theme
+        self.lang = lang
+        self.existing_triggers = existing_triggers or []
+        self.original_trigger = snippet["trigger"] if snippet else None
+
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title(title)
+        self.dialog.geometry("500x320")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        self.dialog.configure(bg=self.theme["bg"])
+
+        # トリガー
+        tk.Label(self.dialog, text=lang["dialog_trigger"], bg=self.theme["bg"], fg=self.theme["fg"]).grid(
+            row=0, column=0, padx=10, pady=10, sticky=tk.W)
+        self.trigger_entry = tk.Entry(self.dialog, width=30,
+                                      bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                                      insertbackground=self.theme["fg"], borderwidth=1)
+        self.trigger_entry.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
+
+        # カテゴリ（表示名で表示）
+        tk.Label(self.dialog, text=lang["dialog_category"], bg=self.theme["bg"], fg=self.theme["fg"]).grid(
+            row=1, column=0, padx=10, pady=10, sticky=tk.W)
+
+        cat_map = lang.get("cat_map", {})
+        display_categories = [cat_map.get(c, c) for c in categories if c != "すべて" and c != "All"]
+
+        self.category_var = tk.StringVar(value=cat_map.get("未分類", lang.get("cat_uncategorized", "未分類")))
+        self.category_combo = ttk.Combobox(self.dialog, textvariable=self.category_var,
+                                           values=display_categories, width=27)
+        self.category_combo.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
+
+        # 展開テキスト
+        tk.Label(self.dialog, text=lang["dialog_text"], bg=self.theme["bg"], fg=self.theme["fg"]).grid(
+            row=2, column=0, padx=10, pady=10, sticky=tk.NW)
+        self.text_entry = tk.Text(self.dialog, width=35, height=6,
+                                  bg=self.theme["entry_bg"], fg=self.theme["entry_fg"],
+                                  insertbackground=self.theme["fg"], borderwidth=1)
+        self.text_entry.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+
+        # 既存データ
+        if snippet:
+            self.trigger_entry.insert(0, snippet["trigger"])
+            # カテゴリを表示名に変換して設定
+            raw_cat = snippet.get("category", "未分類")
+            self.category_var.set(cat_map.get(raw_cat, raw_cat))
+            self.text_entry.insert(tk.END, snippet["text"])
+
+        # ボタン
+        btn_frame = tk.Frame(self.dialog, bg=self.theme["bg"])
+        btn_frame.grid(row=3, column=0, columnspan=2, pady=15)
+
+        btn_style = {"bg": self.theme["button_bg"], "fg": self.theme["button_fg"],
+                     "activebackground": self.theme["button_active"], "borderwidth": 0, "padx": 12, "pady": 4}
+
+        tk.Button(btn_frame, text=lang["dialog_save"], command=self.save, **btn_style).pack(side=tk.LEFT, padx=10)
+        tk.Button(btn_frame, text=lang["dialog_cancel"], command=self.cancel, **btn_style).pack(side=tk.LEFT, padx=10)
+
+        # ヒント
+        tk.Label(self.dialog, text=lang["dialog_hint"],
+                 font=("", 9), bg=self.theme["bg"], fg="#888888").grid(row=4, column=0, columnspan=2, padx=10)
+
+        self.dialog.wait_window()
+
+    def save(self):
+        trigger = self.trigger_entry.get().strip()
+        category_display = self.category_var.get().strip()
+        text = self.text_entry.get("1.0", tk.END).strip()
+
+        if not trigger:
+            messagebox.showwarning(self.lang["input_error"],
+                                   self.lang["input_trigger_required"], parent=self.dialog)
+            return
+        if not text:
+            messagebox.showwarning(self.lang["input_error"],
+                                   self.lang["input_text_required"], parent=self.dialog)
+            return
+
+        # トリガー重複チェック（Edit時は自分自身を除外）
+        if trigger != self.original_trigger and trigger in self.existing_triggers:
+            messagebox.showwarning(self.lang["input_error"],
+                                   self.lang.get("input_trigger_duplicate",
+                                   f"'{trigger}' は既に使用されています。別のトリガーを入力してください。"),
+                                   parent=self.dialog)
+            return
+
+        # 表示名から内部名（日本語キー）に逆変換
+        cat_map = self.lang.get("cat_map", {})
+        category_internal = category_display
+        for key, val in cat_map.items():
+            if val == category_display:
+                category_internal = key
+                break
+
+        self.result = {
+            "trigger": trigger,
+            "category": category_internal,
+            "text": text,
+        }
+        self.dialog.destroy()
+
+    def cancel(self):
+        self.dialog.destroy()
+
+# ============================================================
+# エントリーポイント
+# ============================================================
+
+if __name__ == "__main__":
+    app = MeridiSyncApp()
+    app.run()
+
